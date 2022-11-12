@@ -9,7 +9,7 @@
 title                    : "Guillermo Sahonero"
 description              : "Personal Website."
 repository               : "gsahonero/gsahonero.github.io"
-google_scholar_stats_use_cdn : true
+google_scholar_stats_use_cdn : false
 
 # google analytics
 google_analytics_id      :  G-2HP9X9RKJV
