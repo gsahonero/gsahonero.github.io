@@ -7,7 +7,7 @@
 
 # Site Settings
 title                    : "Guillermo Sahonero"
-description              : "Personal Website."
+description              : "Welcome to my personal website."
 repository               : "gsahonero/gsahonero.github.io"
 google_scholar_stats_use_cdn : false
 
@@ -25,7 +25,7 @@ author:
   avatar           : "images/Guillermo Sahonero 6.jpg"
   bio              : "Ph.D. student at the Institute for Biological and Medical Engineering in UC Chile"
   location         : "Santiago, Chile"
-  employer         : ""
+  employer         : 
   pubmed           : 
   googlescholar    : "https://scholar.google.com/citations?user=Jfq_wNsAAAAJ&hl=en"
   email            : "gsahonero@uc.cl"
