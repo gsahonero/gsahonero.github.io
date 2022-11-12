@@ -15,7 +15,7 @@ redirect_from:
 {% endif %}
 {% assign url = gsDataBaseUrl | append: "google-scholar-stats/gs_data_shieldsio.json" %}
 
-<span class='anchor' id='about-me'></span>
+<span class='anchor' id='short-bio'></span>
 
 I am a Ph.D. student at the Institute for Biological and Medical Engineering at UC Chile under the supervision of Professor Pablo Irarrázaval. My work is focused on the intersection between Deep Learning and Magnetic Resonance Imaging. My specific interests are in developing novel data-driven signal processing techniques for Low-Field MRI. I was awarded a full Ph.D. Scholarship from the Chilean National Agency for Research and Development (ANID).
 
@@ -77,3 +77,11 @@ Besides, some short courses I taught previously are:
 
 # Internships
 - *2019.05 - 2020.02*, [Lorem](https://github.com/), China.
+
+<script src="https://unpkg.com/citation-js@0.4.0-8" type="text/javascript"></script>
+<script>
+  const Cite = require('citation-js')
+  contents = readFileSync("docs/publications/refs.bib", 'utf-8');
+  Cite.add(contents);
+  console.log(Cite);
+</script>
