@@ -94,8 +94,9 @@ Besides, some short courses I taught previously are:
 - An introduction to Applied Multivariate Analysis - UCB (2018)
 - LaTeX and IEEE format - UCB (many versions)
 
-# 💬 Invited Talks
-- *2022.05*, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus ornare aliquet ipsum, ac tempus justo dapibus sit amet. 
-- *2021.03*, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus ornare aliquet ipsum, ac tempus justo dapibus sit amet.  \| [\[video\]](https://github.com/)
+# Invited Talks
+- *2022.11*, I was invited to participate in the "¿Qué ingenierías y tecnologías para cuál paz?" conversation. This event is organized by the Grupo de investigación en tecnología e innovación para el desarrollo comunitario from Universidad Nacional de Colombia (UNAL).
 
+
+# Disclaimer
 This site is still under construction!
