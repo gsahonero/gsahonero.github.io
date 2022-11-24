@@ -19,12 +19,15 @@ redirect_from:
 
 I am a Ph.D. student at the Institute for Biological and Medical Engineering at UC Chile under the supervision of Professor Pablo Irarrázaval. My work is focused on the intersection between Deep Learning and Magnetic Resonance Imaging. My specific interests are in developing novel data-driven signal processing techniques for Low-Field MRI. I was awarded a full Ph.D. Scholarship from the Chilean National Agency for Research and Development (ANID).
 
-Previously, I worked as a full-time lecturer and researcher at Universidad Catolica Boliviana "San Pablo" from 2018 to 2022. My work there focused on Machine Learning and Digital Signal Processing applications to Brain-Computer Interfaces (EEG-based Motor Imagery and alternative paradigms as Music Imagery) and Computer Vision (developing several systems for gait recognition in real-time). However, I also contributed to Blockchain, Peace Engineering, Engineering Education, and Serious Games. Some of the courses that I taught were Computer Vision and Electronics Circuits.
+Previously, I worked as a full-time lecturer and researcher at Universidad Catolica Boliviana "San Pablo" from 2018 to 2022. My work there focused on Machine Learning and Digital Signal Processing applications to Brain-Computer Interfaces (EEG-based Motor Imagery and alternative paradigms as Music Imagery) and Computer Vision (developing several systems for gait recognition in real-time). However, I also contributed to Blockchain, Peace Engineering, Engineering Education, and Serious Games. 
+
+Earlier, for my undergraduate research project, I worked under the supervision of Professor Humberto Calderón. My research focused on the development of Hardware Accelerators for Independent Component Analysis (ICA) in the context of EEG-based Brain-Computer Interfaces. For that, I used a ZedBoard platform (Zynq 7020) which combines a programmable logic computing unit (Artix 7 FPGA) and a processing system (ARM Cortex A9) to implement the SOBI (Second-Order Blind Identification) algorithm which was proposed by <a href="https://ieeexplore.ieee.org/abstract/document/554307/" target="_blank">Belouchrani et al. (1997)</a>.
 
 In parallel, I'm an active member of the IEEE WG P2731 (Standard for a Unified Terminology for Brain-Computer Interfaces). As an academic, I was honored to review papers for IEEE Access, IEEE EIRCON, and SHIRCON. By 2021, my research team and I received a grant to develop Gait Recognition-based Surveillance Systems using Computer Vision algorithms. Besides, my teams were chosen as Phase 1 winners of the OpenCV AI Competition 2021.
 
 
 # News
+- *2022.11*: &nbsp; Our paper "Merging Brain-Computer interface P300 speller datasets: perspectives and pitfalls" which was co-authored with Luigi Bianchi, Raffaele Ferrante, Yaoping Hu, and Nusrat Z Zenia has been accepted for publication in Frontiers in Neuroergonomics, section Neurotechnology and Systems Neuroergonomics.
 - *2022.11*: &nbsp; Our work "ADRAS: Airborne Disease Risk Assessment System for Closed Environments" developed in collaboration with Wilber Rojas and Edwin Salcedo will be presented during <a href="https://simbig.org/SIMBig2022/en/program.html">SIMBig 2022</a> in Peru on November 16th. 
 - *2022.11*: &nbsp; Our work "MAMBU: A Bolivian Case of Response to Artificial Ventilators Shortage" developed in collaboration with the MAMBU team will be finally presented during <a href="https://attend.ieee.org/andescon/">ANDESCON 2022</a> in Colombia on November 18th. 
 
@@ -83,8 +86,9 @@ While being a lecturer at <a href="https://lpz.ucb.edu.bo/" target="_blank">UCB<
 
 - Electronic circuits II (Circuitos Electrónicos II - IMT122)
 - Electronic circuits III (Circuitos Electrónicos III - IMT221)
+- Servomechanism Design (Diseño Servomecánico - IMT300)
 - Computer vision (Visión Artificial - IMT344)
-- Degree workshop (Taller de Grado - IMT375) (was later divided into IMT353 and IMT354)
+- Degree workshop (Taller de Grado - IMT375) (which was later divided into IMT353 and IMT354)
 - Degree workshop I (Taller de Grado I - IMT353)
 - Degree workshop II (Taller de Grado II - IMT354)
 
@@ -95,7 +99,7 @@ Besides, some short courses I taught previously are:
 - LaTeX and IEEE format - UCB (many versions)
 
 # Invited Talks
-- *2022.11*, I was invited to participate in the "¿Qué ingenierías y tecnologías para cuál paz?" conversation. This event is organized by the Grupo de investigación en tecnología e innovación para el desarrollo comunitario from Universidad Nacional de Colombia (UNAL).
+- *2022.11*, I was invited to participate in the "¿Qué ingenierías y tecnologías para cuál paz?" conversation. This event is organized by the Grupo de investigación en tecnología e innovación para el desarrollo comunitario from Universidad Nacional de Colombia (UNAL). <a href="https://investigacion.unal.edu.co/boletin/notas-boletin-un-investiga/news/ciclo-de-dialogos-que-ingenierias-y-tecnologias-para-cual-paz/" target="_blank">See more here.</a>
 
 
 # Disclaimer
