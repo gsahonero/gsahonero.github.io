@@ -18,11 +18,11 @@
 
     <style>
         :root {
-            /* We removed card-bg, as everything is now native to bg-color */
             --bg-color: #fcfcfc;
             --text-main: #1a1a1a;
             --text-muted: #555555;
             --accent: #2563eb;
+            --link-color: #2563eb;
             --border: #e5e5e5;
             --wheel-height: 55vh;
         }
@@ -31,10 +31,18 @@
                 --bg-color: #0f1115;
                 --text-main: #f3f4f6;
                 --text-muted: #9ca3af;
-                --accent: #60a5fa;
+                --accent: #3b82f6; /* Slightly softer for UI elements */
+                --link-color: #93c5fd; /* Muted, highly readable pastel blue for text */
                 --border: #374151;
             }
         }
+
+        /* Modern, Slim Scrollbar */
+        * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 10px; transition: background-color 0.3s ease; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted); }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; transition: background-color 0.3s ease; }
@@ -57,32 +65,45 @@
         .menu a:hover, .menu a.active { color: var(--accent); }
         
         .cv-btn { display: inline-block; padding: 0.75rem 1.5rem; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 8px; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: all 0.2s ease; text-align: center; width: 100%; }
-        .cv-btn:hover { background: var(--accent); color: var(--bg-color); }
+        .cv-btn:hover { background: var(--accent); color: var(--bg-color); border-color: var(--accent); }
 
         /* Right Column: Wheel Mechanics */
         .wheel-container { flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative; padding-left: 2rem; }
         
         .snap-section { height: 100vh; scroll-snap-align: center; display: flex; align-items: center; justify-content: flex-start; padding: 2rem; position: relative; }
         
-        /* Native Content Div (No Box) */
+        /* Native Content Div */
         .content-card { width: 100%; max-width: 720px; padding: 1rem 0 1rem 2rem; position: relative; max-height: var(--wheel-height); overflow: hidden; transition: max-height 0.7s cubic-bezier(0.16, 1, 0.3, 1); border-left: 2px solid transparent; }
         
         /* Subtle hover effect to anchor the text */
         .content-card:hover { border-left: 2px solid var(--border); }
         .content-card.expanded { max-height: 85vh; overflow-y: auto; border-left: 2px solid var(--accent); }
         
-        /* The "Fog" Fade - Now uses bg-color to blend perfectly */
+        /* The "Fog" Fade */
         .card-fade { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(transparent, var(--bg-color) 80%); display: flex; align-items: flex-end; justify-content: flex-start; padding-bottom: 1.5rem; cursor: pointer; transition: opacity 0.3s ease; padding-left: 2rem; }
         .content-card.expanded .card-fade { opacity: 0; pointer-events: none; }
         
         .expand-arrow { border: solid var(--accent); border-width: 0 2px 2px 0; display: inline-block; padding: 6px; transform: rotate(45deg); transition: transform 0.4s ease; }
         .content-card.expanded .expand-arrow { transform: rotate(-135deg); margin-top: 15px; }
 
+        /* Typography */
         h2 { margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
         p { line-height: 1.7; margin-bottom: 1.2rem; color: var(--text-muted); font-size: 1.05rem; }
         ul { margin-left: 1.2rem; margin-bottom: 1.2rem; color: var(--text-muted); }
         li { line-height: 1.6; margin-bottom: 0.5rem; }
         strong { color: var(--text-main); }
+        
+        /* Modern Content Hyperlinks */
+        .wheel-container a { 
+            color: var(--link-color); 
+            text-decoration: none; 
+            border-bottom: 1px solid transparent; 
+            padding-bottom: 1px; 
+            transition: border-bottom-color 0.2s ease, color 0.2s ease; 
+        }
+        .wheel-container a:hover { 
+            border-bottom-color: var(--link-color); 
+        }
         
         /* Mobile Overlay */
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 30; opacity: 0; transition: opacity 0.3s ease; }
@@ -92,17 +113,14 @@
             body { flex-direction: column; }
             .mobile-header { display: flex; }
             
-            /* Hide sidebar off-screen by default */
             .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; transform: translateX(-100%); padding-top: 80px; }
             .sidebar.nav-open { transform: translateX(0); }
             
-            /* Overlay behavior */
             .mobile-overlay.nav-open { display: block; opacity: 1; }
 
             .wheel-container { padding-top: 60px; padding-left: 0; scroll-snap-type: none; overflow-x: hidden; }
             .snap-section { height: auto; min-height: 80vh; padding: 1.5rem; scroll-snap-align: none; }
             
-            /* Let text flow naturally on mobile */
             .content-card { max-height: none; padding-left: 1rem; border-left: 2px solid var(--border); }
             .content-card:hover, .content-card.expanded { border-left: 2px solid var(--border); }
             .card-fade { display: none; }
@@ -125,15 +143,13 @@
     <nav class="sidebar" id="sidebar">
         <div class="branding">
             <h1>Guillermo Sahonero</h1>
-            <p>PhD Candidate at UC Chile<br>MRI Researcher & Mechatronics Engineer</p>
+            <p>PhD Candidate at UC Chile<br>MRI Researcher & Software Engineer</p>
             <ul class="menu">
                 <li><a data-target="home">Home</a></li>
                 <li><a data-target="bio">Short Bio</a></li>
                 <li><a data-target="publications">Publications</a></li>
                 <li><a data-target="blog">Blog</a></li>
                 <li><a data-target="teaching">Teaching & Contributions</a></li>
-                <li><a data-target="contact">Contact</a></li>
-                <li><a data-target="social-contact">Socials</a></li>
             </ul>
         </div>
         <a href="/Guillermo_Sahonero_CV.pdf" target="_blank" class="cv-btn">Download CV</a>
