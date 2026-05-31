@@ -6,7 +6,7 @@ layout: default
     <div class="content-card" id="card-home">
         <h2>Welcome.</h2>
         <p>I am a doctoral candidate at the <a href="https://iibm.uc.cl/" target="_blank">Institute for Biological and Medical Engineering (IIBM)</a> at <a href="https://www.uc.cl" target="_blank">UC Chile</a>, working at the <a href="https://cib.uc.cl" target="_blank">Center for Biomedical Imaging (CIB)</a> and the <a href="https://i-health.cl" target="_blank">Millennium Institute for Intelligent Healthcare Engineering (iHEALTH)</a>.
-        <br />
+        <br /
         My work sits at the intersection of physics (Magnetic Resonance Imaging), scientific computing (Julia & Python) and artificial intelligence (Deep Learning & Optimization). I specialize in MRI simulations, sequence design, and optimization, but I also have experience in Computer Vision, Brain-Computer Interfaces, and Engineering Education.
         <br />
         I always welcome collaborations, questions, or just a chat about science, code, or anything in between. Feel free to <a href="/contact" target="_blank">reach out</a>.
@@ -34,7 +34,6 @@ layout: default
 <section id="publications" class="snap-section" data-visual="/assets/ernie-toolkit-demo.gif">
     <div class="content-card" id="card-pub">
         <h2>Publications</h2>
-        <p>Selected peer-reviewed research and developments.</p>
         
         <div class="publications-list" style="margin-top: 2rem;">
             {% assign current_year = "" %}
@@ -65,7 +64,7 @@ layout: default
                     </p>
                     
                     <div class="pub-links">
-                        <a href="/assets/pdf/{{ paper.id }}.pdf" target="_blank" class="cv-btn pub-btn">Read PDF</a>
+                        <a href="/assets/papers/{{ paper.id }}.pdf" target="_blank" class="cv-btn pub-btn">Read PDF</a>
                         {% if paper.DOI %}
                         <a href="https://doi.org/{{ paper.DOI }}" target="_blank" class="doi-link">DOI</a>
                         {% endif %}
