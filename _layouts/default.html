@@ -309,9 +309,11 @@
 
         window.addEventListener('load', () => {
             const path = window.location.pathname.replace(/\//g, '');
-            if(path && document.getElementById(path)) {
-                document.getElementById(path).scrollIntoView({ block: 'center' });
-            }
+        if(path && document.getElementById(path)) {
+                    document.getElementById(path).scrollIntoView({ block: 'center' });
+                    // Set the URL to the targeted section
+                    history.replaceState(null, null, '/' + path);
+                }
         });
     </script>
 </body>
