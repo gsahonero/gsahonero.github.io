@@ -314,7 +314,7 @@
         sections.forEach(sec => observer.observe(sec));
         
         window.addEventListener('load', () => {
-            const path = window.location.pathname.replace(/\//g, '');
+            const path = window.location.pathname.substring(1) || '';
             if(path && document.getElementById(path)) {
                 document.getElementById(path).scrollIntoView({ block: 'center' });
                 // Explicitly set the URL on load to match the visible section
