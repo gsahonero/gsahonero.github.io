@@ -18,8 +18,8 @@
 
     <style>
         :root {
+            /* We removed card-bg, as everything is now native to bg-color */
             --bg-color: #fcfcfc;
-            --card-bg: #ffffff;
             --text-main: #1a1a1a;
             --text-muted: #555555;
             --accent: #2563eb;
@@ -29,7 +29,6 @@
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #0f1115;
-                --card-bg: #1a1d24;
                 --text-main: #f3f4f6;
                 --text-muted: #9ca3af;
                 --accent: #60a5fa;
@@ -38,10 +37,18 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; transition: background-color 0.3s ease; }
 
-        /* Left Column */
-        .sidebar { width: 320px; padding: 4rem 2.5rem; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--border); z-index: 10; }
+        /* Mobile Header (Hidden on Desktop) */
+        .mobile-header { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--bg-color); border-bottom: 1px solid var(--border); z-index: 50; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
+        .mobile-header h2 { font-size: 1.2rem; margin: 0; }
+        
+        /* Hamburger Icon */
+        .burger-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 5px; }
+        .burger-btn span { display: block; width: 25px; height: 3px; background-color: var(--text-main); border-radius: 3px; transition: all 0.3s ease; }
+
+        /* Left Column (Sidebar) */
+        .sidebar { width: 320px; padding: 4rem 2.5rem; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--border); z-index: 40; background-color: var(--bg-color); transition: transform 0.3s ease; }
         .branding h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
         .branding p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.4; margin-bottom: 3rem; }
         .menu { list-style: none; }
@@ -50,17 +57,22 @@
         .menu a:hover, .menu a.active { color: var(--accent); }
         
         .cv-btn { display: inline-block; padding: 0.75rem 1.5rem; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 8px; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: all 0.2s ease; text-align: center; width: 100%; }
-        .cv-btn:hover { background: var(--accent); color: var(--card-bg); }
+        .cv-btn:hover { background: var(--accent); color: var(--bg-color); }
 
         /* Right Column: Wheel Mechanics */
-        .wheel-container { flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative; }
+        .wheel-container { flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative; padding-left: 2rem; }
         
-        .snap-section { height: 100vh; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; }
+        .snap-section { height: 100vh; scroll-snap-align: center; display: flex; align-items: center; justify-content: flex-start; padding: 2rem; position: relative; }
         
-        .content-card { background-color: var(--card-bg); width: 100%; max-width: 720px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); padding: 3rem; position: relative; max-height: var(--wheel-height); overflow: hidden; transition: max-height 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
-        .content-card.expanded { max-height: 85vh; overflow-y: auto; }
+        /* Native Content Div (No Box) */
+        .content-card { width: 100%; max-width: 720px; padding: 1rem 0 1rem 2rem; position: relative; max-height: var(--wheel-height); overflow: hidden; transition: max-height 0.7s cubic-bezier(0.16, 1, 0.3, 1); border-left: 2px solid transparent; }
         
-        .card-fade { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(transparent, var(--card-bg) 80%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 1.5rem; cursor: pointer; transition: opacity 0.3s ease; }
+        /* Subtle hover effect to anchor the text */
+        .content-card:hover { border-left: 2px solid var(--border); }
+        .content-card.expanded { max-height: 85vh; overflow-y: auto; border-left: 2px solid var(--accent); }
+        
+        /* The "Fog" Fade - Now uses bg-color to blend perfectly */
+        .card-fade { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(transparent, var(--bg-color) 80%); display: flex; align-items: flex-end; justify-content: flex-start; padding-bottom: 1.5rem; cursor: pointer; transition: opacity 0.3s ease; padding-left: 2rem; }
         .content-card.expanded .card-fade { opacity: 0; pointer-events: none; }
         
         .expand-arrow { border: solid var(--accent); border-width: 0 2px 2px 0; display: inline-block; padding: 6px; transform: rotate(45deg); transition: transform 0.4s ease; }
@@ -72,30 +84,56 @@
         li { line-height: 1.6; margin-bottom: 0.5rem; }
         strong { color: var(--text-main); }
         
-        /* Mobile */
+        /* Mobile Overlay */
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 30; opacity: 0; transition: opacity 0.3s ease; }
+
+        /* Mobile Breakpoint */
         @media (max-width: 900px) {
-            body { flex-direction: column; overflow: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 2rem; height: auto; position: static; }
-            .branding p { margin-bottom: 1.5rem; }
-            .wheel-container { overflow: visible; height: auto; scroll-snap-type: none; }
+            body { flex-direction: column; }
+            .mobile-header { display: flex; }
+            
+            /* Hide sidebar off-screen by default */
+            .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; transform: translateX(-100%); padding-top: 80px; }
+            .sidebar.nav-open { transform: translateX(0); }
+            
+            /* Overlay behavior */
+            .mobile-overlay.nav-open { display: block; opacity: 1; }
+
+            .wheel-container { padding-top: 60px; padding-left: 0; scroll-snap-type: none; overflow-x: hidden; }
             .snap-section { height: auto; min-height: 80vh; padding: 1.5rem; scroll-snap-align: none; }
-            .content-card { max-height: none; }
+            
+            /* Let text flow naturally on mobile */
+            .content-card { max-height: none; padding-left: 1rem; border-left: 2px solid var(--border); }
+            .content-card:hover, .content-card.expanded { border-left: 2px solid var(--border); }
             .card-fade { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="sidebar">
+    <header class="mobile-header">
+        <h2>Guillermo Sahonero</h2>
+        <button class="burger-btn" onclick="toggleNav()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <div class="mobile-overlay" id="overlay" onclick="toggleNav()"></div>
+
+    <nav class="sidebar" id="sidebar">
         <div class="branding">
             <h1>Guillermo Sahonero</h1>
-            <p>PhD Candidate at UC Chile<br>MRI Researcher & Software Engineer</p>
+            <p>PhD Candidate at UC Chile<br>MRI Researcher & Mechatronics Engineer</p>
             <ul class="menu">
                 <li><a data-target="home">Home</a></li>
                 <li><a data-target="bio">Short Bio</a></li>
                 <li><a data-target="publications">Publications</a></li>
                 <li><a data-target="blog">Blog</a></li>
                 <li><a data-target="teaching">Teaching & Contributions</a></li>
+                <li><a data-target="contact">Contact</a></li>
+                <li><a data-target="social-contact">Socials</a></li>
             </ul>
         </div>
         <a href="/Guillermo_Sahonero_CV.pdf" target="_blank" class="cv-btn">Download CV</a>
@@ -106,15 +144,25 @@
     </main>
 
     <script>
+        // Mobile Nav Toggle
+        function toggleNav() {
+            document.getElementById('sidebar').classList.toggle('nav-open');
+            document.getElementById('overlay').classList.toggle('nav-open');
+        }
+
         // Smooth scrolling overrides
         document.querySelectorAll('.menu a').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('data-target');
                 const el = document.getElementById(targetId);
+                
+                // Close mobile nav if open
+                document.getElementById('sidebar').classList.remove('nav-open');
+                document.getElementById('overlay').classList.remove('nav-open');
+
                 if(el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Explicitly update history on click for snappier URL sync
                     history.replaceState(null, null, targetId === 'home' ? '/' : '/' + targetId);
                 }
             });
@@ -125,9 +173,9 @@
             document.getElementById(cardId).classList.toggle('expanded');
         }
 
-        // Intersection Observer for the /section URL routing magic
+        // Intersection Observer for URL routing
         const sections = document.querySelectorAll('.snap-section');
-        const observerOptions = { root: document.getElementById('wheel'), threshold: 0.6 };
+        const observerOptions = { root: document.getElementById('wheel'), threshold: 0.5 };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -145,7 +193,7 @@
 
         sections.forEach(sec => observer.observe(sec));
 
-        // Handle initial load of a specific route (e.g. user goes directly to /bio)
+        // Initial load route
         window.addEventListener('load', () => {
             const path = window.location.pathname.replace(/\//g, '');
             if(path && document.getElementById(path)) {
