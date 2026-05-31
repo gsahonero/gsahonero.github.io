@@ -67,8 +67,7 @@
         .cv-btn:hover { background: var(--accent); color: var(--bg-color); border-color: var(--accent); }
 
         /* Center Column: Wheel Mechanics */
-        /* Restricted max-width to keep text highly readable */
-        .wheel-container { flex: 1; max-width: 750px; min-width: 450px; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative; padding-left: 2rem; }
+        .wheel-container { flex: 1; max-width: 850px; min-width: 450px; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative; padding-left: 2rem; }
         
         .snap-section { height: 100vh; scroll-snap-align: center; display: flex; align-items: center; justify-content: flex-start; padding: 2rem; position: relative; }
         
@@ -82,9 +81,9 @@
         .expand-arrow { border: solid var(--accent); border-width: 0 2px 2px 0; display: inline-block; padding: 6px; transform: rotate(45deg); transition: transform 0.4s ease; }
         .content-card.expanded .expand-arrow { transform: rotate(-135deg); margin-top: 15px; }
 
-        /* Right Column: Visual Support Panel */
-        .visual-panel { flex: 1.2; display: flex; align-items: center; justify-content: center; padding: 3rem; position: relative; border-left: 1px dashed var(--border); }
-        .dynamic-visual { max-width: 100%; max-height: 70vh; border-radius: 16px; object-fit: cover; opacity: 0; transform: scale(0.97); transition: opacity 0.6s ease, transform 0.6s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        /* Right Column: FIXED AND NARROWER Visual Support Panel */
+        .visual-panel { width: 350px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; border-left: 1px dashed var(--border); }
+        .dynamic-visual { width: 100%; height: auto; max-height: 70vh; border-radius: 16px; object-fit: cover; opacity: 0; transform: scale(0.97); transition: opacity 0.6s ease, transform 0.6s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
         .dynamic-visual.loaded { opacity: 1; transform: scale(1); }
 
         /* Typography */
@@ -101,7 +100,6 @@
 
         /* Breakpoints for smaller laptops / Mobile */
         @media (max-width: 1150px) {
-            /* Drop the 3rd column if screen is too narrow for it to look good */
             .visual-panel { display: none; }
             .wheel-container { max-width: 100%; }
         }
@@ -182,7 +180,6 @@
             document.getElementById(cardId).classList.toggle('expanded');
         }
 
-        // Intersection Observer for URL routing AND Image Swapping
         const sections = document.querySelectorAll('.snap-section');
         const visualEl = document.getElementById('right-visual');
         const observerOptions = { root: document.getElementById('wheel'), threshold: 0.5 };
@@ -198,16 +195,13 @@
                     const activeLink = document.querySelector(`.menu a[data-target="${id}"]`);
                     if(activeLink) activeLink.classList.add('active');
 
-                    // --- NEW: Image Swap Logic ---
                     const visualSrc = entry.target.getAttribute('data-visual');
                     if (visualSrc && visualEl.getAttribute('src') !== visualSrc) {
-                        // Fade out old image
                         visualEl.classList.remove('loaded');
-                        // Wait for fade out, then swap source and fade in
                         setTimeout(() => {
                             visualEl.src = visualSrc;
                             visualEl.classList.add('loaded');
-                        }, 400); // 400ms matches the CSS transition time
+                        }, 400);
                     } else if (!visualSrc) {
                         visualEl.classList.remove('loaded');
                     }

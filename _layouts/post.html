@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }} - {{ site.title }}</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fcfcfc;
+            --text-main: #1a1a1a;
+            --text-muted: #555555;
+            --accent: #2563eb;
+            --link-color: #2563eb;
+            --border: #e5e5e5;
+            --code-bg: #282c34;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f1115;
+                --text-main: #f3f4f6;
+                --text-muted: #9ca3af;
+                --accent: #3b82f6;
+                --link-color: #93c5fd; 
+                --border: #374151;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Left Sidebar (Minimal for posts) */
+        .sidebar { width: 250px; flex-shrink: 0; padding: 3rem 2rem; border-right: 1px solid var(--border); z-index: 40; }
+        .sidebar h1 { font-size: 1.2rem; margin-bottom: 2rem; }
+        .sidebar a { text-decoration: none; color: var(--text-muted); transition: color 0.2s; font-weight: 500; }
+        .sidebar a:hover { color: var(--accent); }
+
+        /* Center Column: ADAPTIVE Scrollytelling Text */
+        /* Note the resize: horizontal, max-width, and min-width */
+        .post-content-wrapper { 
+            width: 45vw; /* Initial optimal reading width */
+            max-width: 70vw; 
+            min-width: 400px; 
+            flex-shrink: 0;
+            resize: horizontal; /* Gives the user the drag handle */
+            overflow-y: auto; 
+            overflow-x: hidden; 
+            padding: 4rem 2rem 10rem 3rem; 
+            scroll-behavior: smooth; 
+            border-right: 1px dashed var(--border); /* Moved border here for seamless UI */
+        }
+        
+        .post-header { margin-bottom: 4rem; }
+        .post-header h1 { font-size: 2.5rem; margin-bottom: 1rem; line-height: 1.2; letter-spacing: -0.02em; }
+        .post-meta { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* The text blocks that trigger changes */
+        .scroll-step { margin-bottom: 60vh; opacity: 0.4; transition: opacity 0.4s ease; border-left: 2px solid transparent; padding-left: 1.5rem; }
+        .scroll-step.is-active { opacity: 1; border-left: 2px solid var(--accent); }
+        .scroll-step p { line-height: 1.8; margin-bottom: 1.2rem; font-size: 1.1rem; }
+
+        /* Right Column: Responsive Code Visuals */
+        /* Flex: 1 allows this pane to dynamically grow/shrink as the user drags the center pane */
+        .visual-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; background-color: var(--bg-color); position: relative; }
+        
+        /* The container holding the extracted code/animations */
+        .dynamic-asset { position: absolute; width: 90%; max-height: 80vh; overflow-y: auto; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); background-color: var(--code-bg); }
+        .dynamic-asset.is-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        
+        .dynamic-asset pre { margin: 0; padding: 1.5rem; font-size: 0.9rem; border-radius: 12px; }
+
+        /* Mobile */
+        @media (max-width: 1000px) {
+            .visual-panel { display: none; }
+            .post-content-wrapper { width: 100%; max-width: 100%; resize: none; padding-bottom: 4rem; border-right: none; }
+            .scroll-step { margin-bottom: 3rem; opacity: 1; border-left: none; padding-left: 0; }
+            .dynamic-asset { position: relative; opacity: 1; transform: none; width: 100%; pointer-events: auto; margin-bottom: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <a href="/">← Back to Home</a>
+    </nav>
+
+    <main class="post-content-wrapper" id="post-scroller">
+        <header class="post-header">
+            <h1>{{ page.title }}</h1>
+            <div class="post-meta">{{ page.date | date: "%B %d, %Y" }}</div>
+        </header>
+
+        {{ content }}
+    </main>
+
+    <aside class="visual-panel" id="visual-panel"></aside>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+
+        if (window.innerWidth > 1000) {
+            const visualPanel = document.getElementById('visual-panel');
+            const assets = document.querySelectorAll('.dynamic-asset');
+            
+            assets.forEach(asset => {
+                visualPanel.appendChild(asset); 
+            });
+        }
+
+        const steps = document.querySelectorAll('.scroll-step');
+        const observerOptions = { 
+            root: document.getElementById('post-scroller'), 
+            rootMargin: "-40% 0px -40% 0px", 
+            threshold: 0 
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    steps.forEach(s => s.classList.remove('is-active'));
+                    entry.target.classList.add('is-active');
+
+                    const targetId = entry.target.getAttribute('data-target');
+                    document.querySelectorAll('.dynamic-asset').forEach(a => a.classList.remove('is-active'));
+                    
+                    const targetAsset = document.getElementById(targetId);
+                    if (targetAsset) targetAsset.classList.add('is-active');
+                }
+            });
+        }, observerOptions);
+
+        steps.forEach(step => observer.observe(step));
+    </script>
+</body>
+</html>
