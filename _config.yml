@@ -1,0 +1,13 @@
+title: Guillermo Sahonero
+description: MRI Researcher, Software Developer & Educator.
+url: "https://gsahonero.github.io"
+baseurl: ""
+
+# Google Analytics
+google_analytics: G-XXXXXXXXXX # Replace with your actual tag
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
