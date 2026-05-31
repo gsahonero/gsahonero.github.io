@@ -1,0 +1,17 @@
+---
+---
+<div class="publication-item" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+    <p style="margin-bottom: 0.5rem; color: var(--text-main);">{{ reference }}</p>
+    
+    <div class="pub-links">
+        <a href="/assets/pdf/{{ entry.key }}.pdf" target="_blank" class="cv-btn" style="padding: 0.3rem 0.8rem; font-size: 0.85rem; display: inline-block; width: auto; margin-top: 0.5rem;">
+            Read PDF
+        </a>
+        
+        {% if entry.doi %}
+        <a href="https://doi.org/{{ entry.doi }}" target="_blank" style="margin-left: 1rem; font-size: 0.85rem; font-weight: 500;">
+            DOI Link
+        </a>
+        {% endif %}
+    </div>
+</div>

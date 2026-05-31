@@ -11,3 +11,11 @@ markdown: kramdown
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-scholar
+
+scholar:
+  style: ieee          
+  locale: en
+  source: ./_bibliography
+  bibliography: publications.bib
+  bibliography_template: bib 

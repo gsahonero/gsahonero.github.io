@@ -31,43 +31,14 @@ layout: default
     </div>
 </section>
 
-<section id="publications" class="snap-section" data-visual="/assets/mri-simulation.gif">
+<section id="publications" class="snap-section" data-visual="/assets/ernie-toolkit-demo.gif">
     <div class="content-card" id="card-pub">
         <h2>Publications</h2>
-        <p><small>A dynamically updated list from Google Scholar.</small></p>
+        <p>Selected peer-reviewed research and developments.</p>
         
-        <style>
-            .pub-list { list-style: none; margin-left: 0; }
-            .pub-item { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-            .pub-title { font-weight: 600; color: var(--text-main); font-size: 1.05rem; }
-            .pub-authors { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.2rem; }
-            .pub-venue { font-size: 0.9rem; font-style: italic; color: var(--text-muted); margin-bottom: 0.5rem; }
-            .pub-actions a { 
-                display: inline-block; padding: 0.2rem 0.8rem; margin-right: 0.5rem;
-                font-size: 0.8rem; font-weight: 600; text-decoration: none; 
-                border: 1px solid var(--border); border-radius: 4px; 
-                color: var(--text-main); transition: all 0.2s ease;
-            }
-            .pub-actions a:hover { border-color: var(--accent); color: var(--accent); }
-        </style>
-
-        <ul class="pub-list">
-            {% for pub in site.data.publications %}
-            <li class="pub-item">
-                <div class="pub-title">{{ pub.title }}</div>
-                <div class="pub-authors">{{ pub.authors }}</div>
-                <div class="pub-venue">{{ pub.journal }} {{ pub.year }}</div>
-                <div class="pub-actions">
-                    {% if pub.url %}
-                        <a href="{{ pub.url }}" target="_blank">Scholar</a>
-                    {% endif %}
-                    {% if pub.pdf %}
-                        <a href="{{ pub.pdf }}" target="_blank">PDF</a>
-                    {% endif %}
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
+        <div style="margin-top: 2rem;">
+            {% bibliography %}
+        </div>
         
         <div class="card-fade" onclick="toggleExpand('card-pub')">
             <i class="expand-arrow"></i>
