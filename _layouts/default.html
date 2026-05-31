@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site.title }}</title>
+    {% seo %}
+    
+    {% if site.google_analytics %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ site.google_analytics }}');
+    </script>
+    {% endif %}
+
+    <style>
+        :root {
+            --bg-color: #fcfcfc;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #555555;
+            --accent: #2563eb;
+            --border: #e5e5e5;
+            --wheel-height: 55vh;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f1115;
+                --card-bg: #1a1d24;
+                --text-main: #f3f4f6;
+                --text-muted: #9ca3af;
+                --accent: #60a5fa;
+                --border: #374151;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Left Column */
+        .sidebar { width: 320px; padding: 4rem 2.5rem; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--border); z-index: 10; }
+        .branding h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .branding p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.4; margin-bottom: 3rem; }
+        .menu { list-style: none; }
+        .menu li { margin-bottom: 1.2rem; }
+        .menu a { text-decoration: none; color: var(--text-muted); font-weight: 500; transition: color 0.2s ease; cursor: pointer; font-size: 1.05rem; }
+        .menu a:hover, .menu a.active { color: var(--accent); }
+        
+        .cv-btn { display: inline-block; padding: 0.75rem 1.5rem; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 8px; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: all 0.2s ease; text-align: center; width: 100%; }
+        .cv-btn:hover { background: var(--accent); color: var(--card-bg); }
+
+        /* Right Column: Wheel Mechanics */
+        .wheel-container { flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative; }
+        
+        .snap-section { height: 100vh; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; }
+        
+        .content-card { background-color: var(--card-bg); width: 100%; max-width: 720px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); padding: 3rem; position: relative; max-height: var(--wheel-height); overflow: hidden; transition: max-height 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+        .content-card.expanded { max-height: 85vh; overflow-y: auto; }
+        
+        .card-fade { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(transparent, var(--card-bg) 80%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 1.5rem; cursor: pointer; transition: opacity 0.3s ease; }
+        .content-card.expanded .card-fade { opacity: 0; pointer-events: none; }
+        
+        .expand-arrow { border: solid var(--accent); border-width: 0 2px 2px 0; display: inline-block; padding: 6px; transform: rotate(45deg); transition: transform 0.4s ease; }
+        .content-card.expanded .expand-arrow { transform: rotate(-135deg); margin-top: 15px; }
+
+        h2 { margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        p { line-height: 1.7; margin-bottom: 1.2rem; color: var(--text-muted); font-size: 1.05rem; }
+        ul { margin-left: 1.2rem; margin-bottom: 1.2rem; color: var(--text-muted); }
+        li { line-height: 1.6; margin-bottom: 0.5rem; }
+        strong { color: var(--text-main); }
+        
+        /* Mobile */
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 2rem; height: auto; position: static; }
+            .branding p { margin-bottom: 1.5rem; }
+            .wheel-container { overflow: visible; height: auto; scroll-snap-type: none; }
+            .snap-section { height: auto; min-height: 80vh; padding: 1.5rem; scroll-snap-align: none; }
+            .content-card { max-height: none; }
+            .card-fade { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="branding">
+            <h1>Guillermo Sahonero</h1>
+            <p>PhD Candidate at UC Chile<br>MRI Researcher & Software Engineer</p>
+            <ul class="menu">
+                <li><a data-target="home">Home</a></li>
+                <li><a data-target="bio">Short Bio</a></li>
+                <li><a data-target="publications">Publications</a></li>
+                <li><a data-target="blog">Blog</a></li>
+                <li><a data-target="teaching">Teaching & Contributions</a></li>
+            </ul>
+        </div>
+        <a href="/Guillermo_Sahonero_CV.pdf" target="_blank" class="cv-btn">Download CV</a>
+    </nav>
+
+    <main class="wheel-container" id="wheel">
+        {{ content }}
+    </main>
+
+    <script>
+        // Smooth scrolling overrides
+        document.querySelectorAll('.menu a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-target');
+                const el = document.getElementById(targetId);
+                if(el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Explicitly update history on click for snappier URL sync
+                    history.replaceState(null, null, targetId === 'home' ? '/' : '/' + targetId);
+                }
+            });
+        });
+
+        // Expand logic
+        function toggleExpand(cardId) {
+            document.getElementById(cardId).classList.toggle('expanded');
+        }
+
+        // Intersection Observer for the /section URL routing magic
+        const sections = document.querySelectorAll('.snap-section');
+        const observerOptions = { root: document.getElementById('wheel'), threshold: 0.6 };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    const navUrl = id === 'home' ? '/' : '/' + id;
+                    history.replaceState(null, null, navUrl);
+                    
+                    document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
+                    const activeLink = document.querySelector(`.menu a[data-target="${id}"]`);
+                    if(activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(sec => observer.observe(sec));
+
+        // Handle initial load of a specific route (e.g. user goes directly to /bio)
+        window.addEventListener('load', () => {
+            const path = window.location.pathname.replace(/\//g, '');
+            if(path && document.getElementById(path)) {
+                document.getElementById(path).scrollIntoView({ block: 'center' });
+            }
+        });
+    </script>
+</body>
+</html>
