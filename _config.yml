@@ -4,18 +4,10 @@ url: "https://gsahonero.github.io"
 baseurl: ""
 
 # Google Analytics
-google_analytics: G-XXXXXXXXXX # Replace with your actual tag
+google_analytics: G-2HP9X9RKJV
 
 # Build settings
 markdown: kramdown
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
-  - jekyll-scholar
-
-scholar:
-  style: ieee          
-  locale: en
-  source: ./_bibliography
-  bibliography: publications.bib
-  bibliography_template: bib 

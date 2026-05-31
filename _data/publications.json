@@ -1,0 +1,352 @@
+[
+	{
+		"id": "easttomFunctionalBCIModel2021",
+		"type": "article-journal",
+		"abstract": "In order to facilitate communication and collaboration between researchers, Brain–computer interfaces (BCI) require a generally applicable functional model as well as a common vocabulary. The IEEE P2731 working group is in the process of developing such a functional model and a lexicon of BCI terminology. Such a functional model has multiple aspects including the control interface, physiology, transducers, etc. This current paper focuses on the control interface aspects of that model. Having a generally applicable control interface model will facilitate interdisciplinar y research and communication. The control interface is a critical part of the functional model and is described in this current paper. The control interface presented intentionally is intentionally kept general in order to be widely applicable. Some details are specific to a particular application and are thus left to those applications. It does contain the encoder (which also contains a decoder), with a feedback submodule.",
+		"citation-key": "easttomFunctionalBCIModel2021",
+		"container-title": "Brain-Computer Interfaces",
+		"DOI": "10.1080/2326263X.2021.2002004",
+		"ISSN": "2326-263X, 2326-2621",
+		"issue": "4",
+		"journalAbbreviation": "Brain-Computer Interfaces",
+		"language": "en",
+		"page": "154-160",
+		"source": "DOI.org (Crossref)",
+		"title": "A functional BCI model by the P2731 working group: control interface",
+		"title-short": "A functional BCI model by the P2731 working group",
+		"URL": "https://www.tandfonline.com/doi/full/10.1080/2326263X.2021.2002004",
+		"volume": "8",
+		"author": [
+			{
+				"family": "Easttom",
+				"given": "Chuck"
+			},
+			{
+				"family": "Bianchi",
+				"given": "Luigi"
+			},
+			{
+				"family": "Valeriani",
+				"given": "Davide"
+			},
+			{
+				"family": "Nam",
+				"given": "Chang S."
+			},
+			{
+				"family": "Hossaini",
+				"given": "Ali"
+			},
+			{
+				"family": "Zapała",
+				"given": "Dariusz"
+			},
+			{
+				"family": "Roman-Gonzalez",
+				"given": "Avid"
+			},
+			{
+				"family": "Singh",
+				"given": "Avinash K"
+			},
+			{
+				"family": "Antonietti",
+				"given": "Alberto"
+			},
+			{
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
+			},
+			{
+				"family": "Balachandran",
+				"given": "Pradeep"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2026",
+					3,
+					13
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					10,
+					2
+				]
+			]
+		}
+	},
+	{
+		"id": "easttomFunctionalModelUnifying2021",
+		"type": "article-journal",
+		"abstract": "Brain Computer Interface (BCI) technology is a critical area both for researchers and clinical practitioners. The IEEE P2731 working group is developing a comprehensive BCI lexicography and a functional model of BCI. The glossary and the functional model are inextricably intertwined. The functional model guides the development of the glossary. Terminology is developed from the basis of a BCI functional model. This paper provides the current status of the P2731 working group’s progress towards developing a BCI terminology standard and functional model for the IEEE.",
+		"citation-key": "easttomFunctionalModelUnifying2021",
+		"container-title": "IEEE Open Journal of Engineering in Medicine and Biology",
+		"DOI": "10.1109/OJEMB.2021.3057471",
+		"ISSN": "2644-1276",
+		"journalAbbreviation": "IEEE Open J. Eng. Med. Biol.",
+		"language": "en",
+		"license": "https://creativecommons.org/licenses/by/4.0/legalcode",
+		"page": "91-96",
+		"source": "DOI.org (Crossref)",
+		"title": "A Functional Model for Unifying Brain Computer Interface Terminology",
+		"URL": "https://ieeexplore.ieee.org/document/9349175/",
+		"volume": "2",
+		"author": [
+			{
+				"family": "Easttom",
+				"given": "Chuck"
+			},
+			{
+				"family": "Bianchi",
+				"given": "Luigi"
+			},
+			{
+				"family": "Valeriani",
+				"given": "Davide"
+			},
+			{
+				"family": "Nam",
+				"given": "Chang S."
+			},
+			{
+				"family": "Hossaini",
+				"given": "Ali"
+			},
+			{
+				"family": "Zapala",
+				"given": "Dariusz"
+			},
+			{
+				"family": "Roman-Gonzalez",
+				"given": "Avid"
+			},
+			{
+				"family": "Singh",
+				"given": "Avinash K"
+			},
+			{
+				"family": "Antonietti",
+				"given": "Alberto"
+			},
+			{
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
+			},
+			{
+				"family": "Balachandran",
+				"given": "Pradeep"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2026",
+					3,
+					13
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021"
+				]
+			]
+		}
+	},
+	{
+		"id": "sahonero-alvarezFunctionalBCIModel2021",
+		"type": "article-journal",
+		"abstract": "A Brain-Computer Interface (BCI) can be considered as a technology that allows for alternative means of communication between humans and their environment using thoughts and intentions. The structure of this interface is composed of various stages, beginning with the acquisition of the brain signals, followed by several processing stages, and leading to the generation of feedback signals. The development of a BCI system involves a diverse set of expertise in order to produce a unique environment for continuous innovations. However, such diversity in technical background and expertise may lead to confusion in the terminology used by the community. As such, the IEEE P2731 WG has been tasked with the development of a functional model to facilitate the understanding of a BCI system. In this paper, we focus on the description of the functional elements that belong to the transducer stage of a BCI.",
+		"citation-key": "sahonero-alvarezFunctionalBCIModel2021",
+		"container-title": "Brain-Computer Interfaces",
+		"DOI": "10.1080/2326263X.2021.1968633",
+		"ISSN": "2326-263X, 2326-2621",
+		"issue": "3",
+		"journalAbbreviation": "Brain-Computer Interfaces",
+		"language": "en",
+		"page": "92-107",
+		"source": "DOI.org (Crossref)",
+		"title": "A Functional BCI Model by the P2731 Working Group: Transducer",
+		"title-short": "A Functional BCI Model by the P2731 Working Group",
+		"URL": "https://www.tandfonline.com/doi/full/10.1080/2326263X.2021.1968633",
+		"volume": "8",
+		"author": [
+			{
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
+			},
+			{
+				"family": "Singh",
+				"given": "Avinash Kumar"
+			},
+			{
+				"family": "Sayrafian",
+				"given": "Kamran"
+			},
+			{
+				"family": "Bianchi",
+				"given": "Luigi"
+			},
+			{
+				"family": "Roman-Gonzalez",
+				"given": "Avid"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2026",
+					3,
+					13
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					7,
+					3
+				]
+			]
+		}
+	},
+	{
+		"id": "ordonez3DConvolutionAccelerator2019",
+		"type": "paper-conference",
+		"abstract": "Convolutional Neural Networks (CNNs) have become a popular and useful deep learning algorithm. However, the requirements of computation have also increased. As implementation of CNNs in Embedded Systems or Cyber-Physical Systems (CPS) is required, the need of efficient technologies of computation like FPGAs arise substantially. In this paper, we present a 3D convolution accelerator implemented on a Xilinx ZCU102 FPGA board. It achieves 32.08 GOP/s of performance and an efficiency of 3.58 GOP/s per Watt. This accelerator has been developed in Xilinx SDSoC environment.",
+		"citation-key": "ordonez3DConvolutionAccelerator2019",
+		"container-title": "2019 7th International Engineering, Sciences and Technology Conference (IESTEC)",
+		"DOI": "10.1109/IESTEC46403.2019.00126",
+		"event-title": "2019 7th International Engineering, Sciences and Technology Conference (IESTEC)",
+		"ISBN": "978-1-7281-1691-4",
+		"language": "en",
+		"license": "https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html",
+		"page": "677-681",
+		"publisher": "IEEE",
+		"publisher-place": "Panama, Panama",
+		"source": "DOI.org (Crossref)",
+		"title": "A 3D Convolution Accelerator Implemented on FPGA Using SDSoC",
+		"URL": "https://ieeexplore.ieee.org/document/8943580/",
+		"author": [
+			{
+				"family": "Ordonez",
+				"given": "Jhon"
+			},
+			{
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2026",
+					3,
+					13
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					10
+				]
+			]
+		}
+	},
+	{
+		"id": "carlosBLDCMotorController",
+		"type": "paper-conference",
+		"abstract": "Brushless DC Motors (BLDCM) have many beneﬁts for their high eﬃciency, small size, and low maintenance requirements. On the other hand, high eﬃciency electronics are usually related to the usage of ARM based microcontrollers. In this work, the behavior over multiple PWM frequencies and after applying PWM compensation is studied using an ARM based board. In general, performance of sensorless and hall-eﬀect based controller show expected diﬀerences. However, by using the proposed control schema on a real plant, impactful advantages are obtained showing 67% performance improvement and an average of 20% torque ripple reduction.",
+		"citation-key": "carlosBLDCMotorController",
+		"language": "en",
+		"source": "Zotero",
+		"title": "BLDC Motor Controller Response to PWM Compensation",
+		"author": [
+			{
+				"family": "Carlos",
+				"given": "Gutierrez S"
+			},
+			{
+				"family": "Guillermo",
+				"given": "Sahonero-Alvarez"
+			}
+		]
+	},
+	{
+		"id": "SahoneroComparison",
+		"type": "paper-conference",
+		"abstract": "The Blind Source Separation (BSS) problem is present in a variety of engineering applications, including the electroencephalographic (EEG) signal separation for artifact removal procedure in Brain Computer Interfaces (BCI). Independent Component Analysis (ICA) is a widely used technique for this purpose, although, it is also well known to have high computational complexity. Thus, when 'real time' operation is the target on BCI systems, hardware solutions and specifically FPGA devices arise as feasible answers to the needs. However, when considering the design constraints and requirements, it is necessary to analyze which ICA algorithm would fit better in hardware. In this work, we evaluate different software implementations of ICA approaches using MATLAB and according to some criteria (running time, allocated memory, accuracy and scalability) targeting four ICA algorithms: Second-Order Blind Identification (SOBI), Hyvarinen's fixed-point algorithm (FastICA), logistic Infomax (Infomax) and Joint Approximation Diagonalization of Eigenmatrices (JADE). The outcomes have shown that SOBI's MATLAB implementation is the best procedure among all the analyzed techniques by drastically overcoming the speed of the others algorithms. Moreover, its correlation grades, corresponding to Pearson and Spearman correlation coefficients respectively, indicate it as one of the more accurate algorithms.",
+		"citation-key": "SahoneroComparison",
+		"container-title": "Proceedings of the 8th International Multi-Conference on Complexity, Informatics and Cybernetics",
+		"note": "tex.eventtitle: International Multi-Conference on Complexity, Informatics and Cybernetics",
+		"title": "A Comparison of SOBI, FastICA, JADE and Infomax Algorithms",
+		"author": [
+			{
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
+			},
+			{
+				"family": "Calderon",
+				"given": "Humberto"
+			}
+		]
+	},
+	{
+		"id": "Zapaa2021functional",
+		"type": "article-journal",
+		"citation-key": "Zapaa2021functional",
+		"container-title": "Brain-Computer Interfaces",
+		"DOI": "10.1080/2326263x.2021.1935124",
+		"ISSN": "2326-263X",
+		"issue": "3",
+		"journalAbbreviation": "Brain-Computer Interfaces",
+		"language": "en",
+		"note": "tex.\"author+an:orcid\": 1=\"https://orcid.org/0000-0002-3472-3050\"; 2=\"https://orcid.org/0000-0001-5314-222X\"; 4=\"https://orcid.org/0000-0001-5259-7927\"; 5=\"https://orcid.org/0000-0002-5883-6113\"",
+		"page": "82–91",
+		"publisher": "Informa UK Limited",
+		"title": "A functional BCI model by the P2731 working group: psychology",
+		"URL": "http://dx.doi.org/10.1080/2326263X.2021.1935124",
+		"volume": "8",
+		"author": [
+			{
+				"family": "Zapała",
+				"given": "Dariusz"
+			},
+			{
+				"family": "Hossaini",
+				"given": "Ali"
+			},
+			{
+				"family": "Kianpour",
+				"given": "Mazaher"
+			},
+			{
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
+			},
+			{
+				"family": "Ayesh",
+				"given": "Aladdin"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					6,
+					22
+				]
+			]
+		}
+	}
+]

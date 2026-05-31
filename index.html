@@ -37,7 +37,34 @@ layout: default
         <p>Selected peer-reviewed research and developments.</p>
         
         <div style="margin-top: 2rem;">
-            {% bibliography %}
+            {% for paper in site.data.publications %}
+            <div class="publication-item" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                
+                <p style="margin-bottom: 0.5rem; color: var(--text-main);">
+                    {% for author in paper.author %}
+                        {{ author.family }}, {{ author.given | slice: 0, 1 }}.{% if forloop.last == false %}, {% endif %}
+                    {% endfor %}
+                    
+                    ({{ paper.issued.date-parts[0][0] }}). 
+                    
+                    <strong>{{ paper.title }}</strong>. 
+                    <em>{{ paper.container-title }}</em>.
+                </p>
+                
+                <div class="pub-links">
+                    <a href="/assets/pdf/{{ paper.id }}.pdf" target="_blank" class="cv-btn" style="padding: 0.3rem 0.8rem; font-size: 0.85rem; display: inline-block; width: auto; margin-top: 0.5rem;">
+                        Read PDF
+                    </a>
+                    
+                    {% if paper.DOI %}
+                    <a href="https://doi.org/{{ paper.DOI }}" target="_blank" style="margin-left: 1rem; font-size: 0.85rem; font-weight: 500; color: var(--link-color);">
+                        DOI
+                    </a>
+                    {% endif %}
+                </div>
+                
+            </div>
+            {% endfor %}
         </div>
         
         <div class="card-fade" onclick="toggleExpand('card-pub')">
