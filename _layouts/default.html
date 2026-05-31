@@ -275,13 +275,20 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const id = entry.target.id;
-                    const navUrl = id === 'home' ? '/' : '/' + id;
-                    history.replaceState(null, null, navUrl);
+                    
+                    // Determine the expected URL for this section
+                    const expectedUrl = id === 'home' ? '/' : '/' + id;
+                    
+                    // Only replace state if the URL needs updating. 
+                    // This prevents the observer from constantly resetting the URL to '/' if 'home' is momentarily visible.
+                    if (!window.location.pathname.replace(/\//g, '') || window.location.pathname.replace(/\//g, '') !== id) {
+                         history.replaceState(null, null, expectedUrl);
+                    }
                     
                     document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
                     const activeLink = document.querySelector(`.menu a[data-target="${id}"]`);
                     if(activeLink) activeLink.classList.add('active');
-
+                    
                     // FIXED: Image Swap Logic
                     const visualSrc = entry.target.getAttribute('data-visual');
                     
@@ -304,16 +311,19 @@
                 }
             });
         }, observerOptions);
-
+        
         sections.forEach(sec => observer.observe(sec));
-
+        
         window.addEventListener('load', () => {
             const path = window.location.pathname.replace(/\//g, '');
-        if(path && document.getElementById(path)) {
-                    document.getElementById(path).scrollIntoView({ block: 'center' });
-                    // Set the URL to the targeted section
-                    history.replaceState(null, null, '/' + path);
-                }
+            if(path && document.getElementById(path)) {
+                document.getElementById(path).scrollIntoView({ block: 'center' });
+                // Explicitly set the URL on load to match the visible section
+                history.replaceState(null, null, '/' + path);
+            } else if (document.getElementById('home')) {
+                // If no specific path is found, ensure the URL is clean for the home section
+                history.replaceState(null, null, '/');
+            }
         });
     </script>
 </body>
