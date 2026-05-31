@@ -6,11 +6,10 @@ permalink: /404.html
   <head>
     <meta charset="utf-8">
     <script>
-      // Encode path + query + hash into a redirect parameter
       var l = window.location;
       l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/' +
-        '?p=/' + l.pathname.slice(1).split('/').map(encodeURIComponent).join('/') +
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        '/?p=' + encodeURIComponent(l.pathname) +
         (l.search ? '&q=' + encodeURIComponent(l.search.slice(1)) : '') +
         (l.hash ? '&h=' + encodeURIComponent(l.hash.slice(1)) : '')
       );
