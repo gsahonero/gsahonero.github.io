@@ -36,34 +36,46 @@ layout: default
         <h2>Publications</h2>
         <p>Selected peer-reviewed research and developments.</p>
         
-        <div style="margin-top: 2rem;">
+        <div class="publications-list" style="margin-top: 2rem;">
+            {% assign current_year = "" %}
+            
             {% for paper in site.data.publications %}
-            <div class="publication-item" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                {% assign paper_year = paper.issued.date-parts[0][0] %}
                 
-                <p style="margin-bottom: 0.5rem; color: var(--text-main);">
-                    {% for author in paper.author %}
-                        {{ author.family }}, {{ author.given | slice: 0, 1 }}.{% if forloop.last == false %}, {% endif %}
-                    {% endfor %}
-                    
-                    ({{ paper.issued.date-parts[0][0] }}). 
-                    
-                    <strong>{{ paper.title }}</strong>. 
-                    <em>{{ paper.container-title }}</em>.
-                </p>
-                
-                <div class="pub-links">
-                    <a href="/assets/pdf/{{ paper.id }}.pdf" target="_blank" class="cv-btn" style="padding: 0.3rem 0.8rem; font-size: 0.85rem; display: inline-block; width: auto; margin-top: 0.5rem;">
-                        Read PDF
-                    </a>
-                    
-                    {% if paper.DOI %}
-                    <a href="https://doi.org/{{ paper.DOI }}" target="_blank" style="margin-left: 1rem; font-size: 0.85rem; font-weight: 500; color: var(--link-color);">
-                        DOI
-                    </a>
+                {% if paper_year != current_year %}
+                    {% if current_year != "" %}
+                        </div></details>
                     {% endif %}
+                    
+                    <details class="year-accordion" {% if forloop.first %}open{% endif %}>
+                        <summary>{{ paper_year }}</summary>
+                        <div class="accordion-content">
+                    
+                    {% assign current_year = paper_year %}
+                {% endif %}
+
+                <div class="publication-item">
+                    <p class="paper-text">
+                        {% for author in paper.author %}
+                            {{ author.family }}, {{ author.given | slice: 0, 1 }}.{% if forloop.last == false %}, {% endif %}
+                        {% endfor %}
+                        ({{ paper_year }}). 
+                        <strong>{{ paper.title }}</strong>. 
+                        <em>{{ paper.container-title }}</em>.
+                    </p>
+                    
+                    <div class="pub-links">
+                        <a href="/assets/pdf/{{ paper.id }}.pdf" target="_blank" class="cv-btn pub-btn">Read PDF</a>
+                        {% if paper.DOI %}
+                        <a href="https://doi.org/{{ paper.DOI }}" target="_blank" class="doi-link">DOI</a>
+                        {% endif %}
+                    </div>
                 </div>
+
+                {% if forloop.last %}
+                    </div></details>
+                {% endif %}
                 
-            </div>
             {% endfor %}
         </div>
         

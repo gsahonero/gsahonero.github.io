@@ -268,19 +268,28 @@
 		"type": "paper-conference",
 		"abstract": "Brushless DC Motors (BLDCM) have many beneﬁts for their high eﬃciency, small size, and low maintenance requirements. On the other hand, high eﬃciency electronics are usually related to the usage of ARM based microcontrollers. In this work, the behavior over multiple PWM frequencies and after applying PWM compensation is studied using an ARM based board. In general, performance of sensorless and hall-eﬀect based controller show expected diﬀerences. However, by using the proposed control schema on a real plant, impactful advantages are obtained showing 67% performance improvement and an average of 20% torque ripple reduction.",
 		"citation-key": "carlosBLDCMotorController",
+		"event-title": "Congreso Latinoamericano de Control Automático",
 		"language": "en",
+		"publisher-place": "Quito, Ecuador",
 		"source": "Zotero",
 		"title": "BLDC Motor Controller Response to PWM Compensation",
 		"author": [
 			{
-				"family": "Carlos",
-				"given": "Gutierrez S"
+				"family": "Gutierrez",
+				"given": "Carlos"
 			},
 			{
-				"family": "Guillermo",
-				"given": "Sahonero-Alvarez"
+				"family": "Sahonero-Alvarez",
+				"given": "Guillermo"
 			}
-		]
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2018"
+				]
+			]
+		}
 	},
 	{
 		"id": "SahoneroComparison",
@@ -288,7 +297,9 @@
 		"abstract": "The Blind Source Separation (BSS) problem is present in a variety of engineering applications, including the electroencephalographic (EEG) signal separation for artifact removal procedure in Brain Computer Interfaces (BCI). Independent Component Analysis (ICA) is a widely used technique for this purpose, although, it is also well known to have high computational complexity. Thus, when 'real time' operation is the target on BCI systems, hardware solutions and specifically FPGA devices arise as feasible answers to the needs. However, when considering the design constraints and requirements, it is necessary to analyze which ICA algorithm would fit better in hardware. In this work, we evaluate different software implementations of ICA approaches using MATLAB and according to some criteria (running time, allocated memory, accuracy and scalability) targeting four ICA algorithms: Second-Order Blind Identification (SOBI), Hyvarinen's fixed-point algorithm (FastICA), logistic Infomax (Infomax) and Joint Approximation Diagonalization of Eigenmatrices (JADE). The outcomes have shown that SOBI's MATLAB implementation is the best procedure among all the analyzed techniques by drastically overcoming the speed of the others algorithms. Moreover, its correlation grades, corresponding to Pearson and Spearman correlation coefficients respectively, indicate it as one of the more accurate algorithms.",
 		"citation-key": "SahoneroComparison",
 		"container-title": "Proceedings of the 8th International Multi-Conference on Complexity, Informatics and Cybernetics",
+		"event-title": "8th International Multi-Conference on Complexity, Informatics and Cybernetics",
 		"note": "tex.eventtitle: International Multi-Conference on Complexity, Informatics and Cybernetics",
+		"publisher-place": "Orlando, FL, US",
 		"title": "A Comparison of SOBI, FastICA, JADE and Infomax Algorithms",
 		"author": [
 			{
@@ -299,7 +310,14 @@
 				"family": "Calderon",
 				"given": "Humberto"
 			}
-		]
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2017"
+				]
+			]
+		}
 	},
 	{
 		"id": "Zapaa2021functional",

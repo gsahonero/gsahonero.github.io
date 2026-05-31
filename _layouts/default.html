@@ -128,6 +128,76 @@
             .content-card:hover, .content-card.expanded { border-left: 2px solid var(--border); }
             .card-fade { display: none; }
         }
+
+        .year-accordion {
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .year-accordion summary {
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 1rem 0;
+            list-style: none; /* Hides default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            transition: color 0.2s ease;
+        }
+
+        /* Hide webkit marker */
+        .year-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+
+        /* Custom +/- Icon for Accordion */
+        .year-accordion summary::after {
+            content: '+';
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 300;
+            transition: transform 0.3s ease;
+        }
+
+        .year-accordion[open] summary::after {
+            content: '−';
+        }
+
+        .year-accordion summary:hover {
+            color: var(--accent);
+        }
+
+        .accordion-content {
+            padding: 0.5rem 0 1.5rem 0;
+        }
+
+        .publication-item {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Elegant, Smaller Serif Typography for Citations */
+        .paper-text {
+            font-family: "Georgia", "Cambria", "Times New Roman", serif;
+            font-size: 0.95rem; /* Smaller and crisper */
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .pub-btn { 
+            padding: 0.3rem 0.8rem; 
+            font-size: 0.8rem; 
+            border-radius: 6px;
+        }
+
+        .doi-link { 
+            margin-left: 1rem; 
+            font-size: 0.8rem; 
+            font-weight: 500; 
+            color: var(--link-color); 
+        }
     </style>
 </head>
 <body>
