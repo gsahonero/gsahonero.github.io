@@ -2,15 +2,16 @@ name: Update Google Scholar Publications
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Runs every Sunday at midnight
+    - cron: '0 0 * * 0'
   push:
     paths:
-      - 'assets/papers/**.pdf' # Runs whenever you upload a new PDF
-  workflow_dispatch: # Allows you to run it manually from the Actions tab
+      - 'assets/papers/**.pdf'
+  workflow_dispatch:
 
 jobs:
   update-papers:
     runs-on: ubuntu-latest
+    timeout-minutes: 15 # <-- Fails the job if it hangs longer than 15 minutes
     permissions:
       contents: write
 
