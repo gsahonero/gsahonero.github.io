@@ -173,16 +173,3 @@ layout: default
         </div>
     </div>
 </section>
-
-<script>
-  (function() {
-    var params = new URLSearchParams(window.location.search);
-    var p = params.get('p');
-    if (p) {
-      var q = params.get('q') ? '?' + params.get('q') : '';
-      var h = params.get('h') ? '#' + params.get('h') : '';
-      // p already contains the leading slash, don't prepend another one
-      window.history.replaceState(null, null, p + q + h);
-    }
-  })();
-</script>
