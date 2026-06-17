@@ -84,7 +84,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 .menubtn{padding:6px 12px;border-radius:calc(var(--radius-md) - 2px);border:none;background:transparent;font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:5px;min-height:36px}
 .menubtn:hover,.menubtn.open{background:var(--color-surface);color:var(--color-text)}
 .menubtn svg{width:12px;height:12px;opacity:.6}
-.dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:170px;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .14);border-radius:var(--radius-md);box-shadow:var(--shadow-md);z-index:200;display:none;padding:4px}
+.dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:180px;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .14);border-radius:var(--radius-md);box-shadow:var(--shadow-md);z-index:200;display:none;padding:4px}
 .dropdown.open{display:block}
 .dropitem{display:flex;align-items:center;gap:var(--space-2);width:100%;padding:8px 12px;border:none;background:transparent;border-radius:calc(var(--radius-md) - 2px);font-size:var(--text-sm);text-align:left;color:var(--color-text)}
 .dropitem:hover{background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-offset))}
@@ -140,9 +140,10 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 /* ── modals ── */
 .modal-backdrop{position:fixed;inset:0;background:rgb(0 0 0 / .55);display:none;align-items:center;justify-content:center;padding:var(--space-4);z-index:1000}
 .modal-backdrop.open{display:flex}
-.modal{width:min(560px,100%);max-height:85dvh;overflow:auto;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
+.modal{width:min(680px,100%);max-height:85dvh;overflow:auto;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
 .modal header{padding:var(--space-4);border-bottom:1px solid var(--color-divider);display:flex;justify-content:space-between;align-items:center}
 .modal .body{padding:var(--space-4)}
+.modal-wide{width:min(820px,100%)}
 </style>
 </head>
 <body>
@@ -156,14 +157,15 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-label="CV Builder logo"><path d="M4 5h9l7 7v7H4z"/><path d="M13 5v7h7"/><path d="M7 15h10M7 11h5"/></svg>
         <div class="logo-text">
           <div><strong>CV Builder</strong><div class="tiny">JSON editor &amp; LaTeX exporter</div></div>
-          <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.0.4</button>
+          <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.0.5</button>
         </div>
       </div>
       <button class="iconbtn" data-theme-toggle aria-label="Switch theme">&#9790;</button>
     </div>
 
-    <!-- File menu -->
-    <nav class="menubar" aria-label="File actions">
+    <!-- Menu bar -->
+    <nav class="menubar" aria-label="App actions">
+      <!-- File menu -->
       <div class="menuitem" id="fileMenu">
         <button class="menubtn" id="fileMenuBtn" aria-haspopup="menu" aria-expanded="false">
           File
@@ -182,6 +184,33 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
           <button class="dropitem" id="exportDataBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 12h8M12 8v8"/></svg>
             Export data (JSON)
+          </button>
+        </div>
+      </div>
+
+      <!-- Template menu -->
+      <div class="menuitem" id="tplMenu">
+        <button class="menubtn" id="tplMenuBtn" aria-haspopup="menu" aria-expanded="false">
+          Template
+          <svg viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
+        </button>
+        <div class="dropdown" id="tplDropdown" role="menu">
+          <button class="dropitem" id="editTemplateBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit template
+          </button>
+          <button class="dropitem" id="editMappersBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Edit mappers
+          </button>
+          <div class="drop-divider"></div>
+          <button class="dropitem" id="importTemplateBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Import template
+          </button>
+          <button class="dropitem" id="exportTemplateBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export template
           </button>
         </div>
       </div>
@@ -220,26 +249,9 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 <input id="cvTitle" value="Curriculum Vitae" style="display:none">
 <input id="styleName" value="classic" style="display:none">
 <input id="sectionTitleInput2" value="" style="display:none">
-
-<!-- Upload data modal -->
-<div id="uploadModal" class="modal-backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
-    <header>
-      <strong id="uploadModalTitle">Upload JSON data</strong>
-      <button class="iconbtn" id="closeUploadModal" aria-label="Close">&#x2715;</button>
-    </header>
-    <div class="body stack">
-      <p class="tiny">Select a <code>.json</code> file exported from this tool or following the same CV schema. Loading new data will replace the current session.</p>
-      <label style="display:grid;gap:var(--space-2)">
-        <span class="tiny">JSON file</span>
-        <input id="fileInput" type="file" accept="application/json,.json" style="width:100%;background:var(--color-surface-offset);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);padding:var(--space-2)">
-      </label>
-      <div class="toolbar" style="justify-content:flex-end">
-        <button class="btn" id="cancelUploadBtn">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- hidden file inputs -->
+<input id="fileInput" type="file" accept="application/json,.json" style="display:none">
+<input id="tplFileInput" type="file" accept="application/json,.json" style="display:none">
 
 <!-- Version / changelog modal -->
 <div id="versionModal" class="modal-backdrop" aria-hidden="true">
@@ -249,9 +261,68 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
   </div>
 </div>
 
+<!-- Edit Template modal -->
+<div id="editTemplateModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="editTemplateTitleLbl">
+    <header>
+      <strong id="editTemplateTitleLbl">Edit template</strong>
+      <div class="toolbar">
+        <button class="btn btn-primary" id="applyTemplateBtn">Apply</button>
+        <button class="iconbtn" id="closeEditTemplateModal" aria-label="Close">&#x2715;</button>
+      </div>
+    </header>
+    <div class="body stack">
+      <div class="tiny">Edit the LaTeX preamble &amp; per-section templates. Use <code>{{field}}</code> placeholders. Changes apply when you click Apply.</div>
+      <div class="row2">
+        <div>
+          <label class="tiny" for="tplCvTitle">CV title</label>
+          <input id="tplCvTitle" value="Curriculum Vitae">
+        </div>
+        <div>
+          <label class="tiny" for="tplStyle">moderncv style</label>
+          <input id="tplStyle" value="classic">
+        </div>
+      </div>
+      <div>
+        <label class="tiny" for="tplPreamble">Extra preamble lines (appended after \moderncvstyle)</label>
+        <textarea id="tplPreamble" style="min-height:80px;font-family:monospace;font-size:13px"></textarea>
+      </div>
+      <div>
+        <label class="tiny" for="tplFooter">Extra lines before \end{document}</label>
+        <textarea id="tplFooter" style="min-height:60px;font-family:monospace;font-size:13px"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Mappers modal -->
+<div id="editMappersModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="editMappersTitleLbl">
+    <header>
+      <strong id="editMappersTitleLbl">Edit mappers</strong>
+      <div class="toolbar">
+        <button class="btn btn-primary" id="applyMappersBtn">Apply</button>
+        <button class="iconbtn" id="closeEditMappersModal" aria-label="Close">&#x2715;</button>
+      </div>
+    </header>
+    <div class="body stack">
+      <div class="tiny">Define how each section key maps to a LaTeX rendering strategy. Edit the JSON below — keys are section names, values are strategy strings: <code>cventry</code>, <code>cvitem</code>, <code>publications</code>, <code>abstracts</code>, <code>awards</code>, <code>skills</code>, <code>languages</code>, <code>continuing_education</code>, <code>generic</code>.</div>
+      <textarea id="mappersEditor" style="min-height:320px;font-family:monospace;font-size:13px"></textarea>
+    </div>
+  </div>
+</div>
+
 <script>
-var APP_VERSION = '0.0.4';
+var APP_VERSION = '0.0.5';
 var CHANGELOG = [
+  {version:'0.0.5', changes:[
+    'Upload data now directly opens the OS file picker — no intermediate modal.',
+    'Template menu added: Edit template, Edit mappers, Import template, Export template.',
+    'Edit template: UI to set CV title, moderncv style, extra preamble and footer lines.',
+    'Edit mappers: JSON editor to override per-section LaTeX rendering strategy.',
+    'Import/Export template: load and save template+mappers as a JSON file.',
+    'Full changelog preserved across versions.'
+  ]},
   {version:'0.0.4', changes:[
     'Outline auto-scrolls and highlights the active section on click.',
     'Add entry scrolls to and focuses the first input of the new entry.',
@@ -277,6 +348,29 @@ var CHANGELOG = [
 
 var data = {};
 var state = {sections:{}, propertyNames:{}, activeSection:'', tab:'editor'};
+
+/* ── template state ── */
+var tpl = {
+  cvTitle: 'Curriculum Vitae',
+  style: 'classic',
+  preamble: '',
+  footer: ''
+};
+
+/* default mappers: section key → strategy */
+var DEFAULT_MAPPERS = {
+  education: 'cventry_education',
+  research_experience: 'cventry_research',
+  work_experience: 'cventry_work',
+  teaching_experience: 'cventry_teaching',
+  publications: 'publications',
+  abstracts: 'abstracts',
+  awards: 'awards',
+  continuing_education: 'continuing_education',
+  skills: 'skills',
+  languages: 'languages'
+};
+var mappers = JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
 
 function el(id){ return document.getElementById(id); }
 function isObj(v){ return v && typeof v === 'object' && !Array.isArray(v); }
@@ -348,16 +442,12 @@ function renderSectionList(){
   });
 }
 
-/* ── outline scroll to active section ── */
+/* ── outline scroll ── */
 function scrollOutlineTo(k){
   var box=el('outlineBox');
-  // highlight active section link
   box.querySelectorAll('.outline-link').forEach(function(a){ a.classList.remove('active-section'); });
   var link=box.querySelector('a[href="#sec-card-'+k+'"]');
-  if(link){
-    link.classList.add('active-section');
-    link.scrollIntoView({block:'nearest',behavior:'smooth'});
-  }
+  if(link){ link.classList.add('active-section'); link.scrollIntoView({block:'nearest',behavior:'smooth'}); }
 }
 
 /* ── right outline ── */
@@ -381,24 +471,21 @@ function renderOutline(){
         var label='#'+(i+1);
         if(isObj(item)) label=item.title||item.degree||item.role||item.organization||item.institution||item.language||item.description||label;
         var a=document.createElement('a');
-        a.href='#'+slugId(k,i);
-        a.className='outline-link';
+        a.href='#'+slugId(k,i); a.className='outline-link';
         a.innerHTML='<span class="olabel">'+esc(label)+'</span><span class="otype">entry</span>';
         lst.appendChild(a);
       });
     } else if(isObj(v) && k==='skills'){
       Object.keys(v).forEach(function(group){
         var a=document.createElement('a');
-        a.href='#skill-group-'+k+'-'+group;
-        a.className='outline-link';
+        a.href='#skill-group-'+k+'-'+group; a.className='outline-link';
         a.innerHTML='<span class="olabel">'+esc(human(group))+'</span><span class="otype">group</span>';
         lst.appendChild(a);
       });
     } else if(isObj(v)){
       Object.keys(v).forEach(function(field){
         var a=document.createElement('a');
-        a.href='#field-'+k+'-'+field;
-        a.className='outline-link';
+        a.href='#field-'+k+'-'+field; a.className='outline-link';
         a.innerHTML='<span class="olabel">'+esc(state.propertyNames[k+'.'+field]||human(field))+'</span><span class="otype">field</span>';
         lst.appendChild(a);
       });
@@ -591,7 +678,6 @@ function addEntry(key){
     arr.push(entry);
   } else arr.push({selected:true});
   renderAll();
-  // scroll to and focus the new entry
   var newId=slugId(key,arr.length-1);
   var newEl=document.getElementById(newId);
   if(newEl){
@@ -634,7 +720,7 @@ function buildFullWidthEntries(items,withType){
 
 function renderAwards(items){
   return items.filter(function(x){ return !isObj(x)||x.selected!==false; }).map(function(a){
-    return '\\cvitemwithcomment{'+latexText(a.category||'')+'}{\\parbox[t]{0.87\\textwidth}{'+latexText(a.description||'')+(a.year?' ~ ('+latexText(a.year)+')':'')+'}}{}';
+    return '\\cvitemwithcomment{'+latexText(a.category||'')+'}{\\parbox[t]{0.87\\textwidth}{'+latexText(a.description||'')+(a.year?' ~ ('+latexText(a.year)+')':'')+'}}{}'
   });
 }
 
@@ -655,25 +741,28 @@ function renderLanguages(items){
     var prof='';
     if(isObj(l.proficiency)) prof='writes '+(l.proficiency.writes||'')+', reads '+(l.proficiency.reads||'')+', speaks '+(l.proficiency.speaks||'')+', listens '+(l.proficiency.listens||'');
     else prof=String(l.proficiency||'');
-    return '\\cvitemwithcomment{'+latexText(l.language||'')+'}{'+latexText(prof)+'}{}';
+    return '\\cvitemwithcomment{'+latexText(l.language||'')+'}{'+latexText(prof)+'}{}'
   });
 }
 
 function renderLatex(){
   if(!Object.keys(data).length){ el('latexPreview').textContent='Upload a JSON file to generate LaTeX.'; return; }
   var basics=data.basics||{}; var lines=[];
+  var styleVal=tpl.style||el('styleName').value||'classic';
+  var titleVal=tpl.cvTitle||el('cvTitle').value||basics.title||'Curriculum Vitae';
   lines.push('\\documentclass[11pt,a4paper,sans]{moderncv}');
   lines.push('\\usepackage[utf8]{inputenc}');
-  lines.push('\\moderncvstyle{'+texEscape(el('styleName').value||'classic')+'}');
+  lines.push('\\moderncvstyle{'+texEscape(styleVal)+'}');
   lines.push('%\\moderncvcolor{grey}');
   lines.push('\\definecolor{color2}{RGB}{60,60,60}');
   lines.push('\\definecolor{color1}{RGB}{20,41,82}');
   lines.push('\\usepackage{lipsum}\\usepackage{xstring}');
   lines.push('\\usepackage[scale=0.93]{geometry}');
+  if(tpl.preamble) tpl.preamble.split('\n').forEach(function(l){ if(l.trim()) lines.push(l); });
   lines.push('');
   lines.push('\\firstname{\\Huge '+latexText(basics.firstname||'')+' \\vspace{10pt}}');
   lines.push('\\familyname{\\\\\\Huge '+latexText(basics.lastname||'')+'}');
-  lines.push('\\title{'+latexText(el('cvTitle').value||basics.title||'Curriculum Vitae')+'}');
+  lines.push('\\title{'+latexText(titleVal)+'}');
   if(basics.location)  lines.push('\\address{'+latexText(basics.location)+'\\\\}');
   if(basics.email)     lines.push('\\email{'+latexText(basics.email)+'}');
   if(basics.homepage)  lines.push('\\homepage{'+latexText(basics.homepage)+(String(basics.homepage).endsWith('/')?'':'/')+'}');
@@ -691,25 +780,26 @@ function renderLatex(){
     if(!state.sections[k]||!state.sections[k].include) return;
     var title=state.sections[k].title||human(k);
     var value=data[k]; var block=[];
-    if(k==='education'&&Array.isArray(value)){
+    var strategy=mappers[k]||k;
+    if(strategy==='cventry_education'||k==='education'&&Array.isArray(value)&&!mappers[k]){
       block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'paren')),latexText(e.degree||''),latexText(e.institution||''),e.dissertation?'\\textbf{Dissertation: } '+latexText(e.dissertation):'',latexText(e.description||''),''); });
-    } else if(k==='research_experience'&&Array.isArray(value)){
+    } else if(strategy==='cventry_research'||k==='research_experience'&&Array.isArray(value)&&!mappers[k]){
       block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'dash')),latexText(e.organization||''),'','',latexText(e.role||''),latexText(e.description||'')); });
-    } else if(k==='work_experience'&&Array.isArray(value)){
+    } else if(strategy==='cventry_work'||k==='work_experience'&&Array.isArray(value)&&!mappers[k]){
       block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'dash')),latexText(e.role||''),latexText(e.department||''),latexText(e.organization||''),'',latexText(e.description||'')); });
-    } else if(k==='teaching_experience'&&Array.isArray(value)){
+    } else if(strategy==='cventry_teaching'||k==='teaching_experience'&&Array.isArray(value)&&!mappers[k]){
       block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(e.course_area||''),latexText(e.institution||''),latexText(e.level||''),'','',latexText((e.courses||[]).join(', '))); });
-    } else if(k==='publications'&&Array.isArray(value)){
+    } else if(strategy==='publications'){
       block=buildFullWidthEntries(value,false);
-    } else if(k==='abstracts'&&Array.isArray(value)){
+    } else if(strategy==='abstracts'){
       block=buildFullWidthEntries(value,true);
-    } else if(k==='awards'&&Array.isArray(value)){
+    } else if(strategy==='awards'){
       block=renderAwards(value);
-    } else if(k==='continuing_education'&&Array.isArray(value)){
+    } else if(strategy==='continuing_education'){
       block=value.filter(function(x){return x.selected!==false;}).map(function(c){ return cvitem(latexText((c.type||'')+':'),latexText([c.title,c.year,c.details].filter(Boolean).join('. '))); });
-    } else if(k==='skills'&&isObj(value)){
+    } else if(strategy==='skills'&&isObj(value)){
       block=renderSkillsLatex(value);
-    } else if(k==='languages'&&Array.isArray(value)){
+    } else if(strategy==='languages'){
       block=renderLanguages(value);
     } else if(Array.isArray(value)){
       block=value.filter(function(x){return !isObj(x)||x.selected!==false;}).map(function(item){ return cvitem('',latexText(JSON.stringify(item))); });
@@ -721,6 +811,7 @@ function renderLatex(){
       block.forEach(function(l){ lines.push(l); });
     }
   });
+  if(tpl.footer) tpl.footer.split('\n').forEach(function(l){ if(l.trim()) lines.push(l); });
   lines.push(''); lines.push('\\end{document}');
   el('latexPreview').textContent=lines.join('\n');
 }
@@ -751,30 +842,48 @@ function renderAll(){
 function openModal(id){ el(id).classList.add('open'); el(id).setAttribute('aria-hidden','false'); }
 function closeModal(id){ el(id).classList.remove('open'); el(id).setAttribute('aria-hidden','true'); }
 
-/* ── file menu dropdown ── */
-el('fileMenuBtn').onclick=function(e){
-  e.stopPropagation();
-  var open=el('fileDropdown').classList.contains('open');
-  el('fileDropdown').classList.toggle('open',!open);
-  el('fileMenuBtn').setAttribute('aria-expanded',String(!open));
-};
-document.addEventListener('click',function(){ el('fileDropdown').classList.remove('open'); el('fileMenuBtn').setAttribute('aria-expanded','false'); });
-el('fileDropdown').addEventListener('click',function(e){ e.stopPropagation(); });
+/* ── close all dropdowns ── */
+function closeAllDropdowns(){
+  ['fileDropdown','tplDropdown'].forEach(function(id){
+    el(id).classList.remove('open');
+  });
+  el('fileMenuBtn').setAttribute('aria-expanded','false');
+  el('tplMenuBtn').setAttribute('aria-expanded','false');
+}
 
-el('uploadDataBtn').onclick=function(){ el('fileDropdown').classList.remove('open'); openModal('uploadModal'); };
-el('cancelUploadBtn').onclick=function(){ closeModal('uploadModal'); };
-el('uploadModal').onclick=function(e){ if(e.target===el('uploadModal')) closeModal('uploadModal'); };
-el('closeUploadModal').onclick=function(){ closeModal('uploadModal'); };
+/* ── generic dropdown toggle ── */
+function toggleDropdown(dropId,btnId){
+  var wasOpen=el(dropId).classList.contains('open');
+  closeAllDropdowns();
+  if(!wasOpen){
+    el(dropId).classList.add('open');
+    el(btnId).setAttribute('aria-expanded','true');
+  }
+}
+
+document.addEventListener('click', closeAllDropdowns);
+['fileDropdown','tplDropdown'].forEach(function(id){
+  el(id).addEventListener('click',function(e){ e.stopPropagation(); });
+});
+
+el('fileMenuBtn').onclick=function(e){ e.stopPropagation(); toggleDropdown('fileDropdown','fileMenuBtn'); };
+el('tplMenuBtn').onclick=function(e){ e.stopPropagation(); toggleDropdown('tplDropdown','tplMenuBtn'); };
+
+/* ── File menu: Upload data — direct file picker ── */
+el('uploadDataBtn').onclick=function(){
+  closeAllDropdowns();
+  el('fileInput').value='';
+  el('fileInput').click();
+};
 
 el('fileInput').onchange=function(e){
   var f=e.target.files[0]; if(!f) return;
   var reader=new FileReader();
   reader.onload=function(ev){
-    try {
+    try{
       data=JSON.parse(ev.target.result);
       state.sections={}; state.propertyNames={};
       state.activeSection=Object.keys(data)[0]||'';
-      closeModal('uploadModal');
       renderAll();
     } catch(err){ alert('Invalid JSON: '+err.message); }
   };
@@ -782,7 +891,7 @@ el('fileInput').onchange=function(e){
 };
 
 el('downloadTexBtn').onclick=function(){
-  el('fileDropdown').classList.remove('open');
+  closeAllDropdowns();
   if(!Object.keys(data).length){ alert('No data loaded yet.'); return; }
   renderLatex();
   var blob=new Blob([el('latexPreview').textContent],{type:'text/plain'});
@@ -792,10 +901,84 @@ el('downloadTexBtn').onclick=function(){
 };
 
 el('exportDataBtn').onclick=function(){
-  el('fileDropdown').classList.remove('open');
+  closeAllDropdowns();
   if(!Object.keys(data).length){ alert('No data loaded yet.'); return; }
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cv_edited.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },500);
+};
+
+/* ── Template menu ── */
+
+/* Edit template */
+el('editTemplateBtn').onclick=function(){
+  closeAllDropdowns();
+  el('tplCvTitle').value=tpl.cvTitle;
+  el('tplStyle').value=tpl.style;
+  el('tplPreamble').value=tpl.preamble;
+  el('tplFooter').value=tpl.footer;
+  openModal('editTemplateModal');
+};
+el('applyTemplateBtn').onclick=function(){
+  tpl.cvTitle=el('tplCvTitle').value;
+  tpl.style=el('tplStyle').value;
+  tpl.preamble=el('tplPreamble').value;
+  tpl.footer=el('tplFooter').value;
+  el('cvTitle').value=tpl.cvTitle;
+  el('styleName').value=tpl.style;
+  renderLatex();
+  closeModal('editTemplateModal');
+};
+el('closeEditTemplateModal').onclick=function(){ closeModal('editTemplateModal'); };
+el('editTemplateModal').onclick=function(e){ if(e.target===el('editTemplateModal')) closeModal('editTemplateModal'); };
+
+/* Edit mappers */
+el('editMappersBtn').onclick=function(){
+  closeAllDropdowns();
+  el('mappersEditor').value=JSON.stringify(mappers,null,2);
+  openModal('editMappersModal');
+};
+el('applyMappersBtn').onclick=function(){
+  try{
+    var parsed=JSON.parse(el('mappersEditor').value);
+    mappers=parsed;
+    renderLatex();
+    closeModal('editMappersModal');
+  } catch(err){ alert('Invalid JSON: '+err.message); }
+};
+el('closeEditMappersModal').onclick=function(){ closeModal('editMappersModal'); };
+el('editMappersModal').onclick=function(e){ if(e.target===el('editMappersModal')) closeModal('editMappersModal'); };
+
+/* Import template */
+el('importTemplateBtn').onclick=function(){
+  closeAllDropdowns();
+  el('tplFileInput').value='';
+  el('tplFileInput').click();
+};
+el('tplFileInput').onchange=function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var obj=JSON.parse(ev.target.result);
+      if(obj.tpl) Object.assign(tpl,obj.tpl);
+      if(obj.mappers) mappers=obj.mappers;
+      el('cvTitle').value=tpl.cvTitle||'Curriculum Vitae';
+      el('styleName').value=tpl.style||'classic';
+      renderLatex();
+      alert('Template imported successfully.');
+    } catch(err){ alert('Invalid template JSON: '+err.message); }
+  };
+  reader.readAsText(f);
+};
+
+/* Export template */
+el('exportTemplateBtn').onclick=function(){
+  closeAllDropdowns();
+  var payload={tpl:tpl,mappers:mappers};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cv_template.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(a.href); },500);
 };
@@ -816,7 +999,11 @@ document.querySelectorAll('.tab').forEach(function(btn){
 el('versionBtn').onclick=function(){ openModal('versionModal'); };
 el('closeVersionModal').onclick=function(){ closeModal('versionModal'); };
 el('versionModal').onclick=function(e){ if(e.target===el('versionModal')) closeModal('versionModal'); };
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeModal('versionModal'); closeModal('uploadModal'); } });
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    ['versionModal','editTemplateModal','editMappersModal'].forEach(closeModal);
+  }
+});
 
 /* ── theme toggle ── */
 (function(){
