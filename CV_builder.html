@@ -6,408 +6,628 @@
 <title>CV JSON to LaTeX Builder</title>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=boska@400,500,700&display=swap" rel="stylesheet">
 <style>
-:root,[data-theme="light"]{--text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);--text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;--color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-surface-offset:#f3f0ec;--color-border:#d4d1ca;--color-divider:#dcd9d5;--color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;--color-primary:#01696f;--color-primary-hover:#0c4e54;--color-error:#a12c7b;--color-success:#437a22;--shadow-sm:0 1px 2px oklch(.2 .01 80 / .06);--shadow-md:0 4px 12px oklch(.2 .01 80 / .08);--radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;--font-display:'Boska',Georgia,serif;--font-body:'Satoshi',Inter,sans-serif;--transition:180ms cubic-bezier(.16,1,.3,1)}
-[data-theme="dark"]{--color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;--color-surface-offset:#1d1c1a;--color-border:#393836;--color-divider:#262523;--color-text:#cdccca;--color-text-muted:#97958f;--color-text-faint:#6a6864;--color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-error:#d163a7;--color-success:#6daa45;--shadow-sm:0 1px 2px rgb(0 0 0 / .2);--shadow-md:0 4px 12px rgb(0 0 0 / .3)}
-*,*::before,*::after{box-sizing:border-box} html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility} body{margin:0;min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;color:var(--color-text);background:var(--color-bg)} button,input,textarea,select{font:inherit;color:inherit} a,button,input,textarea,select{transition:background var(--transition),color var(--transition),border-color var(--transition),box-shadow var(--transition)} button{cursor:pointer} img,svg{display:block;max-width:100%}
-::-webkit-scrollbar{width:12px;height:12px} ::-webkit-scrollbar-track{background:color-mix(in oklab,var(--color-surface) 75%, var(--color-bg));border-radius:999px} ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,color-mix(in oklab,var(--color-primary) 45%, var(--color-surface-offset)),color-mix(in oklab,var(--color-primary) 72%, var(--color-surface-offset)));border:2px solid color-mix(in oklab,var(--color-surface) 85%, var(--color-bg));border-radius:999px} ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,color-mix(in oklab,var(--color-primary) 62%, var(--color-surface-offset)),color-mix(in oklab,var(--color-primary) 84%, var(--color-surface-offset)))} *{scrollbar-width:thin;scrollbar-color:color-mix(in oklab,var(--color-primary) 70%, var(--color-surface-offset)) color-mix(in oklab,var(--color-surface) 75%, var(--color-bg))}
+/* ── tokens ── */
+:root,[data-theme="light"]{
+  --text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);
+  --text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;
+  --space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-border:#d4d1ca;--color-divider:#dcd9d5;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;
+  --color-input-bg:#ffffff;--color-input-text:#1a1710;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;
+  --color-error:#a12c7b;--color-success:#437a22;
+  --shadow-sm:0 1px 2px oklch(.2 .01 80 / .06);--shadow-md:0 4px 12px oklch(.2 .01 80 / .08);
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --font-display:'Boska',Georgia,serif;--font-body:'Satoshi',Inter,sans-serif;
+  --transition:180ms cubic-bezier(.16,1,.3,1)
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-border:#393836;--color-divider:#262523;
+  --color-text:#cdccca;--color-text-muted:#97958f;--color-text-faint:#6a6864;
+  --color-input-bg:#2a2927;--color-input-text:#e8e6e3;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;
+  --color-error:#d163a7;--color-success:#6daa45;
+  --shadow-sm:0 1px 2px rgb(0 0 0 / .2);--shadow-md:0 4px 12px rgb(0 0 0 / .3)
+}
+/* ── reset ── */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{margin:0;min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);
+  line-height:1.55;color:var(--color-text);background:var(--color-bg)}
+button,input,textarea,select{font:inherit;color:inherit}
+a,button,input,textarea,select{transition:background var(--transition),color var(--transition),border-color var(--transition),box-shadow var(--transition)}
+button{cursor:pointer} img,svg{display:block;max-width:100%}
+
+/* ── input field colors (fix #1) ── */
+input:not([type=file]):not([type=checkbox]),textarea,select{
+  width:100%;background:var(--color-input-bg);color:var(--color-input-text);
+  border:1px solid oklch(from var(--color-text) l c h / .18);
+  border-radius:var(--radius-md);padding:var(--space-3)}
+input:disabled{opacity:.55;cursor:not-allowed}
+textarea{min-height:100px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);outline-offset:1px}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:color-mix(in oklab,var(--color-surface) 75%,var(--color-bg));border-radius:999px}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,color-mix(in oklab,var(--color-primary) 45%,var(--color-surface-offset)),color-mix(in oklab,var(--color-primary) 72%,var(--color-surface-offset)));border:2px solid color-mix(in oklab,var(--color-surface) 85%,var(--color-bg));border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,color-mix(in oklab,var(--color-primary) 62%,var(--color-surface-offset)),color-mix(in oklab,var(--color-primary) 84%,var(--color-surface-offset)))}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in oklab,var(--color-primary) 70%,var(--color-surface-offset)) color-mix(in oklab,var(--color-surface) 75%,var(--color-bg))}
+
+/* ── skip link ── */
 .skip{position:absolute;left:-9999px;top:auto}.skip:focus{left:var(--space-4);top:var(--space-4);background:var(--color-primary);color:white;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);z-index:1000}
-.app{display:grid;grid-template-columns:300px 360px minmax(0,1fr);min-height:100dvh}.panel{border-right:1px solid oklch(from var(--color-text) l c h / .12);background:var(--color-surface)} .panel:last-child{border-right:none}
-.sidebar{padding:var(--space-4);position:sticky;top:0;height:100dvh;overflow:auto}.editorpane{padding:var(--space-4);position:sticky;top:0;height:100dvh;overflow:auto;background:var(--color-surface-2)} .workspace{padding:var(--space-4) var(--space-5) var(--space-8);overflow:auto}
-.logo{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-4)} .logo-mark{display:flex;align-items:center;gap:var(--space-3)} .logo-mark svg{width:28px;height:28px;color:var(--color-primary)} .logo-mark strong{font-family:var(--font-display);font-size:var(--text-lg);font-weight:600} .logo-text{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap} .version-badge{display:inline-flex;align-items:center;min-height:32px;padding:0 var(--space-3);border-radius:var(--radius-full);border:1px solid oklch(from var(--color-text) l c h / .14);background:var(--color-surface-offset);font-size:var(--text-xs);font-weight:700}
-.iconbtn,.btn{border:1px solid oklch(from var(--color-text) l c h / .12);background:var(--color-surface-offset);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);min-height:44px;display:inline-flex;align-items:center;gap:var(--space-2);box-shadow:var(--shadow-sm)} .btn-primary{background:var(--color-primary);color:#fff;border-color:transparent} .btn-primary:hover{background:var(--color-primary-hover)} .btn-ghost{background:transparent} .btn-danger{color:var(--color-error)}
-.stack{display:grid;gap:var(--space-3)} .muted{color:var(--color-text-muted)} .tiny{font-size:var(--text-xs);color:var(--color-text-muted)} .sectiontitle{font-size:var(--text-sm);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-muted)}
-.upload{padding:var(--space-4);background:linear-gradient(180deg,color-mix(in oklab,var(--color-primary) 8%, var(--color-surface)),var(--color-surface));border:1px solid color-mix(in oklab,var(--color-primary) 22%, var(--color-border));border-radius:var(--radius-lg)} .filefield{position:relative;display:grid;gap:var(--space-2)} .filefield input[type=file]{width:100%;background:color-mix(in oklab,var(--color-surface-offset) 60%, var(--color-bg));border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);padding:var(--space-2);box-shadow:var(--shadow-sm)} .filefield input[type=file]::file-selector-button{margin-right:var(--space-3);border:none;border-radius:calc(var(--radius-lg) - var(--space-2));padding:var(--space-3) var(--space-4);background:linear-gradient(180deg,var(--color-primary),var(--color-primary-hover));color:#fff;font-weight:700;box-shadow:var(--shadow-sm);cursor:pointer} input[type=text],textarea,select{width:100%;background:var(--color-bg);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-md);padding:var(--space-3)} textarea{min-height:100px;resize:vertical}
-.navlist{display:grid;gap:6px} .navitem{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:10px 12px;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;text-align:left;width:100%} .navitem:hover,.navitem.active{background:color-mix(in oklab,var(--color-primary) 7%, var(--color-surface-offset));border-color:color-mix(in oklab,var(--color-primary) 18%, var(--color-border))}
-.count{font-size:var(--text-xs);padding:3px 8px;border-radius:var(--radius-full);background:var(--color-surface-offset);color:var(--color-text-muted)} .toolbar{display:flex;flex-wrap:wrap;gap:var(--space-2)} .split{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3)}
-.card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)} .cardhead{padding:var(--space-4);border-bottom:1px solid var(--color-divider)} .cardbody{padding:var(--space-4)} .subgrid{display:grid;gap:var(--space-3)} .row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
-.outline{display:grid;gap:var(--space-2)} .outline .mini{padding:8px 10px;border-radius:var(--radius-sm);background:var(--color-bg);border:1px solid oklch(from var(--color-text) l c h / .1);display:flex;justify-content:space-between;align-items:center}
-.entry{border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)} .entry + .entry{margin-top:var(--space-3)} .entryhead{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);margin-bottom:var(--space-3)}
-.kv{display:grid;grid-template-columns:minmax(150px,180px) 1fr;column-gap:var(--space-4);row-gap:var(--space-2);align-items:start;padding-block:var(--space-1)} .kv .mono{padding-top:.8rem;letter-spacing:.01em} .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:var(--text-xs);color:var(--color-text-muted)}
+
+/* ── layout: left sidebar | main | right outline ── */
+.app{display:grid;grid-template-columns:270px minmax(0,1fr) 220px;min-height:100dvh}
+.panel{border-right:1px solid oklch(from var(--color-text) l c h / .12);background:var(--color-surface)}
+.panel:last-child{border-right:none;border-left:1px solid oklch(from var(--color-text) l c h / .12)}
+.sidebar{padding:var(--space-4);position:sticky;top:0;height:100dvh;overflow:auto}
+.outlinepane{padding:var(--space-3) var(--space-3) var(--space-8);position:sticky;top:0;height:100dvh;overflow:auto;background:var(--color-surface-2)}
+.workspace{padding:var(--space-4) var(--space-5) var(--space-8);overflow:auto}
+@media (max-width:1200px){.app{grid-template-columns:260px 1fr} .outlinepane{display:none}}
+@media (max-width:820px){.app{grid-template-columns:1fr} .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid oklch(from var(--color-text) l c h / .12)} .row2,.kv{grid-template-columns:1fr}}
+
+/* ── topbar / logo ── */
+.logo{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-3)}
+.logo-mark{display:flex;align-items:center;gap:var(--space-3)}
+.logo-mark svg{width:26px;height:26px;color:var(--color-primary)}
+.logo-mark strong{font-family:var(--font-display);font-size:var(--text-lg);font-weight:600}
+.logo-text{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+.version-badge{display:inline-flex;align-items:center;min-height:28px;padding:0 var(--space-3);border-radius:var(--radius-full);border:1px solid oklch(from var(--color-text) l c h / .14);background:var(--color-surface-offset);font-size:var(--text-xs);font-weight:700;cursor:pointer}
+
+/* ── menu bar (fix #3) ── */
+.menubar{display:flex;gap:2px;margin-bottom:var(--space-3);background:var(--color-surface-offset);border:1px solid oklch(from var(--color-text) l c h / .1);border-radius:var(--radius-md);padding:2px}
+.menuitem{position:relative}
+.menubtn{padding:6px 12px;border-radius:calc(var(--radius-md) - 2px);border:none;background:transparent;font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:5px;min-height:36px}
+.menubtn:hover,.menubtn.open{background:var(--color-surface);color:var(--color-text)}
+.menubtn svg{width:12px;height:12px;opacity:.6}
+.dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:170px;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .14);border-radius:var(--radius-md);box-shadow:var(--shadow-md);z-index:200;display:none;padding:4px}
+.dropdown.open{display:block}
+.dropitem{display:flex;align-items:center;gap:var(--space-2);width:100%;padding:8px 12px;border:none;background:transparent;border-radius:calc(var(--radius-md) - 2px);font-size:var(--text-sm);text-align:left;color:var(--color-text)}
+.dropitem:hover{background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-offset))}
+.dropitem svg{width:15px;height:15px;color:var(--color-text-muted);flex-shrink:0}
+.drop-divider{height:1px;background:var(--color-divider);margin:3px 0}
+
+/* ── buttons ── */
+.iconbtn,.btn{border:1px solid oklch(from var(--color-text) l c h / .12);background:var(--color-surface-offset);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);min-height:40px;display:inline-flex;align-items:center;gap:var(--space-2);box-shadow:var(--shadow-sm)}
+.btn-primary{background:var(--color-primary);color:#fff;border-color:transparent}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-ghost{background:transparent}
+.btn-danger{color:var(--color-error)}
+
+/* ── utilities ── */
+.stack{display:grid;gap:var(--space-3)}
+.muted{color:var(--color-text-muted)} .tiny{font-size:var(--text-xs);color:var(--color-text-muted)}
+.sectiontitle{font-size:var(--text-sm);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-muted)}
+.navlist{display:grid;gap:4px}
+.navitem{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:9px 11px;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;text-align:left;width:100%;font-size:var(--text-sm)}
+.navitem:hover,.navitem.active{background:color-mix(in oklab,var(--color-primary) 7%,var(--color-surface-offset));border-color:color-mix(in oklab,var(--color-primary) 18%,var(--color-border))}
+.count{font-size:var(--text-xs);padding:2px 7px;border-radius:var(--radius-full);background:var(--color-surface-offset);color:var(--color-text-muted)}
+.toolbar{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.split{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3)}
+.card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+.cardhead{padding:var(--space-4);border-bottom:1px solid var(--color-divider)}
+.cardbody{padding:var(--space-4)} .subgrid{display:grid;gap:var(--space-3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+.entry{border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.entry + .entry{margin-top:var(--space-3)}
+.entryhead{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);margin-bottom:var(--space-3)}
+.kv{display:grid;grid-template-columns:minmax(140px,165px) 1fr;column-gap:var(--space-4);row-gap:var(--space-2);align-items:start;padding-block:var(--space-1)}
+.kv .mono{padding-top:.8rem;letter-spacing:.01em}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:var(--text-xs);color:var(--color-text-muted)}
 .propcard{background:var(--color-surface-2);border:1px solid oklch(from var(--color-text) l c h / .1);border-radius:var(--radius-md);padding:var(--space-3)}
-.tabs{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4)} .tab{padding:10px 12px;border-radius:var(--radius-md);border:1px solid oklch(from var(--color-text) l c h / .12);background:var(--color-surface)} .tab.active{background:color-mix(in oklab,var(--color-primary) 7%, var(--color-surface));border-color:color-mix(in oklab,var(--color-primary) 20%, var(--color-border))}
+.tabs{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4)}
+.tab{padding:8px 12px;border-radius:var(--radius-md);border:1px solid oklch(from var(--color-text) l c h / .12);background:var(--color-surface);font-size:var(--text-sm)}
+.tab.active{background:color-mix(in oklab,var(--color-primary) 7%,var(--color-surface));border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border))}
 .preview{white-space:pre-wrap;word-break:break-word;background:#0f1114;color:#f2f2f2;border-radius:var(--radius-lg);padding:var(--space-4);border:1px solid #25282d;min-height:70vh;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.45}
-.hidden{display:none!important} .pill{display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-full);padding:4px 10px;background:var(--color-surface-offset);font-size:var(--text-xs);color:var(--color-text-muted)} .ok{color:var(--color-success)}
-.modal-backdrop{position:fixed;inset:0;background:rgb(0 0 0 / .55);display:none;align-items:center;justify-content:center;padding:var(--space-4);z-index:1000} .modal-backdrop.open{display:flex} .modal{width:min(720px,100%);max-height:80dvh;overflow:auto;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)} .modal header{padding:var(--space-4);border-bottom:1px solid var(--color-divider);display:flex;justify-content:space-between;align-items:center} .modal .body{padding:var(--space-4)}
-@media (max-width:1200px){.app{grid-template-columns:280px 1fr} .editorpane{display:none}} @media (max-width:820px){.app{grid-template-columns:1fr} .sidebar,.editorpane{position:static;height:auto;border-right:none;border-bottom:1px solid oklch(from var(--color-text) l c h / .12)} .row2,.kv{grid-template-columns:1fr}}
+.hidden{display:none!important}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:var(--radius-full);padding:3px 9px;background:var(--color-surface-offset);font-size:var(--text-xs);color:var(--color-text-muted)}
+.ok{color:var(--color-success)}
+
+/* ── right outline panel (fix #5) ── */
+.outline-title{font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:var(--space-2)}
+.outline-section{margin-bottom:var(--space-3)}
+.outline-section-label{font-size:var(--text-xs);font-weight:700;color:var(--color-primary);margin-bottom:4px;padding:2px 0}
+.outline-list{display:grid;gap:2px}
+.outline-link{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:var(--radius-sm);font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.outline-link:hover{background:color-mix(in oklab,var(--color-primary) 7%,var(--color-surface-offset));border-color:color-mix(in oklab,var(--color-primary) 12%,var(--color-border));color:var(--color-text)}
+.outline-link .olabel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.outline-link .otype{flex-shrink:0;font-size:.65rem;opacity:.55;margin-left:4px}
+
+/* ── export-options card in sidebar ── */
+.exportcard{margin-top:var(--space-4)}
+
+/* ── modals ── */
+.modal-backdrop{position:fixed;inset:0;background:rgb(0 0 0 / .55);display:none;align-items:center;justify-content:center;padding:var(--space-4);z-index:1000}
+.modal-backdrop.open{display:flex}
+.modal{width:min(560px,100%);max-height:85dvh;overflow:auto;background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
+.modal header{padding:var(--space-4);border-bottom:1px solid var(--color-divider);display:flex;justify-content:space-between;align-items:center}
+.modal .body{padding:var(--space-4)}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="app">
+
+  <!-- ── LEFT SIDEBAR ── -->
   <aside class="panel sidebar">
     <div class="logo">
       <div class="logo-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-label="CV Builder logo"><path d="M4 5h9l7 7v7H4z"/><path d="M13 5v7h7"/><path d="M7 15h10M7 11h5"/></svg>
         <div class="logo-text">
-          <div><strong>CV Builder</strong><div class="tiny">JSON editor and LaTeX exporter</div></div>
-          <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.0.2</button>
+          <div><strong>CV Builder</strong><div class="tiny">JSON editor &amp; LaTeX exporter</div></div>
+          <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.0.3</button>
         </div>
       </div>
       <button class="iconbtn" data-theme-toggle aria-label="Switch theme">&#9790;</button>
     </div>
-    <div class="upload stack">
-      <div class="sectiontitle">Data</div>
-      <label class="filefield"><span class="tiny">Upload JSON CV</span><input id="fileInput" type="file" accept="application/json,.json" /></label>
-      <div class="toolbar">
-        <button class="btn" id="downloadJsonBtn">Download JSON</button>
-        <button class="btn btn-primary" id="downloadTexBtn">Download .tex</button>
+
+    <!-- File menu (fix #3) -->
+    <nav class="menubar" aria-label="File actions">
+      <div class="menuitem" id="fileMenu">
+        <button class="menubtn" id="fileMenuBtn" aria-haspopup="menu" aria-expanded="false">
+          File
+          <svg viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
+        </button>
+        <div class="dropdown" id="fileDropdown" role="menu">
+          <button class="dropitem" id="uploadDataBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload data&hellip;
+          </button>
+          <div class="drop-divider"></div>
+          <button class="dropitem" id="downloadTexBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .tex
+          </button>
+          <button class="dropitem" id="exportDataBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 12h8M12 8v8"/></svg>
+            Export data (JSON)
+          </button>
+        </div>
       </div>
-      <div class="tiny">Upload a JSON file to begin. The exporter writes the full LaTeX document from the selected content.</div>
-    </div>
-    <div class="stack" style="margin-top:var(--space-4)">
-      <div class="split"><div class="sectiontitle">Sections</div><span class="pill"><span class="ok">&#9679;</span><span id="sectionCount">0</span></span></div>
+    </nav>
+
+    <!-- sections list -->
+    <div class="stack">
+      <div class="split">
+        <div class="sectiontitle">Sections</div>
+        <span class="pill"><span class="ok">&#9679;</span><span id="sectionCount">0</span></span>
+      </div>
       <div id="sectionList" class="navlist"></div>
     </div>
-  </aside>
-  <aside class="panel editorpane">
-    <div class="stack">
-      <div class="split"><div class="sectiontitle">Outline</div><div class="tiny" id="currentSectionLabel">No section selected</div></div>
-      <div id="outlineBox" class="outline"></div>
-      <div class="card"><div class="cardhead"><strong>Export options</strong></div><div class="cardbody subgrid">
+
+    <!-- export options (always visible) -->
+    <div class="exportcard card">
+      <div class="cardhead"><strong>Export options</strong></div>
+      <div class="cardbody subgrid">
         <div><label class="tiny" for="cvTitle">CV title</label><input id="cvTitle" value="Curriculum Vitae"></div>
         <div><label class="tiny" for="styleName">Style</label><input id="styleName" value="classic"></div>
         <div><label class="tiny" for="sectionTitleInput2">Current section title</label><input id="sectionTitleInput2" value=""></div>
-      </div></div>
+      </div>
     </div>
   </aside>
+
+  <!-- ── MAIN WORKSPACE ── -->
   <main id="main" class="workspace">
     <div class="tabs">
       <button class="tab active" data-tab="editor">Editor</button>
       <button class="tab" data-tab="latex">LaTeX</button>
       <button class="tab" data-tab="schema">JSON</button>
-      <button class="tab" data-tab="notes">Mapping</button>
     </div>
     <section id="editorTab"></section>
     <section id="latexTab" class="hidden"><div id="latexPreview" class="preview"></div></section>
     <section id="schemaTab" class="hidden"><div id="schemaPreview" class="preview"></div></section>
-    <section id="notesTab" class="hidden"><div class="card"><div class="cardhead"><strong>LaTeX mapping rules</strong></div><div class="cardbody" id="mappingNotes"></div></div></section>
   </main>
+
+  <!-- ── RIGHT OUTLINE (fix #5) ── -->
+  <aside class="panel outlinepane" aria-label="Section outline">
+    <div class="outline-title">Outline</div>
+    <div id="outlineBox"></div>
+  </aside>
 </div>
+
+<!-- Upload data modal (fix #3) -->
+<div id="uploadModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
+    <header>
+      <strong id="uploadModalTitle">Upload JSON data</strong>
+      <button class="iconbtn" id="closeUploadModal" aria-label="Close">&#x2715;</button>
+    </header>
+    <div class="body stack">
+      <p class="tiny">Select a <code>.json</code> file exported from this tool or following the same CV schema. Loading new data will replace the current session.</p>
+      <label style="display:grid;gap:var(--space-2)">
+        <span class="tiny">JSON file</span>
+        <input id="fileInput" type="file" accept="application/json,.json" style="width:100%;background:var(--color-surface-offset);border:1px solid oklch(from var(--color-text) l c h / .12);border-radius:var(--radius-lg);padding:var(--space-2)">
+      </label>
+      <div class="toolbar" style="justify-content:flex-end">
+        <button class="btn" id="cancelUploadBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Version / changelog modal -->
 <div id="versionModal" class="modal-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="versionTitle">
     <header><strong id="versionTitle">Version history</strong><button class="iconbtn" id="closeVersionModal" aria-label="Close changelog">&#x2715;</button></header>
     <div class="body" id="versionBody"></div>
   </div>
 </div>
+
 <script>
-const APP_VERSION = '0.0.2';
-const CHANGELOG = [
+var APP_VERSION = '0.0.3';
+var CHANGELOG = [
+  {version:'0.0.3', changes:[
+    'Fix #1: Input fields now have proper foreground color in both dark and light modes.',
+    'Fix #2: Skills groups (programming, mri, domains, etc.) now render all items with toggle + label editor.',
+    'Fix #3: File actions moved to a "File" dropdown menu (Upload data\u2026, Download .tex, Export data).',
+    'Fix #4: Mapping rules tab removed.',
+    'Fix #5: Outline panel moved to the right column; each item is an anchor to its entry.'
+  ]},
   {version:'0.0.2', changes:[
-    'Fixed TypeError in buildFullWidthEntries (string was being called as function).',
-    'App starts empty: no personal data assumed; sections appear only after JSON upload.',
-    'Version badge now correctly shows current version and opens changelog.',
-    'Added "Developed by Guillermo Sahonero Alvarez" notice in version history modal.',
-    'Added Download JSON button to export edited data.',
-    'Per-skill item include/exclude checkboxes.',
-    'Per-property label renaming throughout the editor.'
+    'Fixed TypeError in buildFullWidthEntries.',
+    'App starts empty; sections appear only after JSON upload.',
+    'Version badge opens changelog.',
+    'Added Download JSON, per-skill toggles, property renaming.'
   ]},
   {version:'0.0.1', changes:[
-    'Created standalone JSON editor and LaTeX exporter.',
-    'Section-based navigation, outline panel, and LaTeX preview.',
-    'LaTeX generation aligned to cv_2026.tex for general sections.',
-    'Publications and abstracts use full-width compiled entry style from cv_long_2026_en.tex.'
+    'Initial release: JSON editor, section navigation, LaTeX preview.'
   ]}
 ];
 
-let data = {};
-let state = {sections:{}, propertyNames:{}, activeSection:'', tab:'editor'};
+var data = {};
+var state = {sections:{}, propertyNames:{}, activeSection:'', tab:'editor'};
 
-const el = id => document.getElementById(id);
-const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
-const clone = v => structuredClone(v);
-const human = s => String(s).replace(/_/g,' ').replace(/\b\w/g, m => m.toUpperCase());
-const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function el(id){ return document.getElementById(id); }
+function isObj(v){ return v && typeof v === 'object' && !Array.isArray(v); }
+function clone(v){ return JSON.parse(JSON.stringify(v)); }
+function human(s){ return String(s).replace(/_/g,' ').replace(/\b\w/g,function(m){return m.toUpperCase();}); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function slugId(k,i){ return 'entry-'+k+'-'+i; }
 
 function texEscape(s){
-  return String(s ?? '')
+  return String(s==null?'':s)
     .replace(/\\/g,'\\textbackslash{}')
     .replace(/([%$#&_{}])/g,'\\$1')
     .replace(/~/g,'\\textasciitilde{}')
     .replace(/\^/g,'\\textasciicircum{}');
 }
 
+/* ── init ── */
 function initSections(){
-  Object.keys(data).forEach(k => {
-    if(!state.sections[k]) state.sections[k] = {include:true, title:human(k)};
-    initPropertyNames(k, data[k]);
-    if(Array.isArray(data[k])) data[k].forEach(item => {
-      if(isObj(item) && !('selected' in item)) item.selected = true;
+  Object.keys(data).forEach(function(k){
+    if(!state.sections[k]) state.sections[k]={include:true,title:human(k)};
+    initPropertyNames(k,data[k]);
+    if(Array.isArray(data[k])) data[k].forEach(function(item){
+      if(isObj(item)&&!('selected' in item)) item.selected=true;
     });
   });
   normalizeSkills();
 }
 
-function initPropertyNames(section, val, prefix){
-  prefix = prefix || '';
-  if(Array.isArray(val)){ val.forEach(function(item,i){ initPropertyNames(section, item, prefix ? prefix+'.'+i : String(i)); }); return; }
-  if(isObj(val)){ Object.keys(val).forEach(function(key){
-    var path = prefix ? section+'.'+prefix+'.'+key : section+'.'+key;
-    if(!(path in state.propertyNames)) state.propertyNames[path] = human(key);
-    initPropertyNames(section, val[key], prefix ? prefix+'.'+key : key);
-  }); }
+function initPropertyNames(section,val,prefix){
+  prefix=prefix||'';
+  if(Array.isArray(val)){
+    val.forEach(function(item,i){ initPropertyNames(section,item,prefix?prefix+'.'+i:String(i)); });
+    return;
+  }
+  if(isObj(val)){
+    Object.keys(val).forEach(function(key){
+      var path=prefix?section+'.'+prefix+'.'+key:section+'.'+key;
+      if(!(path in state.propertyNames)) state.propertyNames[path]=human(key);
+      initPropertyNames(section,val[key],prefix?prefix+'.'+key:key);
+    });
+  }
 }
 
 function normalizeSkills(){
   if(!data.skills) return;
   Object.keys(data.skills).forEach(function(group){
     if(!Array.isArray(data.skills[group])) return;
-    data.skills[group] = data.skills[group].map(function(item){
-      return typeof item === 'string' ? {name:item, selected:true} : ('selected' in item ? item : Object.assign({}, item, {selected:true}));
+    data.skills[group]=data.skills[group].map(function(item){
+      if(typeof item==='string') return {name:item,selected:true};
+      return ('selected' in item)?item:Object.assign({},item,{selected:true});
     });
   });
 }
 
-function countEntries(v){ return Array.isArray(v) ? v.length : (isObj(v) ? Object.keys(v).length : 1); }
+function countEntries(v){ return Array.isArray(v)?v.length:(isObj(v)?Object.keys(v).length:1); }
 
+/* ── section list ── */
 function renderSectionList(){
-  var list = el('sectionList');
-  list.innerHTML = '';
-  var keys = Object.keys(data);
-  el('sectionCount').textContent = String(keys.length);
-  if(!keys.length){ list.innerHTML = '<div class="tiny muted">Upload a JSON file to begin.</div>'; return; }
+  var list=el('sectionList'); list.innerHTML='';
+  var keys=Object.keys(data);
+  el('sectionCount').textContent=String(keys.length);
+  if(!keys.length){ list.innerHTML='<div class="tiny muted">Upload a JSON file to begin.</div>'; return; }
   keys.forEach(function(k){
-    var btn = document.createElement('button');
-    btn.className = 'navitem' + (state.activeSection === k ? ' active' : '');
-    btn.innerHTML = '<span>'+human(k)+'</span><span class="count">'+countEntries(data[k])+'</span>';
-    btn.onclick = function(){ state.activeSection = k; renderAll(); };
+    var btn=document.createElement('button');
+    btn.className='navitem'+(state.activeSection===k?' active':'');
+    btn.innerHTML='<span>'+human(k)+'</span><span class="count">'+countEntries(data[k])+'</span>';
+    btn.onclick=function(){ state.activeSection=k; renderAll(); };
     list.appendChild(btn);
   });
 }
 
+/* ── right outline (fix #5) ── */
 function renderOutline(){
-  el('currentSectionLabel').textContent = state.activeSection ? human(state.activeSection) : 'No section selected';
-  var box = el('outlineBox');
-  box.innerHTML = '';
-  if(!state.activeSection || !data[state.activeSection]){ box.innerHTML = '<div class="tiny muted">Nothing to outline yet.</div>'; return; }
-  var v = data[state.activeSection];
-  if(isObj(v)){
-    Object.keys(v).forEach(function(key){
-      var d = document.createElement('div'); d.className = 'mini';
-      var p = state.activeSection+'.'+key;
-      d.innerHTML = '<span>'+esc(state.propertyNames[p]||key)+'</span><span class="tiny">field</span>';
-      box.appendChild(d);
-    });
-  } else if(Array.isArray(v)){
-    v.forEach(function(item,i){
-      var label = '#'+(i+1);
-      if(isObj(item)) label = item.title||item.degree||item.role||item.organization||item.institution||item.language||item.description||label;
-      var d = document.createElement('div'); d.className = 'mini';
-      d.innerHTML = '<span>'+esc(label)+'</span><span class="tiny">entry</span>';
-      box.appendChild(d);
-    });
+  var box=el('outlineBox'); box.innerHTML='';
+  if(!Object.keys(data).length){
+    box.innerHTML='<div class="tiny muted" style="padding:var(--space-2)">No data loaded.</div>';
+    return;
   }
+  Object.keys(data).forEach(function(k){
+    var v=data[k];
+    var sec=document.createElement('div'); sec.className='outline-section';
+    var secA=document.createElement('a');
+    secA.href='#sec-card-'+k; secA.className='outline-link';
+    secA.style.fontWeight='700'; secA.style.color='var(--color-primary)';
+    secA.innerHTML='<span class="olabel">'+esc(human(k))+'</span>';
+    sec.appendChild(secA);
+    var lst=document.createElement('div'); lst.className='outline-list';
+    if(Array.isArray(v)){
+      v.forEach(function(item,i){
+        var label='#'+(i+1);
+        if(isObj(item)) label=item.title||item.degree||item.role||item.organization||item.institution||item.language||item.description||label;
+        var a=document.createElement('a');
+        a.href='#'+slugId(k,i);
+        a.className='outline-link';
+        a.innerHTML='<span class="olabel">'+esc(label)+'</span><span class="otype">entry</span>';
+        lst.appendChild(a);
+      });
+    } else if(isObj(v) && k==='skills'){
+      Object.keys(v).forEach(function(group){
+        var a=document.createElement('a');
+        a.href='#skill-group-'+k+'-'+group;
+        a.className='outline-link';
+        a.innerHTML='<span class="olabel">'+esc(human(group))+'</span><span class="otype">group</span>';
+        lst.appendChild(a);
+      });
+    } else if(isObj(v)){
+      Object.keys(v).forEach(function(field){
+        var a=document.createElement('a');
+        a.href='#field-'+k+'-'+field;
+        a.className='outline-link';
+        a.innerHTML='<span class="olabel">'+esc(state.propertyNames[k+'.'+field]||human(field))+'</span><span class="otype">field</span>';
+        lst.appendChild(a);
+      });
+    }
+    sec.appendChild(lst);
+    box.appendChild(sec);
+  });
 }
 
-function propRenameRow(path, key){
+/* ── property rename row ── */
+function propRenameRow(path,key){
   return '<div class="kv"><div class="mono">'+esc(key)+'</div><input data-propname="'+esc(path)+'" value="'+esc(state.propertyNames[path]||human(key))+'"></div>';
 }
-
 function bindPropRename(root){
   root.querySelectorAll('[data-propname]').forEach(function(inp){
-    inp.oninput = function(e){
-      state.propertyNames[e.target.dataset.propname] = e.target.value;
-      renderOutline(); renderEditor(); renderLatex();
+    inp.oninput=function(e){
+      state.propertyNames[e.target.dataset.propname]=e.target.value;
+      renderOutline(); renderLatex();
     };
   });
 }
 
+/* ── editor ── */
 function renderEditor(){
-  var host = el('editorTab');
-  host.innerHTML = '';
-  if(!state.activeSection){ host.innerHTML = '<div class="card"><div class="cardbody tiny">Upload a JSON file to begin editing.</div></div>'; return; }
-  var k = state.activeSection;
-  var title = (state.sections[k] && state.sections[k].title) || human(k);
-  el('sectionTitleInput2').value = title;
-  el('sectionTitleInput2').oninput = function(e){ state.sections[k].title = e.target.value; renderLatex(); renderEditor(); };
-  var sec = document.createElement('div'); sec.className = 'card';
-  sec.innerHTML = '<div class="cardhead"><div class="split"><div><strong>'+human(k)+'</strong><div class="tiny">Edit fields, select entries, and rename properties.</div></div><label class="pill"><input type="checkbox" '+(state.sections[k].include?'checked':'')+' id="includeSectionBox"> Include</label></div></div><div class="cardbody subgrid"><div class="row2"><div><label class="tiny">Output title</label><input id="sectionTitleInput" value="'+esc(title)+'"></div><div><label class="tiny">Section key</label><input disabled value="'+k+'"></div></div><div id="sectionEditor"></div></div>';
+  var host=el('editorTab'); host.innerHTML='';
+  if(!state.activeSection){
+    host.innerHTML='<div class="card"><div class="cardbody tiny">Upload a JSON file to begin editing.</div></div>';
+    return;
+  }
+  var k=state.activeSection;
+  var title=(state.sections[k]&&state.sections[k].title)||human(k);
+  el('sectionTitleInput2').value=title;
+  el('sectionTitleInput2').oninput=function(e){ state.sections[k].title=e.target.value; renderLatex(); renderEditor(); };
+  var sec=document.createElement('div'); sec.className='card';
+  sec.id='sec-card-'+k;
+  sec.innerHTML='<div class="cardhead"><div class="split"><div><strong>'+human(k)+'</strong><div class="tiny">Edit fields, select entries, rename properties.</div></div>'
+    +'<label class="pill"><input type="checkbox" '+(state.sections[k].include?'checked':'')+' id="includeSectionBox"> Include</label>'
+    +'</div></div>'
+    +'<div class="cardbody subgrid">'
+    +'<div class="row2"><div><label class="tiny">Output title</label><input id="sectionTitleInput" value="'+esc(title)+'"></div>'
+    +'<div><label class="tiny">Section key</label><input disabled value="'+k+'"></div></div>'
+    +'<div id="sectionEditor"></div></div>';
   host.appendChild(sec);
-  el('includeSectionBox').onchange = function(e){ state.sections[k].include = e.target.checked; renderLatex(); };
-  el('sectionTitleInput').oninput = function(e){ state.sections[k].title = e.target.value; el('sectionTitleInput2').value = e.target.value; renderLatex(); };
-  var ed = host.querySelector('#sectionEditor');
-  var value = data[k];
-  if(isObj(value)) ed.appendChild(renderObjectFields([k], value));
-  else if(Array.isArray(value)) ed.appendChild(renderArrayFields(k, value));
+  el('includeSectionBox').onchange=function(e){ state.sections[k].include=e.target.checked; renderLatex(); };
+  el('sectionTitleInput').oninput=function(e){ state.sections[k].title=e.target.value; el('sectionTitleInput2').value=e.target.value; renderLatex(); };
+  var ed=host.querySelector('#sectionEditor');
+  var value=data[k];
+  if(isObj(value)) ed.appendChild(renderObjectFields([k],value));
+  else if(Array.isArray(value)) ed.appendChild(renderArrayFields(k,value));
   bindPropRename(host);
 }
 
-function renderObjectFields(path, obj){
-  var wrap = document.createElement('div'); wrap.className = 'subgrid';
-  var section = path[0];
+function renderObjectFields(path,obj){
+  var wrap=document.createElement('div'); wrap.className='subgrid';
+  var section=path[0];
   Object.entries(obj).forEach(function(entry){
-    var key = entry[0], val = entry[1];
-    var propPath = section+'.'+path.slice(1).concat(key).join('.');
+    var key=entry[0],val=entry[1];
+    var propPath=section+'.'+path.slice(1).concat(key).join('.');
     if(Array.isArray(val)){
-      var block = document.createElement('div'); block.className = 'card';
-      block.innerHTML = '<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||key)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
-      var inner = block.querySelector('.cardbody');
-      if(section === 'skills') inner.appendChild(renderSkillsGroup(path.concat(key), val, propPath, key));
+      var block=document.createElement('div'); block.className='card';
+      block.id=section==='skills'?'skill-group-'+section+'-'+key:'field-'+section+'-'+key;
+      block.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||key)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
+      var inner=block.querySelector('.cardbody');
+      if(section==='skills') inner.appendChild(renderSkillsGroup(path.concat(key),val,propPath,key));
       else {
-        val.forEach(function(item,idx){ inner.appendChild(simpleArrayInput(path.concat([key,idx]), item, propPath+'.'+idx)); });
-        var add = document.createElement('button'); add.className = 'btn'; add.textContent = 'Add item';
-        add.onclick = function(){ resolve(path.concat(key)).push(''); renderAll(); };
+        val.forEach(function(item,idx){ inner.appendChild(simpleArrayInput(path.concat([key,idx]),item,propPath+'.'+idx)); });
+        var add=document.createElement('button'); add.className='btn'; add.textContent='Add item';
+        add.onclick=function(){ resolve(path.concat(key)).push(''); renderAll(); };
         inner.appendChild(add);
       }
       wrap.appendChild(block);
     } else if(isObj(val)){
-      var block2 = document.createElement('div'); block2.className = 'card';
-      block2.innerHTML = '<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||key)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
-      block2.querySelector('.cardbody').appendChild(renderObjectFields(path.concat(key), val));
+      var block2=document.createElement('div'); block2.className='card';
+      block2.id='field-'+section+'-'+key;
+      block2.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||key)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
+      block2.querySelector('.cardbody').appendChild(renderObjectFields(path.concat(key),val));
       wrap.appendChild(block2);
     } else {
-      var row = document.createElement('div'); row.className = 'propcard';
-      row.innerHTML = propRenameRow(propPath,key)+'<div class="kv"><div class="mono">value</div><input value="'+esc(val)+'"></div>';
-      (function(p){ row.querySelectorAll('input')[1].oninput = function(e){ setPath(p, e.target.value); }; })(path.concat(key));
+      var row=document.createElement('div'); row.className='propcard';
+      row.id='field-'+section+'-'+key;
+      row.innerHTML=propRenameRow(propPath,key)+'<div class="kv"><div class="mono">value</div><input value="'+esc(val)+'"></div>';
+      (function(p){ row.querySelectorAll('input')[1].oninput=function(e){ setPath(p,e.target.value); }; })(path.concat(key));
       wrap.appendChild(row);
     }
   });
   return wrap;
 }
 
-function renderSkillsGroup(path, arr, propPath, keyName){
-  var wrap = document.createElement('div'); wrap.className = 'subgrid';
-  arr.forEach(function(item, i){
-    var row = document.createElement('div'); row.className = 'entry';
-    row.innerHTML = '<div class="entryhead"><label class="pill"><input type="checkbox" '+(item.selected!==false?'checked':'')+' > Included</label><strong>'+esc(item.name||('item '+(i+1)))+'</strong></div><div class="kv"><div class="mono">Label</div><input value="'+esc(item.name||'')+'"></div>';
-    (function(itm){ row.querySelector('input[type=checkbox]').onchange = function(e){ itm.selected = e.target.checked; renderLatex(); renderSchema(); }; })(item);
-    (function(itm){ row.querySelector('input[type=text]').oninput = function(e){ itm.name = e.target.value; renderLatex(); renderSchema(); renderOutline(); }; })(item);
+/* ── skills render (fix #2) ── */
+function renderSkillsGroup(path,arr,propPath,keyName){
+  var wrap=document.createElement('div'); wrap.className='subgrid';
+  arr.forEach(function(item,i){
+    var row=document.createElement('div'); row.className='entry';
+    row.innerHTML='<div class="entryhead">'
+      +'<label class="pill"><input type="checkbox" '+(item.selected!==false?'checked':'')+'>  Include</label>'
+      +'<strong style="flex:1;padding-left:var(--space-3)">'+esc(item.name||('item '+(i+1)))+'</strong>'
+      +'</div>'
+      +'<div class="kv"><div class="mono">Label</div><input type="text" value="'+esc(item.name||'')+'"></div>';
+    (function(itm){ row.querySelector('input[type=checkbox]').onchange=function(e){ itm.selected=e.target.checked; renderLatex(); renderSchema(); }; })(item);
+    (function(itm,rw){
+      rw.querySelector('input[type=text]').oninput=function(e){
+        itm.name=e.target.value;
+        rw.querySelector('strong').textContent=e.target.value||('item '+(i+1));
+        renderLatex(); renderSchema(); renderOutline();
+      };
+    })(item,row);
     wrap.appendChild(row);
   });
-  var btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'Add skill item';
-  btn.onclick = function(){ resolve(path).push({name:'', selected:true}); renderAll(); };
+  var btn=document.createElement('button'); btn.className='btn'; btn.textContent='Add skill item';
+  btn.onclick=function(){ resolve(path).push({name:'',selected:true}); renderAll(); };
   wrap.appendChild(btn);
   return wrap;
 }
 
-function simpleArrayInput(path, val, propPath){
-  var row = document.createElement('div'); row.className = 'propcard';
-  row.innerHTML = (propPath ? propRenameRow(propPath, String(path[path.length-1])) : '')+'<div class="kv"><div class="mono">value</div><input value="'+esc(isObj(val)?JSON.stringify(val):val)+'"></div>';
-  (function(p){ row.querySelectorAll('input')[1].oninput = function(e){ setPath(p, e.target.value); }; })(path);
+function simpleArrayInput(path,val,propPath){
+  var row=document.createElement('div'); row.className='propcard';
+  row.innerHTML=(propPath?propRenameRow(propPath,String(path[path.length-1])):'')+
+    '<div class="kv"><div class="mono">value</div><input value="'+esc(isObj(val)?JSON.stringify(val):val)+'"></div>';
+  (function(p){ row.querySelectorAll('input')[1].oninput=function(e){ setPath(p,e.target.value); }; })(path);
   return row;
 }
 
-function renderArrayFields(key, arr){
-  var wrap = document.createElement('div'); wrap.className = 'subgrid';
-  var toolbar = document.createElement('div'); toolbar.className = 'toolbar';
-  toolbar.innerHTML = '<button class="btn" id="addEntryBtn">Add entry</button>';
+function renderArrayFields(key,arr){
+  var wrap=document.createElement('div'); wrap.className='subgrid';
+  var toolbar=document.createElement('div'); toolbar.className='toolbar';
+  toolbar.innerHTML='<button class="btn" id="addEntryBtn">Add entry</button>';
   wrap.appendChild(toolbar);
-  toolbar.querySelector('#addEntryBtn').onclick = function(){ addEntry(key); };
-  arr.forEach(function(item, i){
-    var entry = document.createElement('div'); entry.className = 'entry';
-    var label = (isObj(item) ? (item.title||item.degree||item.role||item.organization||item.institution||item.language||item.description) : String(item||'')) || ('#'+(i+1));
-    entry.innerHTML = '<div class="entryhead"><div class="stack" style="gap:6px"><label class="pill"><input type="checkbox" '+(!isObj(item)||item.selected!==false?'checked':'')+' data-sel> Included</label><strong>'+esc(label)+'</strong></div><div class="toolbar"><button class="btn" data-dup>Duplicate</button><button class="btn btn-danger" data-del>Delete</button></div></div><div class="entrybody"></div>';
-    var body = entry.querySelector('.entrybody');
+  toolbar.querySelector('#addEntryBtn').onclick=function(){ addEntry(key); };
+  arr.forEach(function(item,i){
+    var entry=document.createElement('div'); entry.className='entry';
+    entry.id=slugId(key,i);
+    var label=(isObj(item)?(item.title||item.degree||item.role||item.organization||item.institution||item.language||item.description):String(item||''))||('#'+(i+1));
+    entry.innerHTML='<div class="entryhead">'
+      +'<div class="stack" style="gap:6px"><label class="pill"><input type="checkbox" '+(!isObj(item)||item.selected!==false?'checked':'')+' data-sel> Included</label>'
+      +'<strong>'+esc(label)+'</strong></div>'
+      +'<div class="toolbar"><button class="btn" data-dup>Duplicate</button><button class="btn btn-danger" data-del>Delete</button></div>'
+      +'</div><div class="entrybody"></div>';
+    var body=entry.querySelector('.entrybody');
     if(isObj(item)){
       Object.entries(item).forEach(function(fe){
-        var field = fe[0], val = fe[1];
-        if(field === 'selected') return;
-        var propPath = key+'.'+i+'.'+field;
+        var field=fe[0],val=fe[1];
+        if(field==='selected') return;
+        var propPath=key+'.'+i+'.'+field;
         if(Array.isArray(val)){
-          var block = document.createElement('div'); block.className = 'card';
-          block.innerHTML = '<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||field)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
-          var inner = block.querySelector('.cardbody');
-          val.forEach(function(sub,j){ inner.appendChild(simpleArrayInput([key,i,field,j], sub, propPath+'.'+j)); });
-          var btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'Add item';
-          (function(kk,ii,ff){ btn.onclick = function(){ resolve([kk,ii,ff]).push(''); renderAll(); }; })(key,i,field);
+          var block=document.createElement('div'); block.className='card';
+          block.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||field)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
+          var inner=block.querySelector('.cardbody');
+          val.forEach(function(sub,j){ inner.appendChild(simpleArrayInput([key,i,field,j],sub,propPath+'.'+j)); });
+          var btn=document.createElement('button'); btn.className='btn'; btn.textContent='Add item';
+          (function(kk,ii,ff){ btn.onclick=function(){ resolve([kk,ii,ff]).push(''); renderAll(); }; })(key,i,field);
           inner.appendChild(btn); body.appendChild(block);
         } else if(isObj(val)){
-          var card = document.createElement('div'); card.className = 'card';
-          card.innerHTML = '<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||field)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
-          card.querySelector('.cardbody').appendChild(renderObjectFields([key,i,field], val));
+          var card=document.createElement('div'); card.className='card';
+          card.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||field)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
+          card.querySelector('.cardbody').appendChild(renderObjectFields([key,i,field],val));
           body.appendChild(card);
         } else {
-          var row = document.createElement('div'); row.className = 'propcard';
-          row.innerHTML = propRenameRow(propPath,field)+'<div class="kv"><div class="mono">value</div><input value="'+esc(val)+'"></div>';
-          (function(kk,ii,ff){ row.querySelectorAll('input')[1].oninput = function(e){ setPath([kk,ii,ff], e.target.value); }; })(key,i,field);
+          var row=document.createElement('div'); row.className='propcard';
+          row.innerHTML=propRenameRow(propPath,field)+'<div class="kv"><div class="mono">value</div><input value="'+esc(val)+'"></div>';
+          (function(kk,ii,ff){ row.querySelectorAll('input')[1].oninput=function(e){ setPath([kk,ii,ff],e.target.value); }; })(key,i,field);
           body.appendChild(row);
         }
       });
     } else {
-      body.appendChild(simpleArrayInput([key,i], item, key+'.'+i));
+      body.appendChild(simpleArrayInput([key,i],item,key+'.'+i));
     }
-    (function(itm){ entry.querySelector('[data-sel]').onchange = function(e){ if(isObj(itm)) itm.selected = e.target.checked; renderLatex(); renderSchema(); }; })(item);
-    (function(idx){ entry.querySelector('[data-dup]').onclick = function(){ arr.splice(idx+1, 0, clone(arr[idx])); renderAll(); }; })(i);
-    (function(idx){ entry.querySelector('[data-del]').onclick = function(){ arr.splice(idx, 1); renderAll(); }; })(i);
+    (function(itm){ entry.querySelector('[data-sel]').onchange=function(e){ if(isObj(itm)) itm.selected=e.target.checked; renderLatex(); renderSchema(); }; })(item);
+    (function(idx){ entry.querySelector('[data-dup]').onclick=function(){ arr.splice(idx+1,0,clone(arr[idx])); renderAll(); }; })(i);
+    (function(idx){ entry.querySelector('[data-del]').onclick=function(){ arr.splice(idx,1); renderAll(); }; })(i);
     wrap.appendChild(entry);
   });
   return wrap;
 }
 
-function resolve(path){ return path.reduce(function(acc,key){ return acc[key]; }, data); }
+function resolve(path){ return path.reduce(function(acc,key){ return acc[key]; },data); }
 
-function setPath(path, value){
-  var last = path[path.length-1];
-  var ref = path.slice(0,-1).reduce(function(acc,key){ return acc[key]; }, data);
-  ref[last] = value;
+function setPath(path,value){
+  var last=path[path.length-1];
+  var ref=path.slice(0,-1).reduce(function(acc,key){ return acc[key]; },data);
+  ref[last]=value;
   renderLatex(); renderSchema(); renderOutline();
 }
 
 function addEntry(key){
-  var arr = data[key];
-  var template = null;
+  var arr=data[key]; var template=null;
   for(var i=0;i<arr.length;i++){ if(isObj(arr[i])){ template=arr[i]; break; } }
   if(template){
-    var entry = {};
-    Object.keys(template).forEach(function(k){ entry[k] = k==='selected' ? true : (Array.isArray(template[k]) ? [] : ''); });
+    var entry={};
+    Object.keys(template).forEach(function(k){ entry[k]=k==='selected'?true:(Array.isArray(template[k])?[]:''); });
     arr.push(entry);
   } else arr.push({selected:true});
   renderAll();
 }
 
-/* ---- LaTeX generation ---- */
-
-function latexText(x){ return texEscape(String(x === null || x === undefined ? '' : x)); }
-function latexRaw(x){ return String(x === null || x === undefined ? '' : x); }
-function joinDate(start, end, mode){
-  mode = mode || 'dash';
-  start = String(start||'').trim(); end = String(end||'').trim();
-  if(start && end) return mode==='paren' ? start+' ('+end+')' : start+'--'+end;
-  return start || end || '';
+/* ── LaTeX ── */
+function latexText(x){ return texEscape(String(x==null?'':x)); }
+function latexRaw(x){ return String(x==null?'':x); }
+function joinDate(start,end,mode){
+  mode=mode||'dash'; start=String(start||'').trim(); end=String(end||'').trim();
+  if(start&&end) return mode==='paren'?start+' ('+end+')':start+'--'+end;
+  return start||end||'';
 }
-function cvitem(label, content){ return '\\cvitem{'+label+'}{'+content+'}'; }
+function cvitem(label,content){ return '\\cvitem{'+label+'}{'+content+'}'; }
 function cventry(a,b,c,d,e,f){ return '\\cventry{'+a+'}{'+b+'}{'+c+'}{'+d+'}{'+e+'}{'+f+'}'; }
-function commaList(arr){ return (arr||[]).filter(Boolean).map(function(x){ return typeof x==='string' ? x : (x.name||''); }).filter(Boolean).join(', '); }
+function commaList(arr){ return (arr||[]).filter(Boolean).map(function(x){ return typeof x==='string'?x:(x.name||''); }).filter(Boolean).join(', '); }
 
-function buildFullWidthEntries(items, withType){
-  var lines = [];
-  var macro = withType ? '\\compiledAbstracts' : '\\compiledPublications';
-  lines.push('\\makeatletter');
-  lines.push('\\def'+macro+'{}');
-  items.filter(function(x){ return !isObj(x) || x.selected !== false; }).forEach(function(p){
-    var authors = latexRaw(p.authors);
-    var title   = latexRaw(p.title);
-    var venue   = latexRaw(p.venue);
-    var year    = latexRaw(p.year);
-    var typ     = withType ? latexRaw(p.type) : '';
-    var tail    = withType ? '\\ '+year+'~('+typ+').\\par\\smallskip' : '\\ '+year+'.\\par\\smallskip';
+function buildFullWidthEntries(items,withType){
+  var lines=[]; var macro=withType?'\\compiledAbstracts':'\\compiledPublications';
+  lines.push('\\makeatletter'); lines.push('\\def'+macro+'{}');
+  items.filter(function(x){ return !isObj(x)||x.selected!==false; }).forEach(function(p){
+    var authors=latexRaw(p.authors),title=latexRaw(p.title),venue=latexRaw(p.venue),year=latexRaw(p.year);
+    var typ=withType?latexRaw(p.type):'';
+    var tail=withType?'\\ '+year+'~('+typ+').\\par\\smallskip':'\\ '+year+'.\\par\\smallskip';
     lines.push('\\g@addto@macro'+macro+'{%');
     lines.push('\\noindent\\hangindent=1.5em\\hangafter=1%');
     lines.push('\\hbox to 1.5em{-\\hss}%');
     lines.push(authors+'.%');
     lines.push('\\ \\textquotedblleft '+title+'.\\textquotedblright%');
     lines.push('\\ \\textit{'+venue+'}.%');
-    lines.push(tail);
-    lines.push('}');
+    lines.push(tail); lines.push('}');
   });
-  lines.push('\\makeatother');
-  lines.push(macro);
+  lines.push('\\makeatother'); lines.push(macro);
   return lines;
 }
 
 function renderAwards(items){
   return items.filter(function(x){ return !isObj(x)||x.selected!==false; }).map(function(a){
-    return '\\cvitemwithcomment{'+latexText(a.category||'')+'}{\\parbox[t]{0.87\\textwidth}{'+latexText(a.description||'')+(a.year?' ~ ('+latexText(a.year)+')':'')+'}}{}';
+    return '\\cvitemwithcomment{'+latexText(a.category||'')+'}{\\parbox[t]{0.87\\textwidth}{'+latexText(a.description||'')+(a.year?' ~ ('+latexText(a.year)+')':'')+'}}{}'
   });
 }
 
-function renderSkills(obj){
-  var lines = [];
+function renderSkillsLatex(obj){
+  var lines=[];
   Object.keys(obj).forEach(function(group){
-    var arr = obj[group];
-    if(!Array.isArray(arr)) return;
-    var selected = arr.filter(function(x){ return x.selected !== false; });
+    var arr=obj[group]; if(!Array.isArray(arr)) return;
+    var selected=arr.filter(function(x){ return x.selected!==false; });
     if(!selected.length) return;
-    var label = latexText(state.propertyNames['skills.'+group] || human(group));
+    var label=latexText(state.propertyNames['skills.'+group]||human(group));
     lines.push('\\cvitemwithcomment{'+label+'}{\\parbox[t]{0.85\\textwidth}{'+latexText(commaList(selected))+'}}{}');
   });
   return lines;
@@ -415,103 +635,90 @@ function renderSkills(obj){
 
 function renderLanguages(items){
   return items.filter(function(x){ return !isObj(x)||x.selected!==false; }).map(function(l){
-    var prof = '';
-    if(isObj(l.proficiency)) prof = 'writes '+(l.proficiency.writes||'')+', reads '+(l.proficiency.reads||'')+', speaks '+(l.proficiency.speaks||'')+', listens '+(l.proficiency.listens||'');
-    else prof = String(l.proficiency || '');
+    var prof='';
+    if(isObj(l.proficiency)) prof='writes '+(l.proficiency.writes||'')+', reads '+(l.proficiency.reads||'')+', speaks '+(l.proficiency.speaks||'')+', listens '+(l.proficiency.listens||'');
+    else prof=String(l.proficiency||'');
     return '\\cvitemwithcomment{'+latexText(l.language||'')+'}{'+latexText(prof)+'}{}';
   });
 }
 
 function renderLatex(){
-  if(!Object.keys(data).length){ el('latexPreview').textContent = 'Upload a JSON file to generate LaTeX.'; return; }
-  var basics = data.basics || {};
-  var lines = [];
+  if(!Object.keys(data).length){ el('latexPreview').textContent='Upload a JSON file to generate LaTeX.'; return; }
+  var basics=data.basics||{}; var lines=[];
   lines.push('\\documentclass[11pt,a4paper,sans]{moderncv}');
   lines.push('\\usepackage[utf8]{inputenc}');
   lines.push('\\moderncvstyle{'+texEscape(el('styleName').value||'classic')+'}');
   lines.push('%\\moderncvcolor{grey}');
   lines.push('\\definecolor{color2}{RGB}{60,60,60}');
   lines.push('\\definecolor{color1}{RGB}{20,41,82}');
-  lines.push('\\usepackage{lipsum}');
-  lines.push('\\usepackage{xstring}');
+  lines.push('\\usepackage{lipsum}\\usepackage{xstring}');
   lines.push('\\usepackage[scale=0.93]{geometry}');
   lines.push('');
   lines.push('\\firstname{\\Huge '+latexText(basics.firstname||'')+' \\vspace{10pt}}');
   lines.push('\\familyname{\\\\\\Huge '+latexText(basics.lastname||'')+'}');
-  lines.push('\\title{'+latexText(el('cvTitle').value || basics.title || 'Curriculum Vitae')+'}');
+  lines.push('\\title{'+latexText(el('cvTitle').value||basics.title||'Curriculum Vitae')+'}');
   if(basics.location)  lines.push('\\address{'+latexText(basics.location)+'\\\\}');
   if(basics.email)     lines.push('\\email{'+latexText(basics.email)+'}');
   if(basics.homepage)  lines.push('\\homepage{'+latexText(basics.homepage)+(String(basics.homepage).endsWith('/')?'':'/')+'}');
   if(basics.photo)     lines.push('\\photo[70pt][0.4pt]{'+latexText(basics.photo)+'}');
   lines.push('\\hyphenation{Universidad}');
   lines.push('');
-  lines.push('\\begin{document}');
-  lines.push('\\makecvtitle');
-  lines.push('\\vspace{-1em}');
+  lines.push('\\begin{document}\\makecvtitle\\vspace{-1em}');
   if(basics.research_interests){
     lines.push('\\section{Main Research Interests}');
     lines.push('\\cvlistitem{'+latexText(basics.research_interests)+'}');
   }
   lines.push('');
   lines.push('\\renewcommand{\\listitemsymbol}{}');
-  Object.keys(data).filter(function(k){ return k !== 'basics'; }).forEach(function(k){
-    if(!state.sections[k] || !state.sections[k].include) return;
-    var title = state.sections[k].title || human(k);
-    var value = data[k];
-    var block = [];
-    if(k==='education' && Array.isArray(value)){
-      block = value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'paren')), latexText(e.degree||''), latexText(e.institution||''), e.dissertation?'\\textbf{Dissertation: } '+latexText(e.dissertation):'', latexText(e.description||''), ''); });
-    } else if(k==='research_experience' && Array.isArray(value)){
-      block = value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'dash')), latexText(e.organization||''), '', '', latexText(e.role||''), latexText(e.description||'')); });
-    } else if(k==='work_experience' && Array.isArray(value)){
-      block = value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'dash')), latexText(e.role||''), latexText(e.department||''), latexText(e.organization||''), '', latexText(e.description||'')); });
-    } else if(k==='teaching_experience' && Array.isArray(value)){
-      block = value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(e.course_area||''), latexText(e.institution||''), latexText(e.level||''), '', '', latexText((e.courses||[]).join(', '))); });
-    } else if(k==='publications' && Array.isArray(value)){
-      block = buildFullWidthEntries(value, false);
-    } else if(k==='abstracts' && Array.isArray(value)){
-      block = buildFullWidthEntries(value, true);
-    } else if(k==='awards' && Array.isArray(value)){
-      block = renderAwards(value);
-    } else if(k==='continuing_education' && Array.isArray(value)){
-      block = value.filter(function(x){return x.selected!==false;}).map(function(c){ return cvitem(latexText((c.type||'')+':'), latexText([c.title,c.year,c.details].filter(Boolean).join('. '))); });
-    } else if(k==='skills' && isObj(value)){
-      block = renderSkills(value);
-    } else if(k==='languages' && Array.isArray(value)){
-      block = renderLanguages(value);
+  Object.keys(data).filter(function(k){ return k!=='basics'; }).forEach(function(k){
+    if(!state.sections[k]||!state.sections[k].include) return;
+    var title=state.sections[k].title||human(k);
+    var value=data[k]; var block=[];
+    if(k==='education'&&Array.isArray(value)){
+      block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'paren')),latexText(e.degree||''),latexText(e.institution||''),e.dissertation?'\\textbf{Dissertation: } '+latexText(e.dissertation):'',latexText(e.description||''),''); });
+    } else if(k==='research_experience'&&Array.isArray(value)){
+      block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'dash')),latexText(e.organization||''),'','',latexText(e.role||''),latexText(e.description||'')); });
+    } else if(k==='work_experience'&&Array.isArray(value)){
+      block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(joinDate(e.start,e.end,'dash')),latexText(e.role||''),latexText(e.department||''),latexText(e.organization||''),'',latexText(e.description||'')); });
+    } else if(k==='teaching_experience'&&Array.isArray(value)){
+      block=value.filter(function(x){return x.selected!==false;}).map(function(e){ return cventry(latexText(e.course_area||''),latexText(e.institution||''),latexText(e.level||''),'','',latexText((e.courses||[]).join(', '))); });
+    } else if(k==='publications'&&Array.isArray(value)){
+      block=buildFullWidthEntries(value,false);
+    } else if(k==='abstracts'&&Array.isArray(value)){
+      block=buildFullWidthEntries(value,true);
+    } else if(k==='awards'&&Array.isArray(value)){
+      block=renderAwards(value);
+    } else if(k==='continuing_education'&&Array.isArray(value)){
+      block=value.filter(function(x){return x.selected!==false;}).map(function(c){ return cvitem(latexText((c.type||'')+':'),latexText([c.title,c.year,c.details].filter(Boolean).join('. '))); });
+    } else if(k==='skills'&&isObj(value)){
+      block=renderSkillsLatex(value);
+    } else if(k==='languages'&&Array.isArray(value)){
+      block=renderLanguages(value);
     } else if(Array.isArray(value)){
-      block = value.filter(function(x){return !isObj(x)||x.selected!==false;}).map(function(item){ return cvitem('', latexText(JSON.stringify(item))); });
+      block=value.filter(function(x){return !isObj(x)||x.selected!==false;}).map(function(item){ return cvitem('',latexText(JSON.stringify(item))); });
     } else if(isObj(value)){
-      block = Object.entries(value).map(function(e){ return cvitem(latexText(state.propertyNames[k+'.'+e[0]]||e[0]), latexText(e[1])); });
+      block=Object.entries(value).map(function(e){ return cvitem(latexText(state.propertyNames[k+'.'+e[0]]||e[0]),latexText(e[1])); });
     }
     if(block.length){
-      lines.push('');
-      lines.push('\\section{'+latexText(title)+'}');
+      lines.push(''); lines.push('\\section{'+latexText(title)+'}');
       block.forEach(function(l){ lines.push(l); });
     }
   });
-  lines.push('');
-  lines.push('\\end{document}');
-  el('latexPreview').textContent = lines.join('\n');
+  lines.push(''); lines.push('\\end{document}');
+  el('latexPreview').textContent=lines.join('\n');
 }
 
-function renderSchema(){ el('schemaPreview').textContent = JSON.stringify(data, null, 2); }
-
-function renderNotes(){
-  el('mappingNotes').innerHTML = '<div class="subgrid"><p>The generator follows the general structure of <code>cv_2026.tex</code> for main sections, and uses the full-width compiled entry idea from <code>cv_long_2026_en.tex</code> for publications and abstracts.</p><p class="muted">Property labels can be renamed inline. Skill items and any array entry can be toggled individually.</p></div>';
-}
+function renderSchema(){ el('schemaPreview').textContent=JSON.stringify(data,null,2); }
 
 function renderVersionModal(){
-  el('versionBtn').textContent = 'v'+APP_VERSION;
-  el('versionBody').innerHTML =
+  el('versionBtn').textContent='v'+APP_VERSION;
+  el('versionBody').innerHTML=
     CHANGELOG.map(function(v){
-      return '<div class="card" style="margin-bottom:var(--space-3)"><div class="cardhead"><strong>v'+v.version+'</strong></div><div class="cardbody"><ul>'+v.changes.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul></div></div>';
-    }).join('') +
-    '<div class="tiny" style="margin-top:var(--space-5);text-align:center;color:var(--color-text-faint)">Developed by Guillermo Sahonero Alvarez</div>';
+      return '<div class="card" style="margin-bottom:var(--space-3)"><div class="cardhead"><strong>v'+v.version+'</strong></div>'
+        +'<div class="cardbody"><ul>'+v.changes.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul></div></div>';
+    }).join('')
+    +'<div class="tiny" style="margin-top:var(--space-5);text-align:center;color:var(--color-text-faint)">Developed by Guillermo Sahonero Alvarez</div>';
 }
-
-function openModal(){ el('versionModal').classList.add('open'); el('versionModal').setAttribute('aria-hidden','false'); }
-function closeModal(){ el('versionModal').classList.remove('open'); el('versionModal').setAttribute('aria-hidden','true'); }
 
 function renderAll(){
   initSections();
@@ -520,77 +727,98 @@ function renderAll(){
   renderEditor();
   renderLatex();
   renderSchema();
-  renderNotes();
   renderVersionModal();
 }
 
-el('fileInput').onchange = function(e){
-  var f = e.target.files[0]; if(!f) return;
-  var reader = new FileReader();
-  reader.onload = function(ev){
+/* ── modals ── */
+function openModal(id){ el(id).classList.add('open'); el(id).setAttribute('aria-hidden','false'); }
+function closeModal(id){ el(id).classList.remove('open'); el(id).setAttribute('aria-hidden','true'); }
+
+/* ── file menu dropdown (fix #3) ── */
+el('fileMenuBtn').onclick=function(e){
+  e.stopPropagation();
+  var open=el('fileDropdown').classList.contains('open');
+  el('fileDropdown').classList.toggle('open',!open);
+  el('fileMenuBtn').setAttribute('aria-expanded',String(!open));
+};
+document.addEventListener('click',function(){ el('fileDropdown').classList.remove('open'); el('fileMenuBtn').setAttribute('aria-expanded','false'); });
+el('fileDropdown').addEventListener('click',function(e){ e.stopPropagation(); });
+
+el('uploadDataBtn').onclick=function(){ el('fileDropdown').classList.remove('open'); openModal('uploadModal'); };
+el('cancelUploadBtn').onclick=function(){ closeModal('uploadModal'); };
+el('uploadModal').onclick=function(e){ if(e.target===el('uploadModal')) closeModal('uploadModal'); };
+el('closeUploadModal').onclick=function(){ closeModal('uploadModal'); };
+
+el('fileInput').onchange=function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
     try {
-      data = JSON.parse(ev.target.result);
-      state.sections = {}; state.propertyNames = {};
-      state.activeSection = Object.keys(data)[0] || '';
+      data=JSON.parse(ev.target.result);
+      state.sections={}; state.propertyNames={};
+      state.activeSection=Object.keys(data)[0]||'';
+      closeModal('uploadModal');
       renderAll();
     } catch(err){ alert('Invalid JSON: '+err.message); }
   };
   reader.readAsText(f);
 };
 
-el('downloadJsonBtn').onclick = function(){
-  if(!Object.keys(data).length){ alert('No data loaded yet.'); return; }
-  var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cv_edited.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
-};
-
-el('downloadTexBtn').onclick = function(){
+el('downloadTexBtn').onclick=function(){
+  el('fileDropdown').classList.remove('open');
   if(!Object.keys(data).length){ alert('No data loaded yet.'); return; }
   renderLatex();
-  var blob = new Blob([el('latexPreview').textContent], {type:'text/plain'});
-  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cv_generated.tex'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
+  var blob=new Blob([el('latexPreview').textContent],{type:'text/plain'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cv_generated.tex';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },500);
 };
 
+el('exportDataBtn').onclick=function(){
+  el('fileDropdown').classList.remove('open');
+  if(!Object.keys(data).length){ alert('No data loaded yet.'); return; }
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cv_edited.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },500);
+};
+
+/* ── tabs (notes tab removed, fix #4) ── */
 document.querySelectorAll('.tab').forEach(function(btn){
-  btn.onclick = function(){
+  btn.onclick=function(){
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
     btn.classList.add('active');
-    ['editor','latex','schema','notes'].forEach(function(t){ el(t+'Tab').classList.add('hidden'); });
+    ['editor','latex','schema'].forEach(function(t){ el(t+'Tab').classList.add('hidden'); });
     el(btn.dataset.tab+'Tab').classList.remove('hidden');
-    state.tab = btn.dataset.tab;
-    if(state.tab === 'latex') renderLatex();
+    state.tab=btn.dataset.tab;
+    if(state.tab==='latex') renderLatex();
   };
 });
 
-el('versionBtn').onclick = openModal;
-el('closeVersionModal').onclick = closeModal;
-el('versionModal').onclick = function(e){ if(e.target === el('versionModal')) closeModal(); };
-document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+/* ── version modal ── */
+el('versionBtn').onclick=function(){ openModal('versionModal'); };
+el('closeVersionModal').onclick=function(){ closeModal('versionModal'); };
+el('versionModal').onclick=function(e){ if(e.target===el('versionModal')) closeModal('versionModal'); };
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeModal('versionModal'); closeModal('uploadModal'); } });
 
+/* ── theme toggle ── */
 (function(){
-  var t = document.querySelector('[data-theme-toggle]'), r = document.documentElement;
-  var d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-  r.setAttribute('data-theme', d);
+  var t=document.querySelector('[data-theme-toggle]'), r=document.documentElement;
+  var d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
   if(t){
-    t.innerHTML = d==='dark' ? '&#9728;' : '&#9790;';
-    t.addEventListener('click', function(){
-      d = d==='dark' ? 'light' : 'dark';
-      r.setAttribute('data-theme', d);
-      t.innerHTML = d==='dark' ? '&#9728;' : '&#9790;';
-      t.setAttribute('aria-label', 'Switch to '+(d==='dark'?'light':'dark')+' mode');
+    t.innerHTML=d==='dark'?'&#9728;':'&#9790;';
+    t.addEventListener('click',function(){
+      d=d==='dark'?'light':'dark';
+      r.setAttribute('data-theme',d);
+      t.innerHTML=d==='dark'?'&#9728;':'&#9790;';
+      t.setAttribute('aria-label','Switch to '+(d==='dark'?'light':'dark')+' mode');
     });
   }
 })();
 
-renderSectionList();
-renderOutline();
-renderEditor();
-renderLatex();
-renderSchema();
-renderNotes();
-renderVersionModal();
+/* ── initial render ── */
+renderSectionList(); renderOutline(); renderEditor(); renderLatex(); renderSchema(); renderVersionModal();
 </script>
 </body>
 </html>
