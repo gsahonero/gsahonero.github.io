@@ -198,6 +198,10 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
           File<svg viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
         </button>
         <div class="dropdown" id="fileDropdown" role="menu">
+          <button class="dropitem" id="newCvBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>New CV&hellip;
+          </button>
+          <div class="drop-divider"></div>
           <button class="dropitem" id="uploadDataBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload data&hellip;
           </button>
@@ -239,6 +243,9 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
           Help<svg viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
         </button>
         <div class="dropdown" id="helpDropdown" role="menu">
+          <button class="dropitem" id="helpScratchBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>How to create your CV from scratch
+          </button>
           <button class="dropitem" id="helpUsageBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How to use CV Builder
           </button>
@@ -284,6 +291,91 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 <input id="sectionTitleInput2" value="" style="display:none">
 <input id="fileInput" type="file" accept="application/json,.json" style="display:none">
 <input id="tplFileInput" type="file" accept="application/json,.json" style="display:none">
+
+
+<!-- New CV / App intro modal -->
+<div id="newCvModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="newCvTitleLbl">
+    <header>
+      <strong id="newCvTitleLbl">Welcome to CV Builder</strong>
+      <button class="iconbtn" id="closeNewCvModal" aria-label="Close">&#x2715;</button>
+    </header>
+    <div class="body">
+      <div class="help-section">
+        <h3>What is CV Builder?</h3>
+        <p><strong>CV Builder</strong> is a browser-based tool that lets you manage your academic or professional CV as a structured <strong>JSON file</strong> and export it as a ready-to-compile <strong>LaTeX (.tex)</strong> document using the <code>moderncv</code> package.</p>
+        <p>Everything runs locally in your browser — no data is sent to any server. Your JSON file is the single source of truth for your CV.</p>
+      </div>
+      <div class="help-section">
+        <h3>What can you do here?</h3>
+        <ul>
+          <li><strong>Upload</strong> an existing CV JSON file and edit it with a structured form editor.</li>
+          <li><strong>Start from scratch</strong> using a blank template and fill in your details.</li>
+          <li><strong>Select</strong> which sections and entries to include in the final LaTeX output.</li>
+          <li><strong>Rename</strong> section titles and field labels as they will appear in the PDF.</li>
+          <li><strong>Preview</strong> the generated LaTeX live in the LaTeX tab.</li>
+          <li><strong>Download</strong> the <code>.tex</code> file and compile it with any LaTeX distribution (e.g., Overleaf, TeX Live).</li>
+          <li><strong>Export</strong> your edited data back to JSON to save your progress.</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h3>How to get started</h3>
+        <p>Click <strong>Start blank CV</strong> below to load an empty template and begin entering your information, or close this dialog and use <strong>File &rarr; Upload data&hellip;</strong> to load an existing JSON file.</p>
+        <p>For a step-by-step guide, see <strong>Help &rarr; How to create your CV from scratch</strong>.</p>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:var(--space-3);padding-top:var(--space-2)">
+        <button class="btn" id="closeNewCvModalBtn">Cancel</button>
+        <button class="btn btn-primary" id="startBlankCvBtn">Start blank CV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Help: How to create your CV from scratch -->
+<div id="helpScratchModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="helpScratchTitleLbl">
+    <header>
+      <strong id="helpScratchTitleLbl">How to create your CV from scratch</strong>
+      <button class="iconbtn" id="closeHelpScratchModal" aria-label="Close">&#x2715;</button>
+    </header>
+    <div class="body">
+      <div class="help-section">
+        <h3>Step 1 — Start with a blank template</h3>
+        <p>Go to <strong>File &rarr; New CV&hellip;</strong> and click <strong>Start blank CV</strong>. This loads a minimal JSON template with the most common CV sections already defined (basics, education, publications, skills, languages, etc.).</p>
+      </div>
+      <div class="help-section">
+        <h3>Step 2 — Fill in your basics</h3>
+        <p>Click the <strong>basics</strong> section in the left sidebar. Fill in your first name, last name, email, homepage, location, and optionally a photo path. These populate the <code>\firstname</code>, <code>\familyname</code>, <code>\email</code>, and <code>\homepage</code> commands in moderncv.</p>
+      </div>
+      <div class="help-section">
+        <h3>Step 3 — Add entries to each section</h3>
+        <p>Click any section (e.g., <em>education</em>) in the sidebar. Use the <strong>Add entry</strong> button to create a new item. Fill in the fields — each field maps to a column in a <code>\cventry</code> command or equivalent LaTeX macro.</p>
+        <ul>
+          <li>Toggle <strong>Included</strong> on each entry to include or exclude it from the LaTeX output.</li>
+          <li>Use <strong>Duplicate</strong> to copy a filled-in entry as a starting point for a similar one.</li>
+          <li>Use <strong>Delete</strong> to remove an entry permanently.</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h3>Step 4 — Rename labels and section titles</h3>
+        <p>Each field in the editor has a label on the left (e.g., <code>degree</code>). You can rename it — this controls how it appears in the LaTeX output. You can also set a custom <strong>Output title</strong> for each section (e.g., rename <em>education</em> to <em>Academic Training</em>).</p>
+      </div>
+      <div class="help-section">
+        <h3>Step 5 — Preview the LaTeX</h3>
+        <p>Click the <strong>LaTeX</strong> tab at the top of the workspace to see the generated <code>.tex</code> source in real time. Use the <strong>JSON</strong> tab to inspect the raw data structure.</p>
+      </div>
+      <div class="help-section">
+        <h3>Step 6 — Save your progress</h3>
+        <p>Use <strong>File &rarr; Export data (JSON)</strong> regularly to save your work as a <code>.json</code> file. The banner at the top of the sidebar turns <span style="color:var(--color-error);font-weight:700">red</span> whenever there are unsaved changes — it turns <span style="color:var(--color-success);font-weight:700">green</span> once you export. Next time, reload this file with <strong>File &rarr; Upload data&hellip;</strong></p>
+      </div>
+      <div class="help-section">
+        <h3>Step 7 — Download the LaTeX file</h3>
+        <p>When your CV is ready, go to <strong>File &rarr; Download .tex</strong> to get the compiled LaTeX file. Open it in <a href="https://www.overleaf.com" target="_blank" rel="noopener">Overleaf</a> or compile locally with TeX Live / MiKTeX. The document requires the <code>moderncv</code> package.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Version modal -->
 <div id="versionModal" class="modal-backdrop" aria-hidden="true">
@@ -442,8 +534,13 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 </div>
 
 <script>
-var APP_VERSION = '0.1.0';
+var APP_VERSION = '0.1.1';
 var CHANGELOG = [
+  {version:'0.1.1', changes:[
+    'File → New CV: opens a welcome modal explaining the app and lets you start from a blank template.',
+    'Help → How to create your CV from scratch: step-by-step guide modal.',
+    'Smart dirty tracking: banner compares current JSON against last saved/uploaded snapshot — undoing edits back to saved state restores the green clean indicator.'
+  ]},
   {version:'0.1.0', changes:[
     'Help menu added with two submenus: How to use CV Builder and How to use Templates.',
     'Each Help submenu opens a detailed instructional modal.',
@@ -510,13 +607,12 @@ function texEscape(s){
     .replace(/\^/g,'\\textasciicircum{}');
 }
 
-/* ── dirty tracking ── */
-function markDirty(){
-  if(!state.dirty){ state.dirty=true; renderBanner(); }
-}
-function markClean(){
-  state.dirty=false; renderBanner();
-}
+/* ── dirty tracking (snapshot-based) ── */
+var savedSnapshot = '';
+function currentSnapshot(){ return JSON.stringify(data); }
+function markDirty(){ renderBanner(); }
+function markClean(){ savedSnapshot=currentSnapshot(); renderBanner(); }
+function isDirty(){ return savedSnapshot !== currentSnapshot(); }
 function renderBanner(){
   var b=el('unsavedBanner'), ico=el('bannerIcon'), txt=el('bannerText');
   if(!Object.keys(data).length){
@@ -525,7 +621,7 @@ function renderBanner(){
     txt.textContent='No data loaded';
     return;
   }
-  if(state.dirty){
+  if(isDirty()){
     b.className='dirty';
     ico.innerHTML='<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
     txt.textContent='Unsaved changes — export your JSON!';
@@ -948,6 +1044,21 @@ el('fileMenuBtn').onclick=function(e){ e.stopPropagation(); toggleDropdown('file
 el('tplMenuBtn').onclick=function(e){ e.stopPropagation(); toggleDropdown('tplDropdown'); };
 el('helpMenuBtn').onclick=function(e){ e.stopPropagation(); toggleDropdown('helpDropdown'); };
 
+
+var BLANK_CV = {
+  "basics": {"firstname":"","lastname":"","title":"","email":"","homepage":"","location":"","photo":"","research_interests":""},
+  "education": [{"degree":"","institution":"","start":"","end":"","description":"","dissertation":"","selected":true}],
+  "research_experience": [{"organization":"","role":"","start":"","end":"","description":"","selected":true}],
+  "work_experience": [{"role":"","department":"","organization":"","start":"","end":"","description":"","selected":true}],
+  "teaching_experience": [{"course_area":"","institution":"","level":"","courses":[],"selected":true}],
+  "publications": [{"authors":"","title":"","venue":"","year":"","selected":true}],
+  "abstracts": [{"authors":"","title":"","venue":"","year":"","type":"","selected":true}],
+  "awards": [{"category":"","description":"","year":"","selected":true}],
+  "continuing_education": [{"type":"","title":"","year":"","details":"","selected":true}],
+  "skills": {"programming":[],"tools":[]},
+  "languages": [{"language":"","proficiency":"","selected":true}]
+};
+
 /* ── File menu ── */
 el('uploadDataBtn').onclick=function(){
   closeAllDropdowns(); el('fileInput').value=''; el('fileInput').click();
@@ -1046,6 +1157,26 @@ el('helpTemplatesBtn').onclick=function(){ closeAllDropdowns(); openModal('helpT
 el('closeHelpTemplatesModal').onclick=function(){ closeModal('helpTemplatesModal'); };
 el('helpTemplatesModal').onclick=function(e){ if(e.target===el('helpTemplatesModal')) closeModal('helpTemplatesModal'); };
 
+/* ── New CV modal ── */
+el('newCvBtn').onclick=function(){
+  closeAllDropdowns(); openModal('newCvModal');
+};
+el('closeNewCvModal').onclick=function(){ closeModal('newCvModal'); };
+el('closeNewCvModalBtn').onclick=function(){ closeModal('newCvModal'); };
+el('newCvModal').onclick=function(e){ if(e.target===el('newCvModal')) closeModal('newCvModal'); };
+el('startBlankCvBtn').onclick=function(){
+  data=JSON.parse(JSON.stringify(BLANK_CV));
+  state.sections={}; state.propertyNames={};
+  state.activeSection=Object.keys(data)[0]||'';
+  markClean(); renderAll(); closeModal('newCvModal');
+};
+
+/* ── Help: Scratch modal ── */
+el('helpScratchBtn').onclick=function(){ closeAllDropdowns(); openModal('helpScratchModal'); };
+el('closeHelpScratchModal').onclick=function(){ closeModal('helpScratchModal'); };
+el('helpScratchModal').onclick=function(e){ if(e.target===el('helpScratchModal')) closeModal('helpScratchModal'); };
+
+
 /* ── tabs ── */
 document.querySelectorAll('.tab').forEach(function(btn){
   btn.onclick=function(){
@@ -1065,7 +1196,7 @@ el('versionModal').onclick=function(e){ if(e.target===el('versionModal')) closeM
 
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
-    ['versionModal','editTemplateModal','editMappersModal','helpUsageModal','helpTemplatesModal'].forEach(closeModal);
+    ['versionModal','editTemplateModal','editMappersModal','helpUsageModal','helpTemplatesModal','newCvModal','helpScratchModal'].forEach(closeModal);
   }
 });
 
