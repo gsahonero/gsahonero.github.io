@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MRI Physics Demo — Step 2</title>
+  <title>MRI Physics Demo — Step 3</title>
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=boska@400,500,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./style.css" />
@@ -32,159 +32,49 @@
 
     <main class="layout">
       <aside class="panel controls-panel" aria-label="Controls">
-        <details class="tool-panel" open>
-          <summary>Scenario and ensemble</summary>
-          <div class="tool-panel-body">
-            <div class="segmented" role="tablist" aria-label="Scenario selector">
-              <button class="segment is-active" type="button" data-scenario="single" role="tab" aria-selected="true">Single</button>
-              <button class="segment" type="button" data-scenario="line" role="tab" aria-selected="false">1D</button>
-              <button class="segment" type="button" data-scenario="grid" role="tab" aria-selected="false">2D</button>
-            </div>
-            <label class="field">
-              <span>1D/2D count</span>
-              <input id="isoCount" type="range" min="1" max="16" value="7" step="1" />
-              <strong id="isoCountValue">7</strong>
-            </label>
-            <label class="field inline-field">
-              <span>1D orientation</span>
-              <select id="lineOrientation">
-                <option value="horizontal">Horizontal</option>
-                <option value="vertical">Vertical</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Initial phase spread (deg)</span>
-              <input id="initialPhaseSpread" type="range" min="0" max="180" value="0" step="1" />
-              <strong id="initialPhaseSpreadValue">0</strong>
-            </label>
+        <details class="tool-panel" open><summary>Scenario and ensemble</summary><div class="tool-panel-body">
+          <div class="segmented" role="tablist" aria-label="Scenario selector">
+            <button class="segment is-active" type="button" data-scenario="single" role="tab" aria-selected="true">Single</button>
+            <button class="segment" type="button" data-scenario="line" role="tab" aria-selected="false">1D</button>
+            <button class="segment" type="button" data-scenario="grid" role="tab" aria-selected="false">2D</button>
           </div>
-        </details>
-
-        <details class="tool-panel" open>
-          <summary>Field and tissue</summary>
-          <div class="tool-panel-body">
-            <label class="field inline-field">
-              <span>Tissue preset</span>
-              <select id="tissuePreset">
-                <option value="generic">Generic</option>
-                <option value="water">Water-like</option>
-                <option value="fat">Fat-like</option>
-                <option value="shortT2">Short T2</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>B0 scale</span>
-              <input id="b0Scale" type="range" min="0" max="2" value="1" step="0.01" />
-              <strong id="b0ScaleValue">1.00</strong>
-            </label>
-            <label class="field">
-              <span>T1 (ms)</span>
-              <input id="t1" type="range" min="50" max="5000" value="1200" step="10" />
-              <strong id="t1Value">1200</strong>
-            </label>
-            <label class="field">
-              <span>T2 (ms)</span>
-              <input id="t2" type="range" min="5" max="3000" value="120" step="5" />
-              <strong id="t2Value">120</strong>
-            </label>
-            <label class="field">
-              <span>Off-resonance span (Hz)</span>
-              <input id="offRes" type="range" min="0" max="120" value="18" step="1" />
-              <strong id="offResValue">18</strong>
-            </label>
-          </div>
-        </details>
-
-        <details class="tool-panel" open>
-          <summary>RF control</summary>
-          <div class="tool-panel-body">
-            <label class="field">
-              <span>Flip angle (deg)</span>
-              <input id="flipAngle" type="range" min="0" max="180" value="90" step="1" />
-              <strong id="flipAngleValue">90</strong>
-            </label>
-            <label class="field">
-              <span>RF phase (deg)</span>
-              <input id="rfPhase" type="range" min="-180" max="180" value="0" step="1" />
-              <strong id="rfPhaseValue">0</strong>
-            </label>
-            <label class="field">
-              <span>Soft RF duration (ms)</span>
-              <input id="softDuration" type="range" min="1" max="100" value="24" step="1" />
-              <strong id="softDurationValue">24</strong>
-            </label>
-            <div class="button-row">
-              <button class="button button-primary" id="applyHardPulse" type="button">Apply hard pulse</button>
-              <button class="button" id="applySoftPulse" type="button">Soft pulse</button>
-            </div>
-          </div>
-        </details>
-
-        <details class="tool-panel" open>
-          <summary>Gradients and acquisition</summary>
-          <div class="tool-panel-body">
-            <label class="field">
-              <span>Gx amplitude (Hz / normalized unit)</span>
-              <input id="gradX" type="range" min="-80" max="80" value="0" step="1" />
-              <strong id="gradXValue">0</strong>
-            </label>
-            <label class="field">
-              <span>Gy amplitude (Hz / normalized unit)</span>
-              <input id="gradY" type="range" min="-80" max="80" value="0" step="1" />
-              <strong id="gradYValue">0</strong>
-            </label>
-            <label class="field">
-              <span>Gz amplitude (Hz / normalized unit)</span>
-              <input id="gradZ" type="range" min="-80" max="80" value="0" step="1" />
-              <strong id="gradZValue">0</strong>
-            </label>
-            <label class="field">
-              <span>Gradient duration (ms)</span>
-              <input id="gradDuration" type="range" min="1" max="120" value="20" step="1" />
-              <strong id="gradDurationValue">20</strong>
-            </label>
-            <div class="button-grid two-cols">
-              <button class="button" id="applyGradX" type="button">Apply Gx</button>
-              <button class="button" id="applyGradY" type="button">Apply Gy</button>
-              <button class="button" id="applyGradZ" type="button">Apply Gz</button>
-              <button class="button" id="zeroGradients" type="button">Zero queued grads</button>
-            </div>
-          </div>
-        </details>
-
-        <details class="tool-panel" open>
-          <summary>Sequence actions</summary>
-          <div class="tool-panel-body">
-            <div class="button-stack">
-              <button class="button" id="runFID" type="button">Run FID</button>
-              <button class="button" id="runSpinEcho" type="button">Run spin echo line</button>
-              <button class="button" id="runGradientEcho" type="button">Run gradient echo line</button>
-              <button class="button" id="pauseToggle" type="button">Pause</button>
-              <button class="button" id="resetState" type="button">Reset equilibrium</button>
-            </div>
-          </div>
-        </details>
-
-        <details class="tool-panel" open>
-          <summary>Project state</summary>
-          <div class="tool-panel-body">
-            <div class="button-stack">
-              <button class="button" id="saveAnimation" type="button">Save animation</button>
-              <button class="button" id="loadAnimation" type="button">Load animation</button>
-              <button class="button" id="undoStep" type="button">Undo</button>
-              <button class="button" id="redoStep" type="button">Redo</button>
-            </div>
-            <input id="loadInput" type="file" accept="application/json" class="hidden-input" />
-          </div>
-        </details>
+          <label class="field"><span>1D/2D count</span><input id="isoCount" type="range" min="1" max="24" value="7" step="1" /><strong id="isoCountValue">7</strong></label>
+          <label class="field inline-field"><span>1D axis</span><select id="lineAxis"><option value="x">X</option><option value="y">Y</option><option value="z">Z</option></select></label>
+          <label class="field"><span>Initial phase spread (deg)</span><input id="initialPhaseSpread" type="range" min="0" max="180" value="0" step="1" /><strong id="initialPhaseSpreadValue">0</strong></label>
+          <label class="field"><span>Space panel scale</span><input id="spaceScale" type="range" min="0.4" max="3" value="1" step="0.05" /><strong id="spaceScaleValue">1.00</strong></label>
+        </div></details>
+        <details class="tool-panel" open><summary>Field and tissue</summary><div class="tool-panel-body">
+          <label class="field inline-field"><span>Tissue preset</span><select id="tissuePreset"><option value="generic">Generic</option><option value="water">Water-like</option><option value="fat">Fat-like</option><option value="shortT2">Short T2</option></select></label>
+          <label class="field"><span>B0 scale</span><input id="b0Scale" type="range" min="0" max="2" value="1" step="0.01" /><strong id="b0ScaleValue">1.00</strong></label>
+          <label class="field"><span>T1 (ms)</span><input id="t1" type="range" min="50" max="5000" value="1200" step="10" /><strong id="t1Value">1200</strong></label>
+          <label class="field"><span>T2 (ms)</span><input id="t2" type="range" min="5" max="3000" value="120" step="5" /><strong id="t2Value">120</strong></label>
+          <label class="field"><span>Off-resonance span (Hz)</span><input id="offRes" type="range" min="0" max="120" value="18" step="1" /><strong id="offResValue">18</strong></label>
+        </div></details>
+        <details class="tool-panel" open><summary>RF control</summary><div class="tool-panel-body">
+          <label class="field"><span>Flip angle (deg)</span><input id="flipAngle" type="range" min="0" max="180" value="90" step="1" /><strong id="flipAngleValue">90</strong></label>
+          <label class="field"><span>RF phase (deg)</span><input id="rfPhase" type="range" min="-180" max="180" value="0" step="1" /><strong id="rfPhaseValue">0</strong></label>
+          <label class="field"><span>Soft RF duration (ms)</span><input id="softDuration" type="range" min="1" max="100" value="24" step="1" /><strong id="softDurationValue">24</strong></label>
+          <div class="button-row"><button class="button button-primary" id="applyHardPulse" type="button">Apply hard pulse</button><button class="button" id="applySoftPulse" type="button">Soft pulse</button></div>
+        </div></details>
+        <details class="tool-panel" open><summary>Gradients and acquisition</summary><div class="tool-panel-body">
+          <label class="field"><span>Gx amplitude (Hz / unit)</span><input id="gradX" type="range" min="-80" max="80" value="0" step="1" /><strong id="gradXValue">0</strong></label>
+          <label class="field"><span>Gy amplitude (Hz / unit)</span><input id="gradY" type="range" min="-80" max="80" value="0" step="1" /><strong id="gradYValue">0</strong></label>
+          <label class="field"><span>Gz amplitude (Hz / unit)</span><input id="gradZ" type="range" min="-80" max="80" value="0" step="1" /><strong id="gradZValue">0</strong></label>
+          <label class="field"><span>Gradient duration (ms)</span><input id="gradDuration" type="range" min="1" max="120" value="20" step="1" /><strong id="gradDurationValue">20</strong></label>
+          <div class="button-grid two-cols"><button class="button" id="applyGradX" type="button">Apply Gx</button><button class="button" id="applyGradY" type="button">Apply Gy</button><button class="button" id="applyGradZ" type="button">Apply Gz</button><button class="button" id="zeroGradients" type="button">Zero queued grads</button></div>
+        </div></details>
+        <details class="tool-panel" open><summary>Time and scale</summary><div class="tool-panel-body">
+          <label class="field"><span>Simulation speed</span><input id="timeScale" type="range" min="0.05" max="4" value="1" step="0.05" /><strong id="timeScaleValue">1.00×</strong></label>
+          <label class="field"><span>Time display window (ms)</span><input id="timeWindow" type="range" min="40" max="2000" value="320" step="10" /><strong id="timeWindowValue">320</strong></label>
+          <label class="field"><span>Signal gain</span><input id="signalGain" type="range" min="0.25" max="8" value="1" step="0.05" /><strong id="signalGainValue">1.00×</strong></label>
+          <label class="field"><span>Isochromat scale</span><input id="isoMagScale" type="range" min="10" max="140" value="42" step="1" /><strong id="isoMagScaleValue">42</strong></label>
+        </div></details>
+        <details class="tool-panel" open><summary>Sequence actions</summary><div class="tool-panel-body"><div class="button-stack"><button class="button" id="runFID" type="button">Run FID</button><button class="button" id="runSpinEcho" type="button">Run spin echo line</button><button class="button" id="runGradientEcho" type="button">Run gradient echo line</button><button class="button" id="pauseToggle" type="button">Pause</button><button class="button" id="resetState" type="button">Reset equilibrium</button></div></div></details>
+        <details class="tool-panel" open><summary>Project state</summary><div class="tool-panel-body"><div class="button-stack"><button class="button" id="saveAnimation" type="button">Save animation</button><button class="button" id="loadAnimation" type="button">Load animation</button><button class="button" id="undoStep" type="button">Undo</button><button class="button" id="redoStep" type="button">Redo</button></div><input id="loadInput" type="file" accept="application/json" class="hidden-input" /></div></details>
       </aside>
-
       <section class="panel stage-panel">
         <div class="stage-toolbar">
-          <div>
-            <p class="eyebrow">Lab-frame animation</p>
-            <h2>Magnetization state</h2>
-          </div>
+          <div><p class="eyebrow">Lab-frame animation</p><h2>Magnetization state</h2></div>
           <div class="status-grid" aria-live="polite">
             <div class="status-card"><span>Time</span><strong id="timeValue">0.0 ms</strong></div>
             <div class="status-card"><span>|Mxy|</span><strong id="mxyValue">0.000</strong></div>
@@ -195,59 +85,19 @@
             <div class="status-card"><span>kZ</span><strong id="kzValue">0.000</strong></div>
           </div>
         </div>
-
         <div class="viewport-tools">
-          <div class="zoom-cluster">
-            <button class="button" id="zoomOut" type="button">−</button>
-            <label class="field compact-field viewport-range">
-              <span>Isochromat zoom</span>
-              <input id="isoZoom" type="range" min="0.5" max="6" value="1" step="0.05" />
-            </label>
-            <button class="button" id="zoomIn" type="button">+</button>
-            <button class="button" id="resetView" type="button">Reset view</button>
-          </div>
-          <p class="hint">Wheel or pinch-like trackpad motion zooms. Drag inside the ensemble view to pan.</p>
+          <div class="zoom-cluster"><button class="button" id="zoomOut" type="button">−</button><label class="field compact-field viewport-range"><span>Isochromat zoom</span><input id="isoZoom" type="range" min="0.5" max="6" value="1" step="0.05" /></label><button class="button" id="zoomIn" type="button">+</button><button class="button" id="resetView" type="button">Reset view</button></div>
+          <p class="hint">Wheel zooms. Drag inside the ensemble view to pan.</p>
         </div>
-
-        <div class="canvas-stack">
-          <canvas id="mainCanvas" width="1200" height="760" aria-label="MRI magnetization visualization"></canvas>
-          <div class="canvas-legend">
-            <span><i class="dot dot-z"></i> Mz</span>
-            <span><i class="dot dot-xy"></i> Mxy projection</span>
-            <span><i class="dot dot-net"></i> Net magnetization</span>
-            <span><i class="dot dot-g"></i> Active gradients</span>
-          </div>
-        </div>
+        <div class="canvas-stack"><canvas id="mainCanvas" width="1200" height="760" aria-label="MRI magnetization visualization"></canvas><div class="canvas-legend"><span><i class="dot dot-z"></i> Mz</span><span><i class="dot dot-xy"></i> Mxy projection</span><span><i class="dot dot-net"></i> Net magnetization</span><span><i class="dot dot-g"></i> Active gradients</span></div></div>
       </section>
-
       <aside class="panel side-panel">
-        <section class="section-block compact-block">
-          <div class="section-head">
-            <h2>Phase history</h2>
-            <p>Net signal and event timeline update in real time.</p>
-          </div>
-          <canvas id="signalCanvas" width="420" height="220" aria-label="Signal magnitude over time"></canvas>
-        </section>
-
-        <section class="section-block compact-block">
-          <div class="section-head">
-            <h2>Active sequence blocks</h2>
-            <p>Explicit RF, gradient, free-precession, and ADC-style scheduling.</p>
-          </div>
-          <ol class="history-list" id="queueList"></ol>
-        </section>
-
-        <section class="section-block compact-block">
-          <div class="section-head">
-            <h2>Event log</h2>
-            <p>Each RF or sequence event is timestamped for phase-history discussion.</p>
-          </div>
-          <ol class="history-list" id="historyList"></ol>
-        </section>
+        <section class="section-block compact-block"><div class="section-head"><h2>Phase history</h2><p>Net signal and event timeline update in real time.</p></div><canvas id="signalCanvas" width="420" height="220" aria-label="Signal magnitude over time"></canvas></section>
+        <section class="section-block compact-block"><div class="section-head"><h2>Active sequence blocks</h2><p>Explicit RF, gradient, free-precession, and ADC-style scheduling.</p></div><ol class="history-list" id="queueList"></ol></section>
+        <section class="section-block compact-block"><div class="section-head"><h2>Event log</h2><p>Each RF or sequence event is timestamped for phase-history discussion.</p></div><ol class="history-list" id="historyList"></ol></section>
       </aside>
     </main>
   </div>
-
   <script src="./app.js" defer></script>
 </body>
 </html>
