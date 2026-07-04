@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MRI Physics Demo — Step 1</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=boska@400,500,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#app">Skip to content</a>
+  <div class="app-shell" id="app">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" role="img" aria-label="MRI demo logo">
+            <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="4"></circle>
+            <path d="M20 39C24 27 40 27 44 39" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+            <path d="M32 16V32" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">Interactive MRI physics</p>
+          <h1>MRI magnetization playground</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Switch theme">
+          <span class="theme-icon theme-icon-sun">☀</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel controls-panel" aria-label="Controls">
+        <section class="section-block">
+          <div class="section-head">
+            <h2>Scenario</h2>
+            <p>Start with a physically consistent core: equilibrium, precession, relaxation, and phase history.</p>
+          </div>
+          <div class="segmented" role="tablist" aria-label="Scenario selector">
+            <button class="segment is-active" type="button" data-scenario="single" role="tab" aria-selected="true">Single</button>
+            <button class="segment" type="button" data-scenario="line" role="tab" aria-selected="false">1D</button>
+            <button class="segment" type="button" data-scenario="grid" role="tab" aria-selected="false">2D</button>
+          </div>
+          <label class="field">
+            <span>1D/2D count</span>
+            <input id="isoCount" type="range" min="1" max="12" value="7" step="1" />
+            <strong id="isoCountValue">7</strong>
+          </label>
+          <label class="field inline-field">
+            <span>1D orientation</span>
+            <select id="lineOrientation">
+              <option value="horizontal">Horizontal</option>
+              <option value="vertical">Vertical</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h2>Field and tissue</h2>
+            <p>B0 scales equilibrium magnetization. T1 and T2 evolve each isochromat continuously in the lab frame.</p>
+          </div>
+          <label class="field">
+            <span>B0 scale</span>
+            <input id="b0Scale" type="range" min="0" max="2" value="1" step="0.01" />
+            <strong id="b0ScaleValue">1.00</strong>
+          </label>
+          <label class="field">
+            <span>T1 (ms)</span>
+            <input id="t1" type="range" min="100" max="4000" value="1200" step="10" />
+            <strong id="t1Value">1200</strong>
+          </label>
+          <label class="field">
+            <span>T2 (ms)</span>
+            <input id="t2" type="range" min="20" max="2000" value="120" step="5" />
+            <strong id="t2Value">120</strong>
+          </label>
+          <label class="field">
+            <span>Off-resonance span (Hz)</span>
+            <input id="offRes" type="range" min="0" max="80" value="18" step="1" />
+            <strong id="offResValue">18</strong>
+          </label>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h2>RF pulse</h2>
+            <p>Use a flip-angle abstraction now, but the state update is still a true rotation of M about the B1 axis in the transverse plane.</p>
+          </div>
+          <label class="field">
+            <span>Flip angle (deg)</span>
+            <input id="flipAngle" type="range" min="0" max="180" value="90" step="1" />
+            <strong id="flipAngleValue">90</strong>
+          </label>
+          <label class="field">
+            <span>RF phase (deg)</span>
+            <input id="rfPhase" type="range" min="-180" max="180" value="0" step="1" />
+            <strong id="rfPhaseValue">0</strong>
+          </label>
+          <div class="button-row">
+            <button class="button button-primary" id="applyHardPulse" type="button">Apply hard pulse</button>
+            <button class="button" id="applySoftPulse" type="button">Soft pulse</button>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h2>Sequence actions</h2>
+            <p>This first version gives you FID, a basic spin echo line, and a gradient echo line with explicit event logging.</p>
+          </div>
+          <div class="button-stack">
+            <button class="button" id="runFID" type="button">Run FID</button>
+            <button class="button" id="runSpinEcho" type="button">Run spin echo line</button>
+            <button class="button" id="runGradientEcho" type="button">Run gradient echo line</button>
+            <button class="button" id="pauseToggle" type="button">Pause</button>
+            <button class="button" id="resetState" type="button">Reset equilibrium</button>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h2>Project state</h2>
+            <p>In-memory history plus export/import through JSON files, without fake placeholders.</p>
+          </div>
+          <div class="button-stack">
+            <button class="button" id="saveAnimation" type="button">Save animation</button>
+            <button class="button" id="loadAnimation" type="button">Load animation</button>
+            <button class="button" id="undoStep" type="button">Undo</button>
+            <button class="button" id="redoStep" type="button">Redo</button>
+          </div>
+          <input id="loadInput" type="file" accept="application/json" class="hidden-input" />
+        </section>
+      </aside>
+
+      <section class="panel stage-panel">
+        <div class="stage-toolbar">
+          <div>
+            <p class="eyebrow">Lab-frame animation</p>
+            <h2>Magnetization state</h2>
+          </div>
+          <div class="status-grid" aria-live="polite">
+            <div class="status-card">
+              <span>Time</span>
+              <strong id="timeValue">0.0 ms</strong>
+            </div>
+            <div class="status-card">
+              <span>|Mxy|</span>
+              <strong id="mxyValue">0.000</strong>
+            </div>
+            <div class="status-card">
+              <span>Mz</span>
+              <strong id="mzValue">1.000</strong>
+            </div>
+            <div class="status-card">
+              <span>Phase</span>
+              <strong id="phaseValue">0.0°</strong>
+            </div>
+          </div>
+        </div>
+        <div class="canvas-stack">
+          <canvas id="mainCanvas" width="1000" height="720" aria-label="MRI magnetization visualization"></canvas>
+          <div class="canvas-legend">
+            <span><i class="dot dot-z"></i> Mz</span>
+            <span><i class="dot dot-xy"></i> Mxy projection</span>
+            <span><i class="dot dot-net"></i> Net magnetization</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel side-panel">
+        <section class="section-block compact-block">
+          <div class="section-head">
+            <h2>Phase history</h2>
+            <p>Net signal and event timeline update in real time.</p>
+          </div>
+          <canvas id="signalCanvas" width="420" height="220" aria-label="Signal magnitude over time"></canvas>
+        </section>
+
+        <section class="section-block compact-block">
+          <div class="section-head">
+            <h2>Event log</h2>
+            <p>Each RF or sequence event is timestamped for phase-history discussion.</p>
+          </div>
+          <ol class="history-list" id="historyList"></ol>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
