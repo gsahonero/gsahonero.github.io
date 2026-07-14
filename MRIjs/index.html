@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRI Bloch Equation Isochromat Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Libraries via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <h1>
+                <i data-lucide="activity"></i>
+                MRI Bloch Isochromat Simulator
+            </h1>
+            <nav class="top-menu">
+                <div class="menu-item">
+                    <span class="menu-trigger">File</span>
+                    <div class="dropdown-content">
+                        <a href="#" id="menuSaveExp"><i data-lucide="download" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Save Experiment</a>
+                        <a href="#" id="menuLoadExp"><i data-lucide="upload" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Load Experiment</a>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-trigger">Settings</span>
+                    <div class="dropdown-content">
+                        <a href="#" id="menuInterfaceConfig"><i data-lucide="sliders" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Interface Configuration</a>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-trigger">Help</span>
+                    <div class="dropdown-content">
+                        <a href="#" id="menuQuickGuide"><i data-lucide="book-open" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Quick Guide</a>
+                        <a href="#" id="menuAbout"><i data-lucide="info" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>About</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="version">v1.2.0</div>
+        
+        <!-- Hidden elements for file loading -->
+        <input type="file" id="experimentFileInput" style="display:none;" accept=".json">
+    </header>
+
+    <div class="app-container">
+        <!-- 33% Left Panel: Controls -->
+        <aside class="left-panel">
+            
+            <!-- Scenario Selector -->
+            <div class="control-card">
+                <h3>Simulation Scenario</h3>
+                <div class="form-group">
+                    <label for="scenarioSelect">Pulse Sequence Scenario</label>
+                    <select id="scenarioSelect">
+                        <option value="FID">Free Induction Decay (FID)</option>
+                        <option value="GRE">Gradient Echo (GRE)</option>
+                        <option value="SE">Spin Echo (SE)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Parameters Card -->
+            <div class="control-card">
+                <h3>Sequence Parameters</h3>
+                
+                <!-- Global parameters -->
+                <div class="form-row" style="margin-bottom: 0.75rem;">
+                    <div class="form-group">
+                        <label for="simTimeInput">Sim Time (ms)</label>
+                        <input type="number" id="simTimeInput" value="300" min="10" max="2000" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="frameSelect">Frame</label>
+                        <select id="frameSelect">
+                            <option value="rotating">Rotating Frame</option>
+                            <option value="lab">Lab Frame</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Scenario dependent parameters -->
+                <div id="paramFlipGroup" class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="flipAngleInput">Excitation Flip Angle (°)</label>
+                    <input type="number" id="flipAngleInput" value="90" min="0" max="180" step="5">
+                </div>
+
+                <div id="paramTeTrGroup" class="form-row" style="display: none; margin-bottom: 0.75rem;">
+                    <div class="form-group">
+                        <label for="teInput">TE (ms)</label>
+                        <input type="number" id="teInput" value="60" min="5" max="500" step="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="trInput">TR (ms)</label>
+                        <input type="number" id="trInput" value="250" min="10" max="2000" step="10">
+                    </div>
+                </div>
+                
+                <!-- Timing warning display -->
+                <div id="parameterWarning" style="color: #f87171; font-size: 0.725rem; line-height: 1.35; margin-top: 0.5rem; display: none; align-items: flex-start; gap: 0.35rem; background: rgba(248, 113, 113, 0.08); padding: 0.45rem; border-radius: 6px; border: 1px solid rgba(248, 113, 113, 0.2);">
+                    <i data-lucide="alert-triangle" style="width: 14px; height: 14px; color: #f87171; flex-shrink: 0; margin-top: 1px;"></i>
+                    <span id="parameterWarningText"></span>
+                </div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="control-card playback-controls">
+                <h3>Animation Controls</h3>
+                <div class="media-btns">
+                    <button id="playPauseBtn" class="btn btn-primary" title="Animate Isochromats">
+                        <i data-lucide="play"></i> Animate
+                    </button>
+                    <button id="resetBtn" class="btn" title="Reset Animation">
+                        <i data-lucide="rotate-ccw"></i> Reset
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label>Playback Speed</label>
+                    <div class="btn-group" style="margin-top: 0.25rem;">
+                        <button class="btn speed-btn" data-speed="0.25">0.25x</button>
+                        <button class="btn speed-btn" data-speed="0.5">0.5x</button>
+                        <button class="btn speed-btn active" data-speed="1.0" style="border-color: var(--accent-blue);">1x</button>
+                        <button class="btn speed-btn" data-speed="2.0">2x</button>
+                        <button class="btn speed-btn" data-speed="5.0">5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Isochromats List Card -->
+            <div class="control-card" style="flex: 1; display: flex; flex-direction: column; min-height: 200px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 style="border: none; margin: 0; padding: 0;">Active Spins</h3>
+                    <div class="btn-group">
+                        <button id="addDefaultSpinBtn" class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Add spin at random position">
+                            <i data-lucide="plus" style="width: 12px; height: 12px;"></i> Add
+                        </button>
+                        <button id="clearSpinsBtn" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Clear all spins">
+                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="spin-list-container" style="flex: 1;">
+                    <table class="spin-table">
+                        <thead>
+                            <tr>
+                                <th>Spin</th>
+                                <th>Pos (x)</th>
+                                <th>T1 (ms)</th>
+                                <th>T2 (ms)</th>
+                                <th>PD</th>
+                                <th>w (Hz)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="spinListBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Physics Verification Card -->
+            <div class="control-card" style="margin-top: 0.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 style="border: none; margin: 0; padding: 0;">Physics Verification</h3>
+                    <button id="runTestsBtn" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Run physics tests">
+                        <i data-lucide="play" style="width: 12px; height: 12px;"></i> Run Tests
+                    </button>
+                </div>
+                <div id="testResultsList" style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                    <div id="testFidRow" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+                        <i data-lucide="circle-dashed" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
+                        <span>FID: Excitation & T2 Decay</span>
+                    </div>
+                    <div id="testGreRow" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+                        <i data-lucide="circle-dashed" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
+                        <span>GRE: Echo Peak at t = TE</span>
+                    </div>
+                    <div id="testSeRow" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+                        <i data-lucide="circle-dashed" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
+                        <span>SE: Spin Echo Refocus at t = TE</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- 67% Right Panel: Plots & 3D visualization -->
+        <main class="right-panel">
+            
+            <!-- Top Panel: Signal Plot & Sequence Waveforms -->
+            <section class="plot-panel">
+                <div class="panel-header">
+                    <span class="panel-header-title">
+                        <i data-lucide="trending-up" style="width:14px; height:14px;"></i>
+                        Magnetization Signal & Sequence Waveforms
+                    </span>
+                    <span id="signalTimeDisplay" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);">t = 0.0 ms</span>
+                </div>
+                <div class="chart-container-wrapper" style="display: flex; flex-direction: column; gap: 0.5rem; height: calc(100% - 24px);">
+                    <div style="flex: 1.2; position: relative; height: 60%;">
+                        <canvas id="signalChart"></canvas>
+                    </div>
+                    <div style="flex: 0.8; position: relative; height: 40%; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.25rem;">
+                        <canvas id="sequenceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom Panel: Interactive 3D Canvas -->
+            <section class="visual-panel">
+                <div class="panel-header" style="position: absolute; top: 1rem; left: 1.5rem; z-index: 10; pointer-events: none; margin-bottom: 0;">
+                    <span class="panel-header-title">
+                        <i data-lucide="eye" style="width:14px; height:14px;"></i>
+                        Spin Isochromats (3D)
+                    </span>
+                </div>
+                
+                <div id="threeCanvasContainer" class="canvas-container"></div>
+                
+                <div class="canvas-instructions">
+                    Click along the X-axis grid (horizontal line) to add a spin. Click a spin sphere to edit/remove it.
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Add/Edit Isochromat Dialog -->
+    <dialog id="spinDialog">
+        <form method="dialog" id="spinForm">
+            <h3 id="dialogTitle" style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Configure Isochromat</h3>
+            
+            <input type="hidden" id="spinIdInput">
+            
+            <div class="form-group">
+                <label for="spinXInput">Position X (spatial coordinate, -1 to 1)</label>
+                <input type="number" id="spinXInput" min="-1" max="1" step="0.1" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="spinT1Input">T1 Relaxation (ms)</label>
+                    <input type="number" id="spinT1Input" value="600" min="10" max="5000" step="50" required>
+                </div>
+                <div class="form-group">
+                    <label for="spinT2Input">T2 Relaxation (ms)</label>
+                    <input type="number" id="spinT2Input" value="80" min="5" max="1000" step="5" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="spinPdInput">Proton Density (PD)</label>
+                    <input type="number" id="spinPdInput" value="1.0" min="0.1" max="2.0" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="spinWInput">Off-Resonance w (Hz)</label>
+                    <input type="number" id="spinWInput" value="0" min="-100" max="100" step="0.5" required>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" id="deleteSpinBtn" class="btn btn-danger" style="margin-right: auto; display: none;">Delete</button>
+                <button type="button" id="cancelDialogBtn" class="btn">Cancel</button>
+                <button type="submit" id="saveSpinBtn" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Interface Settings Dialog -->
+    <dialog id="interfaceDialog" style="max-width: 320px;">
+        <form method="dialog" id="interfaceForm">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Interface Configuration</h3>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="sphereRadiusSlider">Sphere Size (Radius: <span id="sphereRadiusVal">0.08</span>)</label>
+                <input type="range" id="sphereRadiusSlider" min="0.02" max="0.30" step="0.01" value="0.08" style="width: 100%; margin-top: 0.25rem;">
+            </div>
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">Close</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Quick Guide Dialog -->
+    <dialog id="quickGuideDialog" style="max-width: 450px;">
+        <form method="dialog">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Quick Guide</h3>
+            <div style="font-size: 0.8rem; line-height: 1.4; display: flex; flex-direction: column; gap: 0.65rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                <p><strong>1. Place Spins:</strong> Click anywhere on the horizontal grid line in the bottom 3D view. A dialog will prompt you to set its $T_1$, $T_2$, Proton Density (PD), and off-resonance $\omega$ properties.</p>
+                <p><strong>2. Edit/Delete:</strong> Click directly on any spin sphere in the 3D view, or click its entry in the sidebar "Active Spins" table.</p>
+                <p><strong>3. Parameters:</strong> Adjust sequence parameters in the sidebar. The plots will recalculate immediately.</p>
+                <p><strong>4. Play Animation:</strong> Click the <strong>Animate</strong> button to watch the spins precess and decay. A vertical cursor displays progress on both signal and sequence charts.</p>
+                <p><strong>5. Verification:</strong> Click <strong>Run Tests</strong> to execute numerical physics checks against theoretical expectations.</p>
+            </div>
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">Got it</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- About Dialog -->
+    <dialog id="aboutDialog" style="max-width: 380px;">
+        <form method="dialog">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">About MRI Bloch Simulator</h3>
+            <div style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                <p style="margin-bottom: 0.5rem;"><strong>Version History:</strong></p>
+                <ul style="list-style: none; padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.0.0:</span> Core simulation engine, 3D spin visuals, and stacked charts.</li>
+                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.1.0:</span> Dynamic scenario constraints and physics verification.</li>
+                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.2.0:</span> Sequence visualizer and top-level dropdown menus.</li>
+                </ul>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.7rem; color: var(--text-muted); text-align: center; font-style: italic;">
+                Developed by G. Sahonero with antigravity help
+            </div>
+            <div class="actions" style="margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">Close</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Custom Scripts -->
+    <script src="bloch.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
