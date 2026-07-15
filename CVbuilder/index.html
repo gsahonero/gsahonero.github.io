@@ -38,7 +38,7 @@ body{margin:0;min-height:100dvh;font-family:var(--font-body);font-size:var(--tex
 button,input,textarea,select{font:inherit;color:inherit}
 a,button,input,textarea,select{transition:background var(--transition),color var(--transition),border-color var(--transition),box-shadow var(--transition)}
 button{cursor:pointer} img,svg{display:block;max-width:100%}
-input:not([type=file]):not([type=checkbox]),textarea,select{
+input:not([type=file]):not([type=checkbox]):not([type=radio]),textarea,select{
   width:100%;background:var(--color-input-bg);color:var(--color-input-text);
   border:1px solid oklch(from var(--color-text) l c h / .18);
   border-radius:var(--radius-md);padding:var(--space-3)}
@@ -96,9 +96,24 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
   border-left: 1px solid oklch(from var(--color-text) l c h / .08);
 }
 .workspace{
-  padding: var(--space-4) var(--space-5) var(--space-8);
+  padding: var(--space-4);
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+.left-pane, .right-pane {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  gap: var(--space-3);
+  padding-bottom: var(--space-8);
+}
+.right-pane {
+  border-left: 1px solid var(--color-divider);
+  padding-left: var(--space-5);
 }
 @media(max-width:1200px){
   .app{grid-template-columns:250px 1fr}
@@ -133,8 +148,20 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
     border-bottom: 1px solid oklch(from var(--color-text) l c h / .08);
   }
   .workspace{
-    height:auto;
-    overflow:visible;
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+  .left-pane, .right-pane {
+    height: auto;
+    overflow-y: visible;
+  }
+  .right-pane {
+    border-left: none;
+    padding-left: 0;
+    margin-top: var(--space-6);
+    border-top: 1px solid var(--color-divider);
+    padding-top: var(--space-6);
   }
 }
 
@@ -144,7 +171,39 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 .logo-mark svg{width:22px;height:22px;color:var(--color-primary);transition: transform 0.3s ease;}
 .logo-mark:hover svg{transform: rotate(-5deg) scale(1.05);}
 .logo-mark strong{font-family:var(--font-display);font-size:var(--text-base);font-weight:700;letter-spacing:-0.01em}
-.logo-text{display:flex;align-items:baseline;gap:var(--space-2)}
+.logo-text{display:flex;flex-direction:column;align-items:flex-start}
+.donate-link{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:10px;
+  font-weight:600;
+  color:var(--color-primary);
+  text-decoration:none;
+  margin-top:2px;
+  line-height:1;
+  transition: opacity var(--transition);
+}
+.donate-link:hover{
+  opacity: 0.85;
+  color: var(--color-primary-hover);
+}
+.coffee-icon{
+  display:inline-block;
+  transform-origin: bottom center;
+  animation: coffee-float 2.5s ease-in-out infinite alternate;
+}
+@keyframes coffee-float{
+  0% { transform: translateY(0) rotate(-3deg); }
+  100% { transform: translateY(-2px) rotate(3deg); }
+}
+.donate-link:hover .coffee-icon {
+  animation: coffee-sway 0.5s ease-in-out infinite alternate;
+}
+@keyframes coffee-sway {
+  0% { transform: rotate(-10deg) scale(1.1); }
+  100% { transform: rotate(15deg) scale(1.1); }
+}
 .version-badge{display:inline-flex;align-items:center;height:24px;padding:0 var(--space-2);border-radius:var(--radius-full);border:1px solid oklch(from var(--color-text) l c h / .14);background:var(--color-surface-offset);font-size:10px;font-weight:700;cursor:pointer;transition: all var(--transition)}
 .version-badge:hover{background:var(--color-border);transform: translateY(-1px);}
 
@@ -267,7 +326,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 .ok{color:var(--color-success)}
 
 /* Input modernizations */
-input:not([type=file]):not([type=checkbox]),textarea,select{
+input:not([type=file]):not([type=checkbox]):not([type=radio]),textarea,select{
   width:100%;background:var(--color-input-bg);color:var(--color-input-text);
   border:1px solid oklch(from var(--color-text) l c h / .14);
   border-radius:var(--radius-md);padding:var(--space-3);
@@ -295,6 +354,56 @@ input:focus,textarea:focus,select:focus{
 .outline-link.active-section{background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface-offset));border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border));color:var(--color-text);font-weight:700}
 .outline-link .olabel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .outline-link .otype{flex-shrink:0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;opacity:.45;margin-left:4px}
+
+/* ── welcome tour ── */
+.tour-highlight {
+  position: relative;
+  z-index: 1100 !important;
+  outline: 3px solid var(--color-primary) !important;
+  outline-offset: 4px;
+  box-shadow: 0 0 20px oklch(from var(--color-primary) l c h / .3) !important;
+  transition: outline 0.2s ease, box-shadow 0.2s ease;
+}
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1090;
+  pointer-events: auto;
+}
+.tour-popover {
+  position: fixed;
+  z-index: 1100;
+  width: min(340px, 90vw);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: top 0.3s ease, left 0.3s ease;
+}
+.tour-popover h4 {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.tour-popover p {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.tour-popover .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-1);
+}
 
 /* ── modals ── */
 .modal-backdrop{position:fixed;inset:0;background:rgb(0 0 0 / .4);backdrop-filter: blur(8px);-webkit-backdrop-filter: blur(8px);display:none;align-items:center;justify-content:center;padding:var(--space-4);z-index:1000;transition: all 0.3s ease;}
@@ -341,9 +450,100 @@ input:focus,textarea:focus,select:focus{
     min-height: 400px;
   }
 }
+
+/* ── loading screen ── */
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  background: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+.coffee-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.cup {
+  position: relative;
+  width: 80px;
+  height: 65px;
+  background: #f8fafc;
+  border-radius: 0 0 40px 40px;
+  border-top: 3px solid #cbd5e1;
+}
+.handle {
+  position: absolute;
+  top: 10px;
+  right: -20px;
+  width: 15px;
+  height: 30px;
+  border: 6px solid #f8fafc;
+  border-left: none;
+  border-radius: 0 15px 15px 0;
+}
+.steam-container {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+.steam {
+  width: 4px;
+  height: 20px;
+  background: rgba(248, 250, 252, 0.4);
+  border-radius: 2px;
+  animation: steam-rise 1.8s infinite ease-in-out;
+}
+.steam:nth-child(2) {
+  animation-delay: 0.6s;
+}
+.steam:nth-child(3) {
+  animation-delay: 1.2s;
+}
+@keyframes steam-rise {
+  0% {
+    transform: translateY(0) scaleY(1) skewX(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-10px) scaleY(1.3) skewX(10deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-22px) scaleY(0.8) skewX(-10deg);
+    opacity: 0;
+  }
+}
 </style>
 </head>
 <body>
+<div id="loadingScreen">
+  <div class="coffee-container">
+    <div class="steam-container">
+      <div class="steam"></div>
+      <div class="steam"></div>
+      <div class="steam"></div>
+    </div>
+    <div class="cup">
+      <div class="handle"></div>
+    </div>
+  </div>
+  <div style="font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 8px; letter-spacing: -0.01em">
+    Wait a bit, you will build your awesome CV soon...
+  </div>
+  <div style="font-size: 0.75rem; color: #94a3b8; text-align: center; max-width: 250px">
+    Please consider <a href="https://ko-fi.com/thepolygon" target="_blank" style="color:#38bdf8; text-decoration:underline; font-weight:600">donating something</a> if you liked this project! ☕
+  </div>
+</div>
 <a class="skip" href="#main">Skip to content</a>
 
 <!-- ── TOP BAR ── -->
@@ -354,6 +554,9 @@ input:focus,textarea:focus,select:focus{
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-label="CV Builder logo"><path d="M4 5h9l7 7v7H4z"/><path d="M13 5v7h7"/><path d="M7 15h10M7 11h5"/></svg>
         <div class="logo-text">
           <strong>CV Builder</strong>
+          <a href="https://ko-fi.com/thepolygon" target="_blank" class="donate-link" aria-label="Donate if you like via Ko-fi">
+            Donate if you like <span class="coffee-icon">☕</span>
+          </a>
         </div>
       </div>
     </div>
@@ -415,6 +618,9 @@ input:focus,textarea:focus,select:focus{
           <button class="dropitem" id="editMappersBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Edit mappers
           </button>
+          <button class="dropitem" id="stylePresetsBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Style presets gallery...
+          </button>
           <div class="drop-divider"></div>
           <button class="dropitem" id="saveStyleAsBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2v5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Style As...
@@ -450,19 +656,32 @@ input:focus,textarea:focus,select:focus{
           <button class="dropitem" id="helpTemplatesBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>How to use Templates
           </button>
+          <button class="dropitem" id="helpTourBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V21h2v-5.464"/></svg>Welcome Tour Guide
+          </button>
         </div>
       </div>
     </nav>
   </div>
 
   <div class="topbar-right">
+    <!-- Language Selector -->
+    <div style="display:flex; align-items:center; gap:var(--space-1)">
+      <span class="tiny muted" style="font-weight:600">Lang:</span>
+      <select id="langFilterSelect" style="height:28px; padding:0 6px; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface-offset); font-size:var(--text-xs); font-weight:600; cursor:pointer; color:var(--color-text)">
+        <option value="all">All</option>
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+      </select>
+    </div>
+
     <!-- Unsaved changes banner -->
     <div id="unsavedBanner" class="clean" role="status" aria-live="polite">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" id="bannerIcon"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg>
       <span id="bannerText">No unsaved changes</span>
     </div>
 
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.3.1</button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.4.5</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme">&#9790;</button>
   </div>
 </header>
@@ -484,54 +703,70 @@ input:focus,textarea:focus,select:focus{
   </aside>
 
   <!-- ── MAIN WORKSPACE ── -->
-  <main id="main" class="workspace">
-    <div class="tabs">
-      <button class="tab active" data-tab="editor">Editor</button>
-      <button class="tab" data-tab="latex">LaTeX</button>
-      <button class="tab" data-tab="html">HTML</button>
-      <button class="tab" data-tab="schema">JSON</button>
-    </div>
-    <section id="editorTab"></section>
-    
-    <section id="latexTab" class="hidden">
-      <div class="split-editor">
-        <div class="editor-pane">
-          <div class="split" style="margin-bottom: var(--space-2)">
-            <div class="sectiontitle">LaTeX Template</div>
-            <button class="btn btn-ghost" id="resetLatexTplBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Reset to Default</button>
-          </div>
-          <textarea id="latexTplEditor" spellcheck="false" placeholder="LaTeX Template with placeholders..."></textarea>
+  <main id="main" class="workspace split-workspace">
+    <!-- Left Pane (Form/Template Editors) -->
+    <div class="left-pane stack">
+      <div class="tabs">
+        <button class="tab active" data-tab="editor">Form Editor</button>
+        <button class="tab" data-tab="latex">LaTeX Template</button>
+        <button class="tab" data-tab="html">HTML Template</button>
+      </div>
+      <div id="editorTab" class="stack"></div>
+      
+      <div id="latexTab" class="stack hidden" style="display:flex; flex-direction:column; flex:1">
+        <div class="split" style="margin-bottom: var(--space-2)">
+          <div class="sectiontitle">LaTeX Template</div>
+          <button class="btn btn-ghost" id="resetLatexTplBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Reset Default</button>
         </div>
-        <div class="preview-pane">
-          <div class="split" style="margin-bottom: var(--space-2)">
-            <div class="sectiontitle">Rendered LaTeX Code</div>
+        <textarea id="latexTplEditor" spellcheck="false" placeholder="LaTeX Template with placeholders..." style="flex:1; min-height: 450px; font-family: monospace; font-size: 13px"></textarea>
+      </div>
+      
+      <div id="htmlTab" class="stack hidden" style="display:flex; flex-direction:column; flex:1">
+        <div class="split" style="margin-bottom: var(--space-2)">
+          <div class="sectiontitle">HTML Template</div>
+          <button class="btn btn-ghost" id="resetHtmlTplBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Reset Default</button>
+        </div>
+        <textarea id="htmlTplEditor" spellcheck="false" placeholder="HTML Template with placeholders..." style="flex:1; min-height: 450px; font-family: monospace; font-size: 13px"></textarea>
+      </div>
+    </div>
+
+    <!-- Right Pane (Live Previews) -->
+    <div class="right-pane stack">
+      <div class="tabs">
+        <button class="tab active" data-tab="html-prev">HTML Preview</button>
+        <button class="tab" data-tab="latex-prev">LaTeX Code</button>
+        <button class="tab" data-tab="json-prev">JSON Database</button>
+      </div>
+      
+      <!-- HTML Preview Panel -->
+      <div id="htmlPrevTab" class="stack" style="flex:1; display:flex; flex-direction:column">
+        <div class="split" style="margin-bottom: var(--space-2)">
+          <div class="sectiontitle">Live HTML Preview</div>
+          <button class="btn btn-ghost" id="openHtmlWindowBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Open in New Window</button>
+        </div>
+        <iframe id="htmlPreviewFrame" sandbox="allow-scripts" srcdoc="Loading preview..." style="flex:1; width: 100%; min-height: 450px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: white; margin:0"></iframe>
+      </div>
+      
+      <!-- LaTeX Source Panel -->
+      <div id="latexPrevTab" class="stack hidden" style="flex:1; display:flex; flex-direction:column">
+        <div class="split" style="margin-bottom: var(--space-2)">
+          <div class="sectiontitle">Rendered LaTeX Code</div>
+          <div style="display:flex; gap:var(--space-2)">
+            <button class="btn btn-ghost" id="downloadPdfBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Download PDF</button>
             <button class="btn btn-primary" id="copyLatexCodeBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Copy Code</button>
           </div>
-          <div id="latexPreview" class="preview" style="flex:1; overflow:auto; margin:0"></div>
         </div>
+        <div id="latexPreview" class="preview" style="flex:1; min-height: 450px; overflow:auto; margin:0; padding:var(--space-3); border:1px solid var(--color-border); border-radius:var(--radius-lg); background:var(--color-surface-offset); font-family:monospace; white-space:pre-wrap"></div>
       </div>
-    </section>
-
-    <section id="htmlTab" class="hidden">
-      <div class="split-editor">
-        <div class="editor-pane">
-          <div class="split" style="margin-bottom: var(--space-2)">
-            <div class="sectiontitle">HTML Template</div>
-            <button class="btn btn-ghost" id="resetHtmlTplBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Reset to Default</button>
-          </div>
-          <textarea id="htmlTplEditor" spellcheck="false" placeholder="HTML Template with placeholders..."></textarea>
+      
+      <!-- JSON Schema Panel -->
+      <div id="jsonPrevTab" class="stack hidden" style="flex:1; display:flex; flex-direction:column">
+        <div class="split" style="margin-bottom: var(--space-2)">
+          <div class="sectiontitle">JSON Database</div>
         </div>
-        <div class="preview-pane">
-          <div class="split" style="margin-bottom: var(--space-2)">
-            <div class="sectiontitle">Live HTML Preview</div>
-            <button class="btn btn-ghost" id="openHtmlWindowBtn" style="min-height:30px; height:30px; padding:2px 8px; font-size:var(--text-xs)">Open in New Window</button>
-          </div>
-          <iframe id="htmlPreviewFrame" sandbox="allow-scripts" srcdoc="Loading preview..." style="flex:1; width: 100%; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: white; margin:0"></iframe>
-        </div>
+        <div id="schemaPreview" class="preview" style="flex:1; min-height: 450px; overflow:auto; margin:0; padding:var(--space-3); border:1px solid var(--color-border); border-radius:var(--radius-lg); background:var(--color-surface-offset); font-family:monospace; white-space:pre"></div>
       </div>
-    </section>
-
-    <section id="schemaTab" class="hidden"><div id="schemaPreview" class="preview"></div></section>
+    </div>
   </main>
 
   <!-- ── RIGHT OUTLINE ── -->
@@ -674,6 +909,21 @@ input:focus,textarea:focus,select:focus{
   </div>
 </div>
 
+<!-- Preset Gallery Modal -->
+<div id="presetGalleryModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="presetGalleryTitleLbl">
+    <header>
+      <strong id="presetGalleryTitleLbl">Style Presets Gallery</strong>
+      <button class="iconbtn" id="closePresetGalleryModal" aria-label="Close">&#x2715;</button>
+    </header>
+    <div class="body stack">
+      <div class="tiny">Select a style preset to instantly apply its LaTeX and HTML templates to your active style configuration.</div>
+      <div id="presetGalleryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:var(--space-4); margin-top:var(--space-2)">
+        <!-- Dynamically populated presets -->
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Help: How to create your CV from scratch -->
 <div id="helpScratchModal" class="modal-backdrop" aria-hidden="true">
@@ -892,8 +1142,34 @@ input:focus,textarea:focus,select:focus{
 </div>
 
 <script>
-var APP_VERSION = '0.3.1';
+var APP_VERSION = '0.4.5';
 var CHANGELOG = [
+  {version:'0.4.5', changes:[
+    'Ko-fi Donation Integrations: Added donation hyperlinks linking to Ko-fi (https://ko-fi.com/thepolygon) in the loading screen and top-left header logo text with an animated sway-float coffee cup icon.'
+  ]},
+  {version:'0.4.4', changes:[
+    'Help Menu Tour Restart Option: Renamed the Help menu option to "Welcome Tour Guide" and updated the last step instructions of the tour guide so users can easily rerun the tour.'
+  ]},
+  {version:'0.4.3', changes:[
+    'LaTeX CGI Compiler Integration: Replaced latexonline.cc POST endpoint with a robust texlive.net multipart/form-data cgi-bin POST compiler to fix pdf export.',
+    'Welcome Tour Prev Navigation: Added a Prev button to the welcome tour floating wizard popover card.',
+    'Pre-populated Professional Defaults: Configured basic (professional) CV preset with realistic details as the default database on first launch.'
+  ]},
+  {version:'0.4.2', changes:[
+    'Premium Loading Screen: Added a custom coffee cup steam-rising animation loading screen on initial load.',
+    'Radio Button Size Fix: Fixed a CSS selector bug that was stretching radio inputs to 100% width, making preset labels readable.',
+    'Modal Overlap Correction: Fixed modal stacking by closing the Manage CV Databases dialog before opening the Create New CV modal.'
+  ]},
+  {version:'0.4.1', changes:[
+    'Welcome Guided Tour Assistant: Interactive floating popover wizard highlighting key interface components for first-time users (auto-runs on first load, manually triggerable from the Help menu).'
+  ]},
+  {version:'0.4.0', changes:[
+    'Split-Pane Workspace Layout: Real-time side-by-side editing Form Editor (left) and previews (right) on desktop viewports.',
+    'Style Presets Gallery: Instantly apply Classic Academic, Corporate Blue, or Minimalist Tech layouts to style configurations.',
+    'Live LaTeX PDF Compiler: Integrates with latexonline.cc API to compile and download PDF document streams instantly in-app.',
+    'List Entry Sorting: Added Up (↑) and Down (↓) reordering buttons to list entry cards for sorting list items.',
+    'Bilingual Multi-Language Support: Added a Language dropdown per entry (All, EN, ES) and a global Language filter selector in the header.'
+  ]},
   {version:'0.3.1', changes:[
     'Fixed live HTML template rendering bug with dot path sections (e.g. basics.email) and parent context resolution.',
     'Streamlined Style definition to strictly LaTeX and HTML templates (removing confusing metadata modal).',
@@ -956,7 +1232,7 @@ var CHANGELOG = [
 ];
 
 var data = {};
-var state = {sections:{}, propertyNames:{}, activeSection:'', tab:'editor', dirty:false};
+var state = {sections:{}, propertyNames:{}, activeSection:'', tab:'editor', dirty:false, langFilter:'all'};
 
 var tpl = {cvTitle:'Curriculum Vitae', style:'classic', preamble:'', footer:''};
 
@@ -1171,25 +1447,160 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
 
 // ── PRESETS & LOCAL STORAGE DATABASES ──
 var RESEARCHER_CV = {
-  "basics": {"firstname":"","lastname":"","title":"","email":"","homepage":"","location":"","photo":"","research_interests":""},
-  "education": [{"degree":"","institution":"","start":"","end":"","description":"","dissertation":"","selected":true}],
-  "research_experience": [{"organization":"","role":"","start":"","end":"","description":"","selected":true}],
-  "work_experience": [{"role":"","department":"","organization":"","start":"","end":"","description":"","selected":true}],
-  "teaching_experience": [{"course_area":"","institution":"","level":"","courses":[],"selected":true}],
-  "publications": [{"authors":"","title":"","venue":"","year":"","selected":true}],
-  "abstracts": [{"authors":"","title":"","venue":"","year":"","type":"","selected":true}],
-  "awards": [{"category":"","description":"","year":"","selected":true}],
-  "continuing_education": [{"type":"","title":"","year":"","details":"","selected":true}],
-  "skills": {"programming":[],"tools":[]},
-  "languages": [{"language":"","proficiency":"","selected":true}]
+  "basics": {
+    "firstname": "Guillermo",
+    "lastname": "Sahonero",
+    "title": "Computer Science Researcher",
+    "email": "guillermo@example.com",
+    "homepage": "sahonero.github.io",
+    "location": "La Paz, Bolivia",
+    "photo": "",
+    "research_interests": "Focusing on distributed databases, decentralized consensus algorithms, and web application scalability."
+  },
+  "education": [
+    {
+      "degree": "Ph.D. in Computer Science",
+      "institution": "Technical University of Munich",
+      "start": "2018",
+      "end": "2022",
+      "description": "Conducted research on decentralized state machine replication.",
+      "dissertation": "Scalability Limits in Distributed Consensus Systems",
+      "selected": true
+    }
+  ],
+  "research_experience": [
+    {
+      "organization": "Max Planck Institute",
+      "role": "Postdoctoral Researcher",
+      "start": "2023",
+      "end": "Present",
+      "description": "Investigating high-throughput peer-to-peer messaging topologies.",
+      "selected": true
+    }
+  ],
+  "work_experience": [
+    {
+      "role": "Software Research Engineer",
+      "department": "R&D Lab",
+      "organization": "Antigravity Solutions",
+      "start": "2022",
+      "end": "2023",
+      "description": "Implemented prototypes for transactional key-value databases.",
+      "selected": true
+    }
+  ],
+  "teaching_experience": [
+    {
+      "course_area": "Distributed Systems",
+      "institution": "Technical University of Munich",
+      "level": "Graduate course",
+      "courses": ["Advanced Systems Lab", "Consensus Protocols Seminar"],
+      "selected": true
+    }
+  ],
+  "publications": [
+    {
+      "authors": "G. Sahonero, J. Doe",
+      "title": "Scalable Consensus via Optimistic Lock-Free Transactions",
+      "venue": "IEEE Transactions on Parallel & Distributed Systems",
+      "year": "2022",
+      "selected": true
+    }
+  ],
+  "abstracts": [
+    {
+      "authors": "G. Sahonero",
+      "title": "On-chain scaling boundaries for distributed ledgers",
+      "venue": "ACM SIGCOMM Poster Session",
+      "year": "2021",
+      "type": "Poster",
+      "selected": true
+    }
+  ],
+  "awards": [
+    {
+      "category": "Best Paper Award",
+      "description": "Received at IEEE TPDS for outstanding paper contributions.",
+      "year": "2022",
+      "selected": true
+    }
+  ],
+  "continuing_education": [
+    {
+      "type": "Summer School",
+      "title": "Decentralized Systems & Cryptography",
+      "year": "2020",
+      "details": "Selected attendee for a 2-week intensive course.",
+      "selected": true
+    }
+  ],
+  "skills": {
+    "programming": ["Python", "C++", "JavaScript", "Go", "LaTeX"],
+    "tools": ["Git", "Linux", "Docker", "Kubernetes"]
+  },
+  "languages": [
+    {
+      "language": "Spanish",
+      "proficiency": "Native",
+      "selected": true
+    },
+    {
+      "language": "English",
+      "proficiency": "Fluent",
+      "selected": true
+    }
+  ]
 };
 
 var BASIC_CV = {
-  "basics": {"firstname":"","lastname":"","title":"","email":"","homepage":"","location":"","photo":"","research_interests":""},
-  "education": [{"degree":"","institution":"","start":"","end":"","description":"","dissertation":"","selected":true}],
-  "work_experience": [{"role":"","department":"","organization":"","start":"","end":"","description":"","selected":true}],
-  "skills": {"programming":[],"tools":[]},
-  "languages": [{"language":"","proficiency":"","selected":true}]
+  "basics": {
+    "firstname": "Guillermo",
+    "lastname": "Sahonero",
+    "title": "Senior Software Architect",
+    "email": "guillermo@example.com",
+    "homepage": "sahonero.github.io",
+    "location": "La Paz, Bolivia",
+    "photo": "",
+    "research_interests": "Experienced software architect specialized in web technologies, distributed systems, and agentic workflows."
+  },
+  "education": [
+    {
+      "degree": "M.S. in Computer Science",
+      "institution": "Technical University of Munich",
+      "start": "2018",
+      "end": "2020",
+      "description": "Graduated with honors. Focused on software engineering and cloud systems.",
+      "dissertation": "Decoupled Web Architectures using Distributed Message Brokers",
+      "selected": true
+    }
+  ],
+  "work_experience": [
+    {
+      "role": "Lead Architect",
+      "department": "Engineering Team",
+      "organization": "Antigravity Solutions",
+      "start": "2021",
+      "end": "Present",
+      "description": "Led the development of a real-time collaborative workspace platform. Streamlined production deployments and improved response times by 40%. Managed a cross-functional team of 12 engineers.",
+      "selected": true
+    }
+  ],
+  "skills": {
+    "programming": ["JavaScript", "TypeScript", "Python", "Go", "LaTeX"],
+    "tools": ["Docker", "Kubernetes", "Git", "GitHub Actions", "Vite"]
+  },
+  "languages": [
+    {
+      "language": "Spanish",
+      "proficiency": "Native speaker",
+      "selected": true
+    },
+    {
+      "language": "English",
+      "proficiency": "Fluent / Professional",
+      "selected": true
+    }
+  ]
 };
 
 var MINIMAL_CV = {
@@ -1198,6 +1609,393 @@ var MINIMAL_CV = {
 
 var currentDbName = 'Default CV';
 var currentStyleName = 'Default Style';
+
+var STYLE_PRESETS = {
+  classic: {
+    name: "Classic Academic",
+    desc: "The default classic moderncv template with blue accents, ideal for academia and research roles.",
+    latexTemplate: DEFAULT_LATEX_TEMPLATE,
+    htmlTemplate: DEFAULT_HTML_TEMPLATE
+  },
+  corporate: {
+    name: "Corporate Blue",
+    desc: "A clean, modern corporate format with horizontal dividers, side-by-side section labels, and prominent contact details.",
+    latexTemplate: `\\documentclass[11pt,a4paper,sans]{moderncv}
+\\usepackage[utf8]{inputenc}
+\\moderncvstyle{banking}
+\\moderncvcolor{blue}
+\\usepackage[scale=0.9]{geometry}
+\\firstname{{{basics.firstname}}}
+\\familyname{{{basics.lastname}}}
+\\title{{{basics.title}}}
+{{#basics.location}}\\address{{{basics.location}}}{{/basics.location}}
+{{#basics.email}}\\email{{{basics.email}}}{{/basics.email}}
+{{#basics.homepage}}\\homepage{{{basics.homepage}}}{{/basics.homepage}}
+
+\\begin{document}
+\\makecvtitle
+\\vspace{-1.5em}
+
+{{#basics.research_interests}}
+\\section{Summary}
+\\cvitem{}{{{basics.research_interests}}}
+{{/basics.research_interests}}
+
+{{#education}}
+\\section{Education}
+\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{}{{{description}}}
+{{/education}}
+
+{{#work_experience}}
+\\section{Experience}
+\\cventry{{{date_dash}}}{{{role}}}{{{organization}}}{{{department}}}{}{{{description}}}
+{{/work_experience}}
+
+{{#publications}}
+\\section{Publications}
+\\cvitem{-}{{{{authors}}}. \\textquotedblleft {{{title}}}.\textquotedblright\\ \\textit{{{{venue}}}}. {{{year}}}.}
+{{/publications}}
+
+{{#skills}}
+\\section{Skills}
+\\cvitem{{{group}}}{{{items_csv}}}
+{{/skills}}
+
+{{#languages}}
+\\section{Languages}
+\\cvitem{{{language}}}{{{proficiency_desc}}}
+{{/languages}}
+
+\\end{document}`,
+    htmlTemplate: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{{basics.firstname}} {{basics.lastname}} - Resume</title>
+<style>
+  body {
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    background: #f8fafc;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+  .header-banner {
+    background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-bottom: 5px solid #3b82f6;
+  }
+  .header-banner h1 {
+    font-size: 2.8em;
+    margin: 0 0 10px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .header-banner .subtitle {
+    font-size: 1.3em;
+    color: #93c5fd;
+    font-weight: 500;
+  }
+  .contact-info {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    font-size: 0.9em;
+  }
+  .contact-info a {
+    color: #60a5fa;
+    text-decoration: none;
+  }
+  .container {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 20px;
+  }
+  section {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+  }
+  h2 {
+    font-size: 1.4em;
+    color: #0f172a;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .entry {
+    margin-bottom: 20px;
+    border-left: 3px solid #3b82f6;
+    padding-left: 15px;
+  }
+  .entry:last-child {
+    margin-bottom: 0;
+  }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .entry-subheader {
+    font-style: italic;
+    color: #475569;
+    margin-top: 2px;
+  }
+  .entry-description {
+    margin-top: 8px;
+    font-size: 0.95em;
+    color: #334155;
+  }
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  .skills-card {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .skills-card strong {
+    color: #1e3a8a;
+  }
+</style>
+</head>
+<body>
+  <div class="header-banner">
+    <h1>{{basics.firstname}} {{basics.lastname}}</h1>
+    <div class="subtitle">{{basics.title}}</div>
+    <div class="contact-info">
+      {{#basics.email}}<div>Email: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
+      {{#basics.homepage}}<div>Web: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
+      {{#basics.location}}<div>Location: {{basics.location}}</div>{{/basics.location}}
+    </div>
+  </div>
+
+  <div class="container">
+    {{#basics.research_interests}}
+    <section>
+      <h2>Executive Summary</h2>
+      <p>{{basics.research_interests}}</p>
+    </section>
+    {{/basics.research_interests}}
+
+    <section>
+      <h2>Education</h2>
+      {{#education}}
+      <div class="entry">
+        <div class="entry-header">
+          <span>{{degree}} - {{institution}}</span>
+          <span>{{date_paren}}</span>
+        </div>
+        {{#dissertation}}<div class="entry-subheader">Dissertation: {{dissertation}}</div>{{/dissertation}}
+        <div class="entry-description">{{description}}</div>
+      </div>
+      {{/education}}
+    </section>
+
+    <section>
+      <h2>Professional Experience</h2>
+      {{#work_experience}}
+      <div class="entry">
+        <div class="entry-header">
+          <span>{{role}} - {{organization}}</span>
+          <span>{{date_dash}}</span>
+        </div>
+        {{#department}}<div class="entry-subheader">{{department}}</div>{{/department}}
+        <div class="entry-description">{{description}}</div>
+      </div>
+      {{/work_experience}}
+    </section>
+
+    <section>
+      <h2>Key Skills</h2>
+      <div class="skills-grid">
+        {{#skills}}
+        <div class="skills-card">
+          <strong>{{group}}</strong>
+          <div style="margin-top: 5px; font-size:0.9em; color:#475569">{{items_csv}}</div>
+        </div>
+        {{/skills}}
+      </div>
+    </section>
+  </div>
+</body>
+</html>`
+  },
+  tech: {
+    name: "Minimalist Tech",
+    desc: "A developer portfolio layout with monospaced accents, dark mode styling, emerald highlights, and item tags.",
+    latexTemplate: `\\documentclass[11pt,a4paper,sans]{moderncv}
+\\usepackage[utf8]{inputenc}
+\\moderncvstyle{casual}
+\\moderncvcolor{emerald}
+\\usepackage[scale=0.92]{geometry}
+\\firstname{{{basics.firstname}}}
+\\familyname{{{basics.lastname}}}
+\\title{{{basics.title}}}
+{{#basics.location}}\\address{{{basics.location}}}{{/basics.location}}
+{{#basics.email}}\\email{{{basics.email}}}{{/basics.email}}
+{{#basics.homepage}}\\homepage{{{basics.homepage}}}{{/basics.homepage}}
+
+\\begin{document}
+\\makecvtitle
+
+{{#education}}
+\\section{Education}
+\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{}{{{description}}}
+{{/education}}
+
+{{#work_experience}}
+\\section{Experience}
+\\cventry{{{date_dash}}}{{{role}}}{{{organization}}}{}{}{{{description}}}
+{{/work_experience}}
+
+{{#skills}}
+\\section{Skills}
+\\cvitem{{{group}}}{{{items_csv}}}
+{{/skills}}
+
+\\end{document}`,
+    htmlTemplate: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{{basics.firstname}} {{basics.lastname}} - Portfolio</title>
+<style>
+  body {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    background: #0f172a;
+    color: #e2e8f0;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    line-height: 1.6;
+  }
+  header {
+    border-bottom: 1px dashed #334155;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+  }
+  h1 {
+    color: #10b981;
+    font-size: 2em;
+    margin: 0;
+  }
+  .subtitle {
+    color: #94a3b8;
+    font-size: 1.1em;
+  }
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.9em;
+    margin-top: 10px;
+    color: #94a3b8;
+  }
+  .contact a {
+    color: #34d399;
+  }
+  h2 {
+    color: #10b981;
+    font-size: 1.3em;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 5px;
+    margin-top: 40px;
+  }
+  .entry {
+    margin-bottom: 20px;
+  }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #f8fafc;
+  }
+  .entry-description {
+    color: #94a3b8;
+    margin-top: 5px;
+  }
+  .tag {
+    background: #064e3b;
+    color: #34d399;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    display: inline-block;
+    margin: 3px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>> {{basics.firstname}} {{basics.lastname}}</h1>
+    <div class="subtitle">{{basics.title}}</div>
+    <div class="contact">
+      {{#basics.email}}<div>Email: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
+      {{#basics.homepage}}<div>Web: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
+      {{#basics.location}}<div>Location: {{basics.location}}</div>{{/basics.location}}
+    </div>
+  </header>
+
+  <section>
+    <h2># Education</h2>
+    {{#education}}
+    <div class="entry">
+      <div class="entry-header">
+        <span>{{degree}} @ {{institution}}</span>
+        <span>[{{date_paren}}]</span>
+      </div>
+      <div class="entry-description">{{description}}</div>
+    </div>
+    {{/education}}
+  </section>
+
+  <section>
+    <h2># Experience</h2>
+    {{#work_experience}}
+    <div class="entry">
+      <div class="entry-header">
+        <span>{{role}} @ {{organization}}</span>
+        <span>[{{date_dash}}]</span>
+      </div>
+      <div class="entry-description">{{description}}</div>
+    </div>
+    {{/work_experience}}
+  </section>
+
+  <section>
+    <h2># Skills</h2>
+    {{#skills}}
+    <div style="margin-bottom: 15px">
+      <strong>{{group}}:</strong>
+      <div style="margin-top: 5px">
+        {{#items}}
+        <span class="tag">{{name}}</span>
+        {{/items}}
+      </div>
+    </div>
+    {{/skills}}
+  </section>
+</body>
+</html>`
+  }
+};
 
 function listDatabases() {
   var list = [];
@@ -1243,7 +2041,7 @@ function loadDatabase(name) {
       alert('Error loading CV database: ' + e.message);
     }
   } else {
-    createPresetDatabase(name, 'researcher');
+    createPresetDatabase(name, 'basic');
   }
 }
 
@@ -1621,13 +2419,24 @@ function buildTemplateContext() {
   Object.keys(context).forEach(function(secKey) {
     var val = context[secKey];
     if (Array.isArray(val)) {
+      if (state.langFilter && state.langFilter !== 'all') {
+        val = val.filter(function(item) {
+          return !item || !item.lang || item.lang === 'all' || item.lang === state.langFilter;
+        });
+      }
       context[secKey] = val.map(function(item) {
         return prepareContext(item, context);
       });
     } else if (isObj(val) && secKey === 'skills') {
       Object.keys(val).forEach(function(g) {
         if (Array.isArray(val[g])) {
-          val[g] = val[g].map(function(item) {
+          var items = val[g];
+          if (state.langFilter && state.langFilter !== 'all') {
+            items = items.filter(function(item) {
+              return !item || !item.lang || item.lang === 'all' || item.lang === state.langFilter;
+            });
+          }
+          val[g] = items.map(function(item) {
             return prepareContext(item, context);
           });
         }
@@ -1923,14 +2732,25 @@ function renderArrayFields(key,arr){
     var entry=document.createElement('div'); entry.className='entry'; entry.id=slugId(key,i);
     var label=(isObj(item)?(item.title||item.degree||item.role||item.organization||item.institution||item.language||item.description):String(item||''))||('#'+(i+1));
     entry.innerHTML='<div class="entryhead">'
-      +'<div class="stack" style="gap:6px"><label class="pill"><input type="checkbox" '+(!isObj(item)||item.selected!==false?'checked':'')+' data-sel> Included</label>'
+      +'<div class="stack" style="gap:6px; flex-direction:row; align-items:center">'
+      +'<label class="pill"><input type="checkbox" '+(!isObj(item)||item.selected!==false?'checked':'')+' data-sel> Included</label>'
+      +'<select class="db-select" style="height:24px; padding:0 4px; font-size:var(--text-xs); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .1); background:var(--color-surface-offset); color:var(--color-text)" data-lang>'
+      +'<option value="all">Lang: All</option>'
+      +'<option value="en">Lang: EN</option>'
+      +'<option value="es">Lang: ES</option>'
+      +'</select>'
       +'<strong>'+esc(label)+'</strong></div>'
-      +'<div class="toolbar"><button class="btn" data-dup>Duplicate</button><button class="btn btn-danger" data-del>Delete</button></div>'
+      +'<div class="toolbar">'
+      +'<button class="btn btn-ghost btn-xs" data-up style="font-weight:bold; min-height:24px; height:24px; padding:0 8px">↑</button>'
+      +'<button class="btn btn-ghost btn-xs" data-down style="font-weight:bold; min-height:24px; height:24px; padding:0 8px">↓</button>'
+      +'<button class="btn" data-dup>Duplicate</button>'
+      +'<button class="btn btn-danger" data-del>Delete</button>'
+      +'</div>'
       +'</div><div class="entrybody"></div>';
     var body=entry.querySelector('.entrybody');
     if(isObj(item)){
       Object.entries(item).forEach(function(fe){
-        var field=fe[0],val=fe[1]; if(field==='selected') return;
+        var field=fe[0],val=fe[1]; if(field==='selected' || field==='lang') return;
         var propPath=key+'.'+i+'.'+field;
         if(Array.isArray(val)){
           var block=document.createElement('div'); block.className='card';
@@ -1953,6 +2773,46 @@ function renderArrayFields(key,arr){
         }
       });
     } else { body.appendChild(simpleArrayInput([key,i],item,key+'.'+i)); }
+
+    var upBtn = entry.querySelector('[data-up]');
+    var downBtn = entry.querySelector('[data-down]');
+    upBtn.disabled = (i === 0);
+    downBtn.disabled = (i === arr.length - 1);
+    
+    (function(idx){
+      upBtn.onclick = function() {
+        var temp = arr[idx];
+        arr[idx] = arr[idx - 1];
+        arr[idx - 1] = temp;
+        markDirty();
+        renderAll();
+      };
+      downBtn.onclick = function() {
+        var temp = arr[idx];
+        arr[idx] = arr[idx + 1];
+        arr[idx + 1] = temp;
+        markDirty();
+        renderAll();
+      };
+    })(i);
+
+    if(isObj(item)){
+      var langSelect = entry.querySelector('[data-lang]');
+      langSelect.value = item.lang || 'all';
+      (function(itm){
+        langSelect.onchange = function(e) {
+          itm.lang = e.target.value;
+          markDirty();
+          renderLatex();
+          renderHtmlPreview();
+          renderSchema();
+        };
+      })(item);
+    } else {
+      var langSelect = entry.querySelector('[data-lang]');
+      if (langSelect) langSelect.style.display = 'none';
+    }
+
     (function(itm){ entry.querySelector('[data-sel]').onchange=function(e){ if(isObj(itm)) itm.selected=e.target.checked; markDirty(); renderLatex(); renderSchema(); }; })(item);
     (function(idx){ entry.querySelector('[data-dup]').onclick=function(){ arr.splice(idx+1,0,clone(arr[idx])); markDirty(); renderAll(); }; })(i);
     (function(idx){ entry.querySelector('[data-del]').onclick=function(){ arr.splice(idx,1); markDirty(); renderAll(); }; })(i);
@@ -2068,6 +2928,7 @@ function renderAll(){
   renderOutline();
   renderEditor();
   renderLatex();
+  renderHtmlPreview();
   renderSchema();
   renderVersionModal();
   renderBanner();
@@ -2260,6 +3121,117 @@ el('exportTemplateBtn').onclick=function(){
   setTimeout(function(){ URL.revokeObjectURL(a.href); },500);
 };
 
+/* ── Presets Gallery wireup ── */
+el('stylePresetsBtn').onclick = function() {
+  closeAllDropdowns();
+  renderPresetGallery();
+  openModal('presetGalleryModal');
+};
+el('closePresetGalleryModal').onclick = function() { closeModal('presetGalleryModal'); };
+el('presetGalleryModal').onclick = function(e) { if(e.target === el('presetGalleryModal')) closeModal('presetGalleryModal'); };
+
+function renderPresetGallery() {
+  var grid = el('presetGalleryGrid');
+  grid.innerHTML = '';
+  Object.keys(STYLE_PRESETS).forEach(function(key) {
+    var p = STYLE_PRESETS[key];
+    var card = document.createElement('div');
+    card.className = 'preset-card';
+    card.style.display = 'flex';
+    card.style.flexDirection = 'column';
+    card.style.justifyContent = 'space-between';
+    card.style.padding = 'var(--space-3)';
+    card.style.border = '1px solid var(--color-border)';
+    card.style.borderRadius = 'var(--radius-md)';
+    card.style.background = 'var(--color-surface)';
+    
+    var top = document.createElement('div');
+    var title = document.createElement('strong');
+    title.style.fontSize = 'var(--text-sm)';
+    title.style.color = 'var(--color-text)';
+    title.textContent = p.name;
+    
+    var desc = document.createElement('div');
+    desc.className = 'tiny muted';
+    desc.style.marginTop = 'var(--space-1)';
+    desc.style.marginBottom = 'var(--space-3)';
+    desc.textContent = p.desc;
+    
+    top.appendChild(title);
+    top.appendChild(desc);
+    
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-xs';
+    btn.style.width = '100%';
+    btn.textContent = 'Apply Preset';
+    btn.onclick = function() {
+      if (confirm('Apply preset "' + p.name + '"? This will overwrite active templates.')) {
+        el('latexTplEditor').value = p.latexTemplate;
+        el('htmlTplEditor').value = p.htmlTemplate;
+        saveCurrentStyle();
+        renderLatex();
+        renderHtmlPreview();
+        closeModal('presetGalleryModal');
+      }
+    };
+    
+    card.appendChild(top);
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
+/* ── LaTeX PDF compiler ── */
+el('downloadPdfBtn').onclick = function() {
+  var code = el('latexPreview').textContent;
+  if (!code || !code.trim()) {
+    alert("No LaTeX code compiled to send.");
+    return;
+  }
+  
+  // Use texlive.net CGI compiler (supports POST multipart/form-data)
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://texlive.net/cgi-bin/latexcgi';
+  form.target = '_blank';
+  form.enctype = 'multipart/form-data';
+  
+  var filecontents = document.createElement('input');
+  filecontents.type = 'hidden';
+  filecontents.name = 'filecontents[]';
+  filecontents.value = code;
+  form.appendChild(filecontents);
+  
+  var filename = document.createElement('input');
+  filename.type = 'hidden';
+  filename.name = 'filename[]';
+  filename.value = 'document.tex';
+  form.appendChild(filename);
+  
+  var engine = document.createElement('input');
+  engine.type = 'hidden';
+  engine.name = 'engine';
+  engine.value = 'pdflatex';
+  form.appendChild(engine);
+  
+  var ret = document.createElement('input');
+  ret.type = 'hidden';
+  ret.name = 'return';
+  ret.value = 'pdf';
+  form.appendChild(ret);
+  
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
+};
+
+el('langFilterSelect').onchange = function(e) {
+  state.langFilter = e.target.value;
+  renderLatex();
+  renderHtmlPreview();
+  renderSchema();
+};
+
 /* ── Database management wireup ── */
 el('dbSelect').onchange = function(e) {
   var val = e.target.value;
@@ -2285,6 +3257,7 @@ el('modalImportCvBtn').onclick = function() {
   el('fileInput').click();
 };
 el('modalCreateDbBtn').onclick = function() {
+  closeModal('dbManagerModal');
   openModal('newCvModal');
 };
 
@@ -2641,16 +3614,38 @@ el('helpScratchModal').onclick=function(e){ if(e.target===el('helpScratchModal')
 
 
 /* ── tabs ── */
-document.querySelectorAll('.tab').forEach(function(btn){
+/* Left pane tabs */
+document.querySelectorAll('.left-pane .tab').forEach(function(btn){
   btn.onclick=function(){
-    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+    document.querySelectorAll('.left-pane .tab').forEach(function(x){ x.classList.remove('active'); });
     btn.classList.add('active');
-    ['editor','latex','html','schema'].forEach(function(t){ el(t+'Tab').classList.add('hidden'); });
+    ['editor','latex','html'].forEach(function(t){ el(t+'Tab').classList.add('hidden'); });
     el(btn.dataset.tab+'Tab').classList.remove('hidden');
-    state.tab=btn.dataset.tab;
-    if(state.tab==='latex') renderLatex();
-    if(state.tab==='html') renderHtmlPreview();
-    if(state.tab==='schema') renderSchema();
+    state.leftTab=btn.dataset.tab;
+    
+    if(btn.dataset.tab==='latex') renderLatex();
+    if(btn.dataset.tab==='html') renderHtmlPreview();
+  };
+});
+
+/* Right pane tabs */
+document.querySelectorAll('.right-pane .tab').forEach(function(btn){
+  btn.onclick=function(){
+    document.querySelectorAll('.right-pane .tab').forEach(function(x){ x.classList.remove('active'); });
+    btn.classList.add('active');
+    var tabMap = {
+      'html-prev': 'htmlPrevTab',
+      'latex-prev': 'latexPrevTab',
+      'json-prev': 'jsonPrevTab'
+    };
+    Object.values(tabMap).forEach(function(id){ el(id).classList.add('hidden'); });
+    var targetId = tabMap[btn.dataset.tab];
+    el(targetId).classList.remove('hidden');
+    state.rightTab=btn.dataset.tab;
+    
+    if(btn.dataset.tab==='latex-prev') renderLatex();
+    if(btn.dataset.tab==='html-prev') renderHtmlPreview();
+    if(btn.dataset.tab==='json-prev') renderSchema();
   };
 });
 
@@ -2661,7 +3656,7 @@ el('versionModal').onclick=function(e){ if(e.target===el('versionModal')) closeM
 
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
-    ['versionModal','editMappersModal','helpUsageModal','helpTemplatesModal','newCvModal','helpScratchModal','dbManagerModal','styleManagerModal','addSectionModal'].forEach(closeModal);
+    ['versionModal','editMappersModal','helpUsageModal','helpTemplatesModal','newCvModal','helpScratchModal','dbManagerModal','styleManagerModal','addSectionModal','presetGalleryModal'].forEach(closeModal);
   }
 });
 
@@ -2680,11 +3675,195 @@ document.addEventListener('keydown',function(e){
   }
 })();
 
+/* ── Welcome Tour Logic ── */
+var tourActiveStep = 0;
+var TOUR_STEPS = [
+  {
+    target: '#dbSelect',
+    title: 'Manage CV Databases',
+    content: 'Select, rename, duplicate, or import different CV profiles here. All data is saved automatically in your browser.'
+  },
+  {
+    target: '#tplMenuBtn',
+    title: 'Choose Layout Styles',
+    content: 'Open the Style menu to load templates, configure section mappers, or explore the built-in Presets Gallery.'
+  },
+  {
+    target: '#addSectionBtn',
+    title: 'Add & Delete Sections',
+    content: 'Click here to add new predefined or custom sections. You can delete empty sections from their edit cards.'
+  },
+  {
+    target: '.left-pane',
+    title: 'Workspace Editors',
+    content: 'Edit form fields, modify the LaTeX preamble, or edit live HTML code in this left-hand workspace.'
+  },
+  {
+    target: '.right-pane',
+    title: 'Live Previews & Downloads',
+    content: 'Switch tabs to preview the HTML view, check the generated LaTeX code, or click "Download PDF" to compile your document!'
+  },
+  {
+    target: '#langFilterSelect',
+    title: 'Bilingual Resumes',
+    content: 'Tag entries as English or Spanish, then toggle the global output language filter to instantly render either version. If you want to take this tour again, just click on the "Welcome Tour Guide" option inside the Help menu!'
+  }
+];
+
+function startWelcomeTour() {
+  tourActiveStep = 0;
+  removeTourDom();
+  
+  var backdrop = document.createElement('div');
+  backdrop.id = 'tourBackdrop';
+  backdrop.className = 'tour-backdrop';
+  backdrop.onclick = endWelcomeTour;
+  document.body.appendChild(backdrop);
+  
+  var popover = document.createElement('div');
+  popover.id = 'tourPopover';
+  popover.className = 'tour-popover';
+  document.body.appendChild(popover);
+  
+  showTourStep();
+}
+
+function endWelcomeTour() {
+  removeTourDom();
+  localStorage.setItem('cvbuilder_visited', 'true');
+}
+
+function removeTourDom() {
+  var b = el('tourBackdrop');
+  if (b) b.remove();
+  var p = el('tourPopover');
+  if (p) p.remove();
+  document.querySelectorAll('.tour-highlight').forEach(function(x) {
+    x.classList.remove('tour-highlight');
+  });
+}
+
+function showTourStep() {
+  document.querySelectorAll('.tour-highlight').forEach(function(x) {
+    x.classList.remove('tour-highlight');
+  });
+  
+  if (tourActiveStep >= TOUR_STEPS.length) {
+    endWelcomeTour();
+    return;
+  }
+  
+  var step = TOUR_STEPS[tourActiveStep];
+  var targetEl = document.querySelector(step.target);
+  
+  var popover = el('tourPopover');
+  if (!popover) return;
+  
+  popover.innerHTML = '';
+  
+  var title = document.createElement('h4');
+  title.textContent = (tourActiveStep + 1) + '/' + TOUR_STEPS.length + ': ' + step.title;
+  popover.appendChild(title);
+  
+  var text = document.createElement('p');
+  text.textContent = step.content;
+  popover.appendChild(text);
+  
+  var footer = document.createElement('div');
+  footer.className = 'footer';
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'space-between';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
+  
+  var leftGroup = document.createElement('div');
+  leftGroup.style.display = 'flex';
+  leftGroup.style.gap = 'var(--space-2)';
+  
+  var skipBtn = document.createElement('button');
+  skipBtn.className = 'btn btn-ghost btn-xs';
+  skipBtn.textContent = 'Skip';
+  skipBtn.onclick = endWelcomeTour;
+  leftGroup.appendChild(skipBtn);
+  
+  if (tourActiveStep > 0) {
+    var prevBtn = document.createElement('button');
+    prevBtn.className = 'btn btn-ghost btn-xs';
+    prevBtn.textContent = 'Prev';
+    prevBtn.onclick = function() {
+      tourActiveStep--;
+      showTourStep();
+    };
+    leftGroup.appendChild(prevBtn);
+  }
+  footer.appendChild(leftGroup);
+  
+  var nextBtn = document.createElement('button');
+  nextBtn.className = 'btn btn-primary btn-xs';
+  nextBtn.textContent = (tourActiveStep === TOUR_STEPS.length - 1) ? 'Finish' : 'Next';
+  nextBtn.onclick = function() {
+    tourActiveStep++;
+    showTourStep();
+  };
+  footer.appendChild(nextBtn);
+  popover.appendChild(footer);
+  
+  if (targetEl) {
+    targetEl.classList.add('tour-highlight');
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    setTimeout(function() {
+      var rect = targetEl.getBoundingClientRect();
+      var popRect = popover.getBoundingClientRect();
+      
+      var top = rect.bottom + 12;
+      var left = rect.left;
+      
+      if (top + popRect.height > window.innerHeight) {
+        top = rect.top - popRect.height - 12;
+      }
+      if (left + popRect.width > window.innerWidth) {
+        left = window.innerWidth - popRect.width - 20;
+      }
+      if (left < 10) left = 10;
+      if (top < 10) top = 10;
+      
+      popover.style.top = top + 'px';
+      popover.style.left = left + 'px';
+    }, 100);
+  } else {
+    popover.style.top = '50%';
+    popover.style.left = '50%';
+    popover.style.transform = 'translate(-50%, -50%)';
+  }
+}
+
+el('helpTourBtn').onclick = function() {
+  closeAllDropdowns();
+  startWelcomeTour();
+};
+
 /* ── initial load ── */
 var dbList = listDatabases();
 var styleList = listStyles();
 loadDatabase(dbList[0]);
 loadStyle(styleList[0]);
+
+if (!localStorage.getItem('cvbuilder_visited')) {
+  setTimeout(startWelcomeTour, 1000);
+}
+
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var loader = el('loadingScreen');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(function() {
+        loader.remove();
+      }, 500);
+    }
+  }, 1500);
+});
 </script>
 </body>
 </html>
