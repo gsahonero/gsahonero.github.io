@@ -681,7 +681,7 @@ input:focus,textarea:focus,select:focus{
       <span id="bannerText">No unsaved changes</span>
     </div>
 
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.4.5</button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.5.0</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme">&#9790;</button>
   </div>
 </header>
@@ -1142,8 +1142,23 @@ input:focus,textarea:focus,select:focus{
 </div>
 
 <script>
-var APP_VERSION = '0.4.5';
+var APP_VERSION = '0.5.0';
 var CHANGELOG = [
+  {version:'0.5.0', changes:[
+    'LaTeX Education Entry Fix: Re-structured the `\\cventry` layout in the classic template so that optional dissertation fields are properly nested inside braces. This guarantees that exactly 6 parameters are always supplied, resolving TeX syntax errors when compiling.'
+  ]},
+  {version:'0.4.9', changes:[
+    'LaTeX Address Linebreak Fix: Removed the invalid trailing forced linebreak (`\\\\`) from the address command in the classic template, and added an automatic migration layer inside style loader to clean up existing cached user styles.'
+  ]},
+  {version:'0.4.8', changes:[
+    'LaTeX Brace Collision Fix: Changed raw template variable token prefix to `{{&` to prevent the parser from colliding with LaTeX command brackets (e.g. `\\title{...}`), resolving compilation failures.'
+  ]},
+  {version:'0.4.7', changes:[
+    'Default Database Robust Overwrite: Configured automatic migration check to overwrite existing cached Default CV profiles if they are completely empty, ensuring the professional preset displays immediately on load.'
+  ]},
+  {version:'0.4.6', changes:[
+    'Fictional Preset Data: Replaced personal Guillermo Sahonero profile references with a fictional Alex Morgan profile in default presets, and added an automatic database migration layer for existing local storage Default CV profiles.'
+  ]},
   {version:'0.4.5', changes:[
     'Ko-fi Donation Integrations: Added donation hyperlinks linking to Ko-fi (https://ko-fi.com/thepolygon) in the loading screen and top-left header logo text with an animated sway-float coffee cup icon.'
   ]},
@@ -1250,7 +1265,7 @@ var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 \\firstname{\\Huge {{basics.firstname}} \\vspace{10pt}}
 \\familyname{\\\\\\Huge {{basics.lastname}}}
 \\title{{{basics.title}}}
-{{#basics.location}}\\address{{{basics.location}}}\\\\{{/basics.location}}
+{{#basics.location}}\\address{{{basics.location}}}{{/basics.location}}
 {{#basics.email}}\\email{{{basics.email}}}{{/basics.email}}
 {{#basics.homepage}}\\homepage{{{basics.homepage}}}{{/basics.homepage}}
 {{#basics.photo}}\\photo[70pt][0.4pt]{{{basics.photo}}}{{/basics.photo}}
@@ -1269,7 +1284,7 @@ var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 
 {{#education}}
 \\section{Education}
-\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}}{{{description}}}{}
+\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{ {{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}} }{{{description}}}
 {{/education}}
 
 {{#work_experience}}
@@ -1279,7 +1294,7 @@ var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 
 {{#publications}}
 \\section{Publications}
-\\cvitem{-}{{{{authors}}}. \\textquotedblleft {{{title}}}.\\textquotedblright\\ \\textit{{{{venue}}}}. {{{year}}}.}
+\\cvitem{-}{{{authors}}}. \\textquotedblleft {{{title}}}.\\textquotedblright\\ \\textit{{{venue}}}. {{{year}}}.}
 {{/publications}}
 
 {{#skills}}
@@ -1448,19 +1463,19 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
 // ── PRESETS & LOCAL STORAGE DATABASES ──
 var RESEARCHER_CV = {
   "basics": {
-    "firstname": "Guillermo",
-    "lastname": "Sahonero",
+    "firstname": "Alex",
+    "lastname": "Morgan",
     "title": "Computer Science Researcher",
-    "email": "guillermo@example.com",
-    "homepage": "sahonero.github.io",
-    "location": "La Paz, Bolivia",
+    "email": "alex.morgan@example.com",
+    "homepage": "alexmorgan.dev",
+    "location": "San Francisco, CA",
     "photo": "",
     "research_interests": "Focusing on distributed databases, decentralized consensus algorithms, and web application scalability."
   },
   "education": [
     {
       "degree": "Ph.D. in Computer Science",
-      "institution": "Technical University of Munich",
+      "institution": "Stanford University",
       "start": "2018",
       "end": "2022",
       "description": "Conducted research on decentralized state machine replication.",
@@ -1470,7 +1485,7 @@ var RESEARCHER_CV = {
   ],
   "research_experience": [
     {
-      "organization": "Max Planck Institute",
+      "organization": "Pacific Northwest Lab",
       "role": "Postdoctoral Researcher",
       "start": "2023",
       "end": "Present",
@@ -1482,7 +1497,7 @@ var RESEARCHER_CV = {
     {
       "role": "Software Research Engineer",
       "department": "R&D Lab",
-      "organization": "Antigravity Solutions",
+      "organization": "Skyward Innovations",
       "start": "2022",
       "end": "2023",
       "description": "Implemented prototypes for transactional key-value databases.",
@@ -1492,7 +1507,7 @@ var RESEARCHER_CV = {
   "teaching_experience": [
     {
       "course_area": "Distributed Systems",
-      "institution": "Technical University of Munich",
+      "institution": "Stanford University",
       "level": "Graduate course",
       "courses": ["Advanced Systems Lab", "Consensus Protocols Seminar"],
       "selected": true
@@ -1500,7 +1515,7 @@ var RESEARCHER_CV = {
   ],
   "publications": [
     {
-      "authors": "G. Sahonero, J. Doe",
+      "authors": "A. Morgan, J. Doe",
       "title": "Scalable Consensus via Optimistic Lock-Free Transactions",
       "venue": "IEEE Transactions on Parallel & Distributed Systems",
       "year": "2022",
@@ -1509,7 +1524,7 @@ var RESEARCHER_CV = {
   ],
   "abstracts": [
     {
-      "authors": "G. Sahonero",
+      "authors": "A. Morgan",
       "title": "On-chain scaling boundaries for distributed ledgers",
       "venue": "ACM SIGCOMM Poster Session",
       "year": "2021",
@@ -1540,13 +1555,13 @@ var RESEARCHER_CV = {
   },
   "languages": [
     {
-      "language": "Spanish",
-      "proficiency": "Native",
+      "language": "English",
+      "proficiency": "Native speaker",
       "selected": true
     },
     {
-      "language": "English",
-      "proficiency": "Fluent",
+      "language": "Spanish",
+      "proficiency": "Fluent / Professional",
       "selected": true
     }
   ]
@@ -1554,19 +1569,19 @@ var RESEARCHER_CV = {
 
 var BASIC_CV = {
   "basics": {
-    "firstname": "Guillermo",
-    "lastname": "Sahonero",
+    "firstname": "Alex",
+    "lastname": "Morgan",
     "title": "Senior Software Architect",
-    "email": "guillermo@example.com",
-    "homepage": "sahonero.github.io",
-    "location": "La Paz, Bolivia",
+    "email": "alex.morgan@example.com",
+    "homepage": "alexmorgan.dev",
+    "location": "San Francisco, CA",
     "photo": "",
     "research_interests": "Experienced software architect specialized in web technologies, distributed systems, and agentic workflows."
   },
   "education": [
     {
       "degree": "M.S. in Computer Science",
-      "institution": "Technical University of Munich",
+      "institution": "Stanford University",
       "start": "2018",
       "end": "2020",
       "description": "Graduated with honors. Focused on software engineering and cloud systems.",
@@ -1578,7 +1593,7 @@ var BASIC_CV = {
     {
       "role": "Lead Architect",
       "department": "Engineering Team",
-      "organization": "Antigravity Solutions",
+      "organization": "Skyward Innovations",
       "start": "2021",
       "end": "Present",
       "description": "Led the development of a real-time collaborative workspace platform. Streamlined production deployments and improved response times by 40%. Managed a cross-functional team of 12 engineers.",
@@ -1591,12 +1606,12 @@ var BASIC_CV = {
   },
   "languages": [
     {
-      "language": "Spanish",
+      "language": "English",
       "proficiency": "Native speaker",
       "selected": true
     },
     {
-      "language": "English",
+      "language": "Spanish",
       "proficiency": "Fluent / Professional",
       "selected": true
     }
@@ -2027,6 +2042,12 @@ function loadDatabase(name) {
   if (raw) {
     try {
       data = JSON.parse(raw);
+      var isEmptyDefault = (name === 'Default CV' && (!data.basics || (!data.basics.firstname && !data.basics.lastname)));
+      var isPersonalDefault = (data.basics && data.basics.firstname === 'Guillermo' && data.basics.lastname === 'Sahonero');
+      if (isEmptyDefault || isPersonalDefault) {
+        data = JSON.parse(JSON.stringify(BASIC_CV));
+        localStorage.setItem('cvbuilder_cv_' + name, JSON.stringify(data));
+      }
       delete data._templates;
       delete data.templates;
       currentDbName = name;
@@ -2129,7 +2150,23 @@ function loadStyle(name) {
       tpl.preamble = payload.preamble || '';
       tpl.footer = payload.footer || '';
       
-      el('latexTplEditor').value = payload.latexTemplate || DEFAULT_LATEX_TEMPLATE;
+      var latexTpl = payload.latexTemplate || DEFAULT_LATEX_TEMPLATE;
+      var hasMigration = false;
+      if (latexTpl.indexOf('\\address{{{basics.location}}}\\\\') !== -1) {
+        latexTpl = latexTpl.replace('\\address{{{basics.location}}}\\\\', '\\address{{{basics.location}}}');
+        hasMigration = true;
+      }
+      var oldEdu = '\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}}{{{description}}}{}';
+      var newEdu = '\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{ {{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}} }{{{description}}}';
+      if (latexTpl.indexOf(oldEdu) !== -1) {
+        latexTpl = latexTpl.replace(oldEdu, newEdu);
+        hasMigration = true;
+      }
+      if (hasMigration) {
+        payload.latexTemplate = latexTpl;
+        localStorage.setItem('cvbuilder_style_' + name, JSON.stringify(payload));
+      }
+      el('latexTplEditor').value = latexTpl;
       el('htmlTplEditor').value = payload.htmlTemplate || DEFAULT_HTML_TEMPLATE;
       mappers = payload.mappers || JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
       
@@ -2336,7 +2373,7 @@ function renderTemplate(template, data, escapeFn) {
     });
   }
 
-  var rawRegex = /\{\{\{([a-zA-Z0-9_\\.-]+)\}\}\}/g;
+  var rawRegex = /\{\{\&([a-zA-Z0-9_\\.-]+)\}\}/g;
   rendered = rendered.replace(rawRegex, function(match, path) {
     var val = getPathValue(path, data);
     return val !== undefined && val !== null ? String(val) : '';
