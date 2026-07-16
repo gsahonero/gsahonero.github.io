@@ -681,7 +681,7 @@ input:focus,textarea:focus,select:focus{
       <span id="bannerText">No unsaved changes</span>
     </div>
 
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.5.0</button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog">v0.5.1</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme">&#9790;</button>
   </div>
 </header>
@@ -1142,8 +1142,11 @@ input:focus,textarea:focus,select:focus{
 </div>
 
 <script>
-var APP_VERSION = '0.5.0';
+var APP_VERSION = '0.5.1';
 var CHANGELOG = [
+  {version:'0.5.1', changes:[
+    'Conditional Layout Section Headers: Integrated `has_<sectionName>` helper flags inside the rendering context to wrap HTML sections and LaTeX templates. This ensures empty or deleted sections do not display section headers, and avoids duplicate section headers in LaTeX output when multiple items are present.'
+  ]},
   {version:'0.5.0', changes:[
     'LaTeX Education Entry Fix: Re-structured the `\\cventry` layout in the classic template so that optional dissertation fields are properly nested inside braces. This guarantees that exactly 6 parameters are always supplied, resolving TeX syntax errors when compiling.'
   ]},
@@ -1275,37 +1278,47 @@ var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 \\makecvtitle
 \\vspace{-1em}
 
-{{#basics.research_interests}}
+{{#has_research_interests}}
 \\section{Main Research Interests}
 \\cvlistitem{{{basics.research_interests}}}
-{{/basics.research_interests}}
+{{/has_research_interests}}
 
 \\renewcommand{\\listitemsymbol}{}
 
-{{#education}}
+{{#has_education}}
 \\section{Education}
+{{#education}}
 \\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{ {{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}} }{{{description}}}
 {{/education}}
+{{/has_education}}
 
-{{#work_experience}}
+{{#has_work_experience}}
 \\section{Work/Research Experience}
+{{#work_experience}}
 \\cventry{{{date_dash}}}{{{role}}}{{{department}}}{{{organization}}}{}{{{description}}}
 {{/work_experience}}
+{{/has_work_experience}}
 
-{{#publications}}
+{{#has_publications}}
 \\section{Publications}
+{{#publications}}
 \\cvitem{-}{{{authors}}}. \\textquotedblleft {{{title}}}.\\textquotedblright\\ \\textit{{{venue}}}. {{{year}}}.}
 {{/publications}}
+{{/has_publications}}
 
-{{#skills}}
+{{#has_skills}}
 \\section{Skills}
+{{#skills}}
 \\cvitemwithcomment{{{group}}}{\\parbox[t]{0.85\\textwidth}{{{{items_csv}}}}}{}
 {{/skills}}
+{{/has_skills}}
 
-{{#languages}}
+{{#has_languages}}
 \\section{Languages}
+{{#languages}}
 \\cvitemwithcomment{{{language}}}{{{proficiency_desc}}}{}
 {{/languages}}
+{{/has_languages}}
 
 \\end{document}`;
 
@@ -1402,6 +1415,7 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
   </section>
   {{/basics.research_interests}}
 
+  {{#has_education}}
   <section>
     <h2>Education</h2>
     {{#education}}
@@ -1415,7 +1429,9 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
     </div>
     {{/education}}
   </section>
+  {{/has_education}}
 
+  {{#has_work_experience}}
   <section>
     <h2>Experience</h2>
     {{#work_experience}}
@@ -1429,7 +1445,9 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
     </div>
     {{/work_experience}}
   </section>
+  {{/has_work_experience}}
 
+  {{#has_publications}}
   <section>
     <h2>Publications</h2>
     <ul>
@@ -1438,7 +1456,9 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
       {{/publications}}
     </ul>
   </section>
+  {{/has_publications}}
 
+  {{#has_skills}}
   <section>
     <h2>Skills</h2>
     <ul class="skills-list">
@@ -1447,7 +1467,9 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
       {{/skills}}
     </ul>
   </section>
+  {{/has_skills}}
 
+  {{#has_languages}}
   <section>
     <h2>Languages</h2>
     <ul>
@@ -1456,6 +1478,7 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
       {{/languages}}
     </ul>
   </section>
+  {{/has_languages}}
 
 </body>
 </html>`;
@@ -1651,35 +1674,45 @@ var STYLE_PRESETS = {
 \\makecvtitle
 \\vspace{-1.5em}
 
-{{#basics.research_interests}}
+{{#has_research_interests}}
 \\section{Summary}
 \\cvitem{}{{{basics.research_interests}}}
-{{/basics.research_interests}}
+{{/has_research_interests}}
 
-{{#education}}
+{{#has_education}}
 \\section{Education}
+{{#education}}
 \\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{}{{{description}}}
 {{/education}}
+{{/has_education}}
 
-{{#work_experience}}
+{{#has_work_experience}}
 \\section{Experience}
+{{#work_experience}}
 \\cventry{{{date_dash}}}{{{role}}}{{{organization}}}{{{department}}}{}{{{description}}}
 {{/work_experience}}
+{{/has_work_experience}}
 
-{{#publications}}
+{{#has_publications}}
 \\section{Publications}
+{{#publications}}
 \\cvitem{-}{{{{authors}}}. \\textquotedblleft {{{title}}}.\textquotedblright\\ \\textit{{{{venue}}}}. {{{year}}}.}
 {{/publications}}
+{{/has_publications}}
 
-{{#skills}}
+{{#has_skills}}
 \\section{Skills}
+{{#skills}}
 \\cvitem{{{group}}}{{{items_csv}}}
 {{/skills}}
+{{/has_skills}}
 
-{{#languages}}
+{{#has_languages}}
 \\section{Languages}
+{{#languages}}
 \\cvitem{{{language}}}{{{proficiency_desc}}}
 {{/languages}}
+{{/has_languages}}
 
 \\end{document}`,
     htmlTemplate: `<!DOCTYPE html>
@@ -1870,20 +1903,26 @@ var STYLE_PRESETS = {
 \\begin{document}
 \\makecvtitle
 
-{{#education}}
+{{#has_education}}
 \\section{Education}
+{{#education}}
 \\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{}{{{description}}}
 {{/education}}
+{{/has_education}}
 
-{{#work_experience}}
+{{#has_work_experience}}
 \\section{Experience}
+{{#work_experience}}
 \\cventry{{{date_dash}}}{{{role}}}{{{organization}}}{}{}{{{description}}}
 {{/work_experience}}
+{{/has_work_experience}}
 
-{{#skills}}
+{{#has_skills}}
 \\section{Skills}
+{{#skills}}
 \\cvitem{{{group}}}{{{items_csv}}}
 {{/skills}}
+{{/has_skills}}
 
 \\end{document}`,
     htmlTemplate: `<!DOCTYPE html>
@@ -2152,6 +2191,11 @@ function loadStyle(name) {
       
       var latexTpl = payload.latexTemplate || DEFAULT_LATEX_TEMPLATE;
       var hasMigration = false;
+      if (name === 'Default Style' && latexTpl.indexOf('has_publications') === -1) {
+        latexTpl = DEFAULT_LATEX_TEMPLATE;
+        payload.htmlTemplate = DEFAULT_HTML_TEMPLATE;
+        hasMigration = true;
+      }
       if (latexTpl.indexOf('\\address{{{basics.location}}}\\\\') !== -1) {
         latexTpl = latexTpl.replace('\\address{{{basics.location}}}\\\\', '\\address{{{basics.location}}}');
         hasMigration = true;
@@ -2464,7 +2508,9 @@ function buildTemplateContext() {
       context[secKey] = val.map(function(item) {
         return prepareContext(item, context);
       });
+      context['has_' + secKey] = val.length > 0;
     } else if (isObj(val) && secKey === 'skills') {
+      var hasAnySkill = false;
       Object.keys(val).forEach(function(g) {
         if (Array.isArray(val[g])) {
           var items = val[g];
@@ -2476,10 +2522,15 @@ function buildTemplateContext() {
           val[g] = items.map(function(item) {
             return prepareContext(item, context);
           });
+          if (items.length > 0) hasAnySkill = true;
         }
       });
+      context['has_skills'] = hasAnySkill;
     } else if (isObj(val)) {
       context[secKey] = prepareContext(val, context);
+      if (secKey === 'basics') {
+        context.has_research_interests = !!(val.research_interests && val.research_interests.trim());
+      }
     }
   });
   return context;
