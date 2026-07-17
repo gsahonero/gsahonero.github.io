@@ -1,0 +1,62 @@
+{
+  "basics": {
+    "firstname": "Alex",
+    "lastname": "Morgan",
+    "title": "Senior Software Architect",
+    "email": "alex.morgan@example.com",
+    "homepage": "alexmorgan.dev",
+    "location": "San Francisco, CA",
+    "photo": "",
+    "research_interests": "Experienced software architect specialized in web technologies, distributed systems, and agentic workflows."
+  },
+  "education": [
+    {
+      "degree": "M.S. in Computer Science",
+      "institution": "Stanford University",
+      "start": "2018",
+      "end": "2020",
+      "description": "Graduated with honors. Focused on software engineering and cloud systems.",
+      "dissertation": "Decoupled Web Architectures using Distributed Message Brokers",
+      "selected": true
+    }
+  ],
+  "work_experience": [
+    {
+      "role": "Lead Architect",
+      "department": "Engineering Team",
+      "organization": "Skyward Innovations",
+      "start": "2021",
+      "end": "Present",
+      "description": "Led the development of a real-time collaborative workspace platform. Streamlined production deployments and improved response times by 40%. Managed a cross-functional team of 12 engineers.",
+      "selected": true
+    }
+  ],
+  "skills": {
+    "programming": [
+      { "name": "JavaScript", "selected": true },
+      { "name": "TypeScript", "selected": true },
+      { "name": "Python", "selected": true },
+      { "name": "Go", "selected": true },
+      { "name": "LaTeX", "selected": true }
+    ],
+    "tools": [
+      { "name": "Docker", "selected": true },
+      { "name": "Kubernetes", "selected": true },
+      { "name": "Git", "selected": true },
+      { "name": "GitHub Actions", "selected": true },
+      { "name": "Vite", "selected": true }
+    ]
+  },
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "Native speaker",
+      "selected": true
+    },
+    {
+      "language": "Spanish",
+      "proficiency": "Fluent / Professional",
+      "selected": true
+    }
+  ]
+}

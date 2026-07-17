@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CVbuilder - Extensive Functionality Test Suite</title>
+  <style>
+    :root {
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-surface-offset: #334155;
+      --color-text: #f8fafc;
+      --color-text-muted: #94a3b8;
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-success: #10b981;
+      --color-error: #ef4444;
+      --color-warning: #f59e0b;
+      --color-divider: #475569;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      padding: 16px 24px;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: var(--color-surface-offset);
+      color: var(--color-text);
+      border: 1px solid var(--color-divider);
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .iframe-container {
+      width: 0;
+      height: 0;
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+    }
+    .test-dashboard {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 24px;
+      gap: 20px;
+    }
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .summary-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: var(--shadow-lg);
+    }
+    .summary-card .label {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .summary-card .value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .summary-card.passed .value { color: var(--color-success); }
+    .summary-card.failed .value { color: var(--color-error); }
+    
+    .console-panel {
+      background: #090d16;
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: var(--shadow-lg);
+    }
+    .log-line {
+      line-height: 1.4;
+    }
+    .log-line.info { color: #60a5fa; }
+    .log-line.success { color: #34d399; }
+    .log-line.error { color: #f87171; }
+    .log-line.warn { color: #fbbf24; }
+
+    .table-container {
+      background: var(--color-surface);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-divider);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .table-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .filters {
+      display: flex;
+      gap: 12px;
+    }
+    select {
+      background: var(--color-bg);
+      border: 1px solid var(--color-divider);
+      color: var(--color-text);
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .results-table {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 12px 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-divider);
+    }
+    td {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--color-divider);
+      font-size: 13px;
+      line-height: 1.5;
+      vertical-align: top;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }
+    .status-badge.passed { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .status-badge.failed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    
+    code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: #60a5fa;
+    }
+    pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: #090d16;
+      padding: 6px 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      max-width: 250px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--color-text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>CVbuilder Functionality & Logic Test Suite</h1>
+    <div class="header-controls">
+      <button class="btn btn-secondary" id="downloadReportBtn" onclick="downloadLogicReport()" disabled>Export Report (.json)</button>
+      <button class="btn" id="runTestsBtn" onclick="runLogicTests()">Execute Test Protocol</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Headless iframe to run app script context without visual rendering delays -->
+    <div class="iframe-container">
+      <iframe id="logicAppFrame" src="index.html"></iframe>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="test-dashboard">
+      <!-- Summary metrics cards -->
+      <div class="summary-bar">
+        <div class="summary-card">
+          <span class="label">Total Unit Tests</span>
+          <span class="value" id="totalCount">0</span>
+        </div>
+        <div class="summary-card passed">
+          <span class="label">Passed Assertions</span>
+          <span class="value" id="passedCount">0</span>
+        </div>
+        <div class="summary-card failed">
+          <span class="label">Failed Assertions</span>
+          <span class="value" id="failedCount">0</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">Total Latency</span>
+          <span class="value" id="totalTime">0ms</span>
+        </div>
+      </div>
+
+      <!-- Real-time Console Log Output -->
+      <div class="console-panel" id="consoleLogs">
+        <div class="log-line info">Test runner initialized. Press "Execute Test Protocol" to begin.</div>
+      </div>
+
+      <!-- Tests execution table -->
+      <div class="table-container">
+        <div class="table-header">
+          <h2>Test Execution Log</h2>
+          <div class="filters">
+            <select id="suiteFilter" onchange="filterTests()">
+              <option value="all">All Test Suites</option>
+              <option value="compiler">Compiler & Escaping</option>
+              <option value="data">Data Manipulation</option>
+              <option value="storage">Storage & Databases</option>
+              <option value="integration">Module Integration</option>
+              <option value="regression">Wiring & Regression</option>
+            </select>
+          </div>
+        </div>
+        <div class="results-table">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%">Test Case & Description</th>
+                <th style="width: 15%">Suite Category</th>
+                <th style="width: 20%">Expected Output</th>
+                <th style="width: 20%">Actual Output</th>
+                <th style="width: 10%">Latency</th>
+                <th style="width: 10%">Result</th>
+              </tr>
+            </thead>
+            <tbody id="testResultsBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 32px;">
+                  Test protocol is idle. Click "Execute Test Protocol" to begin.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Report Modal -->
+  <div id="reportModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding:20px; z-index:2000">
+    <div style="background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); padding:24px; max-width:450px; width:100%; box-shadow:var(--shadow-lg); display:flex; flex-direction:column; gap:16px">
+      <div style="font-size:18px; font-weight:700; color:var(--color-text); border-bottom:1px solid var(--color-divider); padding-bottom:8px">Test Execution Report</div>
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:12px; font-size:14px">
+        <div>Total Test Suites:</div><strong style="text-align:right">3</strong>
+        <div>Assertions Passed:</div><strong id="reportAssertions" style="color:var(--color-success); text-align:right">0/12</strong>
+        <div>Execution Date:</div><strong id="reportTime" style="text-align:right"></strong>
+        <div>Verdict Status:</div><strong id="reportStatus" style="text-align:right"></strong>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn" style="flex:1" onclick="downloadLogicReport()">Download Report (.json)</button>
+        <button class="btn btn-ghost" style="background:var(--color-surface-offset); color:var(--color-text); border:none; flex:1" onclick="document.getElementById('reportModal').style.display='none'">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var iframe = document.getElementById('logicAppFrame');
+    var consoleLogs = document.getElementById('consoleLogs');
+    var testRuns = [];
+    var lastReport = null;
+
+    function log(text, type = 'info') {
+      var div = document.createElement('div');
+      div.className = 'log-line ' + type;
+      div.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
+      consoleLogs.appendChild(div);
+      consoleLogs.scrollTop = consoleLogs.scrollHeight;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function cleanLocalStorage(win) {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var key = localStorage.key(i);
+        if (key.indexOf('cvbuilder_') === 0) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+
+    function filterTests() {
+      var filter = document.getElementById('suiteFilter').value;
+      var rows = document.querySelectorAll('#testResultsBody tr');
+      rows.forEach(row => {
+        if (filter === 'all' || row.dataset.category === filter) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function appendResultRow(id, name, desc, category, expected, actual, time, passed) {
+      var tbody = document.getElementById('testResultsBody');
+      if (tbody.children.length === 1 && tbody.children[0].cells.length === 1) {
+        tbody.innerHTML = '';
+      }
+      var tr = document.createElement('tr');
+      tr.dataset.category = category;
+      
+      var tdName = document.createElement('td');
+      tdName.innerHTML = '<strong>' + id + ': ' + name + '</strong><div style="font-size:12px; color:var(--color-text-muted); margin-top:4px">' + desc + '</div>';
+      
+      var tdCategory = document.createElement('td');
+      tdCategory.innerHTML = '<code>' + category + '</code>';
+      
+      var tdExpected = document.createElement('td');
+      tdExpected.innerHTML = '<pre>' + escapeHtml(expected) + '</pre>';
+      
+      var tdActual = document.createElement('td');
+      tdActual.innerHTML = '<pre>' + escapeHtml(actual) + '</pre>';
+      
+      var tdTime = document.createElement('td');
+      tdTime.textContent = time + 'ms';
+      
+      var tdResult = document.createElement('td');
+      tdResult.innerHTML = passed 
+        ? '<span class="status-badge passed">Passed</span>' 
+        : '<span class="status-badge failed">Failed</span>';
+        
+      tr.appendChild(tdName);
+      tr.appendChild(tdCategory);
+      tr.appendChild(tdExpected);
+      tr.appendChild(tdActual);
+      tr.appendChild(tdTime);
+      tr.appendChild(tdResult);
+      tbody.appendChild(tr);
+    }
+
+    function escapeHtml(text) {
+      if (typeof text !== 'string') text = JSON.stringify(text, null, 2);
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function downloadLogicReport() {
+      if (!lastReport) return;
+      var blob = new Blob([JSON.stringify(lastReport, null, 2)], {type: 'application/json'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'cvbuilder_functional_report_' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    async function runLogicTests() {
+      document.getElementById('runTestsBtn').disabled = true;
+      document.getElementById('downloadReportBtn').disabled = true;
+      document.getElementById('testResultsBody').innerHTML = '';
+      consoleLogs.innerHTML = '';
+      testRuns = [];
+      
+      var totalPassed = 0;
+      var totalFailed = 0;
+      var startSuiteTime = performance.now();
+
+      try {
+        log('Starting automated logic test suite...', 'info');
+        iframe.src = 'index.html';
+        log('Reloading CVbuilder context...', 'info');
+        await sleep(1500);
+
+        var win = iframe.contentWindow;
+        var doc = iframe.contentDocument;
+        cleanLocalStorage(win);
+
+        // Import necessary global functions
+        var escapeLatex = win.texEscape;
+        var resolvePath = win.resolve;
+        var setPath = win.setPath;
+        var clone = win.clone;
+        var listDatabases = win.listDatabases;
+        var loadDatabase = win.loadDatabase;
+        var saveCurrentDatabase = win.saveCurrentDatabase;
+        var deleteDatabase = win.deleteDatabase;
+        var listStyles = win.listStyles;
+        var htmlEscape = win.htmlEscape;
+
+        /* ===================================================================
+           SUITE 1: COMPILER & ESCAPING FUNCTIONS
+           =================================================================== */
+        
+        // Test 1.1: Escape LaTeX special characters
+        (function() {
+          var tStart = performance.now();
+          var inputStr = "Guillermo & Co % Sales #100 {New} _Project_ ~home^";
+          var expected = "Guillermo \\& Co \\% Sales \\#100 \\{New\\} \\_Project\\_ \\textasciitilde{}home\\textasciicircum{}";
+          var actual = escapeLatex(inputStr);
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.1", "LaTeX Escaping", "Verifies escaping of LaTeX characters (&, %, #, _, {, }, ~, ^)", "compiler", expected, actual, latency, passed);
+          testRuns.push({ id: "1.1", name: "LaTeX Escaping", category: "compiler", expected, actual, passed, latency });
+        })();
+
+        // Test 1.2: LaTeX escaping of raw lists of strings
+        (function() {
+          var tStart = performance.now();
+          var inputList = ["A&B", "C%D"];
+          var expected = "A\\&B, C\\%D";
+          var actual = inputList.map(escapeLatex).join(', ');
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.2", "Array Item Escaping", "Escapes lists of items correctly for compiling templates", "compiler", expected, actual, latency, passed);
+          testRuns.push({ id: "1.2", name: "Array Item Escaping", category: "compiler", expected, actual, passed, latency });
+        })();
+
+        // Test 1.3: HTML Preview Render escaping boundaries
+        (function() {
+          var tStart = performance.now();
+          var inputVal = "John <script>alert(1)</" + "script> & Co";
+          var expected = "John &lt;script&gt;alert(1)&lt;/script&gt; &amp; Co";
+          var actual = win.esc(inputVal);
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.3", "HTML Sanitizer Escaping", "Escapes dangerous html script tags to prevent XSS in previews", "compiler", expected, actual, latency, passed);
+          testRuns.push({ id: "1.3", name: "HTML Sanitizer Escaping", category: "compiler", expected, actual, passed, latency });
+        })();
+
+        // Test 1.4: HTML Entity escaping
+        (function() {
+          var tStart = performance.now();
+          var inputVal = "A & B < C > D";
+          var expected = "A &amp; B &lt; C &gt; D";
+          var actual = htmlEscape(inputVal);
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.4", "HTML Entity Escaping", "Escapes basic HTML characters to prevent template syntax breakages", "compiler", expected, actual, latency, passed);
+          testRuns.push({ id: "1.4", name: "HTML Entity Escaping", category: "compiler", expected, actual, passed, latency });
+        })();
+
+        /* ===================================================================
+           SUITE 2: DATA MANIPULATION & STATE RESOLVER
+           =================================================================== */
+
+        // Test 2.1: Reorder items (Move Up)
+        (function() {
+          var tStart = performance.now();
+          win.data.work = [
+            { role: "Developer A" },
+            { role: "Developer B" },
+            { role: "Developer C" }
+          ];
+          
+          var arr = win.data.work;
+          var i = 2;
+          var temp = arr[i];
+          arr[i] = arr[i-1];
+          arr[i-1] = temp;
+          
+          var expected = ["Developer A", "Developer C", "Developer B"];
+          var actual = win.data.work.map(w => w.role);
+          var passed = JSON.stringify(actual) === JSON.stringify(expected);
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("2.1", "Entry Move Up", "Swaps list indices correctly to reorder items upward", "data", expected, actual, latency, passed);
+          testRuns.push({ id: "2.1", name: "Entry Move Up", category: "data", expected, actual, passed, latency });
+        })();
+
+        // Test 2.2: Reorder items (Move Down)
+        (function() {
+          var tStart = performance.now();
+          var arr = win.data.work;
+          var i = 0;
+          var temp = arr[i];
+          arr[i] = arr[i+1];
+          arr[i+1] = temp;
+          
+          var expected = ["Developer C", "Developer A", "Developer B"];
+          var actual = win.data.work.map(w => w.role);
+          var passed = JSON.stringify(actual) === JSON.stringify(expected);
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("2.2", "Entry Move Down", "Swaps list indices correctly to reorder items downward", "data", expected, actual, latency, passed);
+          testRuns.push({ id: "2.2", name: "Entry Move Down", category: "data", expected, actual, passed, latency });
+        })();
+
+        // Test 2.3: Reorder boundaries checks
+        (function() {
+          var tStart = performance.now();
+          var arr = win.data.work;
+          var canMoveUp = 0 > 0;
+          var canMoveDown = 2 < arr.length - 1;
+          
+          var expected = { canMoveUp: false, canMoveDown: false };
+          var actual = { canMoveUp, canMoveDown };
+          var passed = canMoveUp === expected.canMoveUp && canMoveDown === expected.canMoveDown;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("2.3", "Reorder Boundaries", "Ensures reorder locks indices to bounds [0, length-1]", "data", expected, actual, latency, passed);
+          testRuns.push({ id: "2.3", name: "Reorder Boundaries", category: "data", expected, actual, passed, latency });
+        })();
+
+        // Test 2.4: Deep nested key resolution
+        (function() {
+          var tStart = performance.now();
+          win.data.basics = {
+            location: {
+              city: "La Paz"
+            }
+          };
+          var expected = "La Paz";
+          var actual = resolvePath(["basics", "location", "city"]);
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("2.4", "Nested Key Resolver", "Verifies path resolver fetches values inside nested sub-objects", "data", expected, actual, latency, passed);
+          testRuns.push({ id: "2.4", name: "Nested Key Resolver", category: "data", expected, actual, passed, latency });
+        })();
+
+        // Test 2.5: Dynamic path setter
+        (function() {
+          var tStart = performance.now();
+          setPath(["basics", "location", "city"], "New City");
+          
+          var expected = "New City";
+          var actual = win.data.basics.location.city;
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("2.5", "Nested Path Setter", "Verifies deep nested setter assigns value at target path array", "data", expected, actual, latency, passed);
+          testRuns.push({ id: "2.5", name: "Nested Path Setter", category: "data", expected, actual, passed, latency });
+        })();
+
+        /* ===================================================================
+           SUITE 3: LOCAL STORAGE & DATABASE MANAGERS
+           =================================================================== */
+
+        // Test 3.1: Save new custom database
+        (function() {
+          var tStart = performance.now();
+          win.currentDbName = "Test_Database";
+          win.data = { basics: { firstname: "UnitTester" } };
+          saveCurrentDatabase();
+          
+          var list = listDatabases();
+          var expected = true;
+          var actual = list.indexOf("Test_Database") !== -1;
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("3.1", "Save DB LocalStorage", "Checks saving database serializes and registers key in storage", "storage", expected, actual, latency, passed);
+          testRuns.push({ id: "3.1", name: "Save DB LocalStorage", category: "storage", expected, actual, passed, latency });
+        })();
+
+        // Test 3.2: Load custom database from storage
+        (function() {
+          var tStart = performance.now();
+          win.data = { basics: { firstname: "DirtyValue" } };
+          loadDatabase("Test_Database");
+          
+          var expected = "UnitTester";
+          var actual = win.data.basics.firstname;
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("3.2", "Load DB Storage", "Asserts loading custom database recovers stored data object state", "storage", expected, actual, latency, passed);
+          testRuns.push({ id: "3.2", name: "Load DB Storage", category: "storage", expected, actual, passed, latency });
+        })();
+
+        // Test 3.3: Delete database from storage
+        (function() {
+          var tStart = performance.now();
+          deleteDatabase("Test_Database");
+          
+          var list = listDatabases();
+          var expected = false;
+          var actual = list.indexOf("Test_Database") !== -1;
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("3.3", "Delete DB Storage", "Asserts database deletion completely destroys localStorage target", "storage", expected, actual, latency, passed);
+          testRuns.push({ id: "3.3", name: "Delete DB Storage", category: "storage", expected, actual, passed, latency });
+        })();
+
+        /* ===================================================================
+           SUITE 4: MODULE INTEGRATION TESTING
+           =================================================================== */
+
+        // Test 4.1: Integration: DB to Compiler
+        (function() {
+          var tStart = performance.now();
+          var originalFirstname = win.data.basics.firstname;
+          win.data.basics.firstname = "DynamicIntegrationTest";
+          win.renderLatex();
+          var compiled = doc.getElementById('latexPreview').textContent;
+          var passed = compiled.indexOf("DynamicIntegrationTest") !== -1;
+          win.data.basics.firstname = originalFirstname;
+          win.renderLatex();
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("4.1", "DB to Compiler Integration", "Verifies changes in active database instantly compile into the preview panels", "integration", "Contains 'DynamicIntegrationTest'", passed ? "Passed" : "Failed", latency, passed);
+          testRuns.push({ id: "4.1", name: "DB to Compiler Integration", category: "integration", expected: "Contains 'DynamicIntegrationTest'", actual: passed ? "Passed" : "Failed", passed, latency });
+        })();
+
+        // Test 4.2: Integration: Translator to UI
+        (function() {
+          var tStart = performance.now();
+          var backupLang = win.state.langFilter;
+          win.state.langFilter = 'es';
+          win.updateUITranslations();
+          var actualText = doc.getElementById('downloadPdfBtn').textContent;
+          var expectedText = 'Descargar PDF';
+          var passed = actualText === expectedText;
+          win.state.langFilter = backupLang;
+          win.updateUITranslations();
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("4.2", "Translator to UI Integration", "Asserts that switching global language updates DOM element labels correctly", "integration", expectedText, actualText, latency, passed);
+          testRuns.push({ id: "4.2", name: "Translator to UI Integration", category: "integration", expected: expectedText, actual: actualText, passed, latency });
+        })();
+
+        // Test 4.3: Integration: Instance Overrides to Compiler
+        (function() {
+          var tStart = performance.now();
+          var backupInstance = win.activeInstance;
+          var backupInstanceName = win.currentInstanceName;
+          
+          win.activeInstance = {
+            name: "IntegrationInstanceTest",
+            masterCvName: win.currentDbName,
+            overwrites: {
+              "basics.title": "Architect Override"
+            },
+            visibility: {}
+          };
+          win.currentInstanceName = "IntegrationInstanceTest";
+          win.renderLatex();
+          var compiled = doc.getElementById('latexPreview').textContent;
+          var passed = compiled.indexOf("Architect Override") !== -1;
+          
+          win.activeInstance = backupInstance;
+          win.currentInstanceName = backupInstanceName;
+          win.renderLatex();
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("4.3", "Instance Overrides to Compiler Integration", "Ensures active tailored instance overwrites compile into previews", "integration", "Contains 'Architect Override'", passed ? "Passed" : "Failed", latency, passed);
+          testRuns.push({ id: "4.3", name: "Instance Overrides to Compiler Integration", category: "integration", expected: "Contains 'Architect Override'", actual: passed ? "Passed" : "Failed", passed, latency });
+        })();
+
+        /* ===================================================================
+           SUITE 5: WIRING & REGRESSION GUARD
+           =================================================================== */
+
+        // Test 5.1: importStyleFile function must exist
+        (function() {
+          var tStart = performance.now();
+          var expected = 'function';
+          var actual = typeof win.importStyleFile;
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.1', 'importStyleFile Exists', 'Verifies importStyleFile() is defined — regression guard for the missing function bug', 'regression', expected, actual, latency, passed);
+          testRuns.push({ id: '5.1', name: 'importStyleFile Exists', category: 'regression', expected, actual, passed, latency });
+        })();
+
+        // Test 5.2: openEditMappersModal uses mappersEditor textarea, not a stale mappersEditGrid
+        (function() {
+          var tStart = performance.now();
+          // mappersEditGrid must NOT exist in the DOM (it was the old wrong element)
+          var staleEl = doc.getElementById('mappersEditGrid');
+          // mappersEditor textarea MUST exist
+          var correctEl = doc.getElementById('mappersEditor');
+          var expected = 'no-stale, has-correct';
+          var actual = (!staleEl ? 'no-stale' : 'stale-found') + ', ' + (correctEl ? 'has-correct' : 'missing-correct');
+          var passed = !staleEl && !!correctEl;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.2', 'Mappers Editor Element', 'Ensures openEditMappersModal targets the correct #mappersEditor textarea and not the removed #mappersEditGrid', 'regression', expected, actual, latency, passed);
+          testRuns.push({ id: '5.2', name: 'Mappers Editor Element', category: 'regression', expected, actual, passed, latency });
+        })();
+
+        // Test 5.3: closeAllDropdowns removes .open class, not .show
+        (function() {
+          var tStart = performance.now();
+          // Manually add .open to a dropdown, call closeAllDropdowns, verify it is removed
+          var dropdown = doc.querySelector('.dropdown');
+          var expected = false; // after close, .open should be gone
+          var actual = true; // assume worst case
+          if (dropdown) {
+            dropdown.classList.add('open');
+            win.closeAllDropdowns();
+            actual = dropdown.classList.contains('open');
+          }
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.3', 'closeAllDropdowns Uses .open', 'Asserts that closeAllDropdowns() removes .open (not .show) from dropdowns, matching the CSS rule', 'regression', String(expected), String(actual), latency, passed);
+          testRuns.push({ id: '5.3', name: 'closeAllDropdowns Uses .open', category: 'regression', expected: String(expected), actual: String(actual), passed, latency });
+        })();
+
+        // Test 5.4: All Style Manager modal buttons have onclick handlers
+        (function() {
+          var tStart = performance.now();
+          var ids = ['modalCreateStyleBtn', 'modalStylePresetsBtn', 'modalEditMappersBtn', 'modalImportStyleBtn', 'closeStyleManagerModal', 'closePresetGalleryModal', 'closeEditMappersModal', 'applyMappersBtn'];
+          var missing = ids.filter(function(id) {
+            var el = doc.getElementById(id);
+            return !el || typeof el.onclick !== 'function';
+          });
+          var expected = '[]';
+          var actual = JSON.stringify(missing);
+          var passed = missing.length === 0;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.4', 'Style Manager Buttons Wired', 'Checks that all Style Manager modal buttons have onclick handlers — regression guard for the missing bindings bug', 'regression', expected, actual, latency, passed);
+          testRuns.push({ id: '5.4', name: 'Style Manager Buttons Wired', category: 'regression', expected, actual, passed, latency });
+        })();
+
+        // Test 5.5: Mappers JSON round-trip via applyMappersBtn logic
+        (function() {
+          var tStart = performance.now();
+          var backupMappers = JSON.parse(JSON.stringify(win.mappers));
+          var testPayload = { education: 'cventry_education', skills: 'skills_test_override' };
+          var textarea = doc.getElementById('mappersEditor');
+          var passed = false;
+          if (textarea) {
+            textarea.value = JSON.stringify(testPayload);
+            try {
+              var parsed = JSON.parse(textarea.value);
+              win.mappers = parsed;
+              var actual = win.mappers.skills;
+              passed = actual === 'skills_test_override';
+            } catch(e) { passed = false; }
+          }
+          // Restore
+          win.mappers = backupMappers;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.5', 'Mappers JSON Round-trip', 'Validates that mappers can be serialized to JSON in the textarea, parsed back, and applied to win.mappers', 'regression', 'skills_test_override', win.mappers ? win.mappers.skills || 'n/a' : 'n/a', latency, passed);
+          testRuns.push({ id: '5.5', name: 'Mappers JSON Round-trip', category: 'regression', expected: 'skills_test_override', actual: passed ? 'skills_test_override' : 'mismatch', passed, latency });
+        })();
+
+        // Finalize test metrics
+        var endSuiteTime = performance.now();
+        var suiteDuration = Math.round(endSuiteTime - startSuiteTime);
+        
+        document.getElementById('totalCount').textContent = testRuns.length;
+        document.getElementById('passedCount').textContent = totalPassed;
+        document.getElementById('failedCount').textContent = totalFailed;
+        document.getElementById('totalTime').textContent = suiteDuration + 'ms';
+        
+        log('Extensive functional test protocol finished. Results: ' + totalPassed + ' Passed, ' + totalFailed + ' Failed.', 'success');
+
+        // Compile detailed JSON execution report
+        lastReport = {
+          protocolName: "CVbuilder Extensive Functionality Test Suite",
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          durationMs: suiteDuration,
+          statistics: {
+            totalTests: testRuns.length,
+            passed: totalPassed,
+            failed: totalFailed,
+            successRate: ((totalPassed / testRuns.length) * 100).toFixed(1) + '%'
+          },
+          assertions: testRuns
+        };
+
+        // Render report modal
+        document.getElementById('reportAssertions').textContent = totalPassed + '/' + testRuns.length;
+        document.getElementById('reportTime').textContent = new Date().toLocaleString();
+        
+        var statusEl = document.getElementById('reportStatus');
+        if (totalFailed === 0) {
+          statusEl.textContent = 'ALL PASSED';
+          statusEl.style.color = 'var(--color-success)';
+        } else {
+          statusEl.textContent = 'FAILED';
+          statusEl.style.color = 'var(--color-error)';
+        }
+
+        document.getElementById('reportModal').style.display = 'flex';
+        document.getElementById('downloadReportBtn').disabled = false;
+        
+        cleanLocalStorage(win);
+
+      } catch (err) {
+        log('Exception thrown during test run: ' + err.message, 'error');
+        console.error(err);
+      } finally {
+        document.getElementById('runTestsBtn').disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

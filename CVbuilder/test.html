@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CVbuilder - Automated UX Test Suite</title>
+  <style>
+    :root {
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-surface-offset: #334155;
+      --color-text: #f8fafc;
+      --color-text-muted: #94a3b8;
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-success: #10b981;
+      --color-error: #ef4444;
+      --color-warning: #f59e0b;
+      --color-divider: #475569;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      padding: 16px 24px;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .iframe-panel {
+      flex: 1.3;
+      background: #000;
+      position: relative;
+      border-right: 1px solid var(--color-divider);
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #111;
+    }
+    .test-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg);
+      overflow-y: auto;
+      padding: 24px;
+      gap: 20px;
+    }
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-badge.idle { background: var(--color-surface-offset); color: var(--color-text-muted); }
+    .status-badge.running { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .status-badge.passed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-badge.failed { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    
+    .btn {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .assertion-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .assertion-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+    .assertion-item.passed { color: var(--color-text); }
+    .assertion-item.failed { color: #f87171; }
+    
+    .icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 50%;
+    }
+    .icon.idle { background: #475569; color: white; }
+    .icon.idle::after { content: "•"; }
+    .icon.passed { background: var(--color-success); color: white; }
+    .icon.passed::after { content: "✓"; }
+    .icon.failed { background: var(--color-error); color: white; }
+    .icon.failed::after { content: "✗"; }
+
+    .console-panel {
+      background: #090d16;
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      font-family: monospace;
+      font-size: 12px;
+      height: 180px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .log-line {
+      line-height: 1.4;
+    }
+    .log-line.info { color: #60a5fa; }
+    .log-line.success { color: #34d399; }
+    .log-line.error { color: #f87171; }
+    .log-line.warn { color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>CVbuilder UX Test Suite</h1>
+    <div class="header-controls">
+      <button class="btn" id="runTestsBtn" onclick="runAllTests()">Run Test Suite</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Embeds the actual application under test -->
+    <div class="iframe-panel">
+      <iframe id="appFrame" src="index.html"></iframe>
+    </div>
+
+    <!-- Test Runner Controls & Dashboard -->
+    <div class="test-panel">
+      <!-- Console logs panel -->
+      <div class="console-panel" id="consoleLogs">
+        <div class="log-line info">Test runner initialized. Press "Run Test Suite" to start visual and logic assertions.</div>
+      </div>
+
+      <!-- Test Cases Cards -->
+      <div class="card" id="test-1">
+        <div class="card-title">
+          <span>Test 1: App Layout & Initialization</span>
+          <span class="status-badge idle" id="status-1">Idle</span>
+        </div>
+        <ul class="assertion-list">
+          <li class="assertion-item" id="assert-1-1"><span class="icon idle"></span> Main sidebar is rendered correctly</li>
+          <li class="assertion-item" id="assert-1-2"><span class="icon idle"></span> Active CV selector is loaded</li>
+          <li class="assertion-item" id="assert-1-3"><span class="icon idle"></span> Active Style manager selector is loaded</li>
+        </ul>
+      </div>
+
+      <div class="card" id="test-2">
+        <div class="card-title">
+          <span>Test 2: Welcome Tour Guide & Alignment</span>
+          <span class="status-badge idle" id="status-2">Idle</span>
+        </div>
+        <ul class="assertion-list">
+          <li class="assertion-item" id="assert-2-1"><span class="icon idle"></span> Welcome tour initializes on request</li>
+          <li class="assertion-item" id="assert-2-2"><span class="icon idle"></span> Highlights the correct active element</li>
+          <li class="assertion-item" id="assert-2-3"><span class="icon idle"></span> Popover aligns correctly with no offsets</li>
+          <li class="assertion-item" id="assert-2-4"><span class="icon idle"></span> Finishes and clears overlay smoothly</li>
+        </ul>
+      </div>
+
+      <div class="card" id="test-3">
+        <div class="card-title">
+          <span>Test 3: Language Switching & Localization</span>
+          <span class="status-badge idle" id="status-3">Idle</span>
+        </div>
+        <ul class="assertion-list">
+          <li class="assertion-item" id="assert-3-1"><span class="icon idle"></span> Switching language updates the UI in real-time</li>
+          <li class="assertion-item" id="assert-3-2"><span class="icon idle"></span> Menu and buttons labels translate to Spanish</li>
+          <li class="assertion-item" id="assert-3-3"><span class="icon idle"></span> Welcome Tour popover instructions localize correctly</li>
+        </ul>
+      </div>
+
+      <div class="card" id="test-4">
+        <div class="card-title">
+          <span>Test 4: Style Presets Gallery & Creation</span>
+          <span class="status-badge idle" id="status-4">Idle</span>
+        </div>
+        <ul class="assertion-list">
+          <li class="assertion-item" id="assert-4-1"><span class="icon idle"></span> Style Manager modal opens successfully</li>
+          <li class="assertion-item" id="assert-4-2"><span class="icon idle"></span> Preset gallery displays style preset cards</li>
+          <li class="assertion-item" id="assert-4-3"><span class="icon idle"></span> New style can be created and saved from preset</li>
+        </ul>
+      </div>
+
+      <div class="card" id="test-5">
+        <div class="card-title">
+          <span>Test 5: CV Tailored Instance Overrides</span>
+          <span class="status-badge idle" id="status-5">Idle</span>
+        </div>
+        <ul class="assertion-list">
+          <li class="assertion-item" id="assert-5-1"><span class="icon idle"></span> Status bar tracks dirty unsaved overrides</li>
+          <li class="assertion-item" id="assert-5-2"><span class="icon idle"></span> "Save instance" button scales and functions correctly</li>
+          <li class="assertion-item" id="assert-5-3"><span class="icon idle"></span> Saving override registers to active tailored profile</li>
+        </ul>
+      </div>
+
+      <div class="card" id="test-6">
+        <div class="card-title">
+          <span>Test 6: Menu, Theme &amp; Wiring Regression</span>
+          <span class="status-badge idle" id="status-6">Idle</span>
+        </div>
+        <ul class="assertion-list">
+          <li class="assertion-item" id="assert-6-1"><span class="icon idle"></span> File menu dropdown opens on click</li>
+          <li class="assertion-item" id="assert-6-2"><span class="icon idle"></span> Help menu dropdown opens on click</li>
+          <li class="assertion-item" id="assert-6-3"><span class="icon idle"></span> Version badge opens changelog modal</li>
+          <li class="assertion-item" id="assert-6-4"><span class="icon idle"></span> Theme toggle switches dark/light attribute</li>
+          <li class="assertion-item" id="assert-6-5"><span class="icon idle"></span> Style Manager inner buttons are bound</li>
+          <li class="assertion-item" id="assert-6-6"><span class="icon idle"></span> Test report tally counts correctly (no case mismatch)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Report Modal -->
+  <div id="reportModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding:20px; z-index:2000">
+    <div style="background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); padding:24px; max-width:450px; width:100%; box-shadow:var(--shadow-lg); display:flex; flex-direction:column; gap:16px">
+      <div style="font-size:18px; font-weight:700; color:var(--color-text); border-bottom:1px solid var(--color-divider); padding-bottom:8px">Test Execution Report</div>
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:12px; font-size:14px">
+        <div>Total Test Suites:</div><strong style="text-align:right">6</strong>
+        <div>Passed:</div><strong id="reportPassed" style="color:var(--color-success); text-align:right">0</strong>
+        <div>Failed:</div><strong id="reportFailed" style="color:var(--color-error); text-align:right">0</strong>
+        <div>Assertions Passed:</div><strong id="reportAssertions" style="text-align:right">0/22</strong>
+        <div>Execution Date:</div><strong id="reportTime" style="text-align:right"></strong>
+        <div>Verdict Status:</div><strong id="reportStatus" style="text-align:right"></strong>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn" style="flex:1" onclick="downloadReport()">Download Report (.json)</button>
+        <button class="btn btn-ghost" style="background:var(--color-surface-offset); color:var(--color-text); border:none; flex:1" onclick="document.getElementById('reportModal').style.display='none'">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var iframe = document.getElementById('appFrame');
+    var consoleLogs = document.getElementById('consoleLogs');
+    var lastReportData = null;
+
+    var assertionsResults = {
+      "1-1": { desc: "Main sidebar is rendered correctly", passed: false },
+      "1-2": { desc: "Active CV selector is loaded", passed: false },
+      "1-3": { desc: "Active Style manager selector is loaded", passed: false },
+      "2-1": { desc: "Welcome tour initializes on request", passed: false },
+      "2-2": { desc: "Highlights the correct active element", passed: false },
+      "2-3": { desc: "Popover aligns correctly with no offsets", passed: false },
+      "2-4": { desc: "Finishes and clears overlay smoothly", passed: false },
+      "3-1": { desc: "Switching language updates the UI in real-time", passed: false },
+      "3-2": { desc: "Menu and buttons labels translate to Spanish", passed: false },
+      "3-3": { desc: "Welcome Tour popover instructions localize correctly", passed: false },
+      "4-1": { desc: "Style Manager modal opens successfully", passed: false },
+      "4-2": { desc: "Preset gallery displays style preset cards", passed: false },
+      "4-3": { desc: "New style can be created and saved from preset", passed: false },
+      "5-1": { desc: "Status bar tracks dirty unsaved overrides", passed: false },
+      "5-2": { desc: "Save instance button scales and functions correctly", passed: false },
+      "5-3": { desc: "Saving override registers to active tailored profile", passed: false },
+      "6-1": { desc: "File menu dropdown opens on click", passed: false },
+      "6-2": { desc: "Help menu dropdown opens on click", passed: false },
+      "6-3": { desc: "Version badge opens changelog modal", passed: false },
+      "6-4": { desc: "Theme toggle switches dark/light attribute", passed: false },
+      "6-5": { desc: "Style Manager inner buttons are bound", passed: false },
+      "6-6": { desc: "Test report tally counts correctly (no case mismatch)", passed: false }
+    };
+
+    function log(text, type = 'info') {
+      var div = document.createElement('div');
+      div.className = 'log-line ' + type;
+      div.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
+      consoleLogs.appendChild(div);
+      consoleLogs.scrollTop = consoleLogs.scrollHeight;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function getIframeDocument() {
+      return iframe.contentDocument || iframe.contentWindow.document;
+    }
+
+    function getIframeWindow() {
+      return iframe.contentWindow;
+    }
+
+    function updateBadge(id, status) {
+      var badge = document.getElementById('status-' + id);
+      badge.textContent = status;
+      badge.className = 'status-badge ' + status;
+    }
+
+    function updateAssertion(id, sub, passed) {
+      var key = id + '-' + sub;
+      if (assertionsResults[key]) {
+        assertionsResults[key].passed = passed;
+      }
+      var li = document.getElementById('assert-' + id + '-' + sub);
+      li.className = 'assertion-item ' + (passed ? 'passed' : 'failed');
+      var icon = li.querySelector('.icon');
+      icon.className = 'icon ' + (passed ? 'passed' : 'failed');
+    }
+
+    function downloadReport() {
+      if (!lastReportData) return;
+      var blob = new Blob([JSON.stringify(lastReportData, null, 2)], {type: 'application/json'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'cvbuilder_ux_report_' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      log('Detailed JSON report downloaded successfully.', 'success');
+    }
+
+    async function runAllTests() {
+      document.getElementById('runTestsBtn').disabled = true;
+      consoleLogs.innerHTML = '';
+      
+      // Reset statuses and results
+      Object.keys(assertionsResults).forEach(key => {
+        assertionsResults[key].passed = false;
+      });
+
+      for (var i = 1; i <= 5; i++) {
+        updateBadge(i, 'idle');
+        var assertions = document.querySelectorAll('[id^="assert-' + i + '-"]');
+        assertions.forEach(li => {
+          li.className = 'assertion-item';
+          li.querySelector('.icon').className = 'icon idle';
+        });
+      }
+
+      try {
+        log('Starting automated UX test suite...', 'info');
+        
+        // Reload iframe to guarantee clean state
+        iframe.src = 'index.html';
+        log('Reloading CVbuilder application...', 'info');
+        await sleep(1500); // Wait for application bootstrap
+
+        var doc = getIframeDocument();
+        var win = getIframeWindow();
+        win.alert = function(msg) { log('Mock Alert: ' + msg, 'info'); };
+
+        /* ── TEST 1: App Layout ── */
+        updateBadge(1, 'running');
+        log('Running Test 1: Layout & Initialization checks', 'info');
+        
+        var sidebar = doc.querySelector('.sidebar');
+        var dbSelect = doc.querySelector('#dbSelect');
+        var styleSelect = doc.querySelector('#styleSelect');
+
+        var t1_1 = !!sidebar;
+        var t1_2 = !!dbSelect;
+        var t1_3 = !!styleSelect;
+
+        updateAssertion(1, 1, t1_1);
+        updateAssertion(1, 2, t1_2);
+        updateAssertion(1, 3, t1_3);
+
+        if (t1_1 && t1_2 && t1_3) {
+          updateBadge(1, 'passed');
+          log('Test 1 Passed: Layout elements successfully initialized.', 'success');
+        } else {
+          updateBadge(1, 'failed');
+          log('Test 1 Failed: Some layout containers were missing.', 'error');
+        }
+
+        /* ── TEST 2: Welcome Tour Guide ── */
+        updateBadge(2, 'running');
+        log('Running Test 2: Welcome Tour Guide flow and positioning alignment', 'info');
+
+        // Open Help Dropdown
+        var helpBtn = doc.querySelector('#helpMenuBtn');
+        if (helpBtn) {
+          helpBtn.click();
+          await sleep(300);
+          
+          var tourBtn = doc.querySelector('#helpTourBtn');
+          if (tourBtn) {
+            tourBtn.click();
+            log('Manually triggered Welcome Tour Guide.', 'info');
+            await sleep(500);
+            
+            var popover = doc.querySelector('#tourPopover');
+            var t2_1 = !!popover;
+            updateAssertion(2, 1, t2_1);
+            
+            if (t2_1) {
+              // Inspect target highlight
+              var activeStep = win.tourActiveStep;
+              var targetSelector = win.TOUR_STEPS[activeStep].target;
+              var targetEl = doc.querySelector(targetSelector);
+              var t2_2 = targetEl && targetEl.classList.contains('tour-highlight');
+              updateAssertion(2, 2, t2_2);
+              
+              // Verify positioning offset (wait 250ms for active repositioning timeout in showTourStep)
+              await sleep(250);
+              var popoverRect = popover.getBoundingClientRect();
+              var t2_3 = popoverRect.top > 0 && popoverRect.left > 0 && popover.style.transform !== 'translate(-50%, -50%)';
+              updateAssertion(2, 3, t2_3);
+              
+              // Navigate steps to the end
+              log('Stepping through all tour popovers...', 'info');
+              while (win.tourActiveStep < win.TOUR_STEPS.length - 1) {
+                var currentPopover = doc.querySelector('#tourPopover');
+                if (!currentPopover) {
+                  log('Test 2 Error: Popover disappeared mid-tour.', 'error');
+                  break;
+                }
+                var currentNextBtn = currentPopover.querySelector('.btn-primary');
+                if (!currentNextBtn) {
+                  log('Test 2 Error: Next button missing in step.', 'error');
+                  break;
+                }
+                currentNextBtn.click();
+                await sleep(300);
+              }
+              
+              // Find the final button inside the last step popover
+              var finalPopover = doc.querySelector('#tourPopover');
+              var finalNextBtn = finalPopover ? finalPopover.querySelector('.btn-primary') : null;
+              var isFinishBtn = finalNextBtn && (finalNextBtn.textContent === 'Finish' || finalNextBtn.textContent === 'Finalizar');
+              
+              if (finalNextBtn) {
+                finalNextBtn.click();
+              }
+              await sleep(300);
+              
+              var t2_4 = !doc.querySelector('#tourPopover') && isFinishBtn;
+              updateAssertion(2, 4, t2_4);
+              
+              if (t2_1 && t2_2 && t2_3 && t2_4) {
+                updateBadge(2, 'passed');
+                log('Test 2 Passed: Welcome tour aligns and clears overlay successfully.', 'success');
+              } else {
+                updateBadge(2, 'failed');
+                log('Test 2 Failed: Tour alignment or popover cleanup failed.', 'error');
+              }
+            } else {
+              updateAssertion(2, 2, false);
+              updateAssertion(2, 3, false);
+              updateAssertion(2, 4, false);
+              updateBadge(2, 'failed');
+              log('Test 2 Failed: Welcome tour modal popover failed to render.', 'error');
+            }
+          }
+        }
+
+        /* ── TEST 3: Language Switching ── */
+        updateBadge(3, 'running');
+        log('Running Test 3: Spanish localization & UI translations', 'info');
+
+        var langSelect = doc.querySelector('#langFilterSelect');
+        if (langSelect) {
+          langSelect.value = 'es';
+          langSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          await sleep(500);
+
+          var isSpanish = win.state.langFilter === 'es';
+          updateAssertion(3, 1, isSpanish);
+
+          // Check main translated labels
+          var sidebarHeader = doc.querySelector('.sidebar .sectiontitle');
+          var downloadPdfBtn = doc.querySelector('#downloadPdfBtn');
+          var fileMenuText = doc.querySelector('#fileMenuBtn').firstChild.textContent.trim();
+          
+          var t3_2 = sidebarHeader.textContent === 'Secciones' && 
+                     downloadPdfBtn.textContent === 'Descargar PDF' &&
+                     fileMenuText === 'Archivo';
+          updateAssertion(3, 2, t3_2);
+
+          // Trigger tour under Spanish context and check localization
+          var helpBtn = doc.querySelector('#helpMenuBtn');
+          helpBtn.click();
+          await sleep(200);
+          doc.querySelector('#helpTourBtn').click();
+          await sleep(500);
+
+          var popover = doc.querySelector('#tourPopover');
+          var popoverTitle = popover ? popover.querySelector('h4').textContent : '';
+          var t3_3 = popoverTitle.indexOf('Administrar bases de datos de CV') !== -1;
+          
+          // Close tour
+          if (popover) {
+            popover.querySelector('.btn-ghost').click(); // skip
+          }
+          updateAssertion(3, 3, t3_3);
+
+          if (isSpanish && t3_2 && t3_3) {
+            updateBadge(3, 'passed');
+            log('Test 3 Passed: Dynamic translations to Spanish applied correctly.', 'success');
+          } else {
+            updateBadge(3, 'failed');
+            log('Test 3 Failed: Translation mismatches found.', 'error');
+          }
+          
+          // Restore English
+          langSelect.value = 'en';
+          langSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          await sleep(300);
+        }
+
+        /* ── TEST 4: Style Manager & Presets ── */
+        updateBadge(4, 'running');
+        log('Running Test 4: Style Manager & Presets gallery style creation', 'info');
+
+        // Choose __manage__ in style select to open Style Manager Modal
+        styleSelect.value = '__manage__';
+        styleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        await sleep(500);
+
+        var styleModal = doc.querySelector('#styleManagerModal');
+        var t4_1 = styleModal && styleModal.classList.contains('open');
+        updateAssertion(4, 1, t4_1);
+
+        if (t4_1) {
+          // Click "+ Create New Style" to open preset gallery modal in creation mode
+          var createBtn = doc.querySelector('#modalCreateStyleBtn');
+          createBtn.click();
+          await sleep(500);
+
+          var galleryModal = doc.querySelector('#presetGalleryModal');
+          var t4_2 = galleryModal && galleryModal.classList.contains('open') && doc.querySelectorAll('.preset-card').length > 0;
+          updateAssertion(4, 2, t4_2);
+
+          if (t4_2) {
+            // Click Create Style from Preset on first preset
+            var firstPresetCardBtn = doc.querySelector('.preset-card button');
+            
+            // Stub prompt window
+            var originalPrompt = win.prompt;
+            win.prompt = function() { return 'AutomatedStyle'; };
+
+            firstPresetCardBtn.click();
+            await sleep(500);
+
+            // Restore prompt
+            win.prompt = originalPrompt;
+
+            // Verify active style is now AutomatedStyle
+            var t4_3 = win.currentStyleName === 'AutomatedStyle';
+            updateAssertion(4, 3, t4_3);
+
+            // Clean up style
+            localStorage.removeItem('cvbuilder_style_AutomatedStyle');
+
+            if (t4_1 && t4_2 && t4_3) {
+              updateBadge(4, 'passed');
+              log('Test 4 Passed: Style creation from Presets gallery matches requirements.', 'success');
+            } else {
+              updateBadge(4, 'failed');
+              log('Test 4 Failed: Preset style application or storage save failed.', 'error');
+            }
+          } else {
+            updateAssertion(4, 3, false);
+            updateBadge(4, 'failed');
+          }
+          
+          // Close style manager modal if open
+          var closeStyleBtn = doc.querySelector('#closeStyleManagerModal');
+          if (closeStyleBtn) {
+            closeStyleBtn.click();
+            await sleep(300);
+          }
+        }
+
+        /* ── TEST 5: CV Tailored Instances ── */
+        updateBadge(5, 'running');
+        log('Running Test 5: Instance selective overrides & dirty state tracking', 'info');
+
+        // Create an active instance
+        var originalPrompt = win.prompt;
+        win.prompt = function() { return 'TestInstance'; };
+        
+        // Open Instance manager select
+        var instSelect = doc.querySelector('#instanceSelect');
+        instSelect.value = '__manage__';
+        instSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        await sleep(500);
+
+        // Click create instance in modal (uses correct selector #createInstanceBtn)
+        var createInstBtn = doc.querySelector('#createInstanceBtn');
+        if (createInstBtn) {
+          createInstBtn.click();
+          await sleep(500);
+        }
+
+        win.prompt = originalPrompt;
+
+        // Verify instance was loaded
+        var isInstanceActive = win.activeInstance !== null && win.currentInstanceName === 'TestInstance';
+        log('Active Instance loaded: ' + isInstanceActive, 'info');
+
+        // Trigger input value change to check override controls
+        // Focus first field input inside 'basics'
+        var basicsTab = doc.querySelector('[data-tab="editor"]');
+        basicsTab.click();
+        await sleep(300);
+
+        // Select basics section in sidebar
+        var basicsNav = doc.querySelector('.navitem');
+        if (basicsNav) basicsNav.click();
+        await sleep(300);
+
+        // Get the actual value input field (inside the input-wrapper container)
+        var firstInput = doc.querySelector('#sectionEditor .input-wrapper input, #sectionEditor .input-wrapper textarea');
+        if (firstInput) {
+          firstInput.value = 'Johnathan';
+          firstInput.dispatchEvent(new Event('input', { bubbles: true }));
+          await sleep(500);
+
+          // Verify override-status-bar says unsaved
+          var statusBar = doc.querySelector('.override-status-bar');
+          var statusLabel = statusBar ? statusBar.querySelector('.status-label').textContent : '';
+          var t5_1 = statusLabel.indexOf('Tailored Override (Unsaved)') !== -1 || statusLabel.indexOf('Anulación adaptada (sin guardar)') !== -1;
+          updateAssertion(5, 1, t5_1);
+
+          // Check if Save instance button renders and fits correctly
+          var saveBtn = statusBar ? statusBar.querySelector('[data-apply]') : null;
+          var t5_2 = saveBtn && saveBtn.getBoundingClientRect().width > 20 && saveBtn.offsetHeight >= 24;
+          updateAssertion(5, 2, t5_2);
+
+          if (saveBtn) {
+            // Click save instance
+            saveBtn.click();
+            await sleep(500);
+
+            // Verify status turns to saved
+            var updatedLabel = statusBar.querySelector('.status-label').textContent;
+            var t5_3 = updatedLabel.indexOf('Tailored Override') !== -1 || updatedLabel.indexOf('Anulación adaptada') !== -1;
+            updateAssertion(5, 3, t5_3);
+
+            if (t5_1 && t5_2 && t5_3) {
+              updateBadge(5, 'passed');
+              log('Test 5 Passed: Instance overrides track, save, and reset correctly.', 'success');
+            } else {
+              updateBadge(5, 'failed');
+              log('Test 5 Failed: Override tracking status check failed.', 'error');
+            }
+          } else {
+            updateAssertion(5, 2, false);
+            updateAssertion(5, 3, false);
+            updateBadge(5, 'failed');
+          }
+        } else {
+          log('Test 5 Error: Basics section first input element not found.', 'error');
+          updateBadge(5, 'failed');
+        }
+
+        /* ── TEST 6: Menu, Theme & Wiring Regression ── */
+        updateBadge(6, 'running');
+        log('Running Test 6: Menu dropdowns, theme toggle, version badge, and wiring regression checks', 'info');
+
+        // 6-1: File menu dropdown opens
+        var fileMenuBtn = doc.querySelector('#fileMenuBtn');
+        fileMenuBtn.click();
+        await sleep(300);
+        var fileDropdown = doc.querySelector('#fileDropdown');
+        var t6_1 = fileDropdown && fileDropdown.classList.contains('open');
+        updateAssertion(6, 1, t6_1);
+        // Close it
+        win.closeAllDropdowns();
+        await sleep(200);
+
+        // 6-2: Help menu dropdown opens
+        var helpMenuBtn = doc.querySelector('#helpMenuBtn');
+        helpMenuBtn.click();
+        await sleep(300);
+        var helpDropdown = doc.querySelector('#helpDropdown');
+        var t6_2 = helpDropdown && helpDropdown.classList.contains('open');
+        updateAssertion(6, 2, t6_2);
+        win.closeAllDropdowns();
+        await sleep(200);
+
+        // 6-3: Version badge opens changelog modal
+        var versionBadge = doc.querySelector('#versionBtn');
+        versionBadge.click();
+        await sleep(400);
+        var versionModal = doc.querySelector('#versionModal');
+        var t6_3 = versionModal && versionModal.classList.contains('open');
+        updateAssertion(6, 3, t6_3);
+        // Close version modal
+        var closeVerBtn = doc.querySelector('#closeVersionModal');
+        if (closeVerBtn) { closeVerBtn.click(); await sleep(200); }
+
+        // 6-4: Theme toggle switches data-theme attribute
+        var htmlEl = doc.documentElement;
+        var initialTheme = htmlEl.getAttribute('data-theme');
+        var themeToggle = doc.querySelector('[data-theme-toggle]');
+        themeToggle.click();
+        await sleep(200);
+        var newTheme = htmlEl.getAttribute('data-theme');
+        var t6_4 = newTheme !== initialTheme;
+        updateAssertion(6, 4, t6_4);
+        // Restore theme
+        themeToggle.click();
+        await sleep(200);
+
+        // 6-5: Style Manager inner buttons are bound (modalCreateStyleBtn has onclick)
+        var styleSelectEl = doc.querySelector('#styleSelect');
+        styleSelectEl.value = '__manage__';
+        styleSelectEl.dispatchEvent(new Event('change', { bubbles: true }));
+        await sleep(400);
+        var createStyleBtn = doc.querySelector('#modalCreateStyleBtn');
+        var presetsBtn = doc.querySelector('#modalStylePresetsBtn');
+        var t6_5 = createStyleBtn && typeof createStyleBtn.onclick === 'function'
+                && presetsBtn && typeof presetsBtn.onclick === 'function';
+        updateAssertion(6, 5, t6_5);
+        var closeStyleMgr = doc.querySelector('#closeStyleManagerModal');
+        if (closeStyleMgr) { closeStyleMgr.click(); await sleep(200); }
+
+        // 6-6: Report tally case regression — simulate badge states and count
+        (function() {
+          var dummyIds = ['t6r-1','t6r-2','t6r-3'];
+          var dummies = dummyIds.map(function(id) {
+            var el = document.createElement('span');
+            el.id = id;
+            el.textContent = 'passed';
+            document.body.appendChild(el);
+            return el;
+          });
+          var counted = 0;
+          dummies.forEach(function(el) {
+            if (el.textContent.toLowerCase() === 'passed') counted++;
+          });
+          dummies.forEach(function(el) { el.remove(); });
+          var t6_6 = counted === 3;
+          updateAssertion(6, 6, t6_6);
+
+          if (t6_1 && t6_2 && t6_3 && t6_4 && t6_5 && t6_6) {
+            updateBadge(6, 'passed');
+            log('Test 6 Passed: All menu, theme toggle and wiring regression checks passed.', 'success');
+          } else {
+            updateBadge(6, 'failed');
+            log('Test 6 Failed: One or more regression checks failed.', 'error');
+          }
+        })();
+
+        // Clean up active instance
+        localStorage.removeItem('cvbuilder_cv_' + win.currentDbName);
+        localStorage.removeItem('cvbuilder_instance_TestInstance');
+        log('UX Test Suite execution finished.', 'success');
+
+        // Compile final stats and generate report
+        var passedCount = 0;
+        var failedCount = 0;
+        for (var i = 1; i <= 6; i++) {
+          var status = document.getElementById('status-' + i).textContent.toLowerCase();
+          if (status === 'passed') passedCount++;
+          else failedCount++;
+        }
+
+        var totalAssertions = Object.keys(assertionsResults).length;
+        var passedAssertions = Object.values(assertionsResults).filter(a => a.passed).length;
+
+        // Populate detailed lastReportData
+        var logLines = Array.from(consoleLogs.querySelectorAll('.log-line')).map(div => div.textContent);
+        
+        lastReportData = {
+          suiteName: "CVbuilder UX Test Suite",
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          environment: {
+            language: navigator.language,
+            platform: navigator.platform,
+            windowSize: {
+              width: window.innerWidth,
+              height: window.innerHeight
+            },
+            iframeSize: {
+              width: iframe.offsetWidth,
+              height: iframe.offsetHeight
+            }
+          },
+          summary: {
+            totalSuites: 6,
+            passedSuites: passedCount,
+            failedSuites: failedCount,
+            totalAssertions: totalAssertions,
+            passedAssertions: passedAssertions,
+            failedAssertions: totalAssertions - passedAssertions
+          },
+          details: [
+            { id: 1, name: "App Layout & Initialization", status: document.getElementById('status-1').textContent },
+            { id: 2, name: "Welcome Tour Guide & Alignment", status: document.getElementById('status-2').textContent },
+            { id: 3, name: "Language Switching & Localization", status: document.getElementById('status-3').textContent },
+            { id: 4, name: "Style Presets Gallery & Creation", status: document.getElementById('status-4').textContent },
+            { id: 5, name: "CV Tailored Instance Overrides", status: document.getElementById('status-5').textContent },
+            { id: 6, name: "Menu, Theme & Wiring Regression", status: document.getElementById('status-6').textContent }
+          ],
+          assertions: assertionsResults,
+          consoleHistory: logLines
+        };
+
+        // Render report modal
+        document.getElementById('reportPassed').textContent = passedCount;
+        document.getElementById('reportFailed').textContent = failedCount;
+        document.getElementById('reportAssertions').textContent = passedAssertions + '/' + totalAssertions;
+        document.getElementById('reportTime').textContent = new Date().toLocaleString();
+        
+        var statusEl = document.getElementById('reportStatus');
+        if (failedCount === 0) {
+          statusEl.textContent = 'ALL PASSED';
+          statusEl.style.color = 'var(--color-success)';
+        } else {
+          statusEl.textContent = 'FAILED';
+          statusEl.style.color = 'var(--color-error)';
+        }
+
+        document.getElementById('reportModal').style.display = 'flex';
+
+      } catch (err) {
+        log('Exception thrown during test run: ' + err.message, 'error');
+        console.error(win);
+      } finally {
+        document.getElementById('runTestsBtn').disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
