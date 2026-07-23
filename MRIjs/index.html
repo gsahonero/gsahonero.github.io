@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRI Bloch Equation Isochromat Simulator</title>
+    <title>MRIjs</title>
     <link rel="stylesheet" href="styles.css">
     
     <!-- Libraries via CDN -->
@@ -18,7 +18,7 @@
         <div style="display: flex; align-items: center; gap: 1rem;">
             <h1>
                 <i data-lucide="activity"></i>
-                MRI Bloch Isochromat Simulator
+                MRIjs
             </h1>
             <nav class="top-menu">
                 <div class="menu-item">
@@ -43,7 +43,7 @@
                 </div>
             </nav>
         </div>
-        <div class="version">v1.2.0</div>
+        <div class="version">v1.3.0</div>
         
         <!-- Hidden elements for file loading -->
         <input type="file" id="experimentFileInput" style="display:none;" accept=".json">
@@ -91,12 +91,12 @@
                     <input type="number" id="flipAngleInput" value="90" min="0" max="180" step="5">
                 </div>
 
-                <div id="paramTeTrGroup" class="form-row" style="display: none; margin-bottom: 0.75rem;">
-                    <div class="form-group">
+                <div id="paramTeTrRow" class="form-row" style="margin-bottom: 0.75rem;">
+                    <div id="paramTeGroup" class="form-group" style="display: none;">
                         <label for="teInput">TE (ms)</label>
                         <input type="number" id="teInput" value="60" min="5" max="500" step="5">
                     </div>
-                    <div class="form-group">
+                    <div id="paramTrGroup" class="form-group" style="display: none;">
                         <label for="trInput">TR (ms)</label>
                         <input type="number" id="trInput" value="250" min="10" max="2000" step="10">
                     </div>
@@ -122,12 +122,19 @@
                 </div>
                 <div class="form-group">
                     <label>Playback Speed</label>
-                    <div class="btn-group" style="margin-top: 0.25rem;">
-                        <button class="btn speed-btn" data-speed="0.25">0.25x</button>
-                        <button class="btn speed-btn" data-speed="0.5">0.5x</button>
-                        <button class="btn speed-btn active" data-speed="1.0" style="border-color: var(--accent-blue);">1x</button>
-                        <button class="btn speed-btn" data-speed="2.0">2x</button>
-                        <button class="btn speed-btn" data-speed="5.0">5x</button>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
+                        <div class="btn-group speed-group" style="width: 100%;">
+                            <button class="btn speed-btn" data-speed="0.25">0.25x</button>
+                            <button class="btn speed-btn" data-speed="0.5">0.5x</button>
+                            <button class="btn speed-btn active" data-speed="1.0" style="border-color: var(--accent-blue);">1x</button>
+                            <button class="btn speed-btn" data-speed="2.0">2x</button>
+                            <button class="btn speed-btn" data-speed="5.0">5x</button>
+                            <button id="customSpeedBtn" class="btn speed-btn" data-speed="custom">Custom</button>
+                        </div>
+                        <div id="customSpeedInputGroup" style="display: none; align-items: center; gap: 0.5rem;">
+                            <input type="number" id="customSpeedInput" value="1.0" min="0.01" max="10.0" step="0.05" style="flex: 1; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: rgba(10, 13, 20, 0.6); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">x speed (0.01x - 10x)</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -215,7 +222,7 @@
             </section>
 
             <!-- Bottom Panel: Interactive 3D Canvas -->
-            <section class="visual-panel">
+            <section class="visual-panel" style="position: relative;">
                 <div class="panel-header" style="position: absolute; top: 1rem; left: 1.5rem; z-index: 10; pointer-events: none; margin-bottom: 0;">
                     <span class="panel-header-title">
                         <i data-lucide="eye" style="width:14px; height:14px;"></i>
@@ -223,7 +230,22 @@
                     </span>
                 </div>
                 
+                <!-- Viewport navigation controls (3D symbols to move the plane) -->
+                <div class="viewport-controls">
+                    <button id="btnOrbitLeft" class="viewport-btn" title="Rotate Left"><i data-lucide="rotate-ccw"></i></button>
+                    <button id="btnOrbitRight" class="viewport-btn" title="Rotate Right"><i data-lucide="rotate-cw"></i></button>
+                    <button id="btnOrbitUp" class="viewport-btn" title="Tilt Up"><i data-lucide="arrow-up-right"></i></button>
+                    <button id="btnOrbitDown" class="viewport-btn" title="Tilt Down"><i data-lucide="arrow-down-left"></i></button>
+                </div>
+                
                 <div id="threeCanvasContainer" class="canvas-container"></div>
+                
+                <!-- Pan view horizontal slider -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0 1.5rem 0.5rem 1.5rem; width: 100%; box-sizing: border-box; z-index: 10;">
+                    <i data-lucide="move" style="width: 14px; height: 14px; color: var(--text-secondary); flex-shrink: 0;"></i>
+                    <label for="panViewSlider" style="white-space: nowrap; font-size: 0.725rem; color: var(--text-secondary); user-select: none;">Pan View (X):</label>
+                    <input type="range" id="panViewSlider" min="-5.0" max="5.0" step="0.1" value="0.0" style="flex: 1; height: 4px; accent-color: var(--accent-blue); background: rgba(255,255,255,0.05); border: none; padding: 0;">
+                </div>
                 
                 <div class="canvas-instructions">
                     Click along the X-axis grid (horizontal line) to add a spin. Click a spin sphere to edit/remove it.
@@ -248,22 +270,22 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="spinT1Input">T1 Relaxation (ms)</label>
-                    <input type="number" id="spinT1Input" value="600" min="10" max="5000" step="50" required>
+                    <input type="number" id="spinT1Input" value="600" min="0.1" step="any" required>
                 </div>
                 <div class="form-group">
                     <label for="spinT2Input">T2 Relaxation (ms)</label>
-                    <input type="number" id="spinT2Input" value="80" min="5" max="1000" step="5" required>
+                    <input type="number" id="spinT2Input" value="80" min="0.1" step="any" required>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="spinPdInput">Proton Density (PD)</label>
-                    <input type="number" id="spinPdInput" value="1.0" min="0.1" max="2.0" step="0.1" required>
+                    <input type="number" id="spinPdInput" value="1.0" min="0" step="any" required>
                 </div>
                 <div class="form-group">
                     <label for="spinWInput">Off-Resonance w (Hz)</label>
-                    <input type="number" id="spinWInput" value="0" min="-100" max="100" step="0.5" required>
+                    <input type="number" id="spinWInput" value="0" step="any" required>
                 </div>
             </div>
 
@@ -309,13 +331,14 @@
     <!-- About Dialog -->
     <dialog id="aboutDialog" style="max-width: 380px;">
         <form method="dialog">
-            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">About MRI Bloch Simulator</h3>
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">About MRIjs</h3>
             <div style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary); margin-bottom: 1.5rem;">
                 <p style="margin-bottom: 0.5rem;"><strong>Version History:</strong></p>
                 <ul style="list-style: none; padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
                     <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.0.0:</span> Core simulation engine, 3D spin visuals, and stacked charts.</li>
                     <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.1.0:</span> Dynamic scenario constraints and physics verification.</li>
-                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.2.0:</span> Sequence visualizer and top-level dropdown menus.</li>
+                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.2.0:</span> Sequence visualizer, interactive zooming, and top dropdown menus.</li>
+                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.3.0:</span> Viewport controls, coordinate axes cues, and pointer hover state feedback.</li>
                 </ul>
             </div>
             <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.7rem; color: var(--text-muted); text-align: center; font-style: italic;">

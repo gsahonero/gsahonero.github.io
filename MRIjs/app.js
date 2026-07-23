@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initDefaultSpins();
     setupEventListeners();
     runSimulation();
+    // Dispatch change event to toggle parameters visibility correctly on load
+    const scenarioSelect = document.getElementById('scenarioSelect');
+    if (scenarioSelect) scenarioSelect.dispatchEvent(new Event('change'));
     runPhysicsTests();
     
     // Trigger Lucide icons
@@ -116,8 +119,12 @@ function initThree() {
     // Labeled main magnetic field vector B0 at the side
     createB0Vector();
 
+    // Cartesian coordinate cues (X, Y, Z arrows and labels)
+    createCoordinateAxes();
+
     // Raycasting for placements
     container.addEventListener('pointerdown', onCanvasClick);
+    container.addEventListener('pointermove', onCanvasPointerMove);
 
     // Handle Resize
     window.addEventListener('resize', () => {
@@ -139,7 +146,53 @@ function createB0Vector() {
     const arrow = new THREE.ArrowHelper(dir, origin, length, hex, 0.4, 0.2);
     scene.add(arrow);
 
-    // Add a text-like representation or label in future? Simply the gold arrow represents B0.
+    // Label B0
+    const b0Label = createTextSprite('B0', '#f59e0b', new THREE.Vector3(6.0, 0, 1.3));
+    scene.add(b0Label);
+}
+
+// Draw coordinate axes cues in the bottom-left corner of the viewport
+function createCoordinateAxes() {
+    const origin = new THREE.Vector3(-6.0, 0, -1.0);
+    
+    // X-Axis (Red)
+    const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, 1.0, 0xef4444, 0.2, 0.1);
+    scene.add(arrowX);
+    const labelX = createTextSprite('X', '#ef4444', new THREE.Vector3(-4.8, 0, -1.0));
+    scene.add(labelX);
+
+    // Y-Axis (Green)
+    const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), origin, 1.0, 0x10b981, 0.2, 0.1);
+    scene.add(arrowY);
+    const labelY = createTextSprite('Y', '#10b981', new THREE.Vector3(-6.0, 1.2, -1.0));
+    scene.add(labelY);
+
+    // Z-Axis (Blue)
+    const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, 1.0, 0x3b82f6, 0.2, 0.1);
+    scene.add(arrowZ);
+    const labelZ = createTextSprite('Z', '#3b82f6', new THREE.Vector3(-6.0, 0, 0.2));
+    scene.add(labelZ);
+}
+
+// Helper to generate text sprites for 3D labeling
+function createTextSprite(text, colorStr, position) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.font = 'bold 36px Outfit, sans-serif';
+    ctx.fillStyle = colorStr;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 32, 32);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.copy(position);
+    sprite.scale.set(0.5, 0.5, 1.0);
+    return sprite;
 }
 
 // Initialize Chart.js Signal and Sequence Plots
@@ -377,15 +430,25 @@ function setupEventListeners() {
         const scenario = scenarioSelect.value;
         
         // Toggle input groups
+        const teTrRow = document.getElementById('paramTeTrRow');
+        const teGroup = document.getElementById('paramTeGroup');
+        const trGroup = document.getElementById('paramTrGroup');
+        
         if (scenario === 'FID') {
             document.getElementById('paramFlipGroup').style.display = 'flex';
-            document.getElementById('paramTeTrGroup').style.display = 'none';
+            if (teGroup) teGroup.style.display = 'none';
+            if (trGroup) trGroup.style.display = 'flex';
+            if (teTrRow) teTrRow.style.gridTemplateColumns = '1fr';
         } else if (scenario === 'GRE') {
             document.getElementById('paramFlipGroup').style.display = 'flex';
-            document.getElementById('paramTeTrGroup').style.display = 'grid';
+            if (teGroup) teGroup.style.display = 'flex';
+            if (trGroup) trGroup.style.display = 'flex';
+            if (teTrRow) teTrRow.style.gridTemplateColumns = '1fr 1fr';
         } else if (scenario === 'SE') {
             document.getElementById('paramFlipGroup').style.display = 'none';
-            document.getElementById('paramTeTrGroup').style.display = 'grid';
+            if (teGroup) teGroup.style.display = 'flex';
+            if (trGroup) trGroup.style.display = 'flex';
+            if (teTrRow) teTrRow.style.gridTemplateColumns = '1fr 1fr';
         }
         
         runSimulation();
@@ -479,6 +542,9 @@ function setupEventListeners() {
 
     // Speed Control Buttons
     const speedBtns = document.querySelectorAll('.speed-btn');
+    const customSpeedGroup = document.getElementById('customSpeedInputGroup');
+    const customSpeedInput = document.getElementById('customSpeedInput');
+
     speedBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             speedBtns.forEach(b => {
@@ -487,9 +553,31 @@ function setupEventListeners() {
             });
             btn.classList.add('active');
             btn.style.borderColor = 'var(--accent-blue)';
-            playbackSpeed = parseFloat(btn.dataset.speed);
+
+            const speedVal = btn.dataset.speed;
+            if (speedVal === 'custom') {
+                customSpeedGroup.style.display = 'flex';
+                let val = parseFloat(customSpeedInput.value) || 1.0;
+                val = Math.max(0.01, Math.min(10.0, val));
+                playbackSpeed = val;
+            } else {
+                customSpeedGroup.style.display = 'none';
+                playbackSpeed = parseFloat(speedVal);
+            }
         });
     });
+
+    if (customSpeedInput) {
+        ['input', 'change'].forEach(evtType => {
+            customSpeedInput.addEventListener(evtType, () => {
+                let val = parseFloat(customSpeedInput.value);
+                if (!isNaN(val)) {
+                    val = Math.max(0.01, Math.min(10.0, val));
+                    playbackSpeed = val;
+                }
+            });
+        });
+    }
 
     // Add Default Spin
     document.getElementById('addDefaultSpinBtn').addEventListener('click', () => {
@@ -592,6 +680,75 @@ function setupEventListeners() {
 
     document.getElementById('signalChart').addEventListener('wheel', handleZoomWheel, { passive: false });
     document.getElementById('sequenceChart').addEventListener('wheel', handleZoomWheel, { passive: false });
+
+    // Viewport controls button listeners (tilt and rotate the 3D plane)
+    document.getElementById('btnOrbitLeft').addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateCamera(0.2, 0);
+    });
+    document.getElementById('btnOrbitRight').addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateCamera(-0.2, 0);
+    });
+    document.getElementById('btnOrbitUp').addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateCamera(0, -0.15);
+    });
+    document.getElementById('btnOrbitDown').addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateCamera(0, 0.15);
+    });
+
+    // Pan View Slider listener (translates view along placement axis)
+    const panSlider = document.getElementById('panViewSlider');
+    if (panSlider) {
+        panSlider.addEventListener('input', (e) => {
+            const targetX = parseFloat(e.target.value);
+            panCameraToX(targetX);
+        });
+    }
+
+    // Pointer grabbing cursor states
+    const threeContainer = document.getElementById('threeCanvasContainer');
+    threeContainer.addEventListener('pointerdown', () => {
+        if (threeContainer.style.cursor === 'grab') {
+            threeContainer.style.cursor = 'grabbing';
+        }
+    });
+}
+
+// Change cursor to reflect actions (editing, placing, or rotating)
+function onCanvasPointerMove(event) {
+    const container = document.getElementById('threeCanvasContainer');
+    if (!renderer || !camera) return;
+    
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+
+    // 1. Check if hovering over an existing spin sphere
+    const sphereMeshes = Object.values(spinVisuals).map(v => v.sphereMesh);
+    const intersects = raycaster.intersectObjects(sphereMeshes);
+
+    if (intersects.length > 0) {
+        container.style.cursor = 'pointer'; // indicates click to edit
+        return;
+    }
+
+    // 2. Check if hovering over the spin placement area on the XZ plane (Y = 0)
+    const planeY = new THREE.Plane(new THREE.Vector3(0, 1.0, 0), 0);
+    const intersection = new THREE.Vector3();
+    if (raycaster.ray.intersectPlane(planeY, intersection)) {
+        if (Math.abs(intersection.z) < 1.5 && Math.abs(intersection.x) <= 5.5) {
+            container.style.cursor = 'crosshair'; // indicates click to place isochromat
+            return;
+        }
+    }
+
+    container.style.cursor = 'grab'; // default dragging behavior
 }
 
 // Raycaster to handle user click on the 3D panel
@@ -871,7 +1028,14 @@ function animateLoop(now) {
     requestAnimationFrame(animateLoop);
 
     // Update Controls (orbit camera physics)
-    if (controls) controls.update();
+    if (controls) {
+        controls.update();
+        // Keep the horizontal pan view slider in sync if the camera is panned via mouse drag
+        const panSlider = document.getElementById('panViewSlider');
+        if (panSlider) {
+            panSlider.value = controls.target.x.toFixed(1);
+        }
+    }
 
     if (isAnimating && simResults) {
         const delta = now - lastFrameTime; // real-time elapsed in ms
@@ -1107,4 +1271,31 @@ function updateSphereRadius(radius) {
             visual.sphereMesh.scale.setScalar(radius);
         }
     });
+}
+
+// Programmatic spherical rotation of camera relative to controls.target
+function rotateCamera(deltaTheta, deltaPhi) {
+    if (!controls || !camera) return;
+    
+    const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+    const spherical = new THREE.Spherical().setFromVector3(offset);
+    
+    spherical.theta += deltaTheta;
+    spherical.phi = Math.max(0.1, Math.min(Math.PI / 2 + 0.1, spherical.phi + deltaPhi)); // clamp polar angle to avoid going under grid
+    
+    offset.setFromSpherical(spherical);
+    camera.position.copy(controls.target).add(offset);
+    controls.update();
+}
+
+// Panning camera target and camera position together along X-axis
+function panCameraToX(targetX) {
+    if (!controls || !camera) return;
+    
+    const deltaX = targetX - controls.target.x;
+    
+    controls.target.x = targetX;
+    camera.position.x += deltaX;
+    
+    controls.update();
 }

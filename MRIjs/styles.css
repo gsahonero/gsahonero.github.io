@@ -464,3 +464,58 @@ dialog .actions {
 .menu-item:hover .dropdown-content {
     display: block;
 }
+
+/* Viewport Controls */
+.viewport-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.35rem;
+    z-index: 100;
+}
+
+.viewport-btn {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    backdrop-filter: blur(8px);
+}
+
+.viewport-btn:hover {
+    color: var(--text-primary);
+    background: rgba(59, 130, 246, 0.2);
+    border-color: var(--accent-blue);
+    transform: translateY(-1px);
+}
+
+.viewport-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Speed group layout grid to prevent overflow */
+.speed-group {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+.speed-group .btn {
+    border-radius: 6px !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.75rem !important;
+}
