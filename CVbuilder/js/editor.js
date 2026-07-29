@@ -1,3 +1,40 @@
+function updateEntryWarningIcon(inputEl) {
+  if (!inputEl) return;
+  var entryEl = inputEl.closest ? inputEl.closest('.entry') : null;
+  if (!entryEl) return;
+  
+  var inputs = entryEl.querySelectorAll('input:not([type=checkbox]):not([type=file]), textarea');
+  var hasContent = false;
+  inputs.forEach(function(inp) {
+    if (inp.value && inp.value.trim().length > 0) {
+      hasContent = true;
+    }
+  });
+  
+  var warnIcon = entryEl.querySelector('.warn-icon');
+  var selBox = entryEl.querySelector('[data-sel]');
+  var isIncluded = !selBox || selBox.checked;
+  
+  if (hasContent || !isIncluded) {
+    if (warnIcon) warnIcon.style.display = 'none';
+  } else {
+    if (warnIcon) {
+      warnIcon.style.display = 'inline';
+    } else {
+      var strongEl = entryEl.querySelector('.entryhead strong');
+      if (strongEl) {
+        var isEs = state.langFilter === 'es';
+        var span = document.createElement('span');
+        span.className = 'warn-icon';
+        span.title = isEs ? 'Incluido pero vacío' : 'Included but empty';
+        span.style.cssText = 'color:var(--color-warning); cursor:help; font-size:var(--text-sm); margin-left:var(--space-2)';
+        span.textContent = '⚠️';
+        strongEl.insertAdjacentElement('afterend', span);
+      }
+    }
+  }
+}
+
 function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   var displayVal = getInstanceValue(propPath, masterVal);
   var isOverridden = activeInstance && activeInstance.overwrites && (propPath in activeInstance.overwrites);
@@ -66,6 +103,7 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
     } else {
       setPath(pathArray, val);
     }
+    updateEntryWarningIcon(inputEl);
   };
   
   if (isOverridden) {
@@ -81,15 +119,18 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
 }
 
 function initSections(){
+  if (Array.isArray(data.basics) && data.basics.length > 0) {
+    data.basics = data.basics[0];
+  }
+  normalizeSkills();
   Object.keys(data).forEach(function(k){
-    if(k==='_templates'||k==='templates'||k==='_hiddenFields'||k.indexOf('_')===0) return;
+    if(k==='_templates'||k==='templates'||k==='_hiddenFields'||k==='instances'||k.indexOf('_')===0) return;
     if(!state.sections[k]) state.sections[k]={include:true,title:human(k)};
     initPropertyNames(k,data[k]);
     if(Array.isArray(data[k])) data[k].forEach(function(item){
       if(isObj(item)&&!('selected' in item)) item.selected=true;
     });
   });
-  normalizeSkills();
 }
 
 function initPropertyNames(section,val,prefix){
@@ -106,13 +147,45 @@ function initPropertyNames(section,val,prefix){
 
 function normalizeSkills(){
   if(!data.skills) return;
-  Object.keys(data.skills).forEach(function(group){
-    if(!Array.isArray(data.skills[group])) return;
-    data.skills[group]=data.skills[group].map(function(item){
-      if(typeof item==='string') return {name:item,selected:true};
-      return ('selected' in item)?item:Object.assign({},item,{selected:true});
+
+  if (Array.isArray(data.skills)) {
+    var newSkillsObj = {};
+    data.skills.forEach(function(g, idx){
+      if (!g) return;
+      var groupName = g.group_name || g.name || g.category || ('group_' + (idx + 1));
+      var list = [];
+      if (typeof g.skills_list === 'string') {
+        list = g.skills_list.split(',').map(function(s){ return { name: s.trim(), selected: g.selected !== false }; }).filter(function(x){ return x.name; });
+      } else if (Array.isArray(g.skills)) {
+        list = g.skills.map(function(s){ return typeof s === 'string' ? { name: s, selected: true } : (s && s.name ? s : { name: String(s || ''), selected: true }); });
+      } else if (Array.isArray(g.items)) {
+        list = g.items.map(function(s){ return typeof s === 'string' ? { name: s, selected: true } : (s && s.name ? s : { name: String(s || ''), selected: true }); });
+      }
+      newSkillsObj[groupName] = list;
     });
-  });
+    data.skills = newSkillsObj;
+  }
+
+  if (isObj(data.skills)) {
+    Object.keys(data.skills).forEach(function(group){
+      var val = data.skills[group];
+      if (typeof val === 'string') {
+        data.skills[group] = val.split(',').map(function(s){ return { name: s.trim(), selected: true }; }).filter(function(x){ return x.name; });
+      } else if (Array.isArray(val)) {
+        data.skills[group] = val.map(function(item){
+          if (!item) return { name: '', selected: true };
+          if (typeof item === 'string') return { name: item, selected: true };
+          if (isObj(item)) {
+            return {
+              name: item.name !== undefined ? String(item.name) : (item.title || item.label || ''),
+              selected: item.selected !== false
+            };
+          }
+          return { name: String(item), selected: true };
+        });
+      }
+    });
+  }
 }
 
 function countEntries(v){ return Array.isArray(v)?v.length:(isObj(v)?Object.keys(v).length:1); }
@@ -120,7 +193,7 @@ function countEntries(v){ return Array.isArray(v)?v.length:(isObj(v)?Object.keys
 function renderSectionList(){
   var list=el('sectionList'); list.innerHTML='';
   var keys=Object.keys(data).filter(function(k){
-    return k!=='_templates'&&k!=='templates'&&k!=='_hiddenFields'&&k.indexOf('_')!==0;
+    return k!=='_templates'&&k!=='templates'&&k!=='_hiddenFields'&&k!=='instances'&&k.indexOf('_')!==0;
   });
   el('sectionCount').textContent=String(keys.length);
   var isEs = state.langFilter === 'es';
@@ -141,21 +214,138 @@ function scrollOutlineTo(k){
   if(link){ link.classList.add('active-section'); link.scrollIntoView({block:'nearest',behavior:'smooth'}); }
 }
 
+function moveSectionOrder(key, direction) {
+  var keys = Object.keys(data).filter(function(k){
+    return k!=='_templates'&&k!=='templates'&&k!=='_hiddenFields'&&k!=='instances'&&k.indexOf('_')!==0;
+  });
+  var idx = keys.indexOf(key);
+  if (idx === -1) return;
+  var targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= keys.length) return;
+  
+  var targetKey = keys[targetIdx];
+  reorderSectionTo(key, targetKey);
+}
+
+function reorderSectionTo(srcKey, targetKey) {
+  var allKeys = Object.keys(data);
+  var srcIdx = allKeys.indexOf(srcKey);
+  var targetIdx = allKeys.indexOf(targetKey);
+  if (srcIdx === -1 || targetIdx === -1 || srcIdx === targetIdx) return;
+  
+  allKeys.splice(srcIdx, 1);
+  allKeys.splice(targetIdx, 0, srcKey);
+  
+  var newData = {};
+  allKeys.forEach(function(k) { newData[k] = data[k]; });
+  data = newData;
+  markDirty();
+  renderAll();
+}
+
 function renderOutline(){
   var box=el('outlineBox'); box.innerHTML='';
   var keys = Object.keys(data).filter(function(k){
-    return k!=='_templates'&&k!=='templates'&&k!=='_hiddenFields'&&k.indexOf('_')!==0;
+    return k!=='_templates'&&k!=='templates'&&k!=='_hiddenFields'&&k!=='instances'&&k.indexOf('_')!==0;
   });
   var isEs = state.langFilter === 'es';
   if(!keys.length){ box.innerHTML='<div class="tiny muted" style="padding:var(--space-2)">' + (isEs ? 'No se han cargado datos.' : 'No data loaded.') + '</div>'; return; }
-  keys.forEach(function(k){
+  
+  keys.forEach(function(k, index){
     var v=data[k];
     var sec=document.createElement('div'); sec.className='outline-section';
+    sec.dataset.key = k;
+
+    var secHeader = document.createElement('div');
+    secHeader.className = 'outline-sec-header';
+    secHeader.style.display = 'flex';
+    secHeader.style.alignItems = 'center';
+    secHeader.style.justifyContent = 'space-between';
+    secHeader.style.paddingRight = '4px';
+
+    var leftGroup = document.createElement('div');
+    leftGroup.style.display = 'flex';
+    leftGroup.style.alignItems = 'center';
+    leftGroup.style.gap = '4px';
+    leftGroup.style.flex = '1';
+    leftGroup.style.overflow = 'hidden';
+
+    var dragSpan = document.createElement('span');
+    dragSpan.className = 'drag-handle';
+    dragSpan.setAttribute('draggable', 'true');
+    dragSpan.title = isEs ? 'Arrastrar para reordenar' : 'Drag to reorder';
+    dragSpan.style.cursor = 'grab';
+    dragSpan.style.fontSize = '12px';
+    dragSpan.style.color = 'var(--color-text-muted)';
+    dragSpan.style.marginRight = '4px';
+    dragSpan.style.userSelect = 'none';
+    dragSpan.textContent = '⋮⋮';
+
     var secA=document.createElement('a');
     secA.href='#sec-card-'+k; secA.className='outline-link'+(state.activeSection===k?' active-section':'');
     secA.style.fontWeight='700'; secA.style.color='var(--color-primary)';
     secA.innerHTML='<span class="olabel">'+esc(human(k))+'</span>';
-    sec.appendChild(secA);
+
+    leftGroup.appendChild(dragSpan);
+    leftGroup.appendChild(secA);
+
+    var moveToolbar = document.createElement('div');
+    moveToolbar.style.display = 'flex';
+    moveToolbar.style.gap = '2px';
+
+    var upDisabled = (index === 0) ? 'disabled' : '';
+    var downDisabled = (index === keys.length - 1) ? 'disabled' : '';
+
+    moveToolbar.innerHTML = 
+      '<button class="btn btn-ghost btn-xs btn-move-up" ' + upDisabled + ' title="' + (isEs ? 'Mover arriba' : 'Move Up') + '" style="padding:1px 5px; font-weight:bold; font-size:11px">↑</button>' +
+      '<button class="btn btn-ghost btn-xs btn-move-down" ' + downDisabled + ' title="' + (isEs ? 'Mover abajo' : 'Move Down') + '" style="padding:1px 5px; font-weight:bold; font-size:11px">↓</button>';
+
+    secHeader.appendChild(leftGroup);
+    secHeader.appendChild(moveToolbar);
+    sec.appendChild(secHeader);
+
+    var btnUp = moveToolbar.querySelector('.btn-move-up');
+    if (btnUp) {
+      btnUp.onclick = function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        moveSectionOrder(k, 'up');
+      };
+    }
+    var btnDown = moveToolbar.querySelector('.btn-move-down');
+    if (btnDown) {
+      btnDown.onclick = function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        moveSectionOrder(k, 'down');
+      };
+    }
+
+    // Drag & Drop handlers attached strictly to handle and row drop target
+    dragSpan.ondragstart = function(e) {
+      e.dataTransfer.setData('text/plain', k);
+      sec.style.opacity = '0.5';
+    };
+    dragSpan.ondragend = function() {
+      sec.style.opacity = '1';
+      document.querySelectorAll('.outline-section').forEach(function(el){ el.style.borderTop = 'none'; });
+    };
+    sec.ondragover = function(e) {
+      e.preventDefault();
+      sec.style.borderTop = '2px solid var(--color-primary)';
+    };
+    sec.ondragleave = function() {
+      sec.style.borderTop = 'none';
+    };
+    sec.ondrop = function(e) {
+      e.preventDefault();
+      sec.style.borderTop = 'none';
+      var srcKey = e.dataTransfer.getData('text/plain');
+      if (srcKey && srcKey !== k) {
+        reorderSectionTo(srcKey, k);
+      }
+    };
+
     var lst=document.createElement('div'); lst.className='outline-list';
     if(Array.isArray(v)){
       v.forEach(function(item,i){
@@ -292,6 +482,57 @@ function bindPropRename(root){
   });
 }
 
+function getEntryYear(item) {
+  if (!isObj(item)) return 0;
+  var yrStr = item.start || item.end || item.year || item.date || '';
+  var match = String(yrStr).match(/\d{4}/);
+  if (match) return parseInt(match[0], 10);
+  if (String(yrStr).toLowerCase().indexOf('present') !== -1 || String(yrStr).toLowerCase().indexOf('actual') !== -1) return 9999;
+  return 0;
+}
+
+function getEntryText(item) {
+  if (!isObj(item)) return String(item || '').toLowerCase();
+  var txt = item.title || item.degree || item.role || item.authors || item.category || item.language || item.name || item.description || '';
+  return String(txt).toLowerCase();
+}
+
+function sortSectionEntries(key) {
+  var arr = data[key];
+  if (!Array.isArray(arr) || arr.length < 2) return;
+
+  var hasYears = arr.some(function(it) {
+    return isObj(it) && (it.start || it.end || it.year || it.date);
+  });
+
+  if (!state.sortDirections) state.sortDirections = {};
+  var currentDir = state.sortDirections[key] || 'none';
+  
+  var nextDir;
+  if (hasYears) {
+    nextDir = (currentDir === 'year_desc') ? 'year_asc' : 'year_desc';
+  } else {
+    nextDir = (currentDir === 'alpha_asc') ? 'alpha_desc' : 'alpha_asc';
+  }
+  state.sortDirections[key] = nextDir;
+
+  arr.sort(function(a, b) {
+    if (nextDir === 'year_desc') {
+      return getEntryYear(b) - getEntryYear(a);
+    } else if (nextDir === 'year_asc') {
+      return getEntryYear(a) - getEntryYear(b);
+    } else if (nextDir === 'alpha_asc') {
+      return getEntryText(a).localeCompare(getEntryText(b));
+    } else if (nextDir === 'alpha_desc') {
+      return getEntryText(b).localeCompare(getEntryText(a));
+    }
+    return 0;
+  });
+
+  markDirty();
+  renderAll();
+}
+
 function renderEditor(){
   var host=el('editorTab'); host.innerHTML='';
   if(!state.activeSection){ host.innerHTML='<div class="card"><div class="cardbody tiny">' + (state.langFilter === 'es' ? 'Importa un archivo JSON para comenzar a editar.' : 'Upload a JSON file to begin editing.') + '</div></div>'; return; }
@@ -302,19 +543,93 @@ function renderEditor(){
   var sec=document.createElement('div'); sec.className='card'; sec.id='sec-card-'+k;
   
   var isEs = state.langFilter === 'es';
-  var deleteBtnHtml = k !== 'basics' ? '<button class="btn btn-danger btn-xs" id="deleteSectionBtn" style="min-height:28px; padding:2px 8px; font-size:var(--text-xs); margin-left:var(--space-2)">' + (isEs ? 'Eliminar sección' : 'Delete Section') + '</button>' : '';
+  var allSecKeys = Object.keys(data).filter(function(x){ return x!=='_templates'&&x!=='templates'&&x!=='_hiddenFields'&&x!=='instances'&&x.indexOf('_')!==0; });
+  var kIdx = allSecKeys.indexOf(k);
 
-  sec.innerHTML='<div class="cardhead"><div class="split"><div><strong>'+human(k)+'</strong><div class="tiny">' + (isEs ? 'Edita campos, selecciona entradas, renombre propiedades.' : 'Edit fields, select entries, rename properties.') + '</div></div>'
-    +'<div style="display:flex; align-items:center; gap:var(--space-2)"><label class="pill"><input type="checkbox" '+(state.sections[k].include?'checked':'')+' id="includeSectionBox"> ' + (isEs ? 'Incluir' : 'Include') + '</label>'
-    +deleteBtnHtml
-    +'</div></div></div>'
+  var sortBtnHtml = '';
+  if (Array.isArray(data[k]) && data[k].length >= 2) {
+    var hasYears = data[k].some(function(it) {
+      return isObj(it) && (it.start || it.end || it.year || it.date);
+    });
+    var currentSort = (state.sortDirections && state.sortDirections[k]) || 'none';
+    var labelText = '';
+    if (hasYears) {
+      if (currentSort === 'year_desc') labelText = isEs ? 'Año (Más reciente ↓)' : 'Year (Newest ↓)';
+      else if (currentSort === 'year_asc') labelText = isEs ? 'Año (Más antiguo ↑)' : 'Year (Oldest ↑)';
+      else labelText = isEs ? 'Ordenar por Año' : 'Sort by Year';
+    } else {
+      if (currentSort === 'alpha_asc') labelText = 'A-Z ↓';
+      else if (currentSort === 'alpha_desc') labelText = 'Z-A ↑';
+      else labelText = isEs ? 'Ordenar A-Z' : 'Sort A-Z';
+    }
+    sortBtnHtml = '<button class="btn btn-ghost btn-xs" id="secCardSortBtn" style="min-height:28px; padding:2px 8px; font-size:var(--text-xs); font-weight:bold">↕ ' + labelText + '</button>';
+  }
+
+  var moveBtnsHtml = 
+    '<button class="btn btn-ghost btn-xs" id="secCardMoveUpBtn" ' + (kIdx <= 0 ? 'disabled' : '') + ' style="min-height:28px; padding:2px 8px; font-size:var(--text-xs); font-weight:bold">↑ ' + (isEs ? 'Subir' : 'Move Up') + '</button>' +
+    '<button class="btn btn-ghost btn-xs" id="secCardMoveDownBtn" ' + (kIdx >= allSecKeys.length - 1 ? 'disabled' : '') + ' style="min-height:28px; padding:2px 8px; font-size:var(--text-xs); font-weight:bold">↓ ' + (isEs ? 'Bajar' : 'Move Down') + '</button>';
+
+  var deleteBtnHtml = k !== 'basics' ? '<button class="btn btn-danger btn-xs" id="deleteSectionBtn" style="min-height:28px; padding:2px 8px; font-size:var(--text-xs)">' + (isEs ? 'Eliminar sección' : 'Delete Section') + '</button>' : '';
+
+  sec.innerHTML='<div class="cardhead" style="display:flex; flex-direction:column; gap:var(--space-2)">'
+    +'<div class="split" style="align-items:center">'
+    +'<div><strong>'+human(k)+'</strong><div class="tiny">' + (isEs ? 'Edita campos, selecciona entradas, reordena secciones.' : 'Edit fields, select entries, reorder sections.') + '</div></div>'
+    +'<div style="display:flex; align-items:center; gap:var(--space-2)">'
+    +'<label class="pill"><input type="checkbox" '+(state.sections[k].include?'checked':'')+' id="includeSectionBox"> ' + (isEs ? 'Incluir' : 'Include') + '</label>'
+    +moveBtnsHtml
+    +'</div></div>'
+    +'<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid oklch(from var(--color-text) l c h / .08); padding-top:var(--space-2); margin-top:var(--space-1)">'
+    +'<div>'+sortBtnHtml+'</div>'
+    +'<div>'+deleteBtnHtml+'</div>'
+    +'</div>'
+    +'</div>'
     +'<div class="cardbody subgrid">'
-    +'<div class="row2"><div><label class="tiny">' + (isEs ? 'Título de salida' : 'Output title') + '</label><input id="sectionTitleInput" value="'+esc(title)+'"></div>'
+    +'<div class="row2"><div><label class="tiny">' + (isEs ? 'Título de salida' : 'Output title') + '</label><input id="sectionTitleInput" value="'+esc(title)+'">'
+    +'<div style="font-size:11px; color:var(--color-primary); margin-top:4px; font-weight:600">ℹ️ ' + (isEs ? 'Los títulos de salida personalizados se guardan en las Instancias de CV (no en el archivo .cv). Guarde su instancia para conservarlos.' : 'Custom output titles are saved within CV Instances (not in the .cv file). Save your CV instance to retain them.') + '</div>'
+    +'</div>'
     +'<div><label class="tiny">' + (isEs ? 'Clave de sección' : 'Section key') + '</label><input disabled value="'+k+'"></div></div>'
     +'<div id="sectionEditor"></div></div>';
   host.appendChild(sec);
+
+  var sortBtn = el('secCardSortBtn');
+  if (sortBtn) sortBtn.onclick = function() { sortSectionEntries(k); };
+  var cardUpBtn = el('secCardMoveUpBtn');
+  if (cardUpBtn) cardUpBtn.onclick = function() { moveSectionOrder(k, 'up'); };
+  var cardDownBtn = el('secCardMoveDownBtn');
+  if (cardDownBtn) cardDownBtn.onclick = function() { moveSectionOrder(k, 'down'); };
   el('includeSectionBox').onchange=function(e){ state.sections[k].include=e.target.checked; markDirty(); renderLatex(); };
-  el('sectionTitleInput').oninput=function(e){ state.sections[k].title=e.target.value; el('sectionTitleInput2').value=e.target.value; markDirty(); renderLatex(); };
+  
+  function checkPromptSaveInstance(newTitle) {
+    if (!state.sections[k]) state.sections[k] = {};
+    state.sections[k].title = newTitle;
+    markDirty();
+    renderLatex();
+    renderHtmlPreview();
+    
+    if (activeInstance && currentInstanceName !== 'None (Master CV)') {
+      saveCurrentInstance();
+    } else {
+      var msg = isEs
+        ? 'Ha modificado el título de salida de la sección "' + human(k) + '".\nLos títulos de salida personalizados se almacenan en las Instancias de CV.\n¿Desea crear o guardar una Instancia de CV ahora para conservar este título?'
+        : 'You modified the section output title for "' + human(k) + '".\nCustom section output titles are stored in CV Instances.\nWould you like to create or save a CV Instance now to retain this custom title?';
+      if (confirm(msg)) {
+        createNewInstancePrompt('Tailored_' + (human(k).replace(/\s+/g, '_')));
+      }
+    }
+  }
+
+  el('sectionTitleInput').oninput=function(e){
+    state.sections[k].title=e.target.value;
+    el('sectionTitleInput2').value=e.target.value;
+    markDirty();
+    renderLatex();
+  };
+  el('sectionTitleInput').onchange=function(e){
+    checkPromptSaveInstance(e.target.value);
+  };
+  el('sectionTitleInput2').onchange=function(e){
+    checkPromptSaveInstance(e.target.value);
+  };
   
   if (k !== 'basics') {
     el('deleteSectionBtn').onclick = function() {
@@ -324,7 +639,7 @@ function renderEditor(){
       if (confirm(msg)) {
         delete data[k];
         delete state.sections[k];
-        var remaining = Object.keys(data).filter(function(x) { return x !== '_templates' && x !== 'templates'; });
+        var remaining = Object.keys(data).filter(function(x) { return x !== '_templates' && x !== 'templates' && x !== 'instances'; });
         state.activeSection = remaining[0] || '';
         markDirty();
         renderAll();
@@ -349,10 +664,32 @@ function renderObjectFields(path,obj){
     if(Array.isArray(val)){
       var block=document.createElement('div'); block.className='card';
       block.id=section==='skills'?'skill-group-'+section+'-'+key:'field-'+section+'-'+key;
-      block.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||key)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
+      var delGroupHtml = (path.length === 1 && Object.keys(obj).length > 1)
+        ? '<button class="btn btn-danger btn-xs" data-del-group style="height:22px; padding:1px 6px; font-size:var(--text-xxs)">' + (isEs ? 'Eliminar grupo' : 'Delete Group') + '</button>'
+        : '';
+      block.innerHTML='<div class="cardhead" style="display:flex; justify-content:space-between; align-items:center">'
+        +'<strong>'+esc(state.propertyNames[propPath]||key)+'</strong>'
+        +delGroupHtml
+        +'</div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
+      
+      var delGrpBtn = block.querySelector('[data-del-group]');
+      if (delGrpBtn) {
+        delGrpBtn.onclick = function() {
+          var msg = isEs 
+            ? '¿Está seguro de que desea eliminar la categoría completa "' + human(key) + '"?'
+            : 'Are you sure you want to delete the entire "' + human(key) + '" category?';
+          if (confirm(msg)) {
+            delete obj[key];
+            markDirty();
+            renderAll();
+          }
+        };
+      }
+
       var inner=block.querySelector('.cardbody');
-      if(section==='skills') inner.appendChild(renderSkillsGroup(path.concat(key),val,propPath,key));
-      else{
+      if(section==='skills' || (path.length === 1 && val.length > 0 && isObj(val[0]) && 'name' in val[0])) {
+        inner.appendChild(renderSkillsGroup(path.concat(key),val,propPath,key));
+      } else {
         val.forEach(function(item,idx){ inner.appendChild(simpleArrayInput(path.concat([key,idx]),item,propPath+'.'+idx)); });
         var add=document.createElement('button'); add.className='btn'; add.textContent=isEs ? 'Añadir elemento' : 'Add item';
         add.onclick=function(){ resolve(path.concat(key)).push(''); markDirty(); renderAll(); };
@@ -366,16 +703,17 @@ function renderObjectFields(path,obj){
       wrap.appendChild(block2);
     } else if (key === 'photo') {
       var row=document.createElement('div'); row.className='propcard'; row.id='field-'+section+'-'+key;
-      var imgHtml = val ? '<img src="' + esc(val) + '" style="max-height: 48px; border-radius: var(--radius-sm); border: 1.5px solid oklch(from var(--color-text) l c h / .15); background: var(--color-surface-offset); object-fit: cover;">' : '<div style="font-size: var(--text-lg)">👤</div>';
+      var imgHtml = val ? '<img src="' + esc(val) + '" style="width: 54px; height: 54px; border-radius: 50%; border: 1.5px solid var(--color-primary); background: var(--color-surface-offset); object-fit: cover; flex-shrink: 0;">' : '<div style="font-size: 28px; width:54px; height:54px; display:flex; align-items:center; justify-content:center; background:var(--color-surface-offset); border-radius:50%">👤</div>';
+      var specText = isEs ? 'Recomendado: Imagen cuadrada (1:1), JPG/PNG, < 2MB.' : 'Recommended: Square aspect ratio (1:1), JPG/PNG, < 2MB.';
       row.innerHTML=propRenameRow(propPath,key)
         +'<div style="display:flex; align-items:center; gap:var(--space-3); margin-top:var(--space-2)">'
         +  imgHtml
         +  '<div style="display:flex; flex-direction:column; gap:var(--space-1); flex:1">'
-        +    '<div style="display:flex; gap:var(--space-2)">'
+        +    '<div style="display:flex; gap:var(--space-2); align-items:center">'
         +      '<button class="btn btn-xs btn-primary" onclick="el(\'photoFileInput\').click()">' + (isEs ? 'Subir imagen' : 'Upload Image') + '</button>'
         +      (val ? '<button class="btn btn-xs btn-danger" id="clearPhotoBtn">' + (isEs ? 'Limpiar' : 'Clear') + '</button>' : '')
         +    '</div>'
-        +    '<div class="tiny muted">' + (isEs ? 'Formatos: JPG, PNG. Guardado en la base de datos.' : 'Formats: JPG, PNG. Fully embedded in database.') + '</div>'
+        +    '<div class="tiny muted" style="font-weight:600">' + specText + '</div>'
         +  '</div>'
         +'</div>'
         +'<input type="file" id="photoFileInput" accept="image/*" style="display:none">';
@@ -413,15 +751,50 @@ function renderObjectFields(path,obj){
       wrap.appendChild(row);
     }
   });
+
+  if (path.length === 1 && section !== 'basics') {
+    var addGroupBtn = document.createElement('button');
+    addGroupBtn.className = 'btn btn-primary';
+    addGroupBtn.style.marginTop = 'var(--space-3)';
+    addGroupBtn.textContent = isEs ? '+ Añadir nueva categoría / grupo' : '+ Add New Category / Group';
+    addGroupBtn.onclick = function() {
+      var labelText = isEs 
+        ? 'Nombre de la nueva categoría (ej. programming, tools, frameworks, languages):' 
+        : 'Enter name for the new category (e.g. programming, tools, frameworks, languages):';
+      var catName = prompt(labelText);
+      if (!catName) return;
+      var cleanKey = catName.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+      if (!cleanKey) return;
+      if (obj[cleanKey]) {
+        alert(isEs ? '¡Esa categoría ya existe!' : 'That category already exists!');
+        return;
+      }
+      var firstKey = Object.keys(obj)[0];
+      if (section === 'skills' || (firstKey && Array.isArray(obj[firstKey]))) {
+        obj[cleanKey] = [{ name: '', selected: true }];
+      } else {
+        obj[cleanKey] = '';
+      }
+      markDirty();
+      renderAll();
+    };
+    wrap.appendChild(addGroupBtn);
+  }
+
   return wrap;
 }
 
 function renderSkillsGroup(path,arr,propPath,keyName){
   var wrap=document.createElement('div'); wrap.className='subgrid';
   var isEs = state.langFilter === 'es';
+  if (!Array.isArray(arr)) return wrap;
   arr.forEach(function(item,i){
+    if (!item || typeof item !== 'object') {
+      item = { name: String(item || ''), selected: true };
+      arr[i] = item;
+    }
     if (state.langFilter && state.langFilter !== 'all') {
-      if (isObj(item) && item.lang && item.lang !== 'all' && item.lang !== state.langFilter) return;
+      if (item.lang && item.lang !== 'all' && item.lang !== state.langFilter) return;
     }
     var row=document.createElement('div'); row.className='entry';
     row.innerHTML='<div class="entryhead" style="display:flex; justify-content:space-between; align-items:center">'
@@ -430,10 +803,13 @@ function renderSkillsGroup(path,arr,propPath,keyName){
       +'<button class="btn btn-danger btn-xs" data-del-skill style="height:20px; padding:0 6px; font-size:var(--text-xxs)">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
       +'</div>'
       +'<div class="kv"><div class="mono">' + (isEs ? 'Etiqueta' : 'Label') + '</div><input type="text" value="'+esc(item.name||'')+'"></div>';
-    (function(itm){ row.querySelector('input[type=checkbox]').onchange=function(e){ itm.selected=e.target.checked; markDirty(); renderLatex(); renderSchema(); }; })(item);
+    (function(itm){ row.querySelector('input[type=checkbox]').onchange=function(e){ if (itm) itm.selected=e.target.checked; markDirty(); renderLatex(); renderSchema(); }; })(item);
     (function(itm,rw){
       rw.querySelector('input[type=text]').oninput=function(e){
-        itm.name=e.target.value; rw.querySelector('strong').textContent=e.target.value||('item '+(i+1));
+        if (itm) {
+          itm.name=e.target.value;
+        }
+        rw.querySelector('strong').textContent=e.target.value||('item '+(i+1));
         markDirty(); renderLatex(); renderSchema(); renderOutline();
       };
     })(item,row);
@@ -615,6 +991,7 @@ function renderArrayFields(key,arr){
           renderLatex();
           renderSchema();
         }
+        updateEntryWarningIcon(selCheckbox);
       };
     })(i, item);
     (function(idx){ entry.querySelector('[data-dup]').onclick=function(){ arr.splice(idx+1,0,clone(arr[idx])); markDirty(); renderAll(); }; })(i);
@@ -636,7 +1013,7 @@ function addEntry(key){
   for(var i=0;i<arr.length;i++){ if(isObj(arr[i])){ template=arr[i]; break; } }
   if(template){
     var entry={};
-    Object.keys(template).forEach(function(k){ entry[k]=k==='selected'?true:(Array.isArray(template[k])?[]:''); });
+    Object.keys(template).forEach(function(k){ entry[k]=k==='selected'?true:(Array.isArray(template[k])?['']:''); });
     arr.push(entry);
   } else arr.push({selected:true});
   markDirty(); renderAll();

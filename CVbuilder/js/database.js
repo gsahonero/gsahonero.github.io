@@ -1,3 +1,16 @@
+// ── DEFAULT STYLE OBJECT ──
+var DEFAULT_STYLE = {
+  cvTitle: 'Curriculum Vitae',
+  style: 'classic',
+  preamble: '',
+  footer: '',
+  latexTemplate: '',
+  htmlTemplate: '',
+  mappers: {},
+  theme: { accentColor: '#2563eb', font: 'sans', photoLeftOffset: 40, photoTopOffset: 0 }
+};
+
+// ── DATABASE (CV) CRUD ──
 function listDatabases() {
   var list = [];
   for (var i = 0; i < localStorage.length; i++) {
@@ -35,14 +48,31 @@ function loadDatabase(name) {
       }
       delete data._templates;
       delete data.templates;
+      // Ensure instances and _style exist
+      if (!data.instances) data.instances = {};
+      if (!data._style) data._style = JSON.parse(JSON.stringify(DEFAULT_STYLE));
+      if (!data._style.mappers || Object.keys(data._style.mappers).length === 0) {
+        data._style.mappers = JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
+      }
+
       currentDbName = name;
       state.sections = {};
       state.propertyNames = {};
-      state.activeSection = Object.keys(data).filter(function(k) { return k !== '_templates' && k !== 'templates'; })[0] || '';
-      
+      state.activeSection = Object.keys(data).filter(function(k) {
+        return k !== '_templates' && k !== 'templates' && k !== 'instances' && k !== '_style';
+      })[0] || '';
+
+      // Reset to no active instance when loading a new DB
+      activeInstance = null;
+      currentInstanceName = 'None (Master CV)';
+
+      // Apply the CV's default style
+      applyStyleToUI(data._style);
+
       markClean();
       renderAll();
       updateDbSelector();
+      updateInstanceSelector();
     } catch (e) {
       alert(t('invalid_json') + e.message);
     }
@@ -55,12 +85,20 @@ function createPresetDatabase(name, preset) {
   var template = RESEARCHER_CV;
   if (preset === 'basic') template = BASIC_CV;
   else if (preset === 'minimal') template = MINIMAL_CV;
-  
+
   data = JSON.parse(JSON.stringify(template));
+  // Ensure _style has full templates
+  if (!data._style.latexTemplate) data._style.latexTemplate = DEFAULT_LATEX_TEMPLATE;
+  if (!data._style.htmlTemplate) data._style.htmlTemplate = DEFAULT_HTML_TEMPLATE;
+  if (!data._style.mappers || Object.keys(data._style.mappers).length === 0) {
+    data._style.mappers = JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
+  }
   currentDbName = name;
   saveCurrentDatabase();
+  applyStyleToUI(data._style);
   renderAll();
   updateDbSelector();
+  updateInstanceSelector();
 }
 
 function deleteDatabase(name) {
@@ -81,238 +119,189 @@ function updateDbSelector() {
     if (name === currentDbName) opt.selected = true;
     sel.appendChild(opt);
   });
-  
+
   var optDiv = document.createElement('option');
   optDiv.disabled = true;
   optDiv.textContent = '──────────';
   sel.appendChild(optDiv);
-  
+
   var optManage = document.createElement('option');
   optManage.value = '__manage__';
   optManage.textContent = state.langFilter === 'es' ? '⚙️ Administrar CVs...' : '⚙️ Manage CVs...';
   sel.appendChild(optManage);
 }
 
-function listStyles() {
-  var list = [];
-  for (var i = 0; i < localStorage.length; i++) {
-    var key = localStorage.key(i);
-    if (key.indexOf('cvbuilder_style_') === 0) {
-      list.push(key.substring('cvbuilder_style_'.length));
-    }
-  }
-  if (list.length === 0) {
-    list.push('Default Style');
-  }
-  return list;
+// ── ACTIVE STYLE HELPERS ──
+
+/**
+ * Returns the current active style object (instance style or CV default style).
+ */
+function getActiveStyle() {
+  if (activeInstance && activeInstance.style) return activeInstance.style;
+  if (!data._style) data._style = JSON.parse(JSON.stringify(DEFAULT_STYLE));
+  return data._style;
 }
 
-function saveCurrentStyle() {
-  if (!currentStyleName) currentStyleName = 'Default Style';
-  var payload = {
-    cvTitle: tpl.cvTitle || 'Curriculum Vitae',
-    style: tpl.style || 'classic',
-    preamble: tpl.preamble || '',
-    footer: tpl.footer || '',
-    latexTemplate: el('latexTplEditor').value,
-    htmlTemplate: el('htmlTplEditor').value,
-    mappers: mappers,
-    theme: {
-      accentColor: state.themeAccentColor,
-      font: state.themeFont
-    }
-  };
-  localStorage.setItem('cvbuilder_style_' + currentStyleName, JSON.stringify(payload));
-  updateStyleSelector();
-  
+/**
+ * Saves the current UI state into the active style (instance or CV default), then persists.
+ */
+function saveActiveStyle() {
+  var styleObj = getActiveStyle();
+  styleObj.cvTitle = tpl.cvTitle || 'Curriculum Vitae';
+  styleObj.style = tpl.style || 'classic';
+  styleObj.preamble = tpl.preamble || '';
+  styleObj.footer = tpl.footer || '';
+  styleObj.latexTemplate = el('latexTplEditor') ? el('latexTplEditor').value : (styleObj.latexTemplate || DEFAULT_LATEX_TEMPLATE);
+  styleObj.htmlTemplate = el('htmlTplEditor') ? el('htmlTplEditor').value : (styleObj.htmlTemplate || DEFAULT_HTML_TEMPLATE);
+  styleObj.mappers = mappers;
+  if (!styleObj.theme) styleObj.theme = {};
+  styleObj.theme.accentColor = state.themeAccentColor;
+  styleObj.theme.font = state.themeFont;
+  styleObj.theme.photoLeftOffset = state.photoLeftOffset !== undefined ? state.photoLeftOffset : 40;
+  styleObj.theme.photoTopOffset = state.photoTopOffset !== undefined ? state.photoTopOffset : 0;
+
   if (activeInstance) {
+    activeInstance.style = styleObj;
     saveCurrentInstance();
-  }
-}
-
-function loadStyle(name) {
-  var raw = localStorage.getItem('cvbuilder_style_' + name);
-  if (raw) {
-    try {
-      var payload = JSON.parse(raw);
-      currentStyleName = name;
-      
-      tpl.cvTitle = payload.cvTitle || 'Curriculum Vitae';
-      tpl.style = payload.style || 'classic';
-      tpl.preamble = payload.preamble || '';
-      tpl.footer = payload.footer || '';
-      
-      state.themeAccentColor = (payload.theme && payload.theme.accentColor) || '#2563eb';
-      state.themeFont = (payload.theme && payload.theme.font) || 'sans';
-      el('themeAccentColor').value = state.themeAccentColor;
-      el('themeAccentHex').value = state.themeAccentColor;
-      el('themeFontSelect').value = state.themeFont;
-      
-      var latexTpl = payload.latexTemplate || DEFAULT_LATEX_TEMPLATE;
-      var hasMigration = false;
-      if (name === 'Default Style' && latexTpl.indexOf('has_publications') === -1) {
-        latexTpl = DEFAULT_LATEX_TEMPLATE;
-        payload.htmlTemplate = DEFAULT_HTML_TEMPLATE;
-        hasMigration = true;
-      }
-      if (latexTpl.indexOf('\\address{{{basics.location}}}\\\\') !== -1) {
-        latexTpl = latexTpl.replace('\\address{{{basics.location}}}\\\\', '\\address{{{basics.location}}}');
-        hasMigration = true;
-      }
-      var oldEdu = '\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}}{{{description}}}{}';
-      var newEdu = '\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{ {{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}} }{{{description}}}';
-      if (latexTpl.indexOf(oldEdu) !== -1) {
-        latexTpl = latexTpl.replace(oldEdu, newEdu);
-        hasMigration = true;
-      }
-      if (hasMigration) {
-        payload.latexTemplate = latexTpl;
-        localStorage.setItem('cvbuilder_style_' + name, JSON.stringify(payload));
-      }
-      el('latexTplEditor').value = latexTpl;
-      el('htmlTplEditor').value = payload.htmlTemplate || DEFAULT_HTML_TEMPLATE;
-      mappers = payload.mappers || JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
-      
-      el('cvTitle').value = tpl.cvTitle;
-      el('styleName').value = tpl.style;
-      
-      renderLatex();
-      updateStyleSelector();
-    } catch (e) {
-      alert(t('invalid_json') + e.message);
-    }
   } else {
-    createBlankStyle(name);
+    data._style = styleObj;
+    saveCurrentDatabase();
   }
 }
 
-function createBlankStyle(name) {
-  currentStyleName = name;
-  tpl = {
-    cvTitle: 'Curriculum Vitae',
-    style: 'classic',
-    preamble: '',
-    footer: ''
-  };
-  el('latexTplEditor').value = DEFAULT_LATEX_TEMPLATE;
-  el('htmlTplEditor').value = DEFAULT_HTML_TEMPLATE;
-  mappers = JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
-  
-  el('cvTitle').value = tpl.cvTitle;
-  el('styleName').value = tpl.style;
-  
-  saveCurrentStyle();
-  renderLatex();
-  updateStyleSelector();
+/**
+ * Applies a style object to all UI controls.
+ */
+function applyStyleToUI(styleObj) {
+  if (!styleObj) styleObj = JSON.parse(JSON.stringify(DEFAULT_STYLE));
+
+  tpl.cvTitle = styleObj.cvTitle || 'Curriculum Vitae';
+  tpl.style = styleObj.style || 'classic';
+  tpl.preamble = styleObj.preamble || '';
+  tpl.footer = styleObj.footer || '';
+
+  var theme = styleObj.theme || {};
+  state.themeAccentColor = theme.accentColor || '#2563eb';
+  state.themeFont = theme.font || 'sans';
+  state.photoLeftOffset = (theme.photoLeftOffset !== undefined) ? theme.photoLeftOffset : 40;
+  state.photoTopOffset = (theme.photoTopOffset !== undefined) ? theme.photoTopOffset : 0;
+
+  if (el('themeAccentColor')) el('themeAccentColor').value = state.themeAccentColor;
+  if (el('themeAccentHex')) el('themeAccentHex').value = state.themeAccentColor;
+  if (el('themeFontSelect')) el('themeFontSelect').value = state.themeFont;
+  if (el('photoLeftSlider')) el('photoLeftSlider').value = state.photoLeftOffset;
+  if (el('photoLeftVal')) el('photoLeftVal').textContent = state.photoLeftOffset + 'px';
+  if (el('photoTopSlider')) el('photoTopSlider').value = state.photoTopOffset;
+  if (el('photoTopVal')) el('photoTopVal').textContent = state.photoTopOffset + 'px';
+
+  var latexTpl = styleObj.latexTemplate || DEFAULT_LATEX_TEMPLATE;
+  var htmlTpl = styleObj.htmlTemplate || DEFAULT_HTML_TEMPLATE;
+
+  // Migration: detect outdated templates and reset
+  var hasMigration = false;
+  if (latexTpl.indexOf('has_publications') === -1) { latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
+  if (htmlTpl.indexOf('all_sections') === -1 || latexTpl.indexOf('all_sections') === -1) { htmlTpl = DEFAULT_HTML_TEMPLATE; latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
+  if (hasMigration) { styleObj.latexTemplate = latexTpl; styleObj.htmlTemplate = htmlTpl; }
+
+  if (el('latexTplEditor')) el('latexTplEditor').value = latexTpl;
+  if (el('htmlTplEditor')) el('htmlTplEditor').value = htmlTpl;
+
+  mappers = (styleObj.mappers && Object.keys(styleObj.mappers).length > 0)
+    ? styleObj.mappers
+    : JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
+
+  if (el('cvTitle')) el('cvTitle').value = tpl.cvTitle;
+  if (el('styleName')) el('styleName').value = tpl.style;
 }
 
-function deleteStyle(name) {
-  localStorage.removeItem('cvbuilder_style_' + name);
-  var list = listStyles();
-  loadStyle(list[0]);
-}
-
-function updateStyleSelector() {
-  var sel = el('styleSelect');
-  if (!sel) return;
-  sel.innerHTML = '';
-  var list = listStyles();
-  list.forEach(function(name) {
-    var opt = document.createElement('option');
-    opt.value = name;
-    opt.textContent = name;
-    if (name === currentStyleName) opt.selected = true;
-    sel.appendChild(opt);
-  });
-  
-  var optDiv = document.createElement('option');
-  optDiv.disabled = true;
-  optDiv.textContent = '──────────';
-  sel.appendChild(optDiv);
-  
-  var optManage = document.createElement('option');
-  optManage.value = '__manage__';
-  optManage.textContent = state.langFilter === 'es' ? '⚙️ Administrar estilos...' : '⚙️ Manage Styles...';
-  sel.appendChild(optManage);
-}
+// ── INSTANCES (stored in data.instances) ──
 
 function listInstances() {
-  var list = [];
-  for (var i = 0; i < localStorage.length; i++) {
-    var key = localStorage.key(i);
-    if (key.indexOf('cvbuilder_instance_') === 0) {
-      list.push(key.substring('cvbuilder_instance_'.length));
-    }
-  }
-  return list;
+  if (!data.instances) data.instances = {};
+  return Object.keys(data.instances);
 }
 
 function saveCurrentInstance() {
   if (!activeInstance || currentInstanceName === 'None (Master CV)') return;
-  activeInstance.style = {
-    cvTitle: tpl.cvTitle || 'Curriculum Vitae',
-    style: tpl.style || 'classic',
-    preamble: tpl.preamble || '',
-    footer: tpl.footer || '',
-    latexTemplate: el('latexTplEditor').value,
-    htmlTemplate: el('htmlTplEditor').value,
-    mappers: mappers
-  };
-  localStorage.setItem('cvbuilder_instance_' + currentInstanceName, JSON.stringify(activeInstance));
+  if (!data.instances) data.instances = {};
+  data.instances[currentInstanceName] = activeInstance;
+  saveCurrentDatabase();
   updateInstanceSelector();
+}
+
+function createNewInstancePrompt(defaultName) {
+  var isEs = (typeof state === 'object' && state && state.langFilter === 'es');
+  var promptMsg = isEs ? 'Ingrese un nombre para guardar su nueva Instancia de CV:' : 'Enter a name to save your new CV Instance:';
+  var name = prompt(promptMsg, defaultName || '');
+  if (!name) return null;
+  name = name.trim();
+  if (!name) return null;
+  if (!data.instances) data.instances = {};
+  if (data.instances[name]) {
+    alert(isEs ? '¡Ya existe una instancia con ese nombre!' : 'An instance with that name already exists!');
+    return null;
+  }
+  var currentStyle = getActiveStyle();
+  var newInst = {
+    style: JSON.parse(JSON.stringify(currentStyle)),
+    overwrites: {},
+    visibility: {},
+    sections: JSON.parse(JSON.stringify(state.sections))
+  };
+  data.instances[name] = newInst;
+  activeInstance = newInst;
+  currentInstanceName = name;
+  saveCurrentDatabase();
+  updateInstanceSelector();
+  renderAll();
+  alert(isEs ? '¡Instancia de CV "' + name + '" guardada con éxito!' : 'CV Instance "' + name + '" saved successfully!');
+  return newInst;
 }
 
 function loadInstance(name) {
   if (!name || name === 'None (Master CV)') {
     activeInstance = null;
     currentInstanceName = 'None (Master CV)';
+    // Restore CV default style
+    applyStyleToUI(data._style || DEFAULT_STYLE);
     updateInstanceSelector();
     renderAll();
     return;
   }
-  var raw = localStorage.getItem('cvbuilder_instance_' + name);
-  if (raw) {
-    try {
-      var payload = JSON.parse(raw);
-      activeInstance = payload;
-      currentInstanceName = name;
-      
-      if (payload.masterCvName && payload.masterCvName !== currentDbName) {
-        var dbRaw = localStorage.getItem('cvbuilder_cv_' + payload.masterCvName);
-        if (dbRaw) {
-          loadDatabase(payload.masterCvName);
-        }
-      }
-      
-      if (payload.style) {
-        tpl.cvTitle = payload.style.cvTitle || 'Curriculum Vitae';
-        tpl.style = payload.style.style || 'classic';
-        tpl.preamble = payload.style.preamble || '';
-        tpl.footer = payload.style.footer || '';
-        el('latexTplEditor').value = payload.style.latexTemplate || DEFAULT_LATEX_TEMPLATE;
-        el('htmlTplEditor').value = payload.style.htmlTemplate || DEFAULT_HTML_TEMPLATE;
-        mappers = payload.style.mappers || JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
-        
-        el('cvTitle').value = tpl.cvTitle;
-        el('styleName').value = tpl.style;
-      }
-      
-      updateInstanceSelector();
-      renderAll();
-    } catch (e) {
-      alert(t('invalid_json') + e.message);
+  if (!data.instances) data.instances = {};
+  var inst = data.instances[name];
+  if (inst) {
+    activeInstance = inst;
+    currentInstanceName = name;
+    // Apply instance style
+    if (inst.style) applyStyleToUI(inst.style);
+    if (inst.sections) {
+      Object.keys(inst.sections).forEach(function(k) {
+        if (!state.sections[k]) state.sections[k] = {};
+        Object.assign(state.sections[k], inst.sections[k]);
+      });
     }
+    updateInstanceSelector();
+    renderAll();
+  } else {
+    alert((state.langFilter === 'es' ? 'Instancia no encontrada: ' : 'Instance not found: ') + name);
+    loadInstance('None (Master CV)');
   }
 }
 
 function deleteInstance(name) {
-  if (confirm(t('confirm_delete_instance', { name: name }))) {
-    localStorage.removeItem('cvbuilder_instance_' + name);
+  var isEs = state.langFilter === 'es';
+  if (confirm(isEs ? '¿Eliminar la instancia "' + name + '"?' : 'Delete instance "' + name + '"?')) {
+    if (!data.instances) data.instances = {};
+    delete data.instances[name];
     if (currentInstanceName === name) {
-      loadInstance('None (Master CV)');
-    } else {
-      updateInstanceSelector();
+      activeInstance = null;
+      currentInstanceName = 'None (Master CV)';
+      applyStyleToUI(data._style || DEFAULT_STYLE);
     }
+    saveCurrentDatabase();
+    updateInstanceSelector();
+    renderAll();
   }
 }
 
@@ -320,12 +309,12 @@ function updateInstanceSelector() {
   var sel = el('instanceSelect');
   if (!sel) return;
   sel.innerHTML = '';
-  
+
   var optNone = document.createElement('option');
   optNone.value = 'None (Master CV)';
   optNone.textContent = 'None (Master CV)';
   sel.appendChild(optNone);
-  
+
   var list = listInstances();
   list.forEach(function(name) {
     var opt = document.createElement('option');
@@ -333,17 +322,17 @@ function updateInstanceSelector() {
     opt.textContent = name;
     sel.appendChild(opt);
   });
-  
+
   var optSep = document.createElement('option');
   optSep.disabled = true;
   optSep.textContent = '──────────';
   sel.appendChild(optSep);
-  
+
   var optManage = document.createElement('option');
   optManage.value = '__manage__';
   optManage.textContent = state.langFilter === 'es' ? 'Administrar instancias...' : 'Manage CV Instances...';
   sel.appendChild(optManage);
-  
+
   sel.value = currentInstanceName;
 
   var indicator = el('instanceIndicator');
@@ -370,14 +359,15 @@ function showInstanceManagerModal() {
       updateInstanceSelector();
     }
   };
-  
+
   var list = listInstances();
   var isEs = state.langFilter === 'es';
   var rows = list.map(function(name) {
+    var isActive = (name === currentInstanceName);
     return '<div class="row" style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-2) 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
-      + '<span><strong>' + esc(name) + '</strong></span>'
+      + '<span><strong>' + esc(name) + '</strong>' + (isActive ? ' <span class="pill" style="font-size:10px; background:oklch(from var(--color-primary) l c h / .15); color:var(--color-primary); border:1px solid var(--color-primary)">' + (isEs ? 'Activo' : 'Active') + '</span>' : '') + '</span>'
       + '<div style="display:flex; gap:var(--space-2)">'
-      + '<button class="btn btn-secondary btn-xs" onclick="downloadInstanceFile(\'' + esc(name) + '\')">' + (isEs ? 'Exportar' : 'Export') + '</button>'
+      + '<button class="btn btn-ghost btn-xs" onclick="loadInstance(\'' + esc(name) + '\'); document.getElementById(\'instanceManagerModal\').remove();">' + (isEs ? 'Cargar' : 'Load') + '</button>'
       + '<button class="btn btn-danger btn-xs" onclick="deleteInstance(\'' + esc(name) + '\'); document.getElementById(\'instanceManagerModal\').remove(); showInstanceManagerModal();">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
       + '</div>'
       + '</div>';
@@ -386,10 +376,9 @@ function showInstanceManagerModal() {
   modal.innerHTML = '<div class="modal" style="max-width:500px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); box-shadow:var(--shadow-md)">'
     + '<div class="modal-header"><h3>' + (isEs ? 'Administrar Instancias de CV' : 'Manage CV Instances') + '</h3></div>'
     + '<div class="modal-body">'
+    + '<div class="tiny muted" style="margin-bottom:var(--space-3)">' + (isEs ? 'Las instancias se guardan dentro del archivo .cv activo.' : 'Instances are saved inside the active .cv file.') + '</div>'
     + '<div style="display:flex; gap:var(--space-2); margin-bottom:var(--space-4)">'
-    + '<input type="file" id="importInstanceFileInput" accept=".cvinstance" style="display:none">'
-    + '<button class="btn btn-primary" id="importInstanceBtn" style="flex:1">' + (isEs ? 'Importar .cvinstance' : 'Import .cvinstance File') + '</button>'
-    + '<button class="btn" id="createInstanceBtn" style="flex:1">' + (isEs ? 'Crear Instancia' : 'Create New Instance') + '</button>'
+    + '<button class="btn btn-primary" id="createInstanceBtn" style="flex:1">' + (isEs ? '+ Crear Instancia' : '+ Create New Instance') + '</button>'
     + '</div>'
     + '<div><strong>' + (isEs ? 'Instancias Guardadas:' : 'Saved Instances:') + '</strong></div>'
     + '<div style="max-height:250px; overflow-y:auto; margin-top:var(--space-2)">' + rows + '</div>'
@@ -398,80 +387,18 @@ function showInstanceManagerModal() {
     + '<button class="btn btn-ghost" id="closeInstanceManagerBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
     + '</div>'
     + '</div>';
-  
+
   document.body.appendChild(modal);
-  
+
   el('closeInstanceManagerBtn').onclick = function() {
     modal.remove();
     updateInstanceSelector();
   };
-  
-  el('importInstanceBtn').onclick = function() {
-    el('importInstanceFileInput').click();
-  };
-  
-  el('importInstanceFileInput').onchange = function(e) {
-    var f = e.target.files[0];
-    if (!f) return;
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      try {
-        var payload = JSON.parse(ev.target.result);
-        if (!payload.name || !payload.style) throw new Error('Missing name or style parameters');
-        localStorage.setItem('cvbuilder_instance_' + payload.name, ev.target.result);
-        modal.remove();
-        loadInstance(payload.name);
-        alert(t('import_success', { name: payload.name }));
-      } catch (err) {
-        alert(t('invalid_json') + err.message);
-      }
-    };
-    reader.readAsText(f);
-  };
-  
-  el('createInstanceBtn').onclick = function() {
-    var name = prompt(t('enter_instance_rename', { name: '' }));
-    if (!name) return;
-    name = name.trim();
-    if (!name) return;
-    if (localStorage.getItem('cvbuilder_instance_' + name)) {
-      alert(t('cv_exists', { name: name }));
-      return;
-    }
-    var newInst = {
-      name: name,
-      masterCvName: currentDbName,
-      style: {
-        cvTitle: tpl.cvTitle || 'Curriculum Vitae',
-        style: tpl.style || 'classic',
-        preamble: tpl.preamble || '',
-        footer: tpl.footer || '',
-        latexTemplate: el('latexTplEditor').value,
-        htmlTemplate: el('htmlTplEditor').value,
-        mappers: mappers
-      },
-      overwrites: {},
-      visibility: {}
-    };
-    localStorage.setItem('cvbuilder_instance_' + name, JSON.stringify(newInst));
-    modal.remove();
-    loadInstance(name);
-    alert(t('style_created', { name: name }));
-  };
-}
 
-function downloadInstanceFile(name) {
-  var raw = localStorage.getItem('cvbuilder_instance_' + name);
-  if (raw) {
-    var blob = new Blob([raw], {type: 'application/json'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = name.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.cvinstance';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function() { URL.revokeObjectURL(a.href); }, 500);
-  }
+  el('createInstanceBtn').onclick = function() {
+    modal.remove();
+    createNewInstancePrompt('');
+  };
 }
 
 function getInstanceValue(pathStr, fallback) {
@@ -505,7 +432,7 @@ function applyOverrideToMaster(pathStr, pathArray) {
     var last = pathArray[pathArray.length - 1];
     var ref = pathArray.slice(0, -1).reduce(function(acc, key) { return acc[key]; }, data);
     ref[last] = val;
-    
+
     delete activeInstance.overwrites[pathStr];
     saveCurrentInstance();
     saveCurrentDatabase();

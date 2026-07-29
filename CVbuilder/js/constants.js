@@ -100,40 +100,7 @@ var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 
 \\renewcommand{\\listitemsymbol}{}
 
-{{#has_education}}
-\\section{{{sections.education.title}}}
-{{#education}}
-\\cventry{{{date_paren}}}{{{degree}}}{{{institution}}}{}{ {{#dissertation}}\\textbf{Dissertation: } {{{dissertation}}}{{/dissertation}} }{{{description}}}
-{{/education}}
-{{/has_education}}
-
-{{#has_work_experience}}
-\\section{{{sections.work_experience.title}}}
-{{#work_experience}}
-\\cventry{{{date_dash}}}{{{role}}}{{{department}}}{{{organization}}}{}{{{description}}}
-{{/work_experience}}
-{{/has_work_experience}}
-
-{{#has_publications}}
-\\section{{{sections.publications.title}}}
-{{#publications}}
-\\cvitem{-}{{{authors}}}. \\textquotedblleft {{{title}}}.\\textquotedblright\\ \\textit{{{venue}}}. {{{year}}}.}
-{{/publications}}
-{{/has_publications}}
-
-{{#has_skills}}
-\\section{{{sections.skills.title}}}
-{{#skills}}
-\\cvitemwithcomment{{{group}}}{\\parbox[t]{0.85\\textwidth}{{{{items_csv}}}}}{}
-{{/skills}}
-{{/has_skills}}
-
-{{#has_languages}}
-\\section{{{sections.languages.title}}}
-{{#languages}}
-\\cvitemwithcomment{{{language}}}{{{proficiency_desc}}}{}
-{{/languages}}
-{{/has_languages}}
+{{&all_sections}}
 
 \\end{document}`;
 
@@ -201,6 +168,7 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
   .entry-description {
     margin-top: 5px;
     font-size: 0.95em;
+    white-space: pre-wrap;
   }
   .skills-list {
     margin: 0;
@@ -214,15 +182,20 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
 </head>
 <body>
 
-  <header>
-    <h1>{{basics.firstname}} {{basics.lastname}}</h1>
-    <div class="subtitle">{{basics.title}}</div>
-    <div class="contact-info">
-      {{#basics.email}}<div>{{labels.basics.email}}: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
-      {{#basics.homepage}}<div>{{labels.basics.homepage}}: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
-      {{#basics.location}}<div>{{labels.basics.location}}: {{basics.location}}</div>{{/basics.location}}
+  <header style="display:flex; align-items:center; margin-bottom:15px">
+    <div>
+      <h1 style="margin:0">{{basics.firstname}} {{basics.lastname}}</h1>
+      <div class="subtitle" style="margin-top:4px; margin-bottom:0">{{basics.title}}</div>
     </div>
+    {{#basics.photo}}
+    <img src="{{basics.photo}}" alt="Profile photo" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #{{{theme.accentColor}}}; flex-shrink:0; margin-left:{{theme.photoLeftOffset}}px; margin-top:{{theme.photoTopOffset}}px;">
+    {{/basics.photo}}
   </header>
+  <div class="contact-info">
+    {{#basics.email}}<div>{{labels.basics.email}}: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
+    {{#basics.homepage}}<div>{{labels.basics.homepage}}: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
+    {{#basics.location}}<div>{{labels.basics.location}}: {{basics.location}}</div>{{/basics.location}}
+  </div>
 
   {{#basics.research_interests}}
   <section>
@@ -231,70 +204,7 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
   </section>
   {{/basics.research_interests}}
 
-  {{#has_education}}
-  <section>
-    <h2>{{sections.education.title}}</h2>
-    {{#education}}
-    <div class="entry">
-      <div class="entry-header">
-        <span>{{degree}} - {{institution}}</span>
-        <span>{{date_paren}}</span>
-      </div>
-      {{#dissertation}}<div class="entry-subheader">Dissertation: {{dissertation}}</div>{{/dissertation}}
-      <div class="entry-description">{{description}}</div>
-    </div>
-    {{/education}}
-  </section>
-  {{/has_education}}
-
-  {{#has_work_experience}}
-  <section>
-    <h2>{{sections.work_experience.title}}</h2>
-    {{#work_experience}}
-    <div class="entry">
-      <div class="entry-header">
-        <span>{{role}} - {{organization}}</span>
-        <span>{{date_dash}}</span>
-      </div>
-      {{#department}}<div class="entry-subheader">{{department}}</div>{{/department}}
-      <div class="entry-description">{{description}}</div>
-    </div>
-    {{/work_experience}}
-  </section>
-  {{/has_work_experience}}
-
-  {{#has_publications}}
-  <section>
-    <h2>{{sections.publications.title}}</h2>
-    <ul>
-      {{#publications}}
-      <li>{{authors}}. "{{title}}." <em>{{venue}}</em>, {{year}}.</li>
-      {{/publications}}
-    </ul>
-  </section>
-  {{/has_publications}}
-
-  {{#has_skills}}
-  <section>
-    <h2>{{sections.skills.title}}</h2>
-    <ul class="skills-list">
-      {{#skills}}
-      <li><strong>{{group}}:</strong> {{items_csv}}</li>
-      {{/skills}}
-    </ul>
-  </section>
-  {{/has_skills}}
-
-  {{#has_languages}}
-  <section>
-    <h2>{{sections.languages.title}}</h2>
-    <ul>
-      {{#languages}}
-      <li>{{language}}: {{proficiency_desc}}</li>
-      {{/languages}}
-    </ul>
-  </section>
-  {{/has_languages}}
+  {{&all_sections}}
 
  </body>
 </html>`;
@@ -403,7 +313,18 @@ var RESEARCHER_CV = {
       "proficiency": "Fluent / Professional",
       "selected": true
     }
-  ]
+  ],
+  "_style": {
+    "cvTitle": "Curriculum Vitae",
+    "style": "classic",
+    "preamble": "",
+    "footer": "",
+    "latexTemplate": "",
+    "htmlTemplate": "",
+    "mappers": {},
+    "theme": { "accentColor": "#2563eb", "font": "sans", "photoLeftOffset": 40, "photoTopOffset": 0 }
+  },
+  "instances": {}
 };
 
 var BASIC_CV = {
@@ -454,11 +375,33 @@ var BASIC_CV = {
       "proficiency": "Fluent / Professional",
       "selected": true
     }
-  ]
+  ],
+  "_style": {
+    "cvTitle": "Curriculum Vitae",
+    "style": "classic",
+    "preamble": "",
+    "footer": "",
+    "latexTemplate": "",
+    "htmlTemplate": "",
+    "mappers": {},
+    "theme": { "accentColor": "#2563eb", "font": "sans", "photoLeftOffset": 40, "photoTopOffset": 0 }
+  },
+  "instances": {}
 };
 
 var MINIMAL_CV = {
-  "basics": {"firstname":"","lastname":"","title":"","email":"","homepage":"","location":"","photo":"","research_interests":""}
+  "basics": {"firstname":"","lastname":"","title":"","email":"","homepage":"","location":"","photo":"","research_interests":""},
+  "_style": {
+    "cvTitle": "Curriculum Vitae",
+    "style": "classic",
+    "preamble": "",
+    "footer": "",
+    "latexTemplate": "",
+    "htmlTemplate": "",
+    "mappers": {},
+    "theme": { "accentColor": "#2563eb", "font": "sans", "photoLeftOffset": 40, "photoTopOffset": 0 }
+  },
+  "instances": {}
 };
 
 var STYLE_PRESETS = {

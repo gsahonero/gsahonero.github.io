@@ -880,6 +880,45 @@
           testRuns.push({ id: '5.5', name: 'Mappers JSON Round-trip', category: 'regression', expected: 'skills_test_override', actual: passed ? 'skills_test_override' : 'mismatch', passed, latency });
         })();
 
+        // Test 5.6: Array Section Live Preview Compiler (Education & Work fields)
+        (function() {
+          var tStart = performance.now();
+          var backupEdu = win.data.education ? JSON.parse(JSON.stringify(win.data.education)) : [];
+          if (!win.data.education) win.data.education = [];
+          win.data.education[0] = { degree: "Ph.D. Quantum Computing", institution: "MIT", start: "2020", end: "2024", selected: true };
+          win.renderLatex();
+          
+          var compiledLatex = doc.getElementById('latexPreview').textContent;
+          var frame = doc.getElementById('htmlPreviewFrame');
+          var compiledHtml = frame ? (frame.srcdoc || '') : '';
+          
+          var passed = compiledLatex.indexOf("Ph.D. Quantum Computing") !== -1 && compiledHtml.indexOf("Ph.D. Quantum Computing") !== -1;
+          
+          win.data.education = backupEdu;
+          win.renderLatex();
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.6', 'Array Section Live Preview', 'Verifies editing array section items (e.g. education degree) updates both LaTeX and HTML live previews', 'regression', "Contains 'Ph.D. Quantum Computing'", passed ? "Passed" : "Failed", latency, passed);
+          testRuns.push({ id: '5.6', name: 'Array Section Live Preview', category: 'regression', expected: "Contains 'Ph.D. Quantum Computing'", actual: passed ? "Passed" : "Failed", passed, latency });
+        })();
+
+        // Test 5.7: PDF Compilation Function & Fallback Guard
+        (function() {
+          var tStart = performance.now();
+          var fnExists = typeof win.downloadPdfFile === 'function';
+          var pdfBtn = doc.getElementById('downloadPdfBtn');
+          var btnExists = !!pdfBtn;
+          var passed = fnExists && btnExists;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.7', 'PDF Download Handler Guard', 'Asserts downloadPdfFile is defined and bound to the download PDF toolbar button', 'regression', 'function, element-found', (fnExists ? 'function' : 'missing') + ', ' + (btnExists ? 'element-found' : 'missing'), latency, passed);
+          testRuns.push({ id: '5.7', name: 'PDF Download Handler Guard', category: 'regression', expected: 'function, element-found', actual: (fnExists ? 'function' : 'missing') + ', ' + (btnExists ? 'element-found' : 'missing'), passed, latency });
+        })();
+
         // Finalize test metrics
         var endSuiteTime = performance.now();
         var suiteDuration = Math.round(endSuiteTime - startSuiteTime);

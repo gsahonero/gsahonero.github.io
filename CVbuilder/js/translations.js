@@ -76,15 +76,45 @@ function updateUITranslations() {
   el('helpTourBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V21h2v-5.464"/></svg>' + (isEs ? 'Guía de bienvenida' : 'Welcome Tour Guide');
   el('helpDiagnosticsBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' + (isEs ? 'Ejecutar diagnósticos' : 'Run Diagnostics');
  
-  // 2. Select box labels
+  // 2. Select box labels & Tooltip guidance
   var dbLbl = document.querySelector('.db-selector span');
   if (dbLbl) dbLbl.textContent = isEs ? 'CV:' : 'CV:';
+  var cvTitle = el('cvTipTitle');
+  var cvDesc = el('cvTipDesc');
+  if (cvTitle && cvDesc) {
+    cvTitle.textContent = isEs ? 'Perfil Principal (CV)' : 'Master CV Profile';
+    cvDesc.textContent = isEs ? 'Contiene todo tu historial laboral y académico completo. Es tu expediente maestro.' : 'Contains all your full career history (education, jobs, skills). This is your master record.';
+  }
+
   var styleLbl = document.querySelector('.style-selector span');
   if (styleLbl) styleLbl.textContent = isEs ? 'Estilo:' : 'Style:';
+  var styleTitle = el('styleTipTitle');
+  var styleDesc = el('styleTipDesc');
+  if (styleTitle && styleDesc) {
+    styleTitle.textContent = isEs ? 'Estilo Visual' : 'Visual Style';
+    styleDesc.textContent = isEs ? 'Controla el diseño gráfico, la tipografía y los colores de tu documento.' : 'Controls the graphic template, typography, and accent colors for your CV.';
+  }
+
   var instLbl = document.querySelector('.instance-selector span');
   if (instLbl) instLbl.textContent = isEs ? 'Instancia:' : 'Instance:';
+  var instTitle = el('instanceTipTitle');
+  var instDesc = el('instanceTipDesc');
+  if (instTitle && instDesc) {
+    instTitle.textContent = isEs ? 'Instancia Adaptada' : 'Tailored Instance';
+    instDesc.textContent = isEs ? 'Una versión personalizada para un empleo específico sin alterar tus datos principales.' : 'A customized version created for a specific job application without changing your master CV data.';
+  }
+
   var langLbl = document.querySelector('.topbar-right span');
   if (langLbl) langLbl.textContent = isEs ? 'Idioma:' : 'Lang:';
+
+  var topbarPdfText = el('topbarPdfBtnText');
+  if (topbarPdfText) topbarPdfText.textContent = isEs ? 'Exportar PDF' : 'Export PDF';
+
+  var menuPdf = el('menuDownloadPdfBtn');
+  if (menuPdf) menuPdf.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' + (isEs ? 'Exportar a PDF...' : 'Export to PDF...');
+
+  var htmlPdfBtn = el('htmlPrevPdfBtn');
+  if (htmlPdfBtn) htmlPdfBtn.textContent = isEs ? 'Exportar PDF' : 'Export PDF';
  
   // 3. Left tabs
   document.querySelectorAll('.left-pane .tab').forEach(function(btn) {
@@ -106,12 +136,14 @@ function updateUITranslations() {
   // 5. Sidebar and Outline headers
   var sidebarTitle = document.querySelector('.sidebar .sectiontitle');
   if (sidebarTitle) sidebarTitle.textContent = isEs ? 'Secciones' : 'Sections';
-  el('addSectionBtn').textContent = isEs ? 'Añadir sección' : 'Add section';
+  var addBtn = el('addSectionBtn');
+  if (addBtn) addBtn.textContent = isEs ? '+ Añadir' : '+ Add';
   var outlineTitle = document.querySelector('.outlinepane .outline-title');
   if (outlineTitle) outlineTitle.textContent = isEs ? 'Esquema' : 'Document Outline';
  
   // 6. Action buttons
-  el('downloadPdfBtn').textContent = isEs ? 'Descargar PDF' : 'Download PDF';
+  var dlPdfBtn = el('downloadPdfBtn');
+  if (dlPdfBtn) dlPdfBtn.textContent = isEs ? 'Descargar PDF' : 'Download PDF';
  
   // 7. Options of langFilterSelect
   var select = el('langFilterSelect');
@@ -127,17 +159,54 @@ function updateUITranslations() {
   }
 
   // 9. Style Manager Modal Buttons
-  el('modalEditMappersBtn').textContent = isEs ? 'Editar mapeos' : 'Edit Mappers';
-  el('modalStylePresetsBtn').textContent = isEs ? 'Galería de estilos' : 'Presets Gallery';
-  el('modalImportStyleBtn').textContent = isEs ? 'Importar estilo (.cvstyle)' : 'Import Style (.cvstyle)';
-  el('modalCreateStyleBtn').textContent = isEs ? '+ Crear nuevo estilo' : '+ Create New Style';
-  el('styleManagerTitleLbl').textContent = isEs ? 'Administrar estilos de CV' : 'Manage CV Styles';
-  el('presetGalleryTitleLbl').textContent = isEs ? 'Galería de estilos' : 'Style Presets Gallery';
+  var edMapBtn = el('modalEditMappersBtn');
+  if (edMapBtn) edMapBtn.textContent = isEs ? 'Editar mapeos' : 'Edit Mappers';
+  var stPreBtn = el('modalStylePresetsBtn');
+  if (stPreBtn) stPreBtn.textContent = isEs ? 'Galería de estilos' : 'Presets Gallery';
+  var impStBtn = el('modalImportStyleBtn');
+  if (impStBtn) impStBtn.textContent = isEs ? 'Importar estilo (.cvstyle)' : 'Import Style (.cvstyle)';
+  var crStBtn = el('modalCreateStyleBtn');
+  if (crStBtn) crStBtn.textContent = isEs ? '+ Crear nuevo estilo' : '+ Create New Style';
+  var stMgrTitle = el('styleManagerTitleLbl');
+  if (stMgrTitle) stMgrTitle.textContent = isEs ? 'Administrar estilos de CV' : 'Manage CV Styles';
+  var preGalTitle = el('presetGalleryTitleLbl');
+  if (preGalTitle) preGalTitle.textContent = isEs ? 'Galería de estilos' : 'Style Presets Gallery';
 
   // 10. Database Manager Modal Buttons
-  el('dbManagerTitleLbl').textContent = isEs ? 'Administrar bases de datos de CV' : 'Manage CV Databases';
-  el('modalImportCvBtn').textContent = isEs ? 'Importar CV (.cv)' : 'Import CV (.cv)';
-  el('modalCreateDbBtn').textContent = isEs ? '+ Crear nuevo CV' : '+ Create New CV';
+  var dbMgrTitle = el('dbManagerTitleLbl');
+  if (dbMgrTitle) dbMgrTitle.textContent = isEs ? 'Administrar bases de datos de CV' : 'Manage CV Databases';
+  var impCvBtn = el('modalImportCvBtn');
+  if (impCvBtn) impCvBtn.textContent = isEs ? 'Importar CV (.cv)' : 'Import CV (.cv)';
+  var crDbBtn = el('modalCreateDbBtn');
+  if (crDbBtn) crDbBtn.textContent = isEs ? '+ Crear nuevo CV' : '+ Create New CV';
+
+  // 11. Visual Customizer Controls
+  var themeTitle = el('visualThemeTitleLbl');
+  if (themeTitle) themeTitle.textContent = isEs ? 'Configuración de Tema Visual' : 'Visual Theme Settings';
+  var accentLbl = el('themeAccentColorLbl');
+  if (accentLbl) accentLbl.textContent = isEs ? 'Color de Acento Principal' : 'Primary Accent Color';
+  var fontLbl = el('themeFontSelectLbl');
+  if (fontLbl) fontLbl.textContent = isEs ? 'Selección de Fuente de Tema' : 'Font Theme Selection';
+  var photoPosTitle = el('photoPosSectionTitle');
+  if (photoPosTitle) photoPosTitle.textContent = isEs ? 'Posición de Foto de Perfil' : 'Profile Photo Positioning';
+  var photoLeftLbl = el('photoLeftSliderLbl');
+  if (photoLeftLbl) photoLeftLbl.textContent = isEs ? 'Desplazamiento Izquierdo (Distancia del Nombre)' : 'Left Offset (Gap from Name)';
+  var photoTopLbl = el('photoTopSliderLbl');
+  if (photoTopLbl) photoTopLbl.textContent = isEs ? 'Desplazamiento Superior (Alineación Vertical)' : 'Top Offset (Vertical Alignment)';
+
+  // 12. Add Section Modal Assistant Labels
+  var addSecTitle = el('addSectionModalTitle');
+  if (addSecTitle) addSecTitle.textContent = isEs ? 'Asistente para Añadir Nueva Sección' : 'Add New CV Section Assistant';
+  var addSecKey = el('addSectionKeyLbl');
+  if (addSecKey) addSecKey.textContent = isEs ? 'Clave de Sección (Identificador)' : 'Section Key (Identifier)';
+  var addSecTitleLbl = el('addSectionTitleLbl');
+  if (addSecTitleLbl) addSecTitleLbl.textContent = isEs ? 'Título de Salida (Encabezado)' : 'Display Title (Header)';
+  var selectStructLbl = el('selectStructureLbl');
+  if (selectStructLbl) selectStructLbl.textContent = isEs ? 'Seleccionar Plantilla de Estructura' : 'Select Section Structure Template';
+  var confirmAddSec = el('confirmAddSectionBtn');
+  if (confirmAddSec) confirmAddSec.textContent = isEs ? 'Crear Sección' : 'Create Section';
+  var cancelAddSec = el('cancelAddSectionBtn');
+  if (cancelAddSec) cancelAddSec.textContent = isEs ? 'Cancelar' : 'Cancel';
 
   // 11. Help Modals HTML Content
   var scratchTitle = el('helpScratchTitleLbl');
@@ -221,72 +290,53 @@ function updateUITranslations() {
   if (usageBody) {
     if (isEs) {
       usageBody.innerHTML = '<div class="help-section">'
-        +'<h3>1. Carga los datos de tu CV</h3>'
-        +'<p>Ve a la ventana de <strong>Bases de Datos</strong> e importa un archivo <code>.cv</code> (JSON) o crea uno nuevo. La aplicación cargará automáticamente todas las secciones.</p>'
+        +'<h3>¿Para quién es CV Builder?</h3>'
+        +'<p>CV Builder está diseñado para <strong>todo tipo de profesionales y estudiantes</strong> (educadores, salud, negocios, ingeniería, creativos y más) que buscan crear un Currículum Vitae profesional, limpio e impecable.</p>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>2. Navega por las secciones</h3>'
-        +'<p>La barra lateral izquierda muestra las secciones disponibles (ej. <em>basics</em>, <em>education</em>, <em>publications</em>). Haz clic en una sección para ver sus campos.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>3. Edita las entradas</h3>'
+        +'<h3>Conceptos Clave explicados fácil:</h3>'
         +'<ul>'
-        +'<li>Modifica cualquier valor en el formulario.</li>'
-        +'<li>Usa la casilla <strong>Include</strong> para decidir si se muestra o se oculta en el CV compilado.</li>'
-        +'<li>Usa <strong>Duplicar</strong> o <strong>Eliminar</strong> según necesites.</li>'
-        +'<li>Puedes renombrar las etiquetas de los campos para cambiar cómo se etiquetan en LaTeX.</li>'
+        +'<li><strong>Perfil de CV (Base de Datos):</strong> Tu historial completo (estudios, empleos, habilidades). Es tu expediente maestro.</li>'
+        +'<li><strong>Estilo Visual (Style):</strong> El diseño gráfico (colores, tipografía y estructura) con el que se generará tu documento.</li>'
+        +'<li><strong>Instancia Adaptada (Instance):</strong> Una versión de tu CV personalizada para una oferta de empleo específica (ej. "Postulación Docente" o "Gerente Comercial"). Te permite ocultar o modificar ciertos datos para esa postulación sin alterar tu expediente principal.</li>'
         +'</ul>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>4. Títulos de sección</h3>'
-        +'<p>Puedes desactivar secciones enteras o reescribir su título de salida (ej. cambiar <em>education</em> a <em>Estudios realizados</em>).</p>'
+        +'<h3>1. Cómo editar tu información</h3>'
+        +'<p>Selecciona una sección en la barra lateral (ej. <em>Formación Académica</em> o <em>Experiencia Laboral</em>) e ingresa tus datos en los campos. Los cambios se actualizan en tiempo real en la Vista Previa.</p>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>5. Previsualización y descarga</h3>'
-        +'<ul>'
-        +'<li><strong>Vista Previa HTML</strong> y <strong>Código LaTeX</strong> en tiempo real en el panel derecho.</li>'
-        +'<li><strong>Descargar Base de Datos CV</strong> en el menú de archivo para guardar tu progreso de forma local.</li>'
-        +'</ul>'
+        +'<h3>2. Foto de Perfil</h3>'
+        +'<p>Puedes subir tu fotografía en la sección <em>basics</em>. Recomendamos una foto de formato cuadrado (1:1), en formato JPG o PNG, menor a 2MB.</p>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>Estructura básica del JSON de CV</h3>'
-        +'<p>El formato <code>.cv</code> es un objeto JSON simple. Contiene:</p>'
-        +'<ul>'
-        +'<li><code>basics</code>: Objeto con datos de contacto, foto y perfil.</li>'
-        +'<li><code>education</code>, <code>work_experience</code>: Listados ordenados de logros y puestos de trabajo.</li>'
-        +'<li><code>skills</code>: Grupos de habilidades y sus elementos.</li>'
-        +'</ul>'
+        +'<h3>3. Exportar tu CV a PDF</h3>'
+        +'<p>Para obtener tu documento final en formato PDF, haz clic en el botón azul <strong>Exportar PDF</strong> ubicado en la barra superior o en el menú de Archivo. También puedes descargar la base de datos de tu CV (<code>.cv</code>) para guardarla en tu computadora.</p>'
         +'</div>';
     } else {
       usageBody.innerHTML = '<div class="help-section">'
-        +'<h3>1. Upload your CV data</h3>'
-        +'<p>Go to <strong>File → Manage CVs...</strong> and click <strong>Import CV (.cv)</strong> to upload a JSON database, or create a blank one. The app loads all sections automatically.</p>'
+        +'<h3>Who is CV Builder for?</h3>'
+        +'<p>CV Builder is designed for <strong>all professionals, academics, and students</strong> (teachers, healthcare workers, business managers, engineers, creatives, and more) looking for a clean, professional, and elegant resume.</p>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>2. Navigate sections</h3>'
-        +'<p>The left sidebar lists every section (e.g., <em>basics</em>, <em>education</em>, <em>publications</em>). Click a section to open its editor.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>3. Edit entries</h3>'
+        +'<h3>Key Concepts Explained Simply:</h3>'
         +'<ul>'
-        +'<li>Use the form fields to edit any value directly.</li>'
-        +'<li>Toggle the <strong>Include</strong> checkbox on each entry to include or exclude it from LaTeX.</li>'
-        +'<li>Use <strong>Duplicate</strong> to copy an entry, or <strong>Delete</strong> to remove it.</li>'
-        +'<li>Rename property labels in the left column to control their LaTeX output label.</li>'
+        +'<li><strong>CV Profile (Database):</strong> Your complete career history (education, work experience, skills). This is your master record.</li>'
+        +'<li><strong>Visual Style:</strong> The graphic template (colors, fonts, and layout) used to render your document.</li>'
+        +'<li><strong>Tailored Instance:</strong> A customized version of your CV created for a specific job application (e.g., "Teaching Position" or "Sales Director"). It lets you adjust or hide specific items for that application without modifying your master profile.</li>'
         +'</ul>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>4. Include/exclude sections</h3>'
-        +'<p>Open a section and uncheck the <strong>Include</strong> toggle to hide the entire section from LaTeX. You can also rename the output section title.</p>'
+        +'<h3>1. Editing your information</h3>'
+        +'<p>Click any section in the sidebar (e.g., <em>Education</em> or <em>Work Experience</em>) and enter your details. Changes update instantly in the Live Preview.</p>'
         +'</div>'
         +'<div class="help-section">'
-        +'<h3>5. Preview and export</h3>'
-        +'<ul>'
-        +'<li><strong>HTML Preview</strong> tab — live preview of the CV.</li>'
-        +'<li><strong>LaTeX Code</strong> tab — view the generated <code>.tex</code> source code.</li>'
-        +'<li><strong>File → Download .tex</strong> — download the compiled LaTeX source file.</li>'
-        +'<li><strong>File → Download CV Database</strong> — save your database to your disk as a <code>.cv</code> file. Do this regularly to prevent data loss.</li>'
-        +'</ul>'
+        +'<h3>2. Profile Photo</h3>'
+        +'<p>Upload a profile photo under the <em>basics</em> section. We recommend a square aspect ratio (1:1), JPG or PNG format, under 2MB.</p>'
+        +'</div>'
+        +'<div class="help-section">'
+        +'<h3>3. Exporting to PDF</h3>'
+        +'<p>To generate your final document, click the blue <strong>Export PDF</strong> button on the top bar or inside the File menu. You can also download your CV profile (<code>.cv</code> file) to back up your data on your computer.</p>'
         +'</div>';
     }
   }

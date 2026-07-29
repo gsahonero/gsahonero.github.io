@@ -19,12 +19,10 @@ var tpl = {
   preamble: '',
   footer: ''
 };
-var mappers = JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
+var mappers = {};
 var currentDbName = 'Default CV';
-var currentStyleName = 'Default Style';
 
 var DB_PREFIX = 'cvbuilder_cv_';
-var STYLE_PREFIX = 'cvbuilder_style_';
 var INSTANCE_PREFIX = 'cvbuilder_instance_';
 
 // ── UTILITY HELPERS ──
@@ -126,6 +124,9 @@ function importDatabaseFile(file) {
     try {
       var imported = JSON.parse(e.target.result);
       var name = file.name.replace(/\.cv$/i, '');
+      // Ensure new format keys exist for backward compat
+      imported.instances = imported.instances || {};
+      imported._style = imported._style || {};
       localStorage.setItem('cvbuilder_cv_' + name, JSON.stringify(imported));
       updateDbSelector();
       loadDatabase(name);
@@ -137,23 +138,6 @@ function importDatabaseFile(file) {
   reader.readAsText(file);
 }
 
-function importStyleFile(file) {
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var imported = JSON.parse(e.target.result);
-      var name = file.name.replace(/\.cvstyle$/i, '');
-      localStorage.setItem('cvbuilder_style_' + name, JSON.stringify(imported));
-      updateStyleSelector();
-      loadStyle(name);
-      alert(t('import_success', { name: name }));
-    } catch(err) {
-      alert(t('invalid_json') + err.message);
-    }
-  };
-  reader.readAsText(file);
-}
 
 function downloadFile(content, mime, filename) {
   var blob = new Blob([content], {type: mime});
@@ -174,60 +158,71 @@ function downloadTexFile() {
 }
 
 function downloadPdfFile() {
-  var tplText = (el('latexTplEditor') && el('latexTplEditor').value) || DEFAULT_LATEX_TEMPLATE;
-  var context = buildTemplateContext();
-  
-  // Attach Base64 photo attachment if vorhanden
-  var photoUrl = (data.basics && data.basics.photo) || '';
-  var payload = new FormData();
-  
-  if (photoUrl.indexOf('data:image/') === 0) {
+  var activeTab = state.rightTab || 'html-prev';
+
+  if (activeTab === 'latex-prev') {
+    // Mode 1: LaTeX PDF Compilation via TeX Live CGI POST form submission (avoids 414 & Cannot POST errors)
+    var tplText = (el('latexTplEditor') && el('latexTplEditor').value) || DEFAULT_LATEX_TEMPLATE;
+    var context = buildTemplateContext();
+    var rendered = renderTemplate(tplText, context, texEscape);
+
+    var isEs = state.langFilter === 'es';
+    var topbarBtn = el('topbarPdfBtn');
+    if (topbarBtn) {
+      topbarBtn.setAttribute('disabled', 'true');
+      var topbarPdfText = el('topbarPdfBtnText');
+      if (topbarPdfText) topbarPdfText.textContent = isEs ? 'Compilando...' : 'Compiling PDF...';
+    }
+
     try {
-      var contentType = photoUrl.substring(5, photoUrl.indexOf(';'));
-      var b64Data = photoUrl;
-      var blob = base64ToBlob(b64Data, contentType);
-      var filename = 'photo.' + contentType.split('/')[1];
-      
-      payload.append('file[]', blob, filename);
-      
-      // Update template to reference filename
-      context.basics.photo = filename;
-    } catch (e) {
-      console.warn('Failed to embed profile photo binary in compile request:', e);
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://texlive.net/cgi-bin/latexcgi';
+      form.enctype = 'multipart/form-data';
+      form.target = '_blank';
+      form.style.display = 'none';
+
+      var nameInput = document.createElement('input');
+      nameInput.type = 'hidden';
+      nameInput.name = 'filename[]';
+      nameInput.value = 'main.tex';
+      form.appendChild(nameInput);
+
+      var textarea = document.createElement('textarea');
+      textarea.name = 'file[]';
+      textarea.value = rendered;
+      form.appendChild(textarea);
+
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(function() { form.remove(); }, 1500);
+    } catch(e) {
+      alert(isEs ? 'La compilación falló. Descargue el archivo .tex en su lugar.' : 'Compilation failed. Please download the .tex file instead.');
+    } finally {
+      if (topbarBtn) {
+        setTimeout(function() {
+          topbarBtn.removeAttribute('disabled');
+          var topbarPdfText = el('topbarPdfBtnText');
+          if (topbarPdfText) topbarPdfText.textContent = isEs ? 'Exportar PDF' : 'Export PDF';
+        }, 1200);
+      }
+    }
+  } else {
+    // Mode 2: HTML Preview Print to PDF
+    var htmlContent = renderHtmlContent();
+    var w = window.open('', '_blank');
+    if (w) {
+      w.document.open();
+      w.document.write(htmlContent);
+      w.document.close();
+      setTimeout(function() {
+        try {
+          w.focus();
+          w.print();
+        } catch(e) { console.warn('Print invocation deferred:', e); }
+      }, 300);
     }
   }
-  
-  var rendered = renderTemplate(tplText, context, texEscape);
-  payload.append('file[]', new Blob([rendered], {type: 'application/x-tex'}), 'main.tex');
-  
-  var btn = el('downloadPdfBtn');
-  btn.setAttribute('disabled', 'true');
-  btn.textContent = state.langFilter === 'es' ? 'Compilando...' : 'Compiling PDF...';
-  
-  fetch('https://texlive.net/cgi-bin/latexcgi', {
-    method: 'POST',
-    body: payload
-  })
-  .then(function(res) {
-    if (!res.ok) throw new Error('TeX Live API compile error');
-    return res.blob();
-  })
-  .then(function(blob) {
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = currentDbName.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.pdf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  })
-  .catch(function(err) {
-    alert(state.langFilter === 'es' ? 'La compilación falló. Compruebe la sintaxis de la plantilla LaTeX.' : 'Compilation failed. Please inspect the LaTeX template syntax.');
-    console.error(err);
-  })
-  .finally(function() {
-    btn.removeAttribute('disabled');
-    btn.textContent = state.langFilter === 'es' ? 'Descargar PDF' : 'Download PDF';
-  });
 }
 
 function openDbManagerModal() {
@@ -353,178 +348,8 @@ function renderDbManagerTable() {
   });
 }
 
-function openStyleManagerModal() {
-  openModal('styleManagerModal');
-  renderStyleManagerTable();
-}
-
-function renderStyleManagerTable() {
-  var tbody = el('styleManagerTableBody');
-  tbody.innerHTML = '';
-  var list = listStyles();
-  var isEs = state.langFilter === 'es';
-  list.forEach(function(name) {
-    var tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid var(--color-divider)';
-    tr.style.fontSize = 'var(--text-sm)';
-    
-    var tdName = document.createElement('td');
-    tdName.style.padding = 'var(--space-3) var(--space-4)';
-    tdName.style.fontWeight = name === currentStyleName ? 'bold' : 'normal';
-    tdName.textContent = name + (name === currentStyleName ? (isEs ? ' (Activo)' : ' (Active)') : '');
-    
-    var tdActions = document.createElement('td');
-    tdActions.style.padding = 'var(--space-3) var(--space-4)';
-    tdActions.style.textAlign = 'right';
-    tdActions.className = 'toolbar';
-    tdActions.style.justifyContent = 'flex-end';
-    
-    var btnLoad = document.createElement('button');
-    btnLoad.className = 'btn btn-ghost btn-xs';
-    btnLoad.style.minHeight = '28px';
-    btnLoad.style.padding = '2px 8px';
-    btnLoad.textContent = isEs ? 'Cargar' : 'Load';
-    btnLoad.disabled = name === currentStyleName;
-    btnLoad.onclick = function() {
-      loadStyle(name);
-      closeModal('styleManagerModal');
-    };
-    tdActions.appendChild(btnLoad);
-    
-    var btnDup = document.createElement('button');
-    btnDup.className = 'btn btn-ghost btn-xs';
-    btnDup.style.minHeight = '28px';
-    btnDup.style.padding = '2px 8px';
-    btnDup.textContent = isEs ? 'Duplicar' : 'Duplicate';
-    btnDup.onclick = function() {
-      var newName = prompt(t('enter_style_rename', { name: name }), name + ' (Copy)');
-      if (newName && newName.trim()) {
-        newName = newName.trim();
-        var raw = localStorage.getItem('cvbuilder_style_' + name);
-        if (raw) {
-          localStorage.setItem('cvbuilder_style_' + newName, raw);
-          renderStyleManagerTable();
-          updateStyleSelector();
-        }
-      }
-    };
-    tdActions.appendChild(btnDup);
-    
-    var btnExport = document.createElement('button');
-    btnExport.className = 'btn btn-ghost btn-xs';
-    btnExport.style.minHeight = '28px';
-    btnExport.style.padding = '2px 8px';
-    btnExport.textContent = isEs ? 'Exportar' : 'Export';
-    btnExport.onclick = function() {
-      var raw = localStorage.getItem('cvbuilder_style_' + name);
-      if (raw) {
-        downloadFile(raw, 'application/json', name.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.cvstyle');
-      }
-    };
-    tdActions.appendChild(btnExport);
-
-    var btnRename = document.createElement('button');
-    btnRename.className = 'btn btn-ghost btn-xs';
-    btnRename.style.minHeight = '28px';
-    btnRename.style.padding = '2px 8px';
-    btnRename.textContent = isEs ? 'Renombrar' : 'Rename';
-    btnRename.onclick = function() {
-      var newName = prompt(t('enter_style_rename', { name: name }), name);
-      if (newName && newName.trim() && newName.trim() !== name) {
-        newName = newName.trim();
-        var raw = localStorage.getItem('cvbuilder_style_' + name);
-        localStorage.setItem('cvbuilder_style_' + newName, raw);
-        localStorage.removeItem('cvbuilder_style_' + name);
-        if (name === currentStyleName) {
-          currentStyleName = newName;
-        }
-        renderStyleManagerTable();
-        updateStyleSelector();
-      }
-    };
-    tdActions.appendChild(btnRename);
-    
-    var btnDel = document.createElement('button');
-    btnDel.className = 'btn btn-danger btn-xs';
-    btnDel.style.minHeight = '28px';
-    btnDel.style.padding = '2px 8px';
-    btnDel.textContent = isEs ? 'Eliminar' : 'Delete';
-    btnDel.disabled = list.length <= 1;
-    btnDel.onclick = function() {
-      if (confirm(t('confirm_delete_style', { name: name }))) {
-        deleteStyle(name);
-        renderStyleManagerTable();
-        updateStyleSelector();
-      }
-    };
-    tdActions.appendChild(btnDel);
-    
-    tr.appendChild(tdName);
-    tr.appendChild(tdActions);
-    tbody.appendChild(tr);
-  });
-}
-
-function openPresetGalleryModal() {
-  closeModal('styleManagerModal');
-  openModal('presetGalleryModal');
-  
-  var grid = el('presetGalleryGrid');
-  grid.innerHTML = '';
-  var isEs = state.langFilter === 'es';
-  Object.entries(STYLE_PRESETS).forEach(function(entry) {
-    var key = entry[0], preset = entry[1];
-    
-    var card = document.createElement('div');
-    card.className = 'preset-card';
-    card.style.border = '1.5px solid var(--color-border)';
-    card.style.borderRadius = 'var(--radius-md)';
-    card.style.padding = 'var(--space-4)';
-    card.style.cursor = 'pointer';
-    card.style.transition = 'all var(--transition)';
-    card.style.background = 'var(--color-surface)';
-    
-    card.innerHTML = '<div style="font-weight:700; margin-bottom:var(--space-1); color:var(--color-text)">' + esc(preset.name) + '</div>'
-      + '<div class="tiny muted" style="margin-bottom:var(--space-3)">' + esc(preset.desc) + '</div>'
-      + '<button class="btn btn-xs btn-primary">' + (isEs ? 'Aplicar plantilla' : 'Apply Preset') + '</button>';
-      
-    card.onclick = function() {
-      if (presetGalleryCreateMode) {
-        var name = prompt(t('enter_style_name'));
-        if (!name) return;
-        name = name.trim();
-        if (!name) return;
-        currentStyleName = name;
-        tpl = {
-          cvTitle: 'Curriculum Vitae',
-          style: key === 'classic' ? 'classic' : (key === 'corporate' ? 'banking' : 'casual'),
-          preamble: '',
-          footer: ''
-        };
-        el('latexTplEditor').value = preset.latexTemplate;
-        el('htmlTplEditor').value = preset.htmlTemplate;
-        mappers = JSON.parse(JSON.stringify(DEFAULT_MAPPERS));
-        saveCurrentStyle();
-      } else {
-        el('latexTplEditor').value = preset.latexTemplate;
-        el('htmlTplEditor').value = preset.htmlTemplate;
-        tpl.style = key === 'classic' ? 'classic' : (key === 'corporate' ? 'banking' : 'casual');
-        saveCurrentStyle();
-      }
-      
-      closeModal('presetGalleryModal');
-      renderLatex();
-      alert(t('preset_applied', { name: preset.name }));
-    };
-    grid.appendChild(card);
-  });
-}
-
 function openEditMappersModal() {
-  closeModal('styleManagerModal');
   openModal('editMappersModal');
-  
-  // Populate the mappers textarea with a JSON representation
   var textarea = el('mappersEditor');
   if (textarea) {
     textarea.value = JSON.stringify(mappers, null, 2);
@@ -532,19 +357,7 @@ function openEditMappersModal() {
 }
 
 // ── LATEX ESCAPING REGISTRY ──
-function texEscape(s) {
-  return String(s==null?'':s)
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/&/g, '\\&')
-    .replace(/%/g, '\\%')
-    .replace(/\$/g, '\\$')
-    .replace(/#/g, '\\#')
-    .replace(/_/g, '\\_')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
-}
+// texEscape is defined in compiler.js to preserve LaTeX commands like \textbf{}, \textit{}, \href{}, etc.
 
 // ── EMBEDDED SYSTEM DIAGNOSTICS SUITE ──
 var diagLastReport = null;
@@ -932,44 +745,70 @@ function downloadDiagReportFile() {
   document.body.removeChild(a);
 }
 
-// ── STYLE MANAGER MODAL BINDINGS ──
-el('modalStylePresetsBtn').onclick = function() {
-  presetGalleryCreateMode = false;
-  openPresetGalleryModal();
-};
-el('modalCreateStyleBtn').onclick = function() {
-  presetGalleryCreateMode = true;
-  openPresetGalleryModal();
-};
-el('modalEditMappersBtn').onclick = function() {
+// ── STYLE MANAGER (now tied to active instance / CV _style) ──
+// Style preset gallery now accessed via Edit Mappers button in Customizer tab.
+el('modalEditMappersBtn') && (el('modalEditMappersBtn').onclick = function() {
   openEditMappersModal();
-};
-el('modalImportStyleBtn').onclick = function() {
-  el('tplFileInput').click();
-};
-el('closeStyleManagerModal').onclick = function() {
-  closeModal('styleManagerModal');
-};
-el('closePresetGalleryModal').onclick = function() {
-  closeModal('presetGalleryModal');
-};
-el('closeEditMappersModal').onclick = function() {
+});
+el('closeEditMappersModal') && (el('closeEditMappersModal').onclick = function() {
   closeModal('editMappersModal');
-};
-el('applyMappersBtn').onclick = function() {
+});
+el('applyMappersBtn') && (el('applyMappersBtn').onclick = function() {
   var textarea = el('mappersEditor');
   if (textarea) {
     try {
       var parsed = JSON.parse(textarea.value);
       mappers = parsed;
-      saveCurrentStyle();
+      saveActiveStyle();
       renderLatex();
       closeModal('editMappersModal');
     } catch(err) {
       alert((state.langFilter === 'es' ? 'JSON inválido: ' : 'Invalid JSON: ') + err.message);
     }
   }
-};
+});
+
+// ── CUSTOMIZER TAB TEMPLATE TOOL BUTTONS ──
+el('customizerEditMappersBtn') && (el('customizerEditMappersBtn').onclick = function() {
+  openEditMappersModal();
+});
+el('customizerPresetsBtn') && (el('customizerPresetsBtn').onclick = function() {
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  var isEs = state.langFilter === 'es';
+  var presetCards = Object.entries(STYLE_PRESETS).map(function(entry) {
+    var key = entry[0], preset = entry[1];
+    return '<div class="preset-card" data-key="' + key + '" style="border:1.5px solid var(--color-border); border-radius:var(--radius-md); padding:var(--space-3); cursor:pointer; background:var(--color-surface); transition:all 0.15s">'
+      + '<div style="font-weight:700; color:var(--color-text)">' + esc(preset.name) + '</div>'
+      + '<div class="tiny muted" style="margin-top:4px">' + esc(preset.desc) + '</div>'
+      + '</div>';
+  }).join('');
+  modal.innerHTML = '<div class="modal" style="max-width:480px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4)">'
+    + '<div class="modal-header"><h3>' + (isEs ? 'Aplicar Plantilla Preset' : 'Apply Preset Template') + '</h3></div>'
+    + '<div class="modal-body"><div class="tiny muted" style="margin-bottom:var(--space-3)">' + (isEs ? 'Aplica una plantilla al estilo activo.' : 'Apply a template to the currently active style.') + '</div>'
+    + '<div style="display:grid; gap:var(--space-3)">' + presetCards + '</div></div>'
+    + '<div class="modal-footer"><button class="btn btn-ghost" id="closePresetPickerBtn">' + (isEs ? 'Cancelar' : 'Cancel') + '</button></div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  el('closePresetPickerBtn').onclick = function() { modal.remove(); };
+  modal.querySelectorAll('.preset-card').forEach(function(card) {
+    card.onmouseenter = function() { card.style.borderColor = 'var(--color-primary)'; };
+    card.onmouseleave = function() { card.style.borderColor = 'var(--color-border)'; };
+    card.onclick = function() {
+      var key = card.getAttribute('data-key');
+      var preset = STYLE_PRESETS[key];
+      if (preset) {
+        if (el('latexTplEditor')) el('latexTplEditor').value = preset.latexTemplate;
+        if (el('htmlTplEditor')) el('htmlTplEditor').value = preset.htmlTemplate;
+        tpl.style = key === 'classic' ? 'classic' : (key === 'corporate' ? 'banking' : 'casual');
+        saveActiveStyle();
+        renderLatex();
+        alert(t('preset_applied', { name: preset.name }));
+      }
+      modal.remove();
+    };
+  });
+});
 
 // ── DB MANAGER MODAL BINDINGS ──
 el('modalCreateDbBtn').onclick = function() {
@@ -1029,14 +868,6 @@ el('saveCvAsBtn').onclick = function() {
   exportDatabaseFile();
 };
 
-el('downloadInstanceBtn').onclick = function() {
-  closeAllDropdowns();
-  if (activeInstance) {
-    downloadInstanceFile(currentInstanceName);
-  } else {
-    alert(t('no_overrides'));
-  }
-};
 
 el('renameCvBtn').onclick = function() {
   closeAllDropdowns();
@@ -1064,9 +895,17 @@ el('downloadTexBtn').onclick = function() {
   downloadTexFile();
 };
 
-el('downloadPdfBtn').onclick = function() {
-  downloadPdfFile();
-};
+var oldPdfBtn = el('downloadPdfBtn');
+if (oldPdfBtn) oldPdfBtn.onclick = downloadPdfFile;
+
+var topbarPdf = el('topbarPdfBtn');
+if (topbarPdf) topbarPdf.onclick = downloadPdfFile;
+
+var menuPdf = el('menuDownloadPdfBtn');
+if (menuPdf) menuPdf.onclick = downloadPdfFile;
+
+var htmlPrevPdf = el('htmlPrevPdfBtn');
+if (htmlPrevPdf) htmlPrevPdf.onclick = downloadPdfFile;
 
 // Help menu binders
 el('helpScratchBtn').onclick = function() {
@@ -1108,15 +947,6 @@ el('dbSelect').onchange = function(e) {
   }
 };
 
-el('styleSelect').onchange = function(e) {
-  if (e.target.value === '__manage__') {
-    openStyleManagerModal();
-    e.target.value = currentStyleName;
-  } else {
-    loadStyle(e.target.value);
-  }
-};
-
 el('instanceSelect').onchange = function(e) {
   if (e.target.value === '__manage__') {
     showInstanceManagerModal();
@@ -1136,47 +966,302 @@ el('langFilterSelect').onchange = function(e) {
 el('themeAccentColor').oninput = function(e) {
   state.themeAccentColor = e.target.value;
   el('themeAccentHex').value = e.target.value;
-  saveCurrentStyle();
+  saveActiveStyle();
   renderLatex();
 };
+
+var photoLeftSlider = el('photoLeftSlider');
+if (photoLeftSlider) {
+  photoLeftSlider.oninput = function(e) {
+    state.photoLeftOffset = parseInt(e.target.value, 10);
+    var valEl = el('photoLeftVal');
+    if (valEl) valEl.textContent = e.target.value + 'px';
+    saveActiveStyle();
+    renderLatex();
+  };
+}
+
+var photoTopSlider = el('photoTopSlider');
+if (photoTopSlider) {
+  photoTopSlider.oninput = function(e) {
+    state.photoTopOffset = parseInt(e.target.value, 10);
+    var valEl = el('photoTopVal');
+    if (valEl) valEl.textContent = e.target.value + 'px';
+    saveActiveStyle();
+    renderLatex();
+  };
+}
 el('themeAccentHex').oninput = function(e) {
   var val = e.target.value;
   if (val.indexOf('#') !== 0) val = '#' + val;
   if (/^#[0-9A-F]{6}$/i.test(val)) {
     state.themeAccentColor = val;
     el('themeAccentColor').value = val;
-    saveCurrentStyle();
+    saveActiveStyle();
     renderLatex();
   }
 };
 el('themeFontSelect').onchange = function(e) {
   state.themeFont = e.target.value;
-  saveCurrentStyle();
+  saveActiveStyle();
   renderLatex();
 };
 
+// Template editor auto-save (debounced 800ms)
+var tplSaveTimer = null;
+function scheduleTplSave() {
+  clearTimeout(tplSaveTimer);
+  tplSaveTimer = setTimeout(function() {
+    saveActiveStyle();
+  }, 800);
+}
+var latexTplEl = el('latexTplEditor');
+if (latexTplEl) latexTplEl.oninput = scheduleTplSave;
+var htmlTplEl = el('htmlTplEditor');
+if (htmlTplEl) htmlTplEl.oninput = scheduleTplSave;
+
 // Custom sections drawer buttons
-el('addSectionBtn').onclick = function() {
+function updateAddSectionPreview() {
   var isEs = state.langFilter === 'es';
-  var labelText = isEs ? 'Nombre de la nueva sección (en minúsculas, ej. awards):' : 'Enter name for the new section (lowercase, e.g. awards):';
-  var section = prompt(labelText);
-  if (!section) return;
-  section = section.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_');
-  if (!section) return;
-  if (data[section]) {
+  var title = el('newSectionTitleInput').value.trim() || (isEs ? 'Título de Sección' : 'Section Title');
+  var selectedRadio = document.querySelector('input[name="sectionStructure"]:checked');
+  var structType = selectedRadio ? selectedRadio.value : 'experience';
+  
+  var pill = el('structureTypePill');
+  if (pill) pill.textContent = structType.toUpperCase();
+  
+  var previewBox = el('addSectionPreviewBox');
+  if (!previewBox) return;
+  
+  var accentColor = state.themeAccentColor || '#2563eb';
+  var html = '<div style="margin-bottom:8px; font-size:13px; line-height:1.5; color:#333">';
+  html += '<h2 style="font-size:1.15em; border-bottom:2px solid ' + accentColor + '; color:' + accentColor + '; margin:0 0 10px 0; padding-bottom:3px; font-weight:700">' + esc(title) + '</h2>';
+  
+  switch (structType) {
+    case 'education':
+      html += '<div style="margin-bottom:10px">';
+      html += '  <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95em"><span>PhD in Biomedical Engineering - Universidad Católica</span><span style="font-size:0.85em; color:#666">2022--2026</span></div>';
+      html += '  <div style="font-style:italic; color:#555; font-size:0.85em; margin-top:2px">Dissertation: Low-field MRI Sequence Optimization</div>';
+      html += '  <div style="margin-top:4px; font-size:0.85em; color:#444">Research on sequence design, machine learning, and physical simulations.</div>';
+      html += '</div>';
+      break;
+    case 'publication':
+      html += '<ul style="margin:0; padding-left:16px; font-size:0.85em">';
+      html += '  <li style="margin-bottom:6px">G. Sahonero-Alvarez, R. Coronado, P. Irarrazaval. "Modeling Voxel Signal Dynamics." <em>ISMRM Annual Meeting</em>, 2026 (Digital Poster).</li>';
+      html += '  <li>R. Coronado, G. Sahonero-Alvarez, C. Prieto. "Accelerated DESPOT1 for 3D T1 Brain Mapping." <em>JMRI</em>, 2025.</li>';
+      html += '</ul>';
+      break;
+    case 'teaching':
+      html += '<div style="margin-bottom:10px">';
+      html += '  <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95em"><span>Mechatronics Engineering - Universidad Católica (Undergraduate)</span></div>';
+      html += '  <div style="margin-top:4px; font-size:0.85em; color:#444"><em>Courses:</em> Computer Vision, Servomechanisms, Robotics Lab</div>';
+      html += '</div>';
+      break;
+    case 'award':
+      html += '<ul style="margin:0; padding-left:16px; font-size:0.85em">';
+      html += '  <li style="margin-bottom:6px"><strong>Grant:</strong> Travel Award for ISMRM 2026 Conference (2026)</li>';
+      html += '  <li><strong>Award:</strong> 2nd Place Plurinational Science & Technology Award (2021)</li>';
+      html += '</ul>';
+      break;
+    case 'skills':
+      html += '<ul style="margin:0; padding:0; list-style:none; font-size:0.85em">';
+      html += '  <li style="margin-bottom:6px"><strong>Programming:</strong> MATLAB, Python, Julia, C/C++, R</li>';
+      html += '  <li><strong>MRI & Modeling:</strong> Bloch simulations, Low-field MRI, Sequence optimization</li>';
+      html += '</ul>';
+      break;
+    case 'simple':
+      html += '<div style="margin-bottom:8px; font-size:0.85em">';
+      html += '  <p style="margin:0">Full-stack software and hardware developer for embedded systems and biomedical devices.</p>';
+      html += '</div>';
+      break;
+    case 'experience':
+    default:
+      html += '<div style="margin-bottom:10px">';
+      html += '  <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95em"><span>PhD Researcher - Millennium Institute iHEALTH</span><span style="font-size:0.85em; color:#666">2022--Present</span></div>';
+      html += '  <div style="font-style:italic; color:#555; font-size:0.85em; margin-top:2px">Biomedical Imaging Center</div>';
+      html += '  <div style="margin-top:4px; font-size:0.85em; color:#444">Optimization of low-field MRI pulse sequences using Physics-Informed Neural Networks.</div>';
+      html += '</div>';
+      break;
+  }
+  
+  html += '</div>';
+  previewBox.innerHTML = html;
+}
+
+// Add Section Modal Assistant Trigger & Logic
+function openAddSectionAssistant() {
+  var keyInp = el('newSectionKeyInput');
+  if (keyInp) {
+    keyInp.value = '';
+    delete keyInp.dataset.manual;
+  }
+  var titleInp = el('newSectionTitleInput');
+  if (titleInp) titleInp.value = '';
+  
+  var radios = document.querySelectorAll('input[name="sectionStructure"]');
+  if (radios.length) radios[0].checked = true;
+  var cards = document.querySelectorAll('#sectionStructureCards .card-radio');
+  cards.forEach(function(c, idx) {
+    if (idx === 0) {
+      c.classList.add('active');
+      c.style.border = '2px solid var(--color-primary)';
+    } else {
+      c.classList.remove('active');
+      c.style.border = '1.5px solid oklch(from var(--color-text) l c h / .15)';
+    }
+  });
+  
+  openModal('addSectionModal');
+  updateAddSectionPreview();
+}
+
+var btnAddSec = el('addSectionBtn');
+if (btnAddSec) btnAddSec.onclick = openAddSectionAssistant;
+
+// Global Click Delegation Fallback for Modals and Action Triggers
+document.addEventListener('click', function(e) {
+  var target = e.target;
+  if (!target) return;
+  
+  var addBtn = target.closest('#addSectionBtn');
+  if (addBtn) {
+    e.preventDefault();
+    openAddSectionAssistant();
+    return;
+  }
+});
+
+var closeAddSecBtn = el('closeAddSectionModal');
+if (closeAddSecBtn) closeAddSecBtn.onclick = function() { closeModal('addSectionModal'); };
+
+var cancelAddSecBtn = el('cancelAddSectionBtn');
+if (cancelAddSecBtn) cancelAddSecBtn.onclick = function() { closeModal('addSectionModal'); };
+
+// Auto-suggest key when user types section title
+el('newSectionTitleInput').oninput = function(e) {
+  var keyInput = el('newSectionKeyInput');
+  if (keyInput && (!keyInput.dataset.manual || !keyInput.value)) {
+    keyInput.value = e.target.value.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+  }
+  updateAddSectionPreview();
+};
+el('newSectionKeyInput').oninput = function(e) {
+  e.target.dataset.manual = 'true';
+};
+
+// Preset card selection click handlers
+document.querySelectorAll('#sectionStructureCards .card-radio').forEach(function(card) {
+  card.onclick = function() {
+    document.querySelectorAll('#sectionStructureCards .card-radio').forEach(function(c) {
+      c.classList.remove('active');
+      c.style.border = '1.5px solid oklch(from var(--color-text) l c h / .15)';
+    });
+    card.classList.add('active');
+    card.style.border = '2px solid var(--color-primary)';
+    var radio = card.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+    updateAddSectionPreview();
+  };
+});
+
+// Confirm Create Section button handler
+el('confirmAddSectionBtn').onclick = function() {
+  var isEs = state.langFilter === 'es';
+  var title = el('newSectionTitleInput').value.trim();
+  var rawKey = el('newSectionKeyInput').value.trim();
+  var key = rawKey.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+  
+  if (!key) {
+    alert(isEs ? 'Por favor ingrese un nombre o clave de sección válido.' : 'Please enter a valid section key or title.');
+    return;
+  }
+  if (data[key]) {
     alert(isEs ? '¡Esa sección ya existe!' : 'That section already exists!');
     return;
   }
   
-  // Choose custom array or custom object template layout
-  var isArray = confirm(isEs ? '¿Es una sección que contiene una lista de elementos (ej. educación)?' : 'Is this section a list of entries (e.g. education)?');
-  if (isArray) {
-    data[section] = [{ selected: true }];
-  } else {
-    data[section] = {};
+  var selectedRadio = document.querySelector('input[name="sectionStructure"]:checked');
+  var structType = selectedRadio ? selectedRadio.value : 'experience';
+  
+  var newSectionData;
+  switch (structType) {
+    case 'education':
+      newSectionData = [{
+        degree: '',
+        institution: '',
+        start: '',
+        end: '',
+        dissertation: '',
+        description: '',
+        selected: true
+      }];
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_education';
+      break;
+    case 'publication':
+      newSectionData = [{
+        authors: '',
+        title: '',
+        venue: '',
+        year: '',
+        type: '',
+        selected: true
+      }];
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'publications';
+      break;
+    case 'teaching':
+      newSectionData = [{
+        course_area: '',
+        institution: '',
+        level: '',
+        courses: [''],
+        description: '',
+        selected: true
+      }];
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_teaching';
+      break;
+    case 'award':
+      newSectionData = [{
+        category: '',
+        description: '',
+        year: '',
+        selected: true
+      }];
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'awards';
+      break;
+    case 'skills':
+      newSectionData = {
+        general: [
+          { name: '', selected: true }
+        ]
+      };
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'skills';
+      break;
+    case 'simple':
+      newSectionData = [{
+        description: '',
+        selected: true
+      }];
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'generic';
+      break;
+    case 'experience':
+    default:
+      newSectionData = [{
+        role: '',
+        organization: '',
+        department: '',
+        start: '',
+        end: '',
+        description: '',
+        selected: true
+      }];
+      if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_work';
+      break;
   }
-  state.sections[section] = { include: true, title: human(section) };
-  state.activeSection = section;
+  
+  data[key] = newSectionData;
+  state.sections[key] = { include: true, title: title || human(key) };
+  state.activeSection = key;
+  closeModal('addSectionModal');
   markDirty();
   renderAll();
 };
@@ -1195,7 +1280,21 @@ document.querySelectorAll('.menubtn').forEach(function(btn) {
     e.stopPropagation();
   };
 });
-window.onclick = function() { closeAllDropdowns(); };
+
+// Interactive info badge tooltips binder
+document.querySelectorAll('.info-tooltip-wrapper').forEach(function(wrap) {
+  wrap.onclick = function(e) {
+    var wasOpen = wrap.classList.contains('open');
+    document.querySelectorAll('.info-tooltip-wrapper').forEach(function(w) { w.classList.remove('open'); });
+    if (!wasOpen) wrap.classList.add('open');
+    e.stopPropagation();
+  };
+});
+
+window.onclick = function() {
+  closeAllDropdowns();
+  document.querySelectorAll('.info-tooltip-wrapper').forEach(function(w) { w.classList.remove('open'); });
+};
 
 // Version badge → opens changelog modal
 var versionBtn = el('versionBtn');
@@ -1239,9 +1338,7 @@ if (userLang.indexOf('es') === 0) {
 // ── INITIAL BOOTSTRAP ──
 updateInstanceSelector();
 var dbList = listDatabases();
-var styleList = listStyles();
 loadDatabase(dbList[0]);
-loadStyle(styleList[0]);
 
 if (!localStorage.getItem('cvbuilder_visited')) {
   setTimeout(startWelcomeTour, 1000);

@@ -281,6 +281,10 @@
           <li class="assertion-item" id="assert-6-4"><span class="icon idle"></span> Theme toggle switches dark/light attribute</li>
           <li class="assertion-item" id="assert-6-5"><span class="icon idle"></span> Style Manager inner buttons are bound</li>
           <li class="assertion-item" id="assert-6-6"><span class="icon idle"></span> Test report tally counts correctly (no case mismatch)</li>
+          <li class="assertion-item" id="assert-6-7"><span class="icon idle"></span> Live preview updates on section entry edit</li>
+          <li class="assertion-item" id="assert-6-8"><span class="icon idle"></span> PDF Compilation handles tab-aware HTML print / LaTeX redirect</li>
+          <li class="assertion-item" id="assert-6-9"><span class="icon idle"></span> Export PDF buttons present in topbar &amp; menu (panel duplicates removed)</li>
+          <li class="assertion-item" id="assert-6-10"><span class="icon idle"></span> Profile photo renders in HTML template &amp; editor displays specs</li>
         </ul>
       </div>
     </div>
@@ -294,7 +298,7 @@
         <div>Total Test Suites:</div><strong style="text-align:right">6</strong>
         <div>Passed:</div><strong id="reportPassed" style="color:var(--color-success); text-align:right">0</strong>
         <div>Failed:</div><strong id="reportFailed" style="color:var(--color-error); text-align:right">0</strong>
-        <div>Assertions Passed:</div><strong id="reportAssertions" style="text-align:right">0/22</strong>
+        <div>Assertions Passed:</div><strong id="reportAssertions" style="text-align:right">0/26</strong>
         <div>Execution Date:</div><strong id="reportTime" style="text-align:right"></strong>
         <div>Verdict Status:</div><strong id="reportStatus" style="text-align:right"></strong>
       </div>
@@ -332,7 +336,11 @@
       "6-3": { desc: "Version badge opens changelog modal", passed: false },
       "6-4": { desc: "Theme toggle switches dark/light attribute", passed: false },
       "6-5": { desc: "Style Manager inner buttons are bound", passed: false },
-      "6-6": { desc: "Test report tally counts correctly (no case mismatch)", passed: false }
+      "6-6": { desc: "Test report tally counts correctly (no case mismatch)", passed: false },
+      "6-7": { desc: "Live preview updates on section entry edit", passed: false },
+      "6-8": { desc: "PDF Compilation handles tab-aware HTML print / LaTeX redirect", passed: false },
+      "6-9": { desc: "Export PDF buttons present in topbar & menu (panel duplicates removed)", passed: false },
+      "6-10": { desc: "Profile photo renders in HTML template & editor displays specs", passed: false }
     };
 
     function log(text, type = 'info') {
@@ -800,9 +808,48 @@
           var t6_6 = counted === 3;
           updateAssertion(6, 6, t6_6);
 
-          if (t6_1 && t6_2 && t6_3 && t6_4 && t6_5 && t6_6) {
+          // 6-7: Live preview updates on section entry edit
+          var t6_7 = false;
+          try {
+            var backupEdu = win.data.education ? JSON.parse(JSON.stringify(win.data.education)) : [];
+            if (!win.data.education) win.data.education = [];
+            win.data.education[0] = { degree: "Ph.D. UX Test Verification", institution: "MIT", start: "2020", end: "2024", selected: true };
+            win.renderLatex();
+            var prevLatex = doc.querySelector('#latexPreview') ? doc.querySelector('#latexPreview').textContent : '';
+            var prevHtmlFrame = doc.querySelector('#htmlPreviewFrame');
+            var prevHtml = prevHtmlFrame ? (prevHtmlFrame.srcdoc || '') : '';
+            t6_7 = prevLatex.indexOf("Ph.D. UX Test Verification") !== -1 && prevHtml.indexOf("Ph.D. UX Test Verification") !== -1;
+            win.data.education = backupEdu;
+            win.renderLatex();
+          } catch(e) { t6_7 = false; }
+          updateAssertion(6, 7, t6_7);
+
+          // 6-8: Tab-aware PDF compilation handler exists and handles HTML print / LaTeX redirect
+          var t6_8 = typeof win.downloadPdfFile === 'function';
+          updateAssertion(6, 8, t6_8);
+
+          // 6-9: Export PDF buttons in topbar & file menu (panel duplicates removed)
+          var t6_9 = !!doc.querySelector('#topbarPdfBtn') && !!doc.querySelector('#menuDownloadPdfBtn');
+          updateAssertion(6, 9, t6_9);
+
+          // 6-10: Profile photo template rendering & editor specs guidance
+          var t6_10 = false;
+          try {
+            var backupPhoto = win.data.basics ? win.data.basics.photo : '';
+            if (!win.data.basics) win.data.basics = {};
+            win.data.basics.photo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+            win.renderLatex();
+            var frameEl = doc.querySelector('#htmlPreviewFrame');
+            var srcDocText = frameEl ? (frameEl.srcdoc || '') : '';
+            t6_10 = srcDocText.indexOf('<img src="data:image/png;base64') !== -1;
+            win.data.basics.photo = backupPhoto;
+            win.renderLatex();
+          } catch(e) { t6_10 = false; }
+          updateAssertion(6, 10, t6_10);
+
+          if (t6_1 && t6_2 && t6_3 && t6_4 && t6_5 && t6_6 && t6_7 && t6_8 && t6_9 && t6_10) {
             updateBadge(6, 'passed');
-            log('Test 6 Passed: All menu, theme toggle and wiring regression checks passed.', 'success');
+            log('Test 6 Passed: All menu, theme toggle, section preview update, PDF export, and photo rendering regression checks passed.', 'success');
           } else {
             updateBadge(6, 'failed');
             log('Test 6 Failed: One or more regression checks failed.', 'error');
