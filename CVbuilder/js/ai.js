@@ -6,17 +6,24 @@
 
 var AIClient = (function() {
 
+  var DEFAULT_SYSTEM_PROMPT = "You are an expert career consultant, resume writer, and ATS optimization specialist. Help candidates craft compelling, professional, concise, and impact-driven resumes.";
+
   function getSettings() {
     var raw = localStorage.getItem('cvbuilder_ai_settings');
     if (raw) {
-      try { return JSON.parse(raw); } catch(e) {}
+      try {
+        var parsed = JSON.parse(raw);
+        if (!parsed.systemPrompt) parsed.systemPrompt = DEFAULT_SYSTEM_PROMPT;
+        return parsed;
+      } catch(e) {}
     }
     return {
       provider: 'ollama', // 'ollama' or 'gemini'
       ollamaEndpoint: 'http://localhost:11434',
       ollamaModel: 'llama3:latest',
       geminiApiKey: '',
-      geminiModel: 'gemini-2.5-flash'
+      geminiModel: 'gemini-2.5-flash',
+      systemPrompt: DEFAULT_SYSTEM_PROMPT
     };
   }
 
@@ -37,7 +44,7 @@ var AIClient = (function() {
   async function callOllama(s, promptText, systemPrompt) {
     var baseUrl = (s.ollamaEndpoint || 'http://localhost:11434').replace(/\/$/, '');
     var modelName = s.ollamaModel || 'llama3:latest';
-    systemPrompt = systemPrompt || "You are an expert career consultant and resume editor. Return clean, direct responses without conversational filler.";
+    var sysPrompt = systemPrompt || s.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
     var endpoints = [
       {
@@ -45,7 +52,7 @@ var AIClient = (function() {
         payload: {
           model: modelName,
           messages: [
-            { role: 'system', content: systemPrompt },
+            { role: 'system', content: sysPrompt },
             { role: 'user', content: promptText }
           ],
           stream: false
@@ -57,7 +64,7 @@ var AIClient = (function() {
         payload: {
           model: modelName,
           messages: [
-            { role: 'system', content: systemPrompt },
+            { role: 'system', content: sysPrompt },
             { role: 'user', content: promptText }
           ],
           stream: false
@@ -98,19 +105,22 @@ var AIClient = (function() {
     throw lastErr || new Error('Could not connect to Ollama model ' + modelName + ' at ' + baseUrl);
   }
 
-  async function callLLM(promptText, systemPrompt) {
+  async function callLLM(promptText, overrideSystemPrompt) {
     var s = getSettings();
-    systemPrompt = systemPrompt || "You are an expert career consultant and resume editor. Return clean, direct responses without conversational filler.";
+    var sysPrompt = overrideSystemPrompt || s.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
     if (s.provider === 'gemini') {
       if (!s.geminiApiKey) throw new Error("Gemini API Key is missing. Please configure it in AI Settings.");
       var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (s.geminiModel || 'gemini-2.5-flash') + ':generateContent?key=' + encodeURIComponent(s.geminiApiKey.trim());
       
       var payload = {
+        systemInstruction: {
+          parts: [{ text: sysPrompt }]
+        },
         contents: [
           {
             parts: [
-              { text: systemPrompt + "\n\nUser Request: " + promptText }
+              { text: promptText }
             ]
           }
         ]
@@ -141,7 +151,7 @@ var AIClient = (function() {
       }
 
     } else {
-      return await callOllama(s, promptText, systemPrompt);
+      return await callOllama(s, promptText, sysPrompt);
     }
   }
 

@@ -2436,7 +2436,13 @@ if (typeof document !== 'undefined') {
 
 if (el('bottomBarAiBtn')) {
   el('bottomBarAiBtn').onclick = function() {
-    showAiHubModal();
+    showAiMenu();
+  };
+}
+
+if (el('bottomBarChatBtn')) {
+  el('bottomBarChatBtn').onclick = function() {
+    toggleAiChatWidget();
   };
 }
 
@@ -2463,10 +2469,128 @@ function updateAiUiState() {
   }
 }
 
-function showAiHubModal() {
+function showAiProviderConfigModal() {
   var isEs = state.langFilter === 'es';
-  var s = AIClient.getSettings();
+  var curS = AIClient.getSettings();
   var isConfigured = AIClient.isConfigured();
+
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="modal" style="max-width:540px; padding:var(--space-4); border-radius:var(--radius-lg)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:var(--space-2); margin-bottom:var(--space-3)">'
+    + '  <h3 style="margin:0">⚙️ ' + (isEs ? 'Configuración de Proveedor de IA' : 'Configure AI Provider') + '</h3>'
+    + '  <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Active' : '○ Unconfigured') + '</span>'
+    + '</div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div class="tiny muted">' + (isEs ? 'Seleccione su proveedor de IA (Ollama Local 100% Gratuito/Sin Servidor o Google Gemini Flash):' : 'Select AI Provider (Ollama Local 100% Free & Offline or Google Gemini Flash):') + '</div>'
+    + '  <div><label class="tiny" style="font-weight:700">Provider</label>'
+    + '    <select id="aiProviderSelect" class="db-select" style="width:100%; height:32px; padding:0 8px; font-weight:600; font-size:13px; margin-top:4px">'
+    + '      <option value="ollama" ' + (curS.provider === 'ollama' ? 'selected' : '') + '>Ollama (Local LLM - 100% Offline & Free)</option>'
+    + '      <option value="gemini" ' + (curS.provider === 'gemini' ? 'selected' : '') + '>Google Gemini Flash (Free Google AI Studio Key)</option>'
+    + '    </select>'
+    + '  </div>'
+    + '  <div id="ollamaFields" style="display:' + (curS.provider === 'ollama' ? 'block' : 'none') + '">'
+    + '    <label class="tiny" style="font-weight:700">Ollama Endpoint URL</label>'
+    + '    <input type="text" id="ollamaEndpointInput" value="' + esc(curS.ollamaEndpoint || 'http://localhost:11434') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace">'
+    + '    <label class="tiny" style="font-weight:700; margin-top:8px; display:block">Model Name</label>'
+    + '    <input type="text" id="ollamaModelInput" value="' + esc(curS.ollamaModel || 'llama3:latest') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="llama3:latest, qwen2.5:latest, etc.">'
+    + '  </div>'
+    + '  <div id="geminiFields" style="display:' + (curS.provider === 'gemini' ? 'block' : 'none') + '">'
+    + '    <label class="tiny" style="font-weight:700">Google Gemini API Key</label>'
+    + '    <input type="password" id="geminiApiKeyInput" value="' + esc(curS.geminiApiKey || '') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="AIzaSy...">'
+    + '    <div class="tiny muted" style="margin-top:4px">🔑 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary); font-weight:700; text-decoration:underline">' + (isEs ? 'Obtenga una clave API gratuita de Google Gemini aquí ↗' : 'Get a free Google Gemini API key here ↗') + '</a></div>'
+    + '  </div>'
+    + '  <div>'
+    + '    <label class="tiny" style="font-weight:700">' + (isEs ? 'Prompt de Sistema (Persona de la IA)' : 'System Prompt (LLM Persona & Instructions)') + '</label>'
+    + '    <textarea id="aiSystemPromptInput" style="width:100%; min-height:60px; padding:6px 8px; font-size:12px; margin-top:4px; font-family:inherit; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text); resize:vertical" placeholder="' + (isEs ? 'Ingrese el prompt de sistema personalizado para la IA...' : 'Enter custom system prompt for LLM...') + '">' + esc(curS.systemPrompt || '') + '</textarea>'
+    + '  </div>'
+    + '  <div id="testConnResult" style="margin-top:var(--space-2); display:none"></div>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; gap:var(--space-2); margin-top:var(--space-3)">'
+    + '  <button class="btn btn-primary" id="saveAiSettingsBtn" style="flex:1; font-weight:700">' + (isEs ? 'Guardar Configuración' : 'Save Settings') + '</button>'
+    + '  <button class="btn btn-ghost" id="testAiConnBtn" style="font-weight:700; border:1px solid oklch(from var(--color-text) l c h / .15)">🧪 ' + (isEs ? 'Probar Conexión' : 'Test Connection') + '</button>'
+    + '  <button class="btn btn-ghost" id="closeAiConfigBtn">' + (isEs ? 'Cancelar' : 'Cancel') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  var providerSelect = modal.querySelector('#aiProviderSelect');
+  providerSelect.onchange = function() {
+    var isOllama = providerSelect.value === 'ollama';
+    modal.querySelector('#ollamaFields').style.display = isOllama ? 'block' : 'none';
+    modal.querySelector('#geminiFields').style.display = isOllama ? 'none' : 'block';
+  };
+
+  modal.querySelector('#testAiConnBtn').onclick = function() {
+    var testBtn = modal.querySelector('#testAiConnBtn');
+    var resDiv = modal.querySelector('#testConnResult');
+    resDiv.style.display = 'block';
+    resDiv.innerHTML = '<div class="tiny muted">⏳ ' + (isEs ? 'Probando conexión...' : 'Testing connection...') + '</div>';
+    testBtn.disabled = true;
+
+    var tempSettings = {
+      provider: providerSelect.value,
+      ollamaEndpoint: modal.querySelector('#ollamaEndpointInput').value,
+      ollamaModel: modal.querySelector('#ollamaModelInput').value,
+      geminiApiKey: modal.querySelector('#geminiApiKeyInput').value,
+      geminiModel: 'gemini-2.5-flash',
+      systemPrompt: modal.querySelector('#aiSystemPromptInput').value
+    };
+
+    AIClient.testConnection(tempSettings).then(function(msg) {
+      resDiv.innerHTML = '<div style="background:rgba(16,185,129,.15); color:var(--color-success); padding:8px 12px; border-radius:var(--radius-sm); font-weight:700; font-size:12px">✅ ' + esc(msg) + '</div>';
+    }).catch(function(err) {
+      var corsTip = '';
+      if (tempSettings.provider === 'ollama') {
+        corsTip = '<div style="margin-top:6px; font-size:11px; color:var(--color-text-muted); line-height:1.4">'
+          + '💡 <strong>How to enable Ollama CORS:</strong><br>'
+          + '• <strong>Windows PowerShell:</strong> <code>$env:OLLAMA_ORIGINS="*" ; ollama serve</code><br>'
+          + '• <strong>Windows GUI App:</strong> Add System Environment Variable <code>OLLAMA_ORIGINS = *</code> and restart Ollama.<br>'
+          + '• <strong>Mac / Linux:</strong> <code>OLLAMA_ORIGINS="*" ollama serve</code>'
+          + '</div>';
+      }
+      resDiv.innerHTML = '<div style="background:rgba(239,68,68,.15); color:var(--color-error); padding:10px 12px; border-radius:var(--radius-sm); font-weight:600; font-size:12px; line-height:1.4">❌ ' + esc(err.message) + corsTip + '</div>';
+    }).finally(function() {
+      testBtn.disabled = false;
+    });
+  };
+
+  modal.querySelector('#saveAiSettingsBtn').onclick = function() {
+    var newSettings = {
+      provider: providerSelect.value,
+      ollamaEndpoint: modal.querySelector('#ollamaEndpointInput').value,
+      ollamaModel: modal.querySelector('#ollamaModelInput').value,
+      geminiApiKey: modal.querySelector('#geminiApiKeyInput').value,
+      geminiModel: 'gemini-2.5-flash',
+      systemPrompt: modal.querySelector('#aiSystemPromptInput').value
+    };
+    AIClient.saveSettings(newSettings);
+    updateAiUiState();
+    modal.remove();
+    alert(isEs ? '¡Configuración de IA guardada!' : 'AI Settings saved successfully!');
+  };
+
+  modal.querySelector('#closeAiConfigBtn').onclick = function() { modal.remove(); };
+}
+
+function showAiHubModal() {
+  showAiProviderConfigModal();
+}
+
+function showAiSettingsModal() {
+  showAiProviderConfigModal();
+}
+
+function showAskImproveModal() {
+  var isEs = state.langFilter === 'es';
+  if (!AIClient.isConfigured()) {
+    alert(isEs ? 'Por favor configure primero su proveedor de IA (Ollama o Gemini).' : 'Please configure your AI Provider (Ollama or Gemini) first.');
+    showAiProviderConfigModal();
+    return;
+  }
 
   var modal = document.createElement('div');
   modal.className = 'modal-backdrop open';
@@ -2474,157 +2598,28 @@ function showAiHubModal() {
 
   modal.innerHTML = '<div class="modal" style="max-width:580px; padding:var(--space-4)">'
     + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
-    + '  <h3>🤖 ' + (isEs ? 'Centro de Inteligencia Artificial' : 'AI Assistant & Settings') + '</h3>'
-    + '  <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Active' : '○ Not Configured') + '</span>'
+    + '  <h3>✨ ' + (isEs ? 'Auditoría & Preguntas de Mejora del CV' : 'CV Audit & Improvement Interview') + '</h3>'
     + '</div>'
     + '<div class="modal-body stack" style="gap:var(--space-3)">'
-    + '  <div style="display:flex; gap:var(--space-2); margin-top:var(--space-1)">'
-    + '    <button class="btn btn-xs ' + (isConfigured ? 'btn-primary' : 'btn-ghost') + '" id="tabAskImproveBtn" style="flex:1; font-weight:700">✨ ' + (isEs ? 'Inspeccionar & Mejorar CV' : 'Ask Me to Improve CV') + '</button>'
-    + '    <button class="btn btn-xs ' + (!isConfigured ? 'btn-primary' : 'btn-ghost') + '" id="tabSettingsBtn" style="flex:1; font-weight:700">⚙️ ' + (isEs ? 'Configuración de Proveedor' : 'Provider Settings') + '</button>'
-    + '  </div>'
-    + '  <div id="aiHubContent" style="margin-top:var(--space-2)"></div>'
+    + '  <div class="tiny muted">' + (isEs ? 'La IA está analizando su CV actual y generando preguntas objetivas:' : 'The AI is analyzing your active CV and generating targeted interview questions:') + '</div>'
+    + '  <div id="critiqueBox" style="min-height:160px; max-height:280px; overflow-y:auto; padding:12px; border-radius:var(--radius-md); background:var(--color-surface-offset); font-size:13px; line-height:1.5; white-space:pre-wrap">⏳ ' + (isEs ? 'Analizando CV y generando preguntas...' : 'Analyzing CV and generating interview questions...') + '</div>'
     + '</div>'
     + '<div class="modal-footer" style="display:flex; justify-content:flex-end; gap:var(--space-2); margin-top:var(--space-3)">'
-    + '  <button class="btn btn-ghost" id="closeAiHubBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
+    + '  <button class="btn btn-ghost" id="closeImproveModalBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
     + '</div>'
     + '</div>';
 
   document.body.appendChild(modal);
 
-  var contentDiv = modal.querySelector('#aiHubContent');
+  modal.querySelector('#closeImproveModalBtn').onclick = function() { modal.remove(); };
 
-  function renderSettingsTab() {
-    var curS = AIClient.getSettings();
-    contentDiv.innerHTML = '<div class="stack" style="gap:var(--space-3)">'
-      + '<div class="tiny muted">' + (isEs ? 'Seleccione su proveedor de IA (Ollama Local 100% Gratuito/Sin Servidor o Google Gemini Flash):' : 'Select AI Provider (Ollama Local 100% Free & Offline or Google Gemini Flash):') + '</div>'
-      + '<div><label class="tiny" style="font-weight:700">Provider</label>'
-      + '  <select id="aiProviderSelect" class="db-select" style="width:100%; height:32px; padding:0 8px; font-weight:600; font-size:13px; margin-top:4px">'
-      + '    <option value="ollama" ' + (curS.provider === 'ollama' ? 'selected' : '') + '>Ollama (Local LLM - 100% Offline & Free)</option>'
-      + '    <option value="gemini" ' + (curS.provider === 'gemini' ? 'selected' : '') + '>Google Gemini Flash (Free Google AI Studio Key)</option>'
-      + '  </select>'
-      + '</div>'
-      + '<div id="ollamaFields" style="display:' + (curS.provider === 'ollama' ? 'block' : 'none') + '">'
-      + '  <label class="tiny" style="font-weight:700">Ollama Endpoint URL</label>'
-      + '  <input type="text" id="ollamaEndpointInput" value="' + esc(curS.ollamaEndpoint || 'http://localhost:11434') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace">'
-      + '  <label class="tiny" style="font-weight:700; margin-top:8px; display:block">Model Name</label>'
-      + '  <input type="text" id="ollamaModelInput" value="' + esc(curS.ollamaModel || 'llama3:latest') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="llama3:latest, qwen2.5:latest, etc.">'
-      + '</div>'
-      + '<div id="geminiFields" style="display:' + (curS.provider === 'gemini' ? 'block' : 'none') + '">'
-      + '  <label class="tiny" style="font-weight:700">Google Gemini API Key</label>'
-      + '  <input type="password" id="geminiApiKeyInput" value="' + esc(curS.geminiApiKey || '') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="AIzaSy...">'
-      + '  <div class="tiny muted" style="margin-top:4px">' + (isEs ? 'Obtenga una clave gratuita en Google AI Studio.' : 'Get a free API key at Google AI Studio.') + '</div>'
-      + '</div>'
-      + '<div id="testConnResult" style="margin-top:var(--space-2); display:none"></div>'
-      + '<div style="display:flex; gap:var(--space-2); margin-top:var(--space-2)">'
-      + '  <button class="btn btn-primary" id="saveAiSettingsBtn" style="flex:1">' + (isEs ? 'Guardar Configuración' : 'Save Settings') + '</button>'
-      + '  <button class="btn btn-ghost" id="testAiConnBtn" style="font-weight:700; border:1px solid oklch(from var(--color-text) l c h / .15)">🧪 ' + (isEs ? 'Probar Conexión' : 'Test Connection') + '</button>'
-      + '</div>'
-      + '</div>';
-
-    var providerSelect = contentDiv.querySelector('#aiProviderSelect');
-    providerSelect.onchange = function() {
-      var isOllama = providerSelect.value === 'ollama';
-      contentDiv.querySelector('#ollamaFields').style.display = isOllama ? 'block' : 'none';
-      contentDiv.querySelector('#geminiFields').style.display = isOllama ? 'none' : 'block';
-    };
-
-    contentDiv.querySelector('#testAiConnBtn').onclick = function() {
-      var testBtn = contentDiv.querySelector('#testAiConnBtn');
-      var resDiv = contentDiv.querySelector('#testConnResult');
-      resDiv.style.display = 'block';
-      resDiv.innerHTML = '<div class="tiny muted">⏳ ' + (isEs ? 'Probando conexión...' : 'Testing connection...') + '</div>';
-      testBtn.disabled = true;
-
-      var tempSettings = {
-        provider: providerSelect.value,
-        ollamaEndpoint: contentDiv.querySelector('#ollamaEndpointInput').value,
-        ollamaModel: contentDiv.querySelector('#ollamaModelInput').value,
-        geminiApiKey: contentDiv.querySelector('#geminiApiKeyInput').value,
-        geminiModel: 'gemini-2.5-flash'
-      };
-
-      AIClient.testConnection(tempSettings).then(function(msg) {
-        resDiv.innerHTML = '<div style="background:rgba(16,185,129,.15); color:var(--color-success); padding:8px 12px; border-radius:var(--radius-sm); font-weight:700; font-size:12px">✅ ' + esc(msg) + '</div>';
-      }).catch(function(err) {
-        var corsTip = '';
-        if (tempSettings.provider === 'ollama') {
-          corsTip = '<div style="margin-top:6px; font-size:11px; color:var(--color-text-muted); line-height:1.4">'
-            + '💡 <strong>How to enable Ollama CORS:</strong><br>'
-            + '• <strong>Windows PowerShell:</strong> <code>$env:OLLAMA_ORIGINS="*" ; ollama serve</code><br>'
-            + '• <strong>Windows GUI App:</strong> Add System Environment Variable <code>OLLAMA_ORIGINS = *</code> and restart Ollama.<br>'
-            + '• <strong>Mac / Linux:</strong> <code>OLLAMA_ORIGINS="*" ollama serve</code>'
-            + '</div>';
-        }
-        resDiv.innerHTML = '<div style="background:rgba(239,68,68,.15); color:var(--color-error); padding:10px 12px; border-radius:var(--radius-sm); font-weight:600; font-size:12px; line-height:1.4">❌ ' + esc(err.message) + corsTip + '</div>';
-      }).finally(function() {
-        testBtn.disabled = false;
-      });
-    };
-
-    contentDiv.querySelector('#saveAiSettingsBtn').onclick = function() {
-      var newSettings = {
-        provider: providerSelect.value,
-        ollamaEndpoint: contentDiv.querySelector('#ollamaEndpointInput').value,
-        ollamaModel: contentDiv.querySelector('#ollamaModelInput').value,
-        geminiApiKey: contentDiv.querySelector('#geminiApiKeyInput').value,
-        geminiModel: 'gemini-2.5-flash'
-      };
-      AIClient.saveSettings(newSettings);
-      updateAiUiState();
-      modal.remove();
-      alert(isEs ? '¡Configuración de IA guardada!' : 'AI Settings saved successfully!');
-    };
-  }
-
-  function renderCritiqueTab() {
-    if (!AIClient.isConfigured()) {
-      contentDiv.innerHTML = '<div class="tiny muted" style="text-align:center; padding:20px 0">'
-        + '⚠️ ' + (isEs ? 'Por favor configure primero su proveedor de IA (Ollama o Gemini) en la pestaña de Configuración.' : 'Please configure your AI Provider (Ollama or Gemini) in the Settings tab first.')
-        + '</div>';
-      return;
-    }
-
-    contentDiv.innerHTML = '<div class="stack" style="gap:var(--space-2)">'
-      + '<div class="tiny muted">' + (isEs ? 'La IA está analizando su CV actual y generando preguntas objetivas:' : 'The AI is analyzing your active CV and generating targeted interview questions:') + '</div>'
-      + '<div id="critiqueBox" style="min-height:160px; max-height:260px; overflow-y:auto; padding:12px; border-radius:var(--radius-md); background:var(--color-surface-offset); font-size:13px; line-height:1.5; white-space:pre-wrap">⏳ ' + (isEs ? 'Analizando CV y generando preguntas...' : 'Analyzing CV and generating interview questions...') + '</div>'
-      + '</div>';
-
-    AIClient.generateCritiqueQuestions(data).then(function(res) {
-      var box = contentDiv.querySelector('#critiqueBox');
-      if (box) box.textContent = res;
-    }).catch(function(err) {
-      var box = contentDiv.querySelector('#critiqueBox');
-      if (box) box.textContent = '❌ Error: ' + err.message;
-    });
-  }
-
-  modal.querySelector('#tabAskImproveBtn').onclick = function() {
-    modal.querySelector('#tabAskImproveBtn').className = 'btn btn-xs btn-primary';
-    modal.querySelector('#tabSettingsBtn').className = 'btn btn-xs btn-ghost';
-    renderCritiqueTab();
-  };
-
-  modal.querySelector('#tabSettingsBtn').onclick = function() {
-    modal.querySelector('#tabAskImproveBtn').className = 'btn btn-xs btn-ghost';
-    modal.querySelector('#tabSettingsBtn').className = 'btn btn-xs btn-primary';
-    renderSettingsTab();
-  };
-
-  modal.querySelector('#closeAiHubBtn').onclick = function() { modal.remove(); };
-
-  if (isConfigured) {
-    renderCritiqueTab();
-  } else {
-    renderSettingsTab();
-  }
-}
-
-function showAiSettingsModal() {
-  showAiHubModal();
-}
-
-function showAskImproveModal() {
-  showAiHubModal();
+  AIClient.generateCritiqueQuestions(data).then(function(res) {
+    var box = modal.querySelector('#critiqueBox');
+    if (box) box.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(res) : res;
+  }).catch(function(err) {
+    var box = modal.querySelector('#critiqueBox');
+    if (box) box.textContent = '❌ Error: ' + err.message;
+  });
 }
 
 function showAiFieldSuggestionsModal(inputEl) {
@@ -2642,39 +2637,60 @@ function showAiFieldSuggestionsModal(inputEl) {
     return;
   }
 
-  var modal = document.createElement('div');
-  modal.className = 'modal-backdrop open';
-  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  var container = inputEl.parentElement;
+  if (!container) return;
 
-  modal.innerHTML = '<div class="modal" style="max-width:540px; padding:var(--space-4)">'
-    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
-    + '  <h3>✨ ' + (isEs ? 'Sugerencias de IA en 1 Clic' : 'One-Click AI Suggestions') + '</h3>'
+  var existing = container.querySelector('.ai-field-tooltip');
+  if (existing) { existing.remove(); return; }
+
+  if (getComputedStyle(container).position === 'static') {
+    container.style.position = 'relative';
+  }
+
+  var pop = document.createElement('div');
+  pop.className = 'ai-field-tooltip';
+
+  var rect = container.getBoundingClientRect();
+  if (rect.left > 340) {
+    pop.style.cssText = 'position:absolute; right:100%; top:0; margin-right:12px; width:330px; max-width:90vw; background:var(--color-surface); border:1px solid oklch(from var(--color-text) l c h / .2); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); padding:10px; z-index:1000; font-family:inherit; text-align:left; color:var(--color-text);';
+  } else {
+    pop.style.cssText = 'position:absolute; top:100%; left:0; margin-top:6px; width:330px; max-width:92vw; background:var(--color-surface); border:1px solid oklch(from var(--color-text) l c h / .2); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); padding:10px; z-index:1000; font-family:inherit; text-align:left; color:var(--color-text);';
+  }
+
+  pop.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:6px; margin-bottom:8px">'
+    + '  <strong style="font-size:12px; display:flex; align-items:center; gap:4px; color:var(--color-primary)">✨ ' + (isEs ? 'Asistente de Campo IA' : 'AI Field Assistant') + '</strong>'
+    + '  <button class="close-pop-btn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:13px; font-weight:700; line-height:1">✕</button>'
     + '</div>'
-    + '<div class="modal-body stack" style="gap:var(--space-3)">'
-    + '  <div class="tiny muted" style="font-weight:600">' + (isEs ? 'Texto original del campo:' : 'Original Field Text:') + '</div>'
-    + '  <div style="background:var(--color-surface-offset); padding:8px 12px; border-radius:var(--radius-sm); font-size:12px; max-height:100px; overflow-y:auto; line-height:1.4">' + esc(origText) + '</div>'
-    + '  <div style="display:flex; gap:var(--space-2); margin-top:var(--space-1)">'
-    + '    <button class="btn btn-xs btn-primary" id="aiEnhanceBtn" style="flex:1; font-weight:700">⚡ ' + (isEs ? 'Pulir & Mejorar' : 'Polish & Enhance') + '</button>'
-    + '    <button class="btn btn-xs btn-ghost" id="aiGrammarBtn" style="flex:1; font-weight:700">✏️ ' + (isEs ? 'Corregir Gramática' : 'Fix Grammar') + '</button>'
-    + '    <button class="btn btn-xs btn-ghost" id="aiTranslateBtn" style="flex:1; font-weight:700">🌐 ' + (isEs ? 'Traducir' : 'Translate') + '</button>'
+    + '<div style="display:flex; gap:4px; margin-bottom:8px">'
+    + '  <button id="aiEnhanceBtn" class="btn btn-xs btn-primary" style="flex:1; font-weight:700; font-size:11px">⚡ ' + (isEs ? 'Pulir' : 'Polish') + '</button>'
+    + '  <button id="aiGrammarBtn" class="btn btn-xs btn-ghost" style="flex:1; font-weight:700; font-size:11px; border:1px solid oklch(from var(--color-text) l c h / .12)">✏️ ' + (isEs ? 'Gramática' : 'Grammar') + '</button>'
+    + '  <button id="aiTranslateBtn" class="btn btn-xs btn-ghost" style="flex:1; font-weight:700; font-size:11px; border:1px solid oklch(from var(--color-text) l c h / .12)">🌐 ' + (isEs ? 'Traducir' : 'Translate') + '</button>'
+    + '</div>'
+    + '<div style="margin-top:6px; border-top:1px solid oklch(from var(--color-text) l c h / .08); padding-top:6px">'
+    + '  <label style="font-size:10px; font-weight:700; color:var(--color-text-muted); display:block; margin-bottom:3px">💬 ' + (isEs ? 'Instrucción / Prompt sobre este campo:' : 'Prompt about this field:') + '</label>'
+    + '  <div style="display:flex; gap:4px">'
+    + '    <input type="text" id="aiCustomPromptInput" placeholder="' + (isEs ? 'ej. Resumir en 15 palabras...' : 'e.g. Make concise & executive...') + '" style="flex:1; height:26px; padding:0 6px; font-size:11px; border-radius:4px; border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface-offset); color:var(--color-text); font-family:inherit">'
+    + '    <button id="aiSubmitCustomBtn" class="btn btn-xs btn-primary" style="height:26px; font-weight:700; font-size:11px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
     + '  </div>'
-    + '  <div id="aiSuggestionBox" style="display:none; margin-top:var(--space-2)">'
-    + '    <div class="tiny muted" style="font-weight:700; margin-bottom:4px">' + (isEs ? 'Sugerencia Generada:' : 'Generated Suggestion:') + '</div>'
-    + '    <textarea id="aiSuggestionText" style="width:100%; min-height:90px; padding:8px; border-radius:var(--radius-sm); font-size:12px; line-height:1.4; border:1.5px solid var(--color-primary); background:var(--color-surface); color:var(--color-text); font-family:inherit"></textarea>'
-    + '    <button class="btn btn-primary" id="applySuggestionBtn" style="width:100%; margin-top:var(--space-2); font-weight:700">✅ ' + (isEs ? 'Aplicar Sugerencia al Campo' : 'Apply Suggestion to Field') + '</button>'
-    + '  </div>'
-    + '  <div id="aiLoadingBox" style="display:none; text-align:center; padding:15px 0" class="tiny muted">⏳ ' + (isEs ? 'Generando sugerencia con IA...' : 'Generating AI suggestion...') + '</div>'
     + '</div>'
-    + '<div class="modal-footer" style="display:flex; justify-content:flex-end; margin-top:var(--space-3)">'
-    + '  <button class="btn btn-ghost" id="closeSuggestionBtn">' + (isEs ? 'Cancelar' : 'Cancel') + '</button>'
-    + '</div>'
+    + '<div id="aiLoadingBox" style="display:none; text-align:center; padding:10px 0; font-size:11px; color:var(--color-text-muted)">⏳ ' + (isEs ? 'Generando sugerencia con IA...' : 'Generating AI suggestion...') + '</div>'
+    + '<div id="aiSuggestionBox" style="display:none; margin-top:8px">'
+    + '  <div class="tiny muted" style="font-weight:700; margin-bottom:4px">' + (isEs ? 'Sugerencia Generada:' : 'Generated Suggestion:') + '</div>'
+    + '  <textarea id="aiSuggestionText" style="width:100%; min-height:70px; padding:6px; font-size:11px; line-height:1.4; border-radius:4px; border:1.5px solid var(--color-primary); background:var(--color-surface-offset); color:var(--color-text); font-family:inherit; resize:none"></textarea>'
+    + '  <button id="applySuggestionBtn" class="btn btn-xs btn-primary" style="width:100%; margin-top:6px; font-weight:700">✅ ' + (isEs ? 'Aplicar Sugerencia al Campo' : 'Apply Suggestion to Field') + '</button>'
     + '</div>';
 
-  document.body.appendChild(modal);
+  container.appendChild(pop);
 
-  var sugBox = modal.querySelector('#aiSuggestionBox');
-  var sugText = modal.querySelector('#aiSuggestionText');
-  var loadBox = modal.querySelector('#aiLoadingBox');
+  var sugBox = pop.querySelector('#aiSuggestionBox');
+  var sugText = pop.querySelector('#aiSuggestionText');
+  var loadBox = pop.querySelector('#aiLoadingBox');
+  var customInput = pop.querySelector('#aiCustomPromptInput');
+
+  pop.querySelector('.close-pop-btn').onclick = function(e) {
+    e.stopPropagation();
+    pop.remove();
+  };
 
   function runTask(taskPromise) {
     sugBox.style.display = 'none';
@@ -2690,31 +2706,354 @@ function showAiFieldSuggestionsModal(inputEl) {
     });
   }
 
-  modal.querySelector('#aiEnhanceBtn').onclick = function() {
+  pop.querySelector('#aiEnhanceBtn').onclick = function(e) {
+    e.stopPropagation();
     runTask(AIClient.enhanceBullet(origText));
   };
 
-  modal.querySelector('#aiGrammarBtn').onclick = function() {
+  pop.querySelector('#aiGrammarBtn').onclick = function(e) {
+    e.stopPropagation();
     runTask(AIClient.fixGrammar(origText));
   };
 
-  modal.querySelector('#aiTranslateBtn').onclick = function() {
+  pop.querySelector('#aiTranslateBtn').onclick = function(e) {
+    e.stopPropagation();
     var targetLang = isEs ? 'es' : 'en';
     runTask(AIClient.translateContent(origText, targetLang));
   };
 
-  modal.querySelector('#applySuggestionBtn').onclick = function() {
+  function submitCustomPrompt() {
+    var customP = customInput.value;
+    if (!customP || !customP.trim()) return;
+    var fullPrompt = "Field content:\n\"" + origText + "\"\n\nTask/Instruction for this field:\n" + customP.trim();
+    runTask(AIClient.callLLM(fullPrompt));
+  }
+
+  pop.querySelector('#aiSubmitCustomBtn').onclick = function(e) {
+    e.stopPropagation();
+    submitCustomPrompt();
+  };
+
+  customInput.onkeydown = function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitCustomPrompt();
+    }
+  };
+
+  pop.querySelector('#applySuggestionBtn').onclick = function(e) {
+    e.stopPropagation();
     var newText = sugText.value;
     if (newText) {
       inputEl.value = newText;
       inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-      modal.remove();
+      pop.remove();
       if (typeof updateFieldAiIcon === 'function') updateFieldAiIcon(inputEl);
     }
   };
-
-  modal.querySelector('#closeSuggestionBtn').onclick = function() { modal.remove(); };
 }
 
-// Initial state sync
-setTimeout(updateAiUiState, 300);
+function showAiMenu() {
+  var isEs = state.langFilter === 'es';
+  var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
+
+  var existing = document.querySelector('.ai-action-menu-backdrop');
+  if (existing) existing.remove();
+
+  var menuModal = document.createElement('div');
+  menuModal.className = 'ai-action-menu-backdrop modal-backdrop open';
+  menuModal.onclick = function(e) { if (e.target === menuModal) menuModal.remove(); };
+
+  menuModal.innerHTML = '<div class="modal" style="max-width:440px; padding:var(--space-4); border-radius:var(--radius-lg); background:var(--color-surface); border:1px solid var(--color-border); box-shadow:var(--shadow-lg)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:var(--space-2); margin-bottom:var(--space-3)">'
+    + '  <h3 style="margin:0; font-size:16px; display:flex; align-items:center; gap:6px">🤖 ' + (isEs ? 'Menú de Inteligencia Artificial' : 'AI Assistant Menu') + '</h3>'
+    + '  <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Active' : '○ Unconfigured') + '</span>'
+    + '</div>'
+    + '<div class="modal-body stack" style="gap:var(--space-2)">'
+    + '  <button class="btn btn-ghost" id="menuAiConfigBtn" style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md)">'
+    + '    <span style="font-size:18px">⚙️</span>'
+    + '    <div style="text-align:left"><div>' + (isEs ? 'Configurar Proveedor' : 'Configure Provider') + '</div><div class="tiny muted">' + (isEs ? 'Ollama Local o Google Gemini Flash' : 'Ollama Local or Google Gemini Flash') + '</div></div>'
+    + '  </button>'
+    + '  <button class="btn btn-ghost" id="menuAiImproveBtn" ' + (!isConfigured ? 'disabled title="' + (isEs ? 'Configure el proveedor de IA primero' : 'Please configure AI provider first') + '"' : '') + ' style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md); ' + (!isConfigured ? 'opacity:0.45; cursor:not-allowed;' : '') + '">'
+    + '    <span style="font-size:18px">✨</span>'
+    + '    <div style="text-align:left"><div>' + (isEs ? 'Mejorar tu CV' : 'Improve your CV') + '</div><div class="tiny muted">' + (isEs ? 'Auditoría e inspección interactiva del CV' : 'Interactive CV audit & achievement prompt') + '</div></div>'
+    + '  </button>'
+    + '  <button class="btn btn-ghost" id="menuAiTranslateBtn" ' + (!isConfigured ? 'disabled title="' + (isEs ? 'Configure el proveedor de IA primero' : 'Please configure AI provider first') + '"' : '') + ' style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md); ' + (!isConfigured ? 'opacity:0.45; cursor:not-allowed;' : '') + '">'
+    + '    <span style="font-size:18px">🌐</span>'
+    + '    <div style="text-align:left"><div>' + (isEs ? 'Traducir CV Completo' : 'Translate CV') + '</div><div class="tiny muted">' + (isEs ? 'Traducción masiva a nueva instancia adaptada' : 'Bulk translate into new tailored instance') + '</div></div>'
+    + '  </button>'
+    + '  <button class="btn btn-ghost" id="menuAiChatBtn" ' + (!isConfigured ? 'disabled title="' + (isEs ? 'Configure el proveedor de IA primero' : 'Please configure AI provider first') + '"' : '') + ' style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md); ' + (!isConfigured ? 'opacity:0.45; cursor:not-allowed;' : '') + '">'
+    + '    <span style="font-size:18px">💬</span>'
+    + '    <div style="text-align:left"><div>' + (isEs ? 'Chat Temporal' : 'Temporal Chat') + '</div><div class="tiny muted">' + (isEs ? 'Asistente conversacional flotante en tiempo real' : 'Interactive floating conversation assistant') + '</div></div>'
+    + '  </button>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; justify-content:flex-end; margin-top:var(--space-3)">'
+    + '  <button class="btn btn-ghost btn-xs" id="closeAiMenuBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(menuModal);
+
+  menuModal.querySelector('#menuAiConfigBtn').onclick = function() {
+    menuModal.remove();
+    showAiProviderConfigModal();
+  };
+
+  menuModal.querySelector('#menuAiImproveBtn').onclick = function() {
+    if (!isConfigured) return;
+    menuModal.remove();
+    showAskImproveModal();
+  };
+
+  menuModal.querySelector('#menuAiTranslateBtn').onclick = function() {
+    if (!isConfigured) return;
+    menuModal.remove();
+    showBulkTranslateCvModal();
+  };
+
+  menuModal.querySelector('#menuAiChatBtn').onclick = function() {
+    if (!isConfigured) return;
+    menuModal.remove();
+    toggleAiChatWidget(true);
+  };
+
+  menuModal.querySelector('#closeAiMenuBtn').onclick = function() { menuModal.remove(); };
+}
+
+function showBulkTranslateCvModal() {
+  var isEs = state.langFilter === 'es';
+
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="modal" style="max-width:500px; padding:var(--space-4)">'
+    + '<div class="modal-header"><h3>🌐 ' + (isEs ? 'Traducción Masiva de CV' : 'Bulk Translate CV') + '</h3></div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div class="tiny muted">' + (isEs ? 'Seleccione el idioma de destino. La IA traducirá todo su CV y creará una nueva Instancia de CV con la traducción.' : 'Select target language. AI will translate your active CV and create a new tailored CV Instance with the translation.') + '</div>'
+    + '  <div>'
+    + '    <label class="tiny" style="font-weight:700">' + (isEs ? 'Idioma Destino' : 'Target Language') + '</label>'
+    + '    <select id="targetLangSelect" class="db-select" style="width:100%; height:32px; padding:0 8px; font-weight:600; margin-top:4px">'
+    + '      <option value="es">Spanish (Español)</option>'
+    + '      <option value="en">English (Inglés)</option>'
+    + '    </select>'
+    + '  </div>'
+    + '  <div id="transStatusBox" style="display:none; text-align:center; padding:15px 0" class="tiny muted">⏳ ' + (isEs ? 'Traduciendo CV con IA... Esto puede tardar unos segundos.' : 'Translating CV with AI... This may take a few seconds.') + '</div>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; gap:var(--space-2); margin-top:var(--space-3)">'
+    + '  <button class="btn btn-primary" id="startTranslateBtn" style="flex:1">' + (isEs ? 'Iniciar Traducción & Crear Instancia' : 'Start Translation & Create Instance') + '</button>'
+    + '  <button class="btn btn-ghost" id="closeTransBtn">' + (isEs ? 'Cancelar' : 'Cancel') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#closeTransBtn').onclick = function() { modal.remove(); };
+
+  modal.querySelector('#startTranslateBtn').onclick = function() {
+    var targetLang = modal.querySelector('#targetLangSelect').value;
+    var targetLangName = targetLang === 'es' ? 'Spanish' : 'English';
+    var statusBox = modal.querySelector('#transStatusBox');
+    var startBtn = modal.querySelector('#startTranslateBtn');
+
+    statusBox.style.display = 'block';
+    startBtn.disabled = true;
+
+    var cvDataCopy = JSON.parse(JSON.stringify(data));
+    delete cvDataCopy.instances;
+    delete cvDataCopy._templates;
+    delete cvDataCopy.templates;
+
+    var sysPrompt = "You are a professional multilingual translator. Translate the JSON values into " + targetLangName + ". Return ONLY valid JSON matching the input structure exactly. Do not alter JSON keys or non-string values.";
+    var prompt = "Translate the string values in this CV JSON object into " + targetLangName + ":\n\n" + JSON.stringify(cvDataCopy);
+
+    AIClient.callLLM(prompt, sysPrompt).then(function(resText) {
+      statusBox.style.display = 'none';
+      
+      var cleanJson = resText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+      var translatedObj = null;
+      try {
+        translatedObj = JSON.parse(cleanJson);
+      } catch(e) {
+        var match = resText.match(/\{[\s\S]*\}/);
+        if (match) {
+          try { translatedObj = JSON.parse(match[0]); } catch(e2) {}
+        }
+      }
+
+      if (!translatedObj) {
+        alert(isEs ? '❌ Error al procesar la respuesta JSON traducida de la IA.' : '❌ Failed to parse translated JSON response from AI.');
+        startBtn.disabled = false;
+        return;
+      }
+
+      var overwritesMap = buildOverwritesFromObject(translatedObj);
+      var instanceName = 'Translated (' + targetLangName + ')';
+
+      if (!data.instances) data.instances = {};
+      var currentStyle = getActiveStyle();
+      data.instances[instanceName] = {
+        style: JSON.parse(JSON.stringify(currentStyle)),
+        overwrites: overwritesMap,
+        visibility: {},
+        propertyNames: {},
+        sections: JSON.parse(JSON.stringify(state.sections))
+      };
+
+      loadInstance(instanceName);
+      modal.remove();
+      alert(isEs ? '✅ CV traducido con éxito. Se ha creado la instancia "' + instanceName + '".' : '✅ CV translated successfully! Created new instance "' + instanceName + '".');
+    }).catch(function(err) {
+      statusBox.style.display = 'none';
+      startBtn.disabled = false;
+      alert('❌ Translation Error: ' + err.message);
+    });
+  };
+}
+
+function buildOverwritesFromObject(obj, prefix) {
+  prefix = prefix || '';
+  var overwrites = {};
+  function walk(o, p) {
+    if (typeof o === 'string' || typeof o === 'number') {
+      if (p) overwrites[p] = String(o);
+    } else if (Array.isArray(o)) {
+      o.forEach(function(item, idx) {
+        walk(item, p ? (p + '.' + idx) : String(idx));
+      });
+    } else if (typeof o === 'object' && o !== null) {
+      Object.keys(o).forEach(function(k) {
+        if (k === 'selected' || k === 'lang' || k === '_idx' || k.indexOf('_') === 0) return;
+        walk(o[k], p ? (p + '.' + k) : k);
+      });
+    }
+  }
+  walk(obj, prefix);
+  return overwrites;
+}
+
+var aiChatHistory = [];
+
+function toggleAiChatWidget(show) {
+  var widget = document.getElementById('aiChatWidget');
+  if (!widget) {
+    createAiChatWidget();
+    widget = document.getElementById('aiChatWidget');
+  }
+
+  if (typeof show === 'boolean') {
+    widget.style.display = show ? 'flex' : 'none';
+  } else {
+    widget.style.display = (widget.style.display === 'none' || !widget.style.display) ? 'flex' : 'none';
+  }
+
+  if (widget.style.display === 'flex') {
+    var inputEl = widget.querySelector('#aiChatInput');
+    if (inputEl) inputEl.focus();
+  }
+}
+
+function createAiChatWidget() {
+  if (document.getElementById('aiChatWidget')) return;
+  var isEs = (typeof state === 'object' && state && state.langFilter === 'es');
+
+  var widget = document.createElement('div');
+  widget.id = 'aiChatWidget';
+  widget.style.cssText = 'position:fixed; bottom:34px; right:24px; width:360px; height:490px; max-width:calc(100vw - 32px); max-height:calc(100vh - 80px); background:var(--color-surface); border:1px solid oklch(from var(--color-text) l c h / .18); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); z-index:9999; display:none; flex-direction:column; overflow:hidden; font-family:inherit;';
+
+  widget.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; background:var(--color-surface-offset); padding:10px 14px; border-bottom:1px solid oklch(from var(--color-text) l c h / .1)">'
+    + '  <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px; color:var(--color-primary)">'
+    + '    <span>🤖</span> <span>' + (isEs ? 'Chat Temporal IA' : 'AI Temporal Chat') + '</span>'
+    + '  </div>'
+    + '  <div style="display:flex; align-items:center; gap:8px">'
+    + '    <button id="clearChatBtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:12px" title="' + (isEs ? 'Limpiar conversación' : 'Clear Chat') + '">🗑️</button>'
+    + '    <button id="closeChatBtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:14px; font-weight:700" title="' + (isEs ? 'Cerrar chat' : 'Close Chat') + '">✕</button>'
+    + '  </div>'
+    + '</div>'
+    + '<div id="aiChatMessages" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:12px; line-height:1.45">'
+    + '  <div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
+    +      (isEs ? '👋 ¡Hola! Soy tu asistente de CV. ¿En qué puedo ayudarte a pulir tu currículum, redactar logros o redactar cartas de presentación hoy?' : '👋 Hello! I am your CV Assistant. How can I help you refine your resume, draft bullet points, or tailor cover letters today?')
+    + '  </div>'
+    + '</div>'
+    + '<div style="display:flex; gap:6px; padding:10px; border-top:1px solid oklch(from var(--color-text) l c h / .1); background:var(--color-surface-offset)">'
+    + '  <input type="text" id="aiChatInput" placeholder="' + (isEs ? 'Escribe un mensaje...' : 'Type a message...') + '" style="flex:1; height:32px; padding:0 10px; font-size:12px; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface); color:var(--color-text); font-family:inherit">'
+    + '  <button id="aiChatSendBtn" class="btn btn-xs btn-primary" style="height:32px; padding:0 12px; font-weight:700; font-size:12px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
+    + '</div>';
+
+  document.body.appendChild(widget);
+
+  var msgBox = widget.querySelector('#aiChatMessages');
+  var inputEl = widget.querySelector('#aiChatInput');
+  var sendBtn = widget.querySelector('#aiChatSendBtn');
+
+  widget.querySelector('#closeChatBtn').onclick = function() { toggleAiChatWidget(false); };
+
+  widget.querySelector('#clearChatBtn').onclick = function() {
+    aiChatHistory = [];
+    msgBox.innerHTML = '<div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
+      + (isEs ? '👋 Chat reiniciado. ¿En qué te ayudo?' : '👋 Chat reset. How can I assist you?') + '</div>';
+  };
+
+  function sendChatMessage() {
+    var text = inputEl.value.trim();
+    if (!text) return;
+
+    if (typeof AIClient === 'undefined' || !AIClient.isConfigured()) {
+      alert(isEs ? 'Por favor configure su proveedor de IA (Ollama o Gemini) primero.' : 'Please configure your AI Provider (Ollama or Gemini) first.');
+      showAiProviderConfigModal();
+      return;
+    }
+
+    var userBubble = document.createElement('div');
+    userBubble.style.cssText = 'background:var(--color-primary); color:#fff; padding:8px 12px; border-radius:var(--radius-md); max-width:85%; align-self:flex-end; word-break:break-word; font-weight:500;';
+    userBubble.textContent = text;
+    msgBox.appendChild(userBubble);
+    inputEl.value = '';
+    msgBox.scrollTop = msgBox.scrollHeight;
+
+    var loadBubble = document.createElement('div');
+    loadBubble.style.cssText = 'background:oklch(from var(--color-text) l c h / .08); color:var(--color-text-muted); padding:8px 12px; border-radius:var(--radius-md); max-width:85%; align-self:flex-start;';
+    loadBubble.textContent = '⏳ Thinking...';
+    msgBox.appendChild(loadBubble);
+    msgBox.scrollTop = msgBox.scrollHeight;
+
+    aiChatHistory.push({ role: 'user', content: text });
+
+    var sysPrompt = "You are a helpful, professional CV & Career Assistant. Answer the candidate's career, resume, and job search questions concisely and helpfully.";
+    var conversationPrompt = aiChatHistory.map(function(m) { return (m.role === 'user' ? 'User: ' : 'Assistant: ') + m.content; }).join('\n');
+
+    AIClient.callLLM(conversationPrompt, sysPrompt).then(function(reply) {
+      loadBubble.remove();
+      aiChatHistory.push({ role: 'assistant', content: reply });
+
+      var botBubble = document.createElement('div');
+      botBubble.style.cssText = 'background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start; word-break:break-word;';
+      botBubble.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(reply) : reply;
+      msgBox.appendChild(botBubble);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }).catch(function(err) {
+      loadBubble.remove();
+      var errBubble = document.createElement('div');
+      errBubble.style.cssText = 'background:rgba(239,68,68,.15); color:var(--color-error); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start;';
+      errBubble.textContent = '❌ Error: ' + err.message;
+      msgBox.appendChild(errBubble);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    });
+  }
+
+  sendBtn.onclick = sendChatMessage;
+  inputEl.onkeydown = function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      sendChatMessage();
+    }
+  };
+}
+
+// Initial state sync & Chat widget init
+setTimeout(function() {
+  updateAiUiState();
+  if (typeof document !== 'undefined' && document.body) {
+    createAiChatWidget();
+  }
+}, 300);

@@ -42,6 +42,7 @@ function countWords(str) {
 function updateFieldAiIcon(inputEl) {
   if (!inputEl) return;
   if (inputEl.type === 'checkbox' || inputEl.type === 'file' || inputEl.type === 'radio') return;
+  if (inputEl.id === 'aiCustomPromptInput' || inputEl.id === 'aiChatInput' || (inputEl.closest && (inputEl.closest('.ai-field-tooltip') || inputEl.closest('#aiChatWidget') || inputEl.closest('.modal')))) return;
   var container = inputEl.parentElement;
   if (!container) return;
 
@@ -593,10 +594,15 @@ function propRenameRow(path,key){
   }
 
   var isEs = state.langFilter === 'es';
-  return '<div class="kv" style="align-items:center; gap:var(--space-2); margin-bottom: 4px">'
-    + '<label class="pill" style="margin:0; font-size:var(--text-xxs); flex-shrink:0"><input type="checkbox" data-field-include="'+esc(path)+'" '+(isIncluded?'checked':'')+'> ' + (isEs ? 'Incluir' : 'Include') + '</label>'
-    + '<div class="mono" style="flex-shrink:0; font-weight:bold; display:flex; align-items:center">'+esc(key)+warningIcon+'</div>'
-    + '<input data-propname="'+esc(path)+'" value="' + esc(labelVal) + '" style="flex:1; height:24px; padding:2px 8px; font-size:var(--text-xs)">'
+  return '<div style="display:flex; flex-direction:column; gap:4px; margin-bottom:var(--space-2); padding:var(--space-2); border-radius:var(--radius-sm); background:var(--color-surface-offset); border:1px solid oklch(from var(--color-text) l c h / .08)">'
+    + '<div style="display:flex; justify-content:space-between; align-items:center">'
+    + '  <div class="mono" style="font-weight:700; font-size:var(--text-xs); display:flex; align-items:center; color:var(--color-text)">'+esc(key)+warningIcon+'</div>'
+    + '  <label class="pill" style="margin:0; font-size:var(--text-xxs); flex-shrink:0"><input type="checkbox" data-field-include="'+esc(path)+'" '+(isIncluded?'checked':'')+'> ' + (isEs ? 'Incluir' : 'Include') + '</label>'
+    + '</div>'
+    + '<div style="margin-top:2px">'
+    + '  <label style="font-size:10px; font-weight:600; color:var(--color-text-muted); display:block; margin-bottom:2px">' + (isEs ? 'Nombre / Etiqueta de campo:' : 'Output Field Name / Label:') + '</label>'
+    + '  <input data-propname="'+esc(path)+'" value="' + esc(labelVal) + '" style="width:100%; height:26px; padding:2px 8px; font-size:var(--text-xs); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text)">'
+    + '</div>'
     + '</div>';
 }
 

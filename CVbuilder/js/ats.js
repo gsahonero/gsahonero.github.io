@@ -9,8 +9,13 @@ var ATSChecker = (function() {
     'achieved', 'engineered', 'developed', 'designed', 'built', 'led', 'managed',
     'increased', 'improved', 'optimized', 'reduced', 'implemented', 'orchestrated',
     'launched', 'published', 'spearheaded', 'integrated', 'delivered', 'accelerated',
-    'created', 'executed', 'established', 'formulated', 'generated', 'transformed'
+    'created', 'executed', 'established', 'formulated', 'generated', 'transformed',
+    'architected', 'negotiated', 'streamlined', 'pioneered', 'quantified', 'overhauled'
   ];
+
+  function isObj(o) {
+    return typeof o === 'object' && o !== null;
+  }
 
   function resolveVal(path, masterVal) {
     if (typeof getInstanceValue === 'function') {
@@ -39,64 +44,117 @@ var ATSChecker = (function() {
 
     var emailVal = resolveVal('basics.email', b.email);
     var locationVal = resolveVal('basics.location', b.location);
+    var titleVal = resolveVal('basics.title', b.title || b.role || b.headline || b.label);
+    var linkVal = resolveVal('basics.homepage', b.homepage || b.website || b.linkedin || b.github);
 
     var checks = [];
     var score = 0;
 
-    // 1. Email check (Mandatory) +15
-    if (emailVal && String(emailVal).trim()) {
-      checks.push({ name: 'Email Address Provided', passed: true, weight: 15, tip: 'Valid email address present.' });
-      score += 15;
+    // 1. Email check (10 pts)
+    if (emailVal && String(emailVal).indexOf('@') !== -1 && String(emailVal).indexOf('.') !== -1) {
+      checks.push({ name: 'Email Address Provided (Valid Format)', passed: true, weight: 10, tip: 'Valid professional email address present.' });
+      score += 10;
     } else {
-      checks.push({ name: 'Email Address Missing', passed: false, weight: 15, tip: 'Add a professional email address under Basics.' });
+      checks.push({ name: 'Email Address Missing or Invalid', passed: false, weight: 10, tip: 'Add a valid professional email address (e.g. alex@domain.com) under Basics.' });
     }
 
-    // 2. Location check (Mandatory) +15
+    // 2. Location check (10 pts)
     if (locationVal && String(locationVal).trim()) {
-      checks.push({ name: 'Location / City Provided', passed: true, weight: 15, tip: 'Location present.' });
-      score += 15;
+      checks.push({ name: 'Location / City Provided', passed: true, weight: 10, tip: 'Location present for ATS geographical filtering.' });
+      score += 10;
     } else {
-      checks.push({ name: 'Location Missing', passed: false, weight: 15, tip: 'Add your city/country location under Basics.' });
+      checks.push({ name: 'Location / City Missing', passed: false, weight: 10, tip: 'Add your city/country location under Basics.' });
     }
 
-    // 3. Optional Phone rule: Phone does NOT deduct points! +10 bonus if present or optional badge
-    checks.push({ name: 'Phone Number (Optional)', passed: true, weight: 10, tip: 'Phone numbers are optional for modern ATS.' });
-    score += 10;
+    // 3. Professional Title / Headline (10 pts)
+    if (titleVal && String(titleVal).trim()) {
+      checks.push({ name: 'Professional Title / Headline', passed: true, weight: 10, tip: 'Job title / headline present under Basics.' });
+      score += 10;
+    } else {
+      checks.push({ name: 'Professional Title / Headline Missing', passed: false, weight: 10, tip: 'Add a clear target job title (e.g., Senior Software Engineer) under Basics.' });
+    }
 
-    // 4. Work Experience check +25
+    // 4. LinkedIn / Portfolio Web Link (10 pts)
+    if (linkVal && String(linkVal).trim()) {
+      checks.push({ name: 'LinkedIn / Portfolio Web Link', passed: true, weight: 10, tip: 'Professional web link or profile present.' });
+      score += 10;
+    } else {
+      checks.push({ name: 'LinkedIn / Portfolio Link Missing', passed: false, weight: 10, tip: 'Add your LinkedIn or portfolio URL under Basics.' });
+    }
+
+    // 5. Work Experience check (15 pts)
     var workEntries = getSectionEntries(d, ['work_experience', 'work', 'experience', 'research_experience', 'teaching_experience', 'professional_experience', 'projects']);
     if (workEntries.length > 0) {
-      checks.push({ name: 'Work Experience Listed (' + workEntries.length + ' entries)', passed: true, weight: 25, tip: 'Work entries present.' });
-      score += 25;
+      checks.push({ name: 'Work Experience Listed (' + workEntries.length + ' entries)', passed: true, weight: 15, tip: 'Work history entries present.' });
+      score += 15;
     } else {
-      checks.push({ name: 'Work Experience Missing', passed: false, weight: 25, tip: 'Add work experience or professional projects.' });
+      checks.push({ name: 'Work Experience Missing', passed: false, weight: 15, tip: 'Add work experience or professional projects.' });
     }
 
-    // 5. Education check +20
+    // 6. Education check (15 pts)
     var eduEntries = getSectionEntries(d, ['education', 'academic', 'studies', 'academic_background', 'continuing_education']);
     if (eduEntries.length > 0) {
-      checks.push({ name: 'Education Listed (' + eduEntries.length + ' entries)', passed: true, weight: 20, tip: 'Education entries present.' });
-      score += 20;
+      checks.push({ name: 'Education Listed (' + eduEntries.length + ' entries)', passed: true, weight: 15, tip: 'Degree or institutional education present.' });
+      score += 15;
     } else {
-      checks.push({ name: 'Education Section Missing', passed: false, weight: 20, tip: 'Add degree or institutional education.' });
+      checks.push({ name: 'Education Section Missing', passed: false, weight: 15, tip: 'Add degree or institutional education.' });
     }
 
-    // 6. Action Verbs Check +15
+    // 7. Skills & Technologies Section (10 pts)
+    var skillsEntries = getSectionEntries(d, ['skills', 'competencies', 'technologies', 'languages', 'skills_and_technologies']);
+    if (skillsEntries.length > 0 || (isObj(d.skills) && Object.keys(d.skills).length > 0)) {
+      checks.push({ name: 'Skills & Core Competencies Listed', passed: true, weight: 10, tip: 'Technical & core skill section present.' });
+      score += 10;
+    } else {
+      checks.push({ name: 'Skills Section Missing', passed: false, weight: 10, tip: 'Add technical skills or core competencies to boost keyword indexing.' });
+    }
+
+    // 8. Measurable Impact & Metrics ($ / % / numbers) (10 pts)
     var fullText = (JSON.stringify(d) || '').toLowerCase();
     if (typeof activeInstance !== 'undefined' && activeInstance && activeInstance.overwrites) {
       fullText += ' ' + (JSON.stringify(activeInstance.overwrites) || '').toLowerCase();
     }
+
+    var metricMatches = fullText.match(/(\b\d+%\b|\$\d+|\b\d+\s*(k|m|b|percent|users|clients|projects|million|billion)\b|\b\d{2,}\b)/gi) || [];
+    var metricCount = metricMatches.length;
+
+    if (metricCount >= 3) {
+      checks.push({ name: 'Measurable Impact & Metrics (' + metricCount + ' metrics found)', passed: true, weight: 10, tip: 'Strong use of quantifiable numbers and percentages ($ / %).' });
+      score += 10;
+    } else if (metricCount >= 1) {
+      checks.push({ name: 'Measurable Impact & Metrics (' + metricCount + ' metric found)', passed: true, weight: 5, tip: 'Add more numbers, percentages, or scale metrics ($ / %) to work bullet points.' });
+      score += 5;
+    } else {
+      checks.push({ name: 'Measurable Impact & Metrics Missing', passed: false, weight: 10, tip: 'Include quantifiable metrics (e.g. "Increased sales by 35%", "Managed $2M budget") in your work entries.' });
+    }
+
+    // 9. Action Power Verbs Usage (10 pts)
     var verbCount = 0;
     ACTION_VERBS.forEach(function(v) {
       if (fullText.indexOf(v) !== -1) verbCount++;
     });
 
     if (verbCount >= 3) {
-      checks.push({ name: 'Action Verbs Usage (' + verbCount + ' found)', passed: true, weight: 15, tip: 'Strong action verbs detected.' });
-      score += 15;
+      checks.push({ name: 'Action Power Verbs Usage (' + verbCount + ' found)', passed: true, weight: 10, tip: 'Strong action power verbs detected.' });
+      score += 10;
+    } else if (verbCount >= 1) {
+      checks.push({ name: 'Action Power Verbs Low (' + verbCount + ' found)', passed: true, weight: 5, tip: 'Include more action verbs like Engineered, Spearheaded, Optimized, Orchestrated.' });
+      score += 5;
     } else {
-      checks.push({ name: 'Action Verbs Low (' + verbCount + ' found)', passed: false, weight: 15, tip: 'Include verbs like Engineered, Developed, Spearheaded, Built.' });
+      checks.push({ name: 'Action Power Verbs Missing', passed: false, weight: 10, tip: 'Start bullet points with strong action verbs (Engineered, Developed, Spearheaded).' });
     }
+
+    // 10. Bullet Point Length & Readability (10 pts)
+    var totalWords = fullText.split(/\s+/).filter(Boolean).length;
+    if (totalWords >= 100 && totalWords <= 800) {
+      checks.push({ name: 'Content Length & Readability (Optimal: ' + totalWords + ' words)', passed: true, weight: 10, tip: 'Resume length is optimal and scannable by ATS parsers.' });
+      score += 10;
+    } else {
+      checks.push({ name: 'Content Length & Readability (' + totalWords + ' words)', passed: false, weight: 10, tip: 'Aim for a balanced word count between 150 and 700 words.' });
+    }
+
+    // 11. Phone Number (Optional - No Penalty)
+    checks.push({ name: 'Phone Number (Optional)', passed: true, weight: 0, tip: 'Phone numbers are optional for modern ATS screening.' });
 
     return {
       score: Math.min(100, score),

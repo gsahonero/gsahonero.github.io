@@ -203,6 +203,39 @@ function htmlEscape(s) {
     .replace(/\\\\/g, '<br>')
     .replace(/~/g, '&nbsp;');
 
+  // Parse Bullet Lists (- item, * item, • item)
+  if (/(?:^|\n)\s*[-*•]\s+/m.test(str)) {
+    var lines = str.split(/\r?\n/);
+    var inList = false;
+    var resultLines = [];
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var listMatch = line.match(/^\s*[-*•]\s+(.*)$/);
+      if (listMatch) {
+        if (!inList) {
+          inList = true;
+          resultLines.push('<ul class="cv-bullet-list" style="margin:4px 0 4px 18px; padding-left:0; list-style-type:disc">');
+        }
+        resultLines.push('  <li style="margin-bottom:2px">' + listMatch[1] + '</li>');
+      } else {
+        if (inList) {
+          inList = false;
+          resultLines.push('</ul>');
+        }
+        if (line.trim()) {
+          resultLines.push(line);
+        }
+      }
+    }
+    if (inList) {
+      resultLines.push('</ul>');
+    }
+    str = resultLines.join('\n');
+  } else {
+    str = str.replace(/\n/g, '<br>');
+  }
+
   return str;
 }
 
@@ -218,6 +251,37 @@ function texEscape(str) {
   str = str.replace(/\*\*([^*]+)\*\*/g, '\\textbf{$1}');
   str = str.replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1\\textit{$2}$3');
 
+  // Parse Bullet Lists (- item, * item, • item) into LaTeX itemize
+  if (/(?:^|\n)\s*[-*•]\s+/m.test(str)) {
+    var texLines = str.split(/\r?\n/);
+    var inTexList = false;
+    var texResult = [];
+
+    for (var j = 0; j < texLines.length; j++) {
+      var tLine = texLines[j];
+      var tMatch = tLine.match(/^\s*[-*•]\s+(.*)$/);
+      if (tMatch) {
+        if (!inTexList) {
+          inTexList = true;
+          texResult.push('\\begin{itemize}');
+        }
+        texResult.push('  \\item ' + tMatch[1]);
+      } else {
+        if (inTexList) {
+          inTexList = false;
+          texResult.push('\\end{itemize}');
+        }
+        if (tLine.trim()) {
+          texResult.push(tLine);
+        }
+      }
+    }
+    if (inTexList) {
+      texResult.push('\\end{itemize}');
+    }
+    str = texResult.join('\n');
+  }
+
   var placeholders = [];
 
   var cmdRegex = /\\([a-zA-Z@]+)(\*?)(?:\{[^{}]*\}|\[[^\[\]]*\])*/g;
@@ -229,7 +293,8 @@ function texEscape(str) {
       'cvitemwithcomment','cvlistitem','vspace','hspace','par','smallskip',
       'medskip','bigskip','makeatletter','makeatother','compiledPublications',
       'compiledAbstracts','noindent','hangindent','hangafter','hbox','hss',
-      'parbox','textit','textbf','textquotedblleft','textquotedblright','photo'
+      'parbox','textit','textbf','textquotedblleft','textquotedblright','photo',
+      'begin','end','item'
     ];
     if (recognized.indexOf(cmdName) !== -1 || cmdName.indexOf('cv') === 0) {
       placeholders.push(match);

@@ -999,3 +999,34 @@ var DEFAULT_MAPPERS = {
   continuing_education:'continuing_education', skills:'skills', languages:'languages'
 };
 
+function parseMarkdown(text) {
+  if (!text) return '';
+  var str = String(text);
+
+  var html = str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  html = html.replace(/```([a-z]*)\n?([\s\S]*?)```/gi, function(match, lang, code) {
+    return '<pre style="background:var(--color-surface-offset); padding:8px 10px; border-radius:var(--radius-sm); font-family:monospace; font-size:11px; overflow-x:auto; margin:6px 0; border:1px solid oklch(from var(--color-text) l c h / .1)"><code>' + code.trim() + '</code></pre>';
+  });
+
+  html = html.replace(/`([^`]+)`/g, '<code style="background:var(--color-surface-offset); padding:2px 5px; border-radius:3px; font-family:monospace; font-size:11px; color:var(--color-primary)">$1</code>');
+
+  html = html.replace(/^### (.*$)/gim, '<h4 style="margin:8px 0 4px 0; font-size:13px; font-weight:700">$1</h4>');
+  html = html.replace(/^## (.*$)/gim, '<h3 style="margin:10px 0 4px 0; font-size:14px; font-weight:700">$1</h3>');
+  html = html.replace(/^# (.*$)/gim, '<h2 style="margin:12px 0 6px 0; font-size:15px; font-weight:700">$1</h2>');
+
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+
+  html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li style="margin-left:16px; list-style-type:disc">$1</li>');
+
+  html = html.replace(/\n/g, '<br>');
+
+  return html;
+}
+
