@@ -1,3 +1,13 @@
+function getPropertyName(itemPath, fallbackKey) {
+  if (activeInstance && activeInstance.propertyNames && activeInstance.propertyNames[itemPath] !== undefined && activeInstance.propertyNames[itemPath] !== '') {
+    return activeInstance.propertyNames[itemPath];
+  }
+  if (typeof state !== 'undefined' && state.propertyNames && state.propertyNames[itemPath] !== undefined && state.propertyNames[itemPath] !== '') {
+    return state.propertyNames[itemPath];
+  }
+  return fallbackKey !== undefined ? fallbackKey : human((itemPath || '').split('.').pop());
+}
+
 function renderTemplate(template, data, escapeFn) {
   if (!template) return '';
   var rendered = template;
@@ -161,6 +171,11 @@ function htmlEscape(s) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
+  // Markdown syntax parsing
+  str = str.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  str = str.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  str = str.replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3');
+
   var limit = 0;
   while (limit < 10 && /\\textbf\{([^{}]*)\}/.test(str)) {
     limit++;
@@ -197,6 +212,11 @@ function texEscape(str) {
   if (/^[a-zA-Z0-9_\-.]+\.(png|jpg|jpeg|gif|pdf|eps)$/i.test(str)) {
     return str;
   }
+
+  // Parse Markdown syntax into TeX commands
+  str = str.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '\\href{$2}{$1}');
+  str = str.replace(/\*\*([^*]+)\*\*/g, '\\textbf{$1}');
+  str = str.replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1\\textit{$2}$3');
 
   var placeholders = [];
 
@@ -341,10 +361,16 @@ function buildTemplateContext(format) {
     root.has_photo = false;
   }
 
-  // Add customized property/field names mappings
+  // Add customized property/field names mappings combining global state and activeInstance overrides
   root.labels = {};
-  Object.keys(state.propertyNames).forEach(function(pathStr) {
-    var label = state.propertyNames[pathStr];
+  var combinedPropNames = Object.assign({}, state.propertyNames || {});
+  if (activeInstance && activeInstance.propertyNames) {
+    Object.assign(combinedPropNames, activeInstance.propertyNames);
+  }
+
+  Object.keys(combinedPropNames).forEach(function(pathStr) {
+    var label = combinedPropNames[pathStr];
+    if (!label) return;
     var parts = pathStr.split('.');
     var current = root.labels;
     for (var i = 0; i < parts.length - 1; i++) {
@@ -380,10 +406,20 @@ function buildTemplateContext(format) {
   }
 
   if (!root.labels.basics) root.labels.basics = {};
-  if (!root.labels.basics.research_interests) {
-    var isEs = state.langFilter === 'es';
-    root.labels.basics.research_interests = state.propertyNames['basics.research_interests'] || (isEs ? 'Intereses de Investigación' : 'Research Interests');
-  }
+  var isEs = state.langFilter === 'es';
+  var ensureBasicsLabel = function(field, defaultText) {
+    var fullPath = 'basics.' + field;
+    root.labels.basics[field] = getPropertyName(fullPath, field) || defaultText;
+  };
+
+  ensureBasicsLabel('firstname', isEs ? 'Nombre' : 'First Name');
+  ensureBasicsLabel('lastname', isEs ? 'Apellido' : 'Last Name');
+  ensureBasicsLabel('title', isEs ? 'Título Profesional' : 'Title');
+  ensureBasicsLabel('email', 'Email');
+  ensureBasicsLabel('location', isEs ? 'Ubicación' : 'Location');
+  ensureBasicsLabel('homepage', isEs ? 'Sitio Web' : 'Website');
+  ensureBasicsLabel('phone', isEs ? 'Teléfono' : 'Phone');
+  ensureBasicsLabel('research_interests', isEs ? 'Intereses de Investigación' : 'Research Interests');
 
   // Add Spanish sections translation support
   root.sections = {};
@@ -623,11 +659,11 @@ function renderAutoSectionLatex(key, val) {
       var itemPath = key + '.' + g;
       if (Array.isArray(visVal[g])) {
         if (!visVal[g].length) return;
-        var gLabel = latexText(state.propertyNames[itemPath] || human(g));
+        var gLabel = latexText(getPropertyName(itemPath, g));
         var csv = visVal[g].map(function(x) { return typeof x === 'string' ? x : (x.name || x.label || x.language || ''); }).filter(Boolean).join(', ');
         if (csv) tex += '\\cvitemwithcomment{' + gLabel + '}{\\parbox[t]{0.85\\textwidth}{' + latexText(csv) + '}}{}\n';
       } else if (visVal[g] != null) {
-        var kLabel = latexText(state.propertyNames[itemPath] || human(g));
+        var kLabel = latexText(getPropertyName(itemPath, g));
         tex += '\\cvitemwithcomment{' + kLabel + '}{\\parbox[t]{0.85\\textwidth}{' + latexText(String(visVal[g])) + '}}{}\n';
       }
     });
@@ -1005,6 +1041,7 @@ function updateHtmlPreviewContent() {
   } catch (e) {
     console.warn('Could not update iframe HTML content:', e);
   }
+  if (typeof updateAtsBadge === 'function') updateAtsBadge();
 }
 
 function renderHtmlPreview(targetSectionId) {
@@ -1100,6 +1137,7 @@ function renderLatex() {
   var rendered = renderLatexCode();
   var prevEl = el('latexPreview');
   if (prevEl) prevEl.textContent = rendered;
+  if (typeof updateAtsBadge === 'function') updateAtsBadge();
 }
 
 function renderSchema(){ el('schemaPreview').textContent=JSON.stringify(data,null,2); }

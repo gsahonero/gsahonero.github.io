@@ -704,3 +704,24 @@ input:focus,textarea:focus,select:focus{
     opacity: 0;
   }
 }
+
+/* ── Drag & Drop Reordering ── */
+.drag-handle {
+  cursor: grab !important;
+  opacity: 0.65;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.drag-handle:hover {
+  opacity: 1;
+  transform: scale(1.15);
+  color: var(--color-primary) !important;
+}
+.entry.dragging {
+  opacity: 0.45;
+  border: 2px dashed var(--color-primary) !important;
+  box-shadow: var(--shadow-lg);
+}
+.entry.drag-over {
+  border-top: 3px solid var(--color-primary) !important;
+  background: oklch(from var(--color-primary) l c h / 0.08) !important;
+}

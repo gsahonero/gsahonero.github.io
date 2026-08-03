@@ -919,6 +919,107 @@
           testRuns.push({ id: '5.7', name: 'PDF Download Handler Guard', category: 'regression', expected: 'function, element-found', actual: (fnExists ? 'function' : 'missing') + ', ' + (btnExists ? 'element-found' : 'missing'), passed, latency });
         })();
 
+        // Test 5.8: Markdown Syntax Parser (LaTeX & HTML)
+        (function() {
+          var tStart = performance.now();
+          var sampleMd = "**bold text** *italic text* [Example](https://example.com)";
+          var texOut = win.texEscape(sampleMd);
+          var htmlOut = win.htmlEscape(sampleMd);
+
+          var texPassed = texOut.indexOf('\\textbf{bold text}') !== -1 && texOut.indexOf('\\textit{italic text}') !== -1 && texOut.indexOf('\\href{https://example.com}{Example}') !== -1;
+          var htmlPassed = htmlOut.indexOf('<strong>bold text</strong>') !== -1 && htmlOut.indexOf('<em>italic text</em>') !== -1 && htmlOut.indexOf('<a href="https://example.com"') !== -1;
+          var passed = texPassed && htmlPassed;
+
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.8', 'Markdown Syntax Parser', 'Asserts Markdown bold, italic, and links convert to LaTeX (textbf/textit/href) and HTML (strong/em/a)', 'unit', 'Markdown converted to TeX & HTML', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.8', name: 'Markdown Syntax Parser', category: 'unit', expected: 'Markdown converted to TeX & HTML', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.9: Embedded Instance Storage Housekeeping
+        (function() {
+          var tStart = performance.now();
+          var insts = win.listInstances();
+          var isArray = Array.isArray(insts);
+          var storedInDb = win.data && win.data.instances && typeof win.data.instances === 'object';
+          var passed = isArray && storedInDb;
+
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.9', 'Embedded Instance Storage Housekeeping', 'Asserts tailored instances are managed exclusively inside win.data.instances object', 'unit', 'Array & stored in db.instances', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.9', name: 'Embedded Instance Storage Housekeeping', category: 'unit', expected: 'Array & stored in db.instances', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.10: Importer & Exporter Data Engine
+        (function() {
+          var tStart = performance.now();
+          var sampleJsonResume = JSON.stringify({
+            basics: { name: "Jane Doe", label: "Software Engineer", email: "jane@example.com" },
+            work: [{ name: "TechCorp", position: "Senior Dev", startDate: "2021", endDate: "Present" }],
+            education: [{ institution: "Stanford", studyType: "B.S.", area: "CS" }]
+          });
+
+          var parsed = win.Importer.parseJsonResume(sampleJsonResume);
+          var impPassed = parsed && parsed.basics.firstname === "Jane" && parsed.basics.lastname === "Doe" && parsed.work.length === 1;
+
+          var jsonRes = win.Exporter.exportToJsonResume(win.data);
+          var mdRes = win.Exporter.exportToMarkdown(win.data);
+          var expPassed = typeof jsonRes === 'string' && jsonRes.indexOf('$schema') !== -1 && typeof mdRes === 'string' && mdRes.indexOf('#') !== -1;
+
+          var passed = impPassed && expPassed;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.10', 'Importer & Exporter Data Engine', 'Validates parsing JSON Resume schemas and exporting database to JSON Resume and Markdown', 'unit', 'Valid Import & Export Data', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.10', name: 'Importer & Exporter Data Engine', category: 'unit', expected: 'Valid Import & Export Data', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.11: ATS Scoring Rules (Optional Phone & Keyword Matcher)
+        (function() {
+          var tStart = performance.now();
+          var sampleData = {
+            basics: { firstname: "Alex", lastname: "Morgan", email: "alex@example.com", location: "San Francisco, CA" },
+            work: [{ role: "Engineer", organization: "Tech", description: "Engineered, developed, and optimized scalable distributed systems" }],
+            education: [{ degree: "Ph.D.", institution: "MIT" }]
+          };
+
+          var res = win.ATSChecker.calculateAtsScore(sampleData);
+          var scorePassed = res.score === 100;
+
+          var jobText = "Looking for a Software Engineer with experience in distributed systems and algorithms.";
+          var kw = win.ATSChecker.matchJobKeywords(sampleData, jobText);
+          var kwPassed = Array.isArray(kw.matched) && Array.isArray(kw.missing) && kw.matchPercentage > 0;
+
+          var passed = scorePassed && kwPassed;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.11', 'ATS Scoring Rules', 'Validates ATS score calculation (phone optional = 100% score) and job keyword matcher', 'unit', '100% ATS score & keyword match', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.11', name: 'ATS Scoring Rules', category: 'unit', expected: '100% ATS score & keyword match', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.12: AI Client Configuration & Conditional UI Logic
+        (function() {
+          var tStart = performance.now();
+          var exists = typeof win.AIClient !== 'undefined';
+          var settings = exists ? win.AIClient.getSettings() : null;
+          var isConf = exists ? win.AIClient.isConfigured() : false;
+
+          var passed = exists && settings && typeof isConf === 'boolean';
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.12', 'AI Client & Settings', 'Validates AIClient module exists, reads settings, and evaluates configuration status for conditional UI', 'unit', 'AIClient configured & Settings readable', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.12', name: 'AI Client & Settings', category: 'unit', expected: 'AIClient configured & Settings readable', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
         // Finalize test metrics
         var endSuiteTime = performance.now();
         var suiteDuration = Math.round(endSuiteTime - startSuiteTime);

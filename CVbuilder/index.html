@@ -85,6 +85,12 @@
           <button class="dropitem" id="saveCvAsBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2v5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Download CV Database
           </button>
+          <button class="dropitem" id="importExternalBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import (JSON Resume / LinkedIn / Reactive)...
+          </button>
+          <button class="dropitem" id="exportFormatsBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Export (Markdown / Plain Text / JSON)...
+          </button>
           <button class="dropitem" id="renameCvBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rename Current CV...
           </button>
@@ -128,6 +134,10 @@
   </div>
 
   <div class="topbar-right">
+    <!-- ATS Score Badge -->
+    <button id="atsBadgeBtn" class="btn btn-ghost" style="height:30px; padding:0 10px; font-size:var(--text-xs); font-weight:700; display:flex; align-items:center; gap:6px; margin-right:var(--space-2); border:1px solid oklch(from var(--color-text) l c h / .14)" title="View ATS Score & Job Keyword Analysis">
+      <span style="font-size:12px">🎯</span> ATS Score: <span id="atsScoreVal" style="color:var(--color-primary); font-weight:800">100%</span>
+    </button>
     <button class="btn btn-primary" id="topbarPdfBtn" style="height:30px; padding:0 12px; font-size:var(--text-xs); font-weight:700; display:flex; align-items:center; gap:6px; margin-right:var(--space-3)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       <span id="topbarPdfBtnText">Export PDF</span>
@@ -740,8 +750,11 @@
       Donate if you like <span class="coffee-icon">☕</span>
     </a>
   </div>
-  <div class="statusbar-right" style="display:flex; align-items:center; gap:var(--space-4)">
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.7.1</button>
+  <div class="statusbar-right" style="display:flex; align-items:center; gap:var(--space-2)">
+    <button id="bottomBarAiBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-primary) l c h / .3); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-primary); display:flex; align-items:center; gap:4px" title="AI Assistant Settings & Interactive Critique Wizard">
+      🤖 <span id="bottomBarAiText">AI Assistant</span>
+    </button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.8.0</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme" style="background:none; border:none; padding:0; cursor:pointer; font-size:var(--text-sm); line-height:1; display:flex; align-items:center; justify-content:center; color:var(--color-text-muted)">&#9790;</button>
   </div>
 </footer>
@@ -753,6 +766,10 @@
 <script src="js/translations.js"></script>
 <script src="js/compiler.js"></script>
 <script src="js/database.js"></script>
+<script src="js/importer.js"></script>
+<script src="js/exporter.js"></script>
+<script src="js/ats.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/editor.js"></script>
 <script src="presets/tours.js"></script>
 <script src="js/tour.js"></script>

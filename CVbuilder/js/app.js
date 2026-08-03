@@ -98,6 +98,7 @@ function renderAll() {
   renderLatex();
   renderHtmlPreview();
   renderSchema();
+  updateAtsBadge();
 }
 
 // ── DIALOG MODALS ──
@@ -872,6 +873,20 @@ el('saveCvAsBtn').onclick = function() {
   closeAllDropdowns();
   exportDatabaseFile();
 };
+
+if (el('importExternalBtn')) {
+  el('importExternalBtn').onclick = function() {
+    closeAllDropdowns();
+    showImportModal();
+  };
+}
+
+if (el('exportFormatsBtn')) {
+  el('exportFormatsBtn').onclick = function() {
+    closeAllDropdowns();
+    showExportModal();
+  };
+}
 
 
 el('renameCvBtn').onclick = function() {
@@ -2179,3 +2194,527 @@ function attachIframeEventListeners() {
 }
 
 setInterval(attachIframeEventListeners, 400);
+
+function showImportModal() {
+  var isEs = state.langFilter === 'es';
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="modal" style="max-width:540px; padding:var(--space-4)">'
+    + '<div class="modal-header"><h3>' + (isEs ? 'Importar Datos Externos' : 'Import External CV Data') + '</h3></div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div class="tiny muted">' + (isEs ? 'Seleccione el formato y pegue el contenido JSON o cargue un archivo:' : 'Select format and paste JSON content or upload a file:') + '</div>'
+    + '  <select id="importFormatSelect" class="db-select" style="height:32px; padding:0 8px; font-weight:600; font-size:13px">'
+    + '    <option value="jsonresume">JSON Resume (resume.json)</option>'
+    + '    <option value="reactiveresume">Reactive Resume JSON (v4/v5)</option>'
+    + '    <option value="linkedin">LinkedIn Export (JSON/CSV)</option>'
+    + '  </select>'
+    + '  <textarea id="importTextarea" rows="8" placeholder="' + (isEs ? 'Pegue el contenido JSON aquí...' : 'Paste JSON content here...') + '" style="width:100%; font-family:monospace; font-size:12px; padding:8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text)"></textarea>'
+    + '  <div style="display:flex; justify-content:space-between; align-items:center">'
+    + '    <input type="file" id="importFileInput" accept=".json,.csv,.txt" style="font-size:12px">'
+    + '  </div>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; gap:var(--space-2); margin-top:var(--space-3)">'
+    + '  <button class="btn btn-primary" id="confirmImportBtn" style="flex:1">' + (isEs ? 'Importar al CV' : 'Import to CV') + '</button>'
+    + '  <button class="btn btn-ghost" id="cancelImportBtn">' + (isEs ? 'Cancelar' : 'Cancel') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#cancelImportBtn').onclick = function() { modal.remove(); };
+
+  modal.querySelector('#importFileInput').onchange = function(e) {
+    var file = e.target.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        modal.querySelector('#importTextarea').value = ev.target.result;
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  modal.querySelector('#confirmImportBtn').onclick = function() {
+    var text = modal.querySelector('#importTextarea').value;
+    var format = modal.querySelector('#importFormatSelect').value;
+    if (!text || !text.trim()) {
+      alert(isEs ? 'Por favor ingrese contenido para importar.' : 'Please enter content to import.');
+      return;
+    }
+    try {
+      var importedData = null;
+      if (format === 'reactiveresume') {
+        importedData = Importer.parseReactiveResume(text);
+      } else if (format === 'linkedin') {
+        importedData = Importer.parseLinkedInExport(text);
+      } else {
+        importedData = Importer.parseJsonResume(text);
+      }
+      
+      if (importedData) {
+        data = Object.assign({}, data, importedData);
+        saveCurrentDatabase();
+        renderAll();
+        modal.remove();
+        alert(isEs ? '¡Datos importados con éxito!' : 'CV data imported successfully!');
+      }
+    } catch(err) {
+      alert((isEs ? 'Error de importación: ' : 'Import Error: ') + err.message);
+    }
+  };
+}
+
+function showExportModal() {
+  var isEs = state.langFilter === 'es';
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="modal" style="max-width:560px; padding:var(--space-4)">'
+    + '<div class="modal-header"><h3>' + (isEs ? 'Exportar en Otros Formatos' : 'Export Other Formats') + '</h3></div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div class="tiny muted">' + (isEs ? 'Seleccione el formato deseado para copiar o descargar:' : 'Select desired format to copy or download:') + '</div>'
+    + '  <div style="display:flex; gap:8px">'
+    + '    <button class="btn btn-ghost btn-xs export-tab active" data-format="markdown">Markdown (.md)</button>'
+    + '    <button class="btn btn-ghost btn-xs export-tab" data-format="jsonresume">JSON Resume (.json)</button>'
+    + '    <button class="btn btn-ghost btn-xs export-tab" data-format="reactiveresume">Reactive Resume (.json)</button>'
+    + '    <button class="btn btn-ghost btn-xs export-tab" data-format="plaintext">Plain Text (.txt)</button>'
+    + '  </div>'
+    + '  <textarea id="exportTextarea" rows="10" readonly style="width:100%; font-family:monospace; font-size:12px; padding:8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text)"></textarea>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; gap:var(--space-2); margin-top:var(--space-3)">'
+    + '  <button class="btn btn-primary" id="copyExportBtn" style="flex:1">' + (isEs ? 'Copiar Texto' : 'Copy Text') + '</button>'
+    + '  <button class="btn btn-secondary" id="downloadExportBtn">' + (isEs ? 'Descargar Archivo' : 'Download File') + '</button>'
+    + '  <button class="btn btn-ghost" id="cancelExportBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  var activeFormat = 'markdown';
+  var txtArea = modal.querySelector('#exportTextarea');
+
+  function updateExportText() {
+    if (activeFormat === 'jsonresume') {
+      txtArea.value = Exporter.exportToJsonResume();
+    } else if (activeFormat === 'reactiveresume') {
+      txtArea.value = Exporter.exportToReactiveResume();
+    } else if (activeFormat === 'plaintext') {
+      txtArea.value = Exporter.exportToPlainText();
+    } else {
+      txtArea.value = Exporter.exportToMarkdown();
+    }
+  }
+  updateExportText();
+
+  modal.querySelectorAll('.export-tab').forEach(function(btn) {
+    btn.onclick = function() {
+      modal.querySelectorAll('.export-tab').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeFormat = btn.dataset.format;
+      updateExportText();
+    };
+  });
+
+  modal.querySelector('#cancelExportBtn').onclick = function() { modal.remove(); };
+
+  modal.querySelector('#copyExportBtn').onclick = function() {
+    navigator.clipboard.writeText(txtArea.value);
+    alert(isEs ? '¡Copiado al portapapeles!' : 'Copied to clipboard!');
+  };
+
+  modal.querySelector('#downloadExportBtn').onclick = function() {
+    var ext = activeFormat === 'markdown' ? 'md' : (activeFormat === 'plaintext' ? 'txt' : 'json');
+    var mime = ext === 'json' ? 'application/json' : 'text/plain';
+    downloadFile(txtArea.value, mime, currentDbName.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.' + ext);
+  };
+}
+
+if (el('atsBadgeBtn')) {
+  el('atsBadgeBtn').onclick = function() {
+    showAtsModal();
+  };
+}
+
+function updateAtsBadge() {
+  if (typeof ATSChecker === 'undefined') return;
+  var badgeVal = el('atsScoreVal');
+  if (!badgeVal) return;
+  var res = ATSChecker.calculateAtsScore(data);
+  badgeVal.textContent = res.score + '%';
+  if (res.score >= 80) badgeVal.style.color = 'var(--color-success)';
+  else if (res.score >= 60) badgeVal.style.color = 'var(--color-warning)';
+  else badgeVal.style.color = 'var(--color-error)';
+
+  var modalScore = el('atsModalScoreHeaderVal');
+  if (modalScore) {
+    modalScore.textContent = 'Score: ' + res.score + '%';
+    modalScore.style.color = res.score >= 80 ? 'var(--color-success)' : (res.score >= 60 ? 'var(--color-warning)' : 'var(--color-error)');
+  }
+  var checkList = el('atsModalCheckList');
+  if (checkList) {
+    checkList.innerHTML = res.checks.map(function(c) {
+      var badge = c.passed
+        ? '<span style="color:var(--color-success); font-weight:bold">✓ PASSED</span>'
+        : '<span style="color:var(--color-warning); font-weight:bold">⚠ RECOMMENDATION</span>';
+      return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
+        + '<div><strong>' + esc(c.name) + '</strong><div class="tiny muted">' + esc(c.tip) + '</div></div>'
+        + '<div>' + badge + '</div>'
+        + '</div>';
+    }).join('');
+  }
+}
+
+function showAtsModal() {
+  var isEs = state.langFilter === 'es';
+  var res = ATSChecker.calculateAtsScore(data);
+
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  var checkRows = res.checks.map(function(c) {
+    var badge = c.passed
+      ? '<span style="color:var(--color-success); font-weight:bold">✓ PASSED</span>'
+      : '<span style="color:var(--color-warning); font-weight:bold">⚠ RECOMMENDATION</span>';
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
+      + '<div><strong>' + esc(c.name) + '</strong><div class="tiny muted">' + esc(c.tip) + '</div></div>'
+      + '<div>' + badge + '</div>'
+      + '</div>';
+  }).join('');
+
+  modal.innerHTML = '<div class="modal" style="max-width:600px; padding:var(--space-4)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
+    + '  <h3>🎯 ' + (isEs ? 'Análisis de Optimización ATS & Palabras Clave' : 'ATS Optimization & Keyword Inspector') + '</h3>'
+    + '  <span id="atsModalScoreHeaderVal" style="font-size:18px; font-weight:800; color:' + (res.score >= 80 ? 'var(--color-success)' : (res.score >= 60 ? 'var(--color-warning)' : 'var(--color-error)')) + '">Score: ' + res.score + '%</span>'
+    + '</div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div style="font-weight:700; margin-top:var(--space-2)">' + (isEs ? 'Verificaciones de Estructura ATS:' : 'ATS Structural Checks:') + '</div>'
+    + '  <div id="atsModalCheckList" style="max-height:220px; overflow-y:auto">' + checkRows + '</div>'
+    + '  <hr style="border:none; border-top:1px solid oklch(from var(--color-text) l c h / .1); margin:var(--space-2) 0">'
+    + '  <div style="font-weight:700">' + (isEs ? 'Inspector de Palabras Clave de Empleo:' : 'Job Description Keyword Matcher:') + '</div>'
+    + '  <textarea id="jobDescInput" rows="4" placeholder="' + (isEs ? 'Pegue la descripción del puesto de trabajo aquí para comparar palabras clave...' : 'Paste Job Description text here to compare matching keywords...') + '" style="width:100%; font-size:12px; padding:8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text)"></textarea>'
+    + '  <div id="keywordResults" style="margin-top:var(--space-2)"></div>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; gap:var(--space-2); margin-top:var(--space-3)">'
+    + '  <button class="btn btn-primary" id="analyzeJobBtn" style="flex:1">' + (isEs ? 'Analizar Palabras Clave' : 'Analyze Job Keywords') + '</button>'
+    + '  <button class="btn btn-ghost" id="closeAtsModalBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#closeAtsModalBtn').onclick = function() { modal.remove(); };
+
+  modal.querySelector('#analyzeJobBtn').onclick = function() {
+    var jobText = modal.querySelector('#jobDescInput').value;
+    var kwRes = ATSChecker.matchJobKeywords(data, jobText);
+    var resDiv = modal.querySelector('#keywordResults');
+
+    if (!jobText.trim()) {
+      resDiv.innerHTML = '<div class="tiny muted">' + (isEs ? 'Ingrese el texto de la oferta de trabajo para analizar.' : 'Enter job text to analyze keywords.') + '</div>';
+      return;
+    }
+
+    var matchedPills = kwRes.matched.map(function(k){ return '<span class="pill" style="background:rgba(16,185,129,.15); color:var(--color-success)">✓ ' + esc(k) + '</span>'; }).join(' ') || '<span class="tiny muted">None</span>';
+    var missingPills = kwRes.missing.map(function(k){ return '<span class="pill" style="background:rgba(239,68,68,.15); color:var(--color-error)">✕ ' + esc(k) + '</span>'; }).join(' ') || '<span class="tiny muted">None</span>';
+
+    resDiv.innerHTML = '<div style="display:flex; flex-direction:column; gap:8px; background:var(--color-surface-offset); padding:10px; border-radius:var(--radius-md)">'
+      + '<div style="font-weight:700; font-size:13px">' + (isEs ? 'Coincidencia de Palabras Clave: ' : 'Keyword Match: ') + '<span style="color:var(--color-primary)">' + kwRes.matchPercentage + '%</span></div>'
+      + '<div><strong class="tiny">' + (isEs ? 'Coincidentes: ' : 'Matched Keywords: ') + '</strong>' + matchedPills + '</div>'
+      + '<div><strong class="tiny">' + (isEs ? 'Faltantes Recomendadas: ' : 'Missing Keywords: ') + '</strong>' + missingPills + '</div>'
+      + '</div>';
+  };
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('input', function() { updateAtsBadge(); });
+  document.addEventListener('change', function() { updateAtsBadge(); });
+}
+
+if (el('bottomBarAiBtn')) {
+  el('bottomBarAiBtn').onclick = function() {
+    showAiHubModal();
+  };
+}
+
+function updateAiUiState() {
+  var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
+  var txtEl = el('bottomBarAiText');
+  var btnEl = el('bottomBarAiBtn');
+  if (txtEl && typeof AIClient !== 'undefined') {
+    var s = AIClient.getSettings();
+    if (isConfigured) {
+      var name = s.provider === 'gemini' ? 'Gemini Flash' : 'Ollama (Local)';
+      txtEl.textContent = 'AI: ' + name;
+      if (btnEl) {
+        btnEl.style.borderColor = 'var(--color-success)';
+        btnEl.style.color = 'var(--color-success)';
+      }
+    } else {
+      txtEl.textContent = 'AI Assistant';
+      if (btnEl) {
+        btnEl.style.borderColor = 'oklch(from var(--color-primary) l c h / .3)';
+        btnEl.style.color = 'var(--color-primary)';
+      }
+    }
+  }
+}
+
+function showAiHubModal() {
+  var isEs = state.langFilter === 'es';
+  var s = AIClient.getSettings();
+  var isConfigured = AIClient.isConfigured();
+
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="modal" style="max-width:580px; padding:var(--space-4)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
+    + '  <h3>🤖 ' + (isEs ? 'Centro de Inteligencia Artificial' : 'AI Assistant & Settings') + '</h3>'
+    + '  <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Active' : '○ Not Configured') + '</span>'
+    + '</div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div style="display:flex; gap:var(--space-2); margin-top:var(--space-1)">'
+    + '    <button class="btn btn-xs ' + (isConfigured ? 'btn-primary' : 'btn-ghost') + '" id="tabAskImproveBtn" style="flex:1; font-weight:700">✨ ' + (isEs ? 'Inspeccionar & Mejorar CV' : 'Ask Me to Improve CV') + '</button>'
+    + '    <button class="btn btn-xs ' + (!isConfigured ? 'btn-primary' : 'btn-ghost') + '" id="tabSettingsBtn" style="flex:1; font-weight:700">⚙️ ' + (isEs ? 'Configuración de Proveedor' : 'Provider Settings') + '</button>'
+    + '  </div>'
+    + '  <div id="aiHubContent" style="margin-top:var(--space-2)"></div>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; justify-content:flex-end; gap:var(--space-2); margin-top:var(--space-3)">'
+    + '  <button class="btn btn-ghost" id="closeAiHubBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  var contentDiv = modal.querySelector('#aiHubContent');
+
+  function renderSettingsTab() {
+    var curS = AIClient.getSettings();
+    contentDiv.innerHTML = '<div class="stack" style="gap:var(--space-3)">'
+      + '<div class="tiny muted">' + (isEs ? 'Seleccione su proveedor de IA (Ollama Local 100% Gratuito/Sin Servidor o Google Gemini Flash):' : 'Select AI Provider (Ollama Local 100% Free & Offline or Google Gemini Flash):') + '</div>'
+      + '<div><label class="tiny" style="font-weight:700">Provider</label>'
+      + '  <select id="aiProviderSelect" class="db-select" style="width:100%; height:32px; padding:0 8px; font-weight:600; font-size:13px; margin-top:4px">'
+      + '    <option value="ollama" ' + (curS.provider === 'ollama' ? 'selected' : '') + '>Ollama (Local LLM - 100% Offline & Free)</option>'
+      + '    <option value="gemini" ' + (curS.provider === 'gemini' ? 'selected' : '') + '>Google Gemini Flash (Free Google AI Studio Key)</option>'
+      + '  </select>'
+      + '</div>'
+      + '<div id="ollamaFields" style="display:' + (curS.provider === 'ollama' ? 'block' : 'none') + '">'
+      + '  <label class="tiny" style="font-weight:700">Ollama Endpoint URL</label>'
+      + '  <input type="text" id="ollamaEndpointInput" value="' + esc(curS.ollamaEndpoint || 'http://localhost:11434') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace">'
+      + '  <label class="tiny" style="font-weight:700; margin-top:8px; display:block">Model Name</label>'
+      + '  <input type="text" id="ollamaModelInput" value="' + esc(curS.ollamaModel || 'llama3:latest') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="llama3:latest, qwen2.5:latest, etc.">'
+      + '</div>'
+      + '<div id="geminiFields" style="display:' + (curS.provider === 'gemini' ? 'block' : 'none') + '">'
+      + '  <label class="tiny" style="font-weight:700">Google Gemini API Key</label>'
+      + '  <input type="password" id="geminiApiKeyInput" value="' + esc(curS.geminiApiKey || '') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="AIzaSy...">'
+      + '  <div class="tiny muted" style="margin-top:4px">' + (isEs ? 'Obtenga una clave gratuita en Google AI Studio.' : 'Get a free API key at Google AI Studio.') + '</div>'
+      + '</div>'
+      + '<div id="testConnResult" style="margin-top:var(--space-2); display:none"></div>'
+      + '<div style="display:flex; gap:var(--space-2); margin-top:var(--space-2)">'
+      + '  <button class="btn btn-primary" id="saveAiSettingsBtn" style="flex:1">' + (isEs ? 'Guardar Configuración' : 'Save Settings') + '</button>'
+      + '  <button class="btn btn-ghost" id="testAiConnBtn" style="font-weight:700; border:1px solid oklch(from var(--color-text) l c h / .15)">🧪 ' + (isEs ? 'Probar Conexión' : 'Test Connection') + '</button>'
+      + '</div>'
+      + '</div>';
+
+    var providerSelect = contentDiv.querySelector('#aiProviderSelect');
+    providerSelect.onchange = function() {
+      var isOllama = providerSelect.value === 'ollama';
+      contentDiv.querySelector('#ollamaFields').style.display = isOllama ? 'block' : 'none';
+      contentDiv.querySelector('#geminiFields').style.display = isOllama ? 'none' : 'block';
+    };
+
+    contentDiv.querySelector('#testAiConnBtn').onclick = function() {
+      var testBtn = contentDiv.querySelector('#testAiConnBtn');
+      var resDiv = contentDiv.querySelector('#testConnResult');
+      resDiv.style.display = 'block';
+      resDiv.innerHTML = '<div class="tiny muted">⏳ ' + (isEs ? 'Probando conexión...' : 'Testing connection...') + '</div>';
+      testBtn.disabled = true;
+
+      var tempSettings = {
+        provider: providerSelect.value,
+        ollamaEndpoint: contentDiv.querySelector('#ollamaEndpointInput').value,
+        ollamaModel: contentDiv.querySelector('#ollamaModelInput').value,
+        geminiApiKey: contentDiv.querySelector('#geminiApiKeyInput').value,
+        geminiModel: 'gemini-2.5-flash'
+      };
+
+      AIClient.testConnection(tempSettings).then(function(msg) {
+        resDiv.innerHTML = '<div style="background:rgba(16,185,129,.15); color:var(--color-success); padding:8px 12px; border-radius:var(--radius-sm); font-weight:700; font-size:12px">✅ ' + esc(msg) + '</div>';
+      }).catch(function(err) {
+        var corsTip = '';
+        if (tempSettings.provider === 'ollama') {
+          corsTip = '<div style="margin-top:6px; font-size:11px; color:var(--color-text-muted); line-height:1.4">'
+            + '💡 <strong>How to enable Ollama CORS:</strong><br>'
+            + '• <strong>Windows PowerShell:</strong> <code>$env:OLLAMA_ORIGINS="*" ; ollama serve</code><br>'
+            + '• <strong>Windows GUI App:</strong> Add System Environment Variable <code>OLLAMA_ORIGINS = *</code> and restart Ollama.<br>'
+            + '• <strong>Mac / Linux:</strong> <code>OLLAMA_ORIGINS="*" ollama serve</code>'
+            + '</div>';
+        }
+        resDiv.innerHTML = '<div style="background:rgba(239,68,68,.15); color:var(--color-error); padding:10px 12px; border-radius:var(--radius-sm); font-weight:600; font-size:12px; line-height:1.4">❌ ' + esc(err.message) + corsTip + '</div>';
+      }).finally(function() {
+        testBtn.disabled = false;
+      });
+    };
+
+    contentDiv.querySelector('#saveAiSettingsBtn').onclick = function() {
+      var newSettings = {
+        provider: providerSelect.value,
+        ollamaEndpoint: contentDiv.querySelector('#ollamaEndpointInput').value,
+        ollamaModel: contentDiv.querySelector('#ollamaModelInput').value,
+        geminiApiKey: contentDiv.querySelector('#geminiApiKeyInput').value,
+        geminiModel: 'gemini-2.5-flash'
+      };
+      AIClient.saveSettings(newSettings);
+      updateAiUiState();
+      modal.remove();
+      alert(isEs ? '¡Configuración de IA guardada!' : 'AI Settings saved successfully!');
+    };
+  }
+
+  function renderCritiqueTab() {
+    if (!AIClient.isConfigured()) {
+      contentDiv.innerHTML = '<div class="tiny muted" style="text-align:center; padding:20px 0">'
+        + '⚠️ ' + (isEs ? 'Por favor configure primero su proveedor de IA (Ollama o Gemini) en la pestaña de Configuración.' : 'Please configure your AI Provider (Ollama or Gemini) in the Settings tab first.')
+        + '</div>';
+      return;
+    }
+
+    contentDiv.innerHTML = '<div class="stack" style="gap:var(--space-2)">'
+      + '<div class="tiny muted">' + (isEs ? 'La IA está analizando su CV actual y generando preguntas objetivas:' : 'The AI is analyzing your active CV and generating targeted interview questions:') + '</div>'
+      + '<div id="critiqueBox" style="min-height:160px; max-height:260px; overflow-y:auto; padding:12px; border-radius:var(--radius-md); background:var(--color-surface-offset); font-size:13px; line-height:1.5; white-space:pre-wrap">⏳ ' + (isEs ? 'Analizando CV y generando preguntas...' : 'Analyzing CV and generating interview questions...') + '</div>'
+      + '</div>';
+
+    AIClient.generateCritiqueQuestions(data).then(function(res) {
+      var box = contentDiv.querySelector('#critiqueBox');
+      if (box) box.textContent = res;
+    }).catch(function(err) {
+      var box = contentDiv.querySelector('#critiqueBox');
+      if (box) box.textContent = '❌ Error: ' + err.message;
+    });
+  }
+
+  modal.querySelector('#tabAskImproveBtn').onclick = function() {
+    modal.querySelector('#tabAskImproveBtn').className = 'btn btn-xs btn-primary';
+    modal.querySelector('#tabSettingsBtn').className = 'btn btn-xs btn-ghost';
+    renderCritiqueTab();
+  };
+
+  modal.querySelector('#tabSettingsBtn').onclick = function() {
+    modal.querySelector('#tabAskImproveBtn').className = 'btn btn-xs btn-ghost';
+    modal.querySelector('#tabSettingsBtn').className = 'btn btn-xs btn-primary';
+    renderSettingsTab();
+  };
+
+  modal.querySelector('#closeAiHubBtn').onclick = function() { modal.remove(); };
+
+  if (isConfigured) {
+    renderCritiqueTab();
+  } else {
+    renderSettingsTab();
+  }
+}
+
+function showAiSettingsModal() {
+  showAiHubModal();
+}
+
+function showAskImproveModal() {
+  showAiHubModal();
+}
+
+function showAiFieldSuggestionsModal(inputEl) {
+  if (!inputEl) return;
+  var isEs = state.langFilter === 'es';
+  var origText = inputEl.value;
+
+  if (typeof AIClient === 'undefined' || !AIClient.isConfigured()) {
+    var confirmMsg = isEs
+      ? 'Configura tu proveedor de IA (Ollama o Gemini) para usar sugerencias en 1 clic. ¿Abrir configuración de IA?'
+      : 'Please configure your AI Provider (Ollama or Gemini) to use one-click suggestions. Open AI Settings now?';
+    if (confirm(confirmMsg)) {
+      showAiHubModal();
+    }
+    return;
+  }
+
+  var modal = document.createElement('div');
+  modal.className = 'modal-backdrop open';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="modal" style="max-width:540px; padding:var(--space-4)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
+    + '  <h3>✨ ' + (isEs ? 'Sugerencias de IA en 1 Clic' : 'One-Click AI Suggestions') + '</h3>'
+    + '</div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3)">'
+    + '  <div class="tiny muted" style="font-weight:600">' + (isEs ? 'Texto original del campo:' : 'Original Field Text:') + '</div>'
+    + '  <div style="background:var(--color-surface-offset); padding:8px 12px; border-radius:var(--radius-sm); font-size:12px; max-height:100px; overflow-y:auto; line-height:1.4">' + esc(origText) + '</div>'
+    + '  <div style="display:flex; gap:var(--space-2); margin-top:var(--space-1)">'
+    + '    <button class="btn btn-xs btn-primary" id="aiEnhanceBtn" style="flex:1; font-weight:700">⚡ ' + (isEs ? 'Pulir & Mejorar' : 'Polish & Enhance') + '</button>'
+    + '    <button class="btn btn-xs btn-ghost" id="aiGrammarBtn" style="flex:1; font-weight:700">✏️ ' + (isEs ? 'Corregir Gramática' : 'Fix Grammar') + '</button>'
+    + '    <button class="btn btn-xs btn-ghost" id="aiTranslateBtn" style="flex:1; font-weight:700">🌐 ' + (isEs ? 'Traducir' : 'Translate') + '</button>'
+    + '  </div>'
+    + '  <div id="aiSuggestionBox" style="display:none; margin-top:var(--space-2)">'
+    + '    <div class="tiny muted" style="font-weight:700; margin-bottom:4px">' + (isEs ? 'Sugerencia Generada:' : 'Generated Suggestion:') + '</div>'
+    + '    <textarea id="aiSuggestionText" style="width:100%; min-height:90px; padding:8px; border-radius:var(--radius-sm); font-size:12px; line-height:1.4; border:1.5px solid var(--color-primary); background:var(--color-surface); color:var(--color-text); font-family:inherit"></textarea>'
+    + '    <button class="btn btn-primary" id="applySuggestionBtn" style="width:100%; margin-top:var(--space-2); font-weight:700">✅ ' + (isEs ? 'Aplicar Sugerencia al Campo' : 'Apply Suggestion to Field') + '</button>'
+    + '  </div>'
+    + '  <div id="aiLoadingBox" style="display:none; text-align:center; padding:15px 0" class="tiny muted">⏳ ' + (isEs ? 'Generando sugerencia con IA...' : 'Generating AI suggestion...') + '</div>'
+    + '</div>'
+    + '<div class="modal-footer" style="display:flex; justify-content:flex-end; margin-top:var(--space-3)">'
+    + '  <button class="btn btn-ghost" id="closeSuggestionBtn">' + (isEs ? 'Cancelar' : 'Cancel') + '</button>'
+    + '</div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  var sugBox = modal.querySelector('#aiSuggestionBox');
+  var sugText = modal.querySelector('#aiSuggestionText');
+  var loadBox = modal.querySelector('#aiLoadingBox');
+
+  function runTask(taskPromise) {
+    sugBox.style.display = 'none';
+    loadBox.style.display = 'block';
+
+    taskPromise.then(function(result) {
+      loadBox.style.display = 'none';
+      sugText.value = result;
+      sugBox.style.display = 'block';
+    }).catch(function(err) {
+      loadBox.style.display = 'none';
+      alert('❌ Error: ' + err.message);
+    });
+  }
+
+  modal.querySelector('#aiEnhanceBtn').onclick = function() {
+    runTask(AIClient.enhanceBullet(origText));
+  };
+
+  modal.querySelector('#aiGrammarBtn').onclick = function() {
+    runTask(AIClient.fixGrammar(origText));
+  };
+
+  modal.querySelector('#aiTranslateBtn').onclick = function() {
+    var targetLang = isEs ? 'es' : 'en';
+    runTask(AIClient.translateContent(origText, targetLang));
+  };
+
+  modal.querySelector('#applySuggestionBtn').onclick = function() {
+    var newText = sugText.value;
+    if (newText) {
+      inputEl.value = newText;
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+      modal.remove();
+      if (typeof updateFieldAiIcon === 'function') updateFieldAiIcon(inputEl);
+    }
+  };
+
+  modal.querySelector('#closeSuggestionBtn').onclick = function() { modal.remove(); };
+}
+
+// Initial state sync
+setTimeout(updateAiUiState, 300);

@@ -1,5 +1,13 @@
-var APP_VERSION = '0.7.1';
+var APP_VERSION = '0.8.0';
 var CHANGELOG = [
+  {version:'0.8.0', changes:[
+    'AI Engine Integration (Ollama + Gemini): Added 100% free and offline local LLM support via Ollama (http://localhost:11434) and free Google Gemini Flash API key support (BYOK) for bullet point polishing, grammar correction, translation, and an interactive "Ask me to improve" critique wizard.',
+    'ATS Score & Job Keyword Inspector: Real-time ATS compliance score calculator with live input updates, optional phone number rules, multi-schema section detection (work_experience, education), and job description keyword matcher.',
+    'Data Importer & Exporter Engine: Support for importing and exporting JSON Resume (resume.json), Reactive Resume (v4/v5), LinkedIn exports, Markdown (.md), and Plain Text (.txt).',
+    'Customized Field Renaming: Enabled field property label customization (e.g. basics.research_interests -> Personal Profile) across master CV and tailored instances in HTML & LaTeX previews.',
+    'Drag-and-Drop Reordering & Page-Break Guides: Added HTML5 drag handles (⋮⋮) for entry reordering and visual A4 page boundary lines in live previews.',
+    'Markdown Syntax Support: Write **bold**, *italic*, and [link](url) in description fields, compiled automatically into LaTeX (\\textbf, \\textit, \\href) and HTML.'
+  ]},
   {version:'0.7.1', changes:[
     'Collapsible Sidebars & Outline Tree: Added panel collapse buttons for both the left sidebar (52px strip) and right outline pane (42px strip), as well as interactive section item tree expand/collapse chevrons (▼ / ▶).',
     'Interactive Guided Help System: Built interactive 6-step/card guided wizards for "How to create your CV from scratch", "How to use CV Builder" (Component Architecture), and "How to use Templates" (Style & Theme Architecture) with direct action triggers.',
@@ -337,8 +345,52 @@ document.addEventListener('click', function(e) {
   </section>
   {{/basics.research_interests}}
 
-  {{&all_sections}}
-
+  <style>
+    body { position: relative; }
+    .page-break-guide {
+      position: absolute;
+      left: -20px;
+      right: -20px;
+      height: 0;
+      border-bottom: 2px dashed #38bdf8;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .page-break-guide::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 10px;
+      top: -10px;
+      background: #38bdf8;
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: sans-serif;
+    }
+  </style>
+  <script>
+  function renderPageBreakGuides() {
+    document.querySelectorAll('.page-break-guide').forEach(function(el){ el.remove(); });
+    var bodyH = document.body.scrollHeight;
+    var pageH = 1050;
+    var pageNum = 1;
+    var top = pageH;
+    while (top < bodyH) {
+      var guide = document.createElement('div');
+      guide.className = 'page-break-guide';
+      guide.style.top = top + 'px';
+      guide.setAttribute('data-label', 'End of Page ' + pageNum + ' (A4)');
+      document.body.appendChild(guide);
+      pageNum++;
+      top += pageH;
+    }
+  }
+  window.addEventListener('load', renderPageBreakGuides);
+  window.addEventListener('resize', renderPageBreakGuides);
+  setTimeout(renderPageBreakGuides, 300);
+  </script>
  </body>
 </html>`;
 
@@ -564,7 +616,7 @@ var STYLE_PRESETS = {
 \\vspace{-1.5em}
 
 {{#has_research_interests}}
-\\section{Summary}
+\\section{{{labels.basics.research_interests}}}
 \\cvitem{}{{{basics.research_interests}}}
 {{/has_research_interests}}
 

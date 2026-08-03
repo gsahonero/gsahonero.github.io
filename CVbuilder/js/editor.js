@@ -35,6 +35,51 @@ function updateEntryWarningIcon(inputEl) {
   }
 }
 
+function countWords(str) {
+  return String(str || '').trim().split(/\s+/).filter(Boolean).length;
+}
+
+function updateFieldAiIcon(inputEl) {
+  if (!inputEl) return;
+  if (inputEl.type === 'checkbox' || inputEl.type === 'file' || inputEl.type === 'radio') return;
+  var container = inputEl.parentElement;
+  if (!container) return;
+
+  var wordCount = countWords(inputEl.value);
+  var btn = container.querySelector('.ai-field-btn');
+
+  if (wordCount > 10) {
+    if (getComputedStyle(container).position === 'static') {
+      container.style.position = 'relative';
+    }
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.className = 'ai-field-btn';
+      btn.type = 'button';
+      btn.title = 'AI Assistance & One-Click Suggestions (>10 words)';
+      btn.style.cssText = 'position:absolute; bottom:6px; left:60px; opacity:0.35; transition:all 0.2s ease; cursor:pointer; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; background:oklch(from var(--color-primary) l c h / .15); color:var(--color-primary); border:1px solid oklch(from var(--color-primary) l c h / .3); z-index:10; font-family:inherit; display:flex; align-items:center; gap:3px;';
+      btn.innerHTML = '✨ AI';
+
+      btn.onmouseenter = function() { btn.style.opacity = '1'; btn.style.transform = 'scale(1.05)'; };
+      btn.onmouseleave = function() { btn.style.opacity = '0.35'; btn.style.transform = 'scale(1)'; };
+
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (typeof showAiFieldSuggestionsModal === 'function') {
+          showAiFieldSuggestionsModal(inputEl);
+        }
+      };
+
+      container.appendChild(btn);
+    } else {
+      btn.style.display = 'flex';
+    }
+  } else {
+    if (btn) btn.style.display = 'none';
+  }
+}
+
 function setupAutoExpandInput(inputEl) {
   if (!inputEl || inputEl._autoExpandBound) return;
   if (inputEl.type === 'checkbox' || inputEl.type === 'file' || inputEl.type === 'radio') return;
@@ -61,6 +106,7 @@ function setupAutoExpandInput(inputEl) {
       var newH = Math.max(baseH, inputEl.scrollHeight + 4);
       inputEl.style.height = newH + 'px';
     }
+    updateFieldAiIcon(inputEl);
   };
 
   var collapse = function() {
@@ -77,18 +123,25 @@ function setupAutoExpandInput(inputEl) {
         updateHeight();
       }
     }
+    updateFieldAiIcon(inputEl);
   };
 
   inputEl.addEventListener('focus', updateHeight);
   inputEl.addEventListener('click', updateHeight);
   inputEl.addEventListener('input', updateHeight);
   inputEl.addEventListener('blur', collapse);
+  setTimeout(function() { updateFieldAiIcon(inputEl); }, 60);
 }
 
 if (typeof document !== 'undefined') {
   document.addEventListener('focusin', function(e) {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
       setupAutoExpandInput(e.target);
+    }
+  }, true);
+  document.addEventListener('input', function(e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      updateFieldAiIcon(e.target);
     }
   }, true);
 }
@@ -562,6 +615,7 @@ function bindPropRename(root){
       }
       renderOutline();
       renderLatex();
+      updateHtmlPreviewContent();
     };
   });
   root.querySelectorAll('[data-field-include]').forEach(function(chk){
@@ -818,7 +872,8 @@ function renderObjectFields(path,obj){
       wrap.appendChild(block);
     } else if(isObj(val)){
       var block2=document.createElement('div'); block2.className='card'; block2.id='field-'+section+'-'+key;
-      block2.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||key)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
+      var headLabel = (typeof getPropertyName === 'function') ? getPropertyName(propPath, key) : (state.propertyNames[propPath]||key);
+      block2.innerHTML='<div class="cardhead"><strong>'+esc(headLabel)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,key)+'</div>';
       block2.querySelector('.cardbody').appendChild(renderObjectFields(path.concat(key),val));
       wrap.appendChild(block2);
     } else if (key === 'photo') {
@@ -1014,6 +1069,7 @@ function renderArrayFields(key,arr){
 
     entry.innerHTML='<div class="entryhead">'
       +'<div class="stack" style="gap:6px; flex-direction:row; align-items:center">'
+      +'<span class="drag-handle" title="' + (isEs ? 'Arrastrar para reordenar' : 'Drag to reorder') + '" style="cursor:grab; font-weight:bold; font-size:16px; color:var(--color-text-muted); padding:0 4px; user-select:none">⋮⋮</span>'
       +'<label class="pill"><input type="checkbox" '+(!isObj(item)||item.selected!==false?'checked':'')+' data-sel> ' + (isEs ? 'Incluido' : 'Included') + '</label>'
       +'<select class="db-select" style="height:24px; padding:0 4px; font-size:var(--text-xs); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .1); background:var(--color-surface-offset); color:var(--color-text)" data-lang>'
       +'<option value="all">' + (isEs ? 'Idioma: Todos' : 'Lang: All') + '</option>'
@@ -1028,6 +1084,39 @@ function renderArrayFields(key,arr){
       +'<button class="btn btn-danger btn-xs" data-del style="padding:2px 8px; font-size:var(--text-xs)">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
       +'</div>'
       +'</div><div class="entrybody"></div>';
+
+    entry.setAttribute('draggable', 'true');
+    (function(idx){
+      entry.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', String(idx));
+        e.dataTransfer.effectAllowed = 'move';
+        entry.classList.add('dragging');
+      });
+      entry.addEventListener('dragend', function() {
+        entry.classList.remove('dragging');
+        wrap.querySelectorAll('.entry').forEach(function(el){ el.classList.remove('drag-over'); });
+      });
+      entry.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        entry.classList.add('drag-over');
+      });
+      entry.addEventListener('dragleave', function() {
+        entry.classList.remove('drag-over');
+      });
+      entry.addEventListener('drop', function(e) {
+        e.preventDefault();
+        entry.classList.remove('drag-over');
+        var srcIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        var targetIdx = idx;
+        if (!isNaN(srcIdx) && srcIdx !== targetIdx && srcIdx >= 0 && srcIdx < arr.length) {
+          var moved = arr.splice(srcIdx, 1)[0];
+          arr.splice(targetIdx, 0, moved);
+          markDirty();
+          renderAll();
+        }
+      });
+    })(i);
     var body=entry.querySelector('.entrybody');
     if(isObj(item)){
       Object.entries(item).forEach(function(fe){
@@ -1035,7 +1124,8 @@ function renderArrayFields(key,arr){
         var propPath=key+'.'+i+'.'+field;
         if(Array.isArray(val)){
           var block=document.createElement('div'); block.className='card';
-          block.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||field)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
+          var headLabel1 = (typeof getPropertyName === 'function') ? getPropertyName(propPath, field) : (state.propertyNames[propPath]||field);
+          block.innerHTML='<div class="cardhead"><strong>'+esc(headLabel1)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
           var inner=block.querySelector('.cardbody');
           val.forEach(function(sub,j){ inner.appendChild(simpleArrayInput([key,i,field,j],sub,propPath+'.'+j)); });
           var btn=document.createElement('button'); btn.className='btn btn-xs'; btn.textContent=isEs ? 'Añadir elemento' : 'Add item';
@@ -1043,7 +1133,8 @@ function renderArrayFields(key,arr){
           inner.appendChild(btn); body.appendChild(block);
         } else if(isObj(val)){
           var card=document.createElement('div'); card.className='card';
-          card.innerHTML='<div class="cardhead"><strong>'+esc(state.propertyNames[propPath]||field)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
+          var headLabel2 = (typeof getPropertyName === 'function') ? getPropertyName(propPath, field) : (state.propertyNames[propPath]||field);
+          card.innerHTML='<div class="cardhead"><strong>'+esc(headLabel2)+'</strong></div><div class="cardbody subgrid">'+propRenameRow(propPath,field)+'</div>';
           card.querySelector('.cardbody').appendChild(renderObjectFields([key,i,field],val));
           body.appendChild(card);
         } else {
