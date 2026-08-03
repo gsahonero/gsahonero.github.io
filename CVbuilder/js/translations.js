@@ -17,6 +17,11 @@ var DICTIONARY = {
     "cv_exists": "A database named \"{name}\" already exists.",
     "confirm_override_master": "Are you sure you want to apply this override to the master database?",
     "no_overrides": "No overrides saved in this tailored instance yet.",
+    "merge_instance_master": "Merge Instance into Master CV",
+    "confirm_merge_master": "Are you sure you want to permanently merge all tailored overrides from instance \"{name}\" into your Master CV?",
+    "duplicate_instance": "Duplicate Instance",
+    "enter_duplicate_instance_name": "Enter a name for the duplicated CV Instance:",
+    "instance_duplicated": "Instance \"{name}\" duplicated successfully.",
     "diagnostics_idle": "Idle. Click \"Run Tests\" to execute unit assertions.",
     "unsaved_changes": "Unsaved changes",
     "changes_saved": "Saved (Clean)"
@@ -39,6 +44,11 @@ var DICTIONARY = {
     "cv_exists": "Ya existe una base de datos llamada \"{name}\".",
     "confirm_override_master": "¿Está seguro de que desea aplicar este cambio a la base de datos principal?",
     "no_overrides": "Aún no se han guardado cambios personalizados en esta instancia.",
+    "merge_instance_master": "Fusionar instancia en CV maestro",
+    "confirm_merge_master": "¿Está seguro de que desea fusionar permanentemente todas las anulaciones adaptadas de la instancia \"{name}\" en su CV Maestro?",
+    "duplicate_instance": "Duplicar Instancia",
+    "enter_duplicate_instance_name": "Ingrese el nombre para la nueva instancia duplicada:",
+    "instance_duplicated": "Instancia \"{name}\" duplicada con éxito.",
     "diagnostics_idle": "Inactivo. Presione \"Ejecutar pruebas\" para iniciar las comprobaciones.",
     "unsaved_changes": "Cambios sin guardar",
     "changes_saved": "Guardado (Limpio)"
@@ -164,7 +174,7 @@ function updateUITranslations() {
   var stPreBtn = el('modalStylePresetsBtn');
   if (stPreBtn) stPreBtn.textContent = isEs ? 'Galería de estilos' : 'Presets Gallery';
   var impStBtn = el('modalImportStyleBtn');
-  if (impStBtn) impStBtn.textContent = isEs ? 'Importar estilo (.cvstyle)' : 'Import Style (.cvstyle)';
+  if (impStBtn) impStBtn.textContent = isEs ? 'Importar estilo' : 'Import Style';
   var crStBtn = el('modalCreateStyleBtn');
   if (crStBtn) crStBtn.textContent = isEs ? '+ Crear nuevo estilo' : '+ Create New Style';
   var stMgrTitle = el('styleManagerTitleLbl');
@@ -187,12 +197,56 @@ function updateUITranslations() {
   if (accentLbl) accentLbl.textContent = isEs ? 'Color de Acento Principal' : 'Primary Accent Color';
   var fontLbl = el('themeFontSelectLbl');
   if (fontLbl) fontLbl.textContent = isEs ? 'Selección de Fuente de Tema' : 'Font Theme Selection';
+  var alignLbl = el('themeTextAlignSelectLbl');
+  if (alignLbl) alignLbl.textContent = isEs ? 'Alineación de Texto' : 'Text Alignment';
+  var alignSelect = el('themeTextAlignSelect');
+  if (alignSelect && alignSelect.options.length >= 4) {
+    alignSelect.options[0].textContent = isEs ? 'Alineado a la Izquierda' : 'Left Aligned';
+    alignSelect.options[1].textContent = isEs ? 'Justificado' : 'Justified';
+    alignSelect.options[2].textContent = isEs ? 'Centrado' : 'Center Aligned';
+    alignSelect.options[3].textContent = isEs ? 'Alineado a la Derecha' : 'Right Aligned';
+  }
   var photoPosTitle = el('photoPosSectionTitle');
   if (photoPosTitle) photoPosTitle.textContent = isEs ? 'Posición de Foto de Perfil' : 'Profile Photo Positioning';
   var photoLeftLbl = el('photoLeftSliderLbl');
   if (photoLeftLbl) photoLeftLbl.textContent = isEs ? 'Desplazamiento Izquierdo (Distancia del Nombre)' : 'Left Offset (Gap from Name)';
   var photoTopLbl = el('photoTopSliderLbl');
   if (photoTopLbl) photoTopLbl.textContent = isEs ? 'Desplazamiento Superior (Alineación Vertical)' : 'Top Offset (Vertical Alignment)';
+
+  var headerSpacingTitle = el('headerSpacingSectionTitle');
+  if (headerSpacingTitle) headerSpacingTitle.textContent = isEs ? 'Espaciado de Encabezados' : 'Header & Layout Spacing';
+  var headerSpacerLbl = el('headerSpacerSliderLbl');
+  if (headerSpacerLbl) headerSpacerLbl.textContent = isEs ? 'Separador de Encabezado (Espacio Título y Fecha)' : 'Header Spacer (Gap between Title & Date)';
+
+  // 12. PDF Export Format Selection Modal Labels
+  var pdfFmtTitle = el('pdfFormatTitleLbl');
+  if (pdfFmtTitle) pdfFmtTitle.textContent = isEs ? 'Exportar Documento PDF' : 'Export PDF Document';
+  var pdfFmtDesc = el('pdfFormatDesc');
+  if (pdfFmtDesc) pdfFmtDesc.textContent = isEs ? 'Selecciona tu formato de exportación PDF y motor de compilación preferido:' : 'Select your preferred PDF export format and compilation engine:';
+  var latexFmtTitle = el('pdfFormatLatexTitle');
+  if (latexFmtTitle) latexFmtTitle.textContent = isEs ? 'Motor LaTeX (PDF Tipografiado)' : 'LaTeX Engine (Typeset PDF)';
+  var latexFmtDesc = el('pdfFormatLatexDesc');
+  if (latexFmtDesc) latexFmtDesc.textContent = isEs ? 'Compila tu documento en un PDF profesional de calidad editorial mediante un compilador LaTeX en línea.' : 'Compiles your document into a professional, publication-quality PDF via an online LaTeX compiler.';
+  var htmlFmtTitle = el('pdfFormatHtmlTitle');
+  if (htmlFmtTitle) htmlFmtTitle.textContent = isEs ? 'Impresión del Navegador (HTML)' : 'HTML Browser Print';
+  var htmlFmtDesc = el('pdfFormatHtmlDesc');
+  if (htmlFmtDesc) htmlFmtDesc.textContent = isEs ? 'Abre la vista previa HTML en una ventana independiente lista para imprimir o guardar en PDF.' : 'Opens your live HTML preview in a new window ready for browser printing or saving to PDF.';
+  var cancelFmtBtn = el('cancelPdfFormatBtn');
+  if (cancelFmtBtn) cancelFmtBtn.textContent = isEs ? 'Cancelar' : 'Cancel';
+  var confFmtBtn = el('confirmPdfFormatBtnText');
+  if (confFmtBtn) confFmtBtn.textContent = isEs ? 'Continuar' : 'Continue';
+
+  // 13. Remote LaTeX Export Privacy Modal Labels
+  var rLatexTitle = el('renderedLatexTitleLbl');
+  if (rLatexTitle) rLatexTitle.textContent = isEs ? 'Código LaTeX Generado' : 'Rendered LaTeX Code';
+  var expTitle = el('latexExportTitleLbl');
+  if (expTitle) expTitle.textContent = isEs ? 'Aviso de Privacidad: Exportación PDF por LaTeX' : 'Remote LaTeX PDF Export Privacy Notice';
+  var dontAskLbl = el('dontAskLatexExportLbl');
+  if (dontAskLbl) dontAskLbl.textContent = isEs ? 'No volver a preguntar durante esta sesión' : 'Don\'t ask again during this session';
+  var cancelExpBtn = el('cancelLatexExportBtn');
+  if (cancelExpBtn) cancelExpBtn.textContent = isEs ? 'Cancelar' : 'Cancel';
+  var confExpBtn = el('confirmLatexExportBtnText');
+  if (confExpBtn) confExpBtn.textContent = isEs ? 'Continuar y Exportar PDF' : 'Proceed & Export PDF';
 
   // 12. Add Section Modal Assistant Labels
   var addSecTitle = el('addSectionModalTitle');
@@ -211,81 +265,15 @@ function updateUITranslations() {
   // 11. Help Modals HTML Content
   var scratchTitle = el('helpScratchTitleLbl');
   if (scratchTitle) scratchTitle.textContent = isEs ? 'Cómo crear tu CV desde cero' : 'How to create your CV from scratch';
-  var scratchBody = document.querySelector('#helpScratchModal .body');
-  if (scratchBody) {
-    if (isEs) {
-      scratchBody.innerHTML = '<div class="help-section">'
-        +'<h3>Paso 1 — Comienza con una plantilla en blanco</h3>'
-        +'<p>Ve a <strong>Archivo &rarr; Nuevo CV...</strong> y haz clic en <strong>Crear CV vacío</strong>. Esto carga una plantilla JSON básica con las secciones de CV más comunes ya definidas (datos básicos, educación, publicaciones, habilidades, idiomas, etc.).</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Paso 2 — Llena tus datos básicos</h3>'
-        +'<p>Haz clic en la sección <strong>basics</strong> en la barra lateral izquierda. Completa tu nombre, apellido, correo, sitio web, ubicación y, opcionalmente, una imagen de perfil. Estos completan los comandos correspondientes de moderncv en LaTeX.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Paso 3 — Agrega entradas a cada sección</h3>'
-        +'<p>Haz clic en cualquier sección (ej. <em>education</em>) en la barra lateral. Utiliza el botón <strong>Añadir entrada</strong> para crear un nuevo elemento. Llena los campos — cada uno se asigna a una columna en un comando de LaTeX.</p>'
-        +'<ul>'
-        +'<li>Activa o desactiva <strong>Included</strong> en cada entrada para decidir si se muestra o se oculta en el CV compilado.</li>'
-        +'<li>Usa <strong>Duplicar</strong> para copiar una entrada y usarla como base para otra similar.</li>'
-        +'<li>Usa <strong>Eliminar</strong> para borrar una entrada de forma permanente.</li>'
-        +'</ul>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Paso 4 — Renombra etiquetas y títulos de sección</h3>'
-        +'<p>Cada campo en el editor tiene una etiqueta a la izquierda (ej. <code>degree</code>). Puedes renombrarla — esto controla cómo aparece en la salida de LaTeX. También puedes establecer un <strong>Título de salida</strong> personalizado para cada sección (ej. cambiar <em>education</em> a <em>Formación Académica</em>).</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Paso 5 — Previsualiza el resultado</h3>'
-        +'<p>Haz clic en la pestaña <strong>Vista Previa HTML</strong> o <strong>Código LaTeX</strong> en el panel derecho para ver el código generado en tiempo real. Usa la pestaña <strong>Base JSON</strong> para inspeccionar la estructura de datos sin procesar.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Paso 6 — Guarda tu progreso</h3>'
-        +'<p>Usa <strong>Descargar Base de Datos CV</strong> en el menú de archivo para guardar tu progreso de forma local. El banner en la parte inferior se volverá rojo cuando tengas cambios sin guardar y verde al guardar.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Paso 7 — Descarga tu CV</h3>'
-        +'<p>Cuando tu CV esté listo, ve a <strong>Archivo &rarr; Descargar archivo .tex</strong> para obtener el código LaTeX o utiliza <strong>Descargar PDF</strong> en el panel derecho para obtener el PDF compilado directamente.</p>'
-        +'</div>';
-    } else {
-      scratchBody.innerHTML = '<div class="help-section">'
-        +'<h3>Step 1 — Start with a blank template</h3>'
-        +'<p>Go to <strong>File &rarr; New CV&hellip;</strong> and click <strong>Start blank CV</strong>. This loads a minimal JSON template with the most common CV sections already defined (basics, education, publications, skills, languages, etc.).</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Step 2 — Fill in your basics</h3>'
-        +'<p>Click the <strong>basics</strong> section in the left sidebar. Fill in your first name, last name, email, homepage, location, and optionally a photo path. These populate the <code>\\firstname</code>, <code>\\familyname</code>, <code>\\email</code>, and <code>\\homepage</code> commands in moderncv.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Step 3 — Add entries to each section</h3>'
-        +'<p>Click any section (e.g., <em>education</em>) in the sidebar. Use the <strong>Add entry</strong> button to create a new item. Fill in the fields — each field maps to a column in a <code>\\cventry</code> command or equivalent LaTeX macro.</p>'
-        +'<ul>'
-        +'<li>Toggle <strong>Included</strong> on each entry to include or exclude it from the LaTeX output.</li>'
-        +'<li>Use <strong>Duplicate</strong> to copy a filled-in entry as a starting point for a similar one.</li>'
-        +'<li>Use <strong>Delete</strong> to remove an entry permanently.</li>'
-        +'</ul>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Step 4 — Rename labels and section titles</h3>'
-        +'<p>Each field in the editor has a label on the left (e.g., <code>degree</code>). You can rename it — this controls how it appears in the LaTeX output. You can also set a custom <strong>Output title</strong> for each section (e.g., rename <em>education</em> to <em>Academic Training</em>).</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Step 5 — Preview the LaTeX</h3>'
-        +'<p>Click the <strong>LaTeX</strong> tab at the top of the workspace to see the generated <code>.tex</code> source in real time. Use the <strong>JSON</strong> tab to inspect the raw data structure.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Step 6 — Save your progress</h3>'
-        +'<p>Use <strong>File &rarr; Download CV Database</strong> regularly to save your CV data as a <code>.cv</code> file. The banner at the top of the sidebar turns <span style="color:var(--color-error);font-weight:700">red</span> whenever there are unsaved changes — it turns <span style="color:var(--color-success);font-weight:700">green</span> once you download.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Step 7 — Download the LaTeX file</h3>'
-        +'<p>When your CV is ready, go to <strong>File &rarr; Download .tex</strong> to get the compiled LaTeX file. Open it in <a href="https://www.overleaf.com" target="_blank" rel="noopener">Overleaf</a> or compile locally with TeX Live / MiKTeX. The document requires the <code>moderncv</code> package.</p>'
-        +'</div>';
-    }
+  if (typeof renderInteractiveScratchGuide === 'function') {
+    renderInteractiveScratchGuide();
   }
 
   var usageTitle = el('helpUsageTitleLbl');
   if (usageTitle) usageTitle.textContent = isEs ? 'Cómo usar CV Builder' : 'How to use CV Builder';
+  if (typeof renderInteractiveUsageGuide === 'function') {
+    renderInteractiveUsageGuide();
+  }
   var usageBody = document.querySelector('#helpUsageModal .body');
   if (usageBody) {
     if (isEs) {
@@ -343,44 +331,7 @@ function updateUITranslations() {
 
   var templatesTitle = el('helpTemplatesTitleLbl');
   if (templatesTitle) templatesTitle.textContent = isEs ? 'Cómo usar Estilos' : 'How to use Styles';
-  var templatesBody = document.querySelector('#helpTemplatesModal .body');
-  if (templatesBody) {
-    if (isEs) {
-      templatesBody.innerHTML = '<div class="help-section">'
-        +'<h3>¿Qué es un Estilo?</h3>'
-        +'<p>Un <em>estilo</em> en CV Builder controla la apariencia del documento final: la fuente tipográfica, el color de acento, el diseño de moderncv, y las reglas (mapeos) que determinan el formato de LaTeX de cada sección.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Personalización Visual</h3>'
-        +'<p>Usa la pestaña <strong>Personalizador Visual</strong> en el editor para cambiar el color de acento (ej. Azul, Verde, Burdeos) y la tipografía de forma interactiva.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Administración de Estilos</h3>'
-        +'<p>Accede a <strong>Administrar estilos...</strong> en el selector de estilos para:</p>'
-        +'<ul>'
-        +'<li>Cargar, duplicar o renombrar estilos guardados.</li>'
-        +'<li>Importar (<code>.cvstyle</code>) o exportar tus estilos para compartirlos.</li>'
-        +'<li>Editar los <strong>mapeos</strong> que enlazan las secciones de datos con comandos específicos de LaTeX.</li>'
-        +'</ul>'
-        +'</div>';
-    } else {
-      templatesBody.innerHTML = '<div class="help-section">'
-        +'<h3>What is a CV Style?</h3>'
-        +'<p>A <em>style</em> configuration controls how the final LaTeX document looks: the main moderncv style theme, colors, typography fonts, custom headers, footers, and mappers.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Visual Theme Customizer</h3>'
-        +'<p>Open the <strong>Visual Customizer</strong> tab in the editor panel to select accent colors and body typography dynamically.</p>'
-        +'</div>'
-        +'<div class="help-section">'
-        +'<h3>Style Manager Modal</h3>'
-        +'<p>Click on the style selector and select <strong>Manage Styles...</strong> to open the style configuration manager:</p>'
-        +'<ul>'
-        +'<li>Load, duplicate, rename, or delete styles.</li>'
-        +'<li>Import (<code>.cvstyle</code>) and export files.</li>'
-        +'<li>Edit <strong>mappers</strong> that map CV database fields to LaTeX commands.</li>'
-        +'</ul>'
-        +'</div>';
-    }
+  if (typeof renderInteractiveTemplatesGuide === 'function') {
+    renderInteractiveTemplatesGuide();
   }
 }

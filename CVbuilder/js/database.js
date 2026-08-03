@@ -7,7 +7,7 @@ var DEFAULT_STYLE = {
   latexTemplate: '',
   htmlTemplate: '',
   mappers: {},
-  theme: { accentColor: '#2563eb', font: 'sans', photoLeftOffset: 40, photoTopOffset: 0 }
+  theme: { accentColor: '#2563eb', font: 'sans', textAlign: 'left', photoLeftOffset: 40, photoTopOffset: 0 }
 };
 
 // ── DATABASE (CV) CRUD ──
@@ -40,11 +40,8 @@ function loadDatabase(name) {
   if (raw) {
     try {
       data = JSON.parse(raw);
-      var isEmptyDefault = (name === 'Default CV' && (!data.basics || (!data.basics.firstname && !data.basics.lastname)));
-      var isPersonalDefault = (data.basics && data.basics.firstname === 'Guillermo' && data.basics.lastname === 'Sahonero');
-      if (isEmptyDefault || isPersonalDefault) {
+      if (!data || typeof data !== 'object') {
         data = JSON.parse(JSON.stringify(BASIC_CV));
-        localStorage.setItem('cvbuilder_cv_' + name, JSON.stringify(data));
       }
       delete data._templates;
       delete data.templates;
@@ -58,16 +55,33 @@ function loadDatabase(name) {
       currentDbName = name;
       state.sections = {};
       state.propertyNames = {};
+
+      if (data._sections) {
+        Object.keys(data._sections).forEach(function(k) {
+          state.sections[k] = Object.assign({}, data._sections[k]);
+        });
+      }
+
       state.activeSection = Object.keys(data).filter(function(k) {
-        return k !== '_templates' && k !== 'templates' && k !== 'instances' && k !== '_style';
+        return k !== '_templates' && k !== 'templates' && k !== 'instances' && k !== '_style' && k !== '_sections';
       })[0] || '';
 
-      // Reset to no active instance when loading a new DB
-      activeInstance = null;
-      currentInstanceName = 'None (Master CV)';
-
-      // Apply the CV's default style
-      applyStyleToUI(data._style);
+      var savedInstName = data._activeInstanceName;
+      if (savedInstName && data.instances && data.instances[savedInstName]) {
+        activeInstance = data.instances[savedInstName];
+        currentInstanceName = savedInstName;
+        if (activeInstance.style) applyStyleToUI(activeInstance.style);
+        if (activeInstance.sections) {
+          Object.keys(activeInstance.sections).forEach(function(k) {
+            if (!state.sections[k]) state.sections[k] = {};
+            Object.assign(state.sections[k], activeInstance.sections[k]);
+          });
+        }
+      } else {
+        activeInstance = null;
+        currentInstanceName = 'None (Master CV)';
+        applyStyleToUI(data._style);
+      }
 
       markClean();
       renderAll();
@@ -157,6 +171,8 @@ function saveActiveStyle() {
   if (!styleObj.theme) styleObj.theme = {};
   styleObj.theme.accentColor = state.themeAccentColor;
   styleObj.theme.font = state.themeFont;
+  styleObj.theme.textAlign = state.themeTextAlign || 'left';
+  styleObj.theme.headerSpacer = state.headerSpacer !== undefined ? state.headerSpacer : 20;
   styleObj.theme.photoLeftOffset = state.photoLeftOffset !== undefined ? state.photoLeftOffset : 40;
   styleObj.theme.photoTopOffset = state.photoTopOffset !== undefined ? state.photoTopOffset : 0;
 
@@ -183,12 +199,17 @@ function applyStyleToUI(styleObj) {
   var theme = styleObj.theme || {};
   state.themeAccentColor = theme.accentColor || '#2563eb';
   state.themeFont = theme.font || 'sans';
+  state.themeTextAlign = theme.textAlign || 'left';
+  state.headerSpacer = (theme.headerSpacer !== undefined) ? theme.headerSpacer : 20;
   state.photoLeftOffset = (theme.photoLeftOffset !== undefined) ? theme.photoLeftOffset : 40;
   state.photoTopOffset = (theme.photoTopOffset !== undefined) ? theme.photoTopOffset : 0;
 
   if (el('themeAccentColor')) el('themeAccentColor').value = state.themeAccentColor;
   if (el('themeAccentHex')) el('themeAccentHex').value = state.themeAccentColor;
   if (el('themeFontSelect')) el('themeFontSelect').value = state.themeFont;
+  if (el('themeTextAlignSelect')) el('themeTextAlignSelect').value = state.themeTextAlign;
+  if (el('headerSpacerSlider')) el('headerSpacerSlider').value = state.headerSpacer;
+  if (el('headerSpacerVal')) el('headerSpacerVal').textContent = state.headerSpacer + 'px';
   if (el('photoLeftSlider')) el('photoLeftSlider').value = state.photoLeftOffset;
   if (el('photoLeftVal')) el('photoLeftVal').textContent = state.photoLeftOffset + 'px';
   if (el('photoTopSlider')) el('photoTopSlider').value = state.photoTopOffset;
@@ -197,10 +218,30 @@ function applyStyleToUI(styleObj) {
   var latexTpl = styleObj.latexTemplate || DEFAULT_LATEX_TEMPLATE;
   var htmlTpl = styleObj.htmlTemplate || DEFAULT_HTML_TEMPLATE;
 
-  // Migration: detect outdated templates and reset
+  // Migration: detect outdated templates and reset/inject alignment tags
   var hasMigration = false;
   if (latexTpl.indexOf('has_publications') === -1) { latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
   if (htmlTpl.indexOf('all_sections') === -1 || latexTpl.indexOf('all_sections') === -1) { htmlTpl = DEFAULT_HTML_TEMPLATE; latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
+  if (htmlTpl.indexOf('theme.textAlign') === -1) {
+    if (htmlTpl.indexOf('</style>') !== -1) {
+      htmlTpl = htmlTpl.replace('</style>', '  body, h1, h2, h3, p, section, .entry, .entry-description, .entry-subheader, .contact-info, .kv-list, ul, li {\n    {{&theme.textAlignCss}}\n  }\n  .contact-info, .entry-header {\n    {{&theme.textAlignFlexCss}}\n  }\n</style>');
+    } else {
+      htmlTpl = DEFAULT_HTML_TEMPLATE;
+    }
+    hasMigration = true;
+  }
+  if (latexTpl.indexOf('theme.textAlign') === -1) {
+    if (latexTpl.indexOf('\\begin{document}') !== -1) {
+      latexTpl = latexTpl.replace('\\begin{document}', '\\begin{document}\n{{&theme.textAlignLatex}}');
+    } else {
+      latexTpl = DEFAULT_LATEX_TEMPLATE;
+    }
+    hasMigration = true;
+  }
+  if (latexTpl.indexOf('{{#basics.photo}}') !== -1) {
+    latexTpl = latexTpl.replace('{{#basics.photo}}', '{{#has_photo}}').replace('{{/basics.photo}}', '{{/has_photo}}').replace('{{{basics.photo}}}', '{{{photo_filename}}}');
+    hasMigration = true;
+  }
   if (hasMigration) { styleObj.latexTemplate = latexTpl; styleObj.htmlTemplate = htmlTpl; }
 
   if (el('latexTplEditor')) el('latexTplEditor').value = latexTpl;
@@ -262,7 +303,8 @@ function loadInstance(name) {
   if (!name || name === 'None (Master CV)') {
     activeInstance = null;
     currentInstanceName = 'None (Master CV)';
-    // Restore CV default style
+    if (data) data._activeInstanceName = null;
+    saveCurrentDatabase();
     applyStyleToUI(data._style || DEFAULT_STYLE);
     updateInstanceSelector();
     renderAll();
@@ -273,7 +315,8 @@ function loadInstance(name) {
   if (inst) {
     activeInstance = inst;
     currentInstanceName = name;
-    // Apply instance style
+    if (data) data._activeInstanceName = name;
+    saveCurrentDatabase();
     if (inst.style) applyStyleToUI(inst.style);
     if (inst.sections) {
       Object.keys(inst.sections).forEach(function(k) {
@@ -302,6 +345,68 @@ function deleteInstance(name) {
     saveCurrentDatabase();
     updateInstanceSelector();
     renderAll();
+  }
+}
+
+function duplicateInstance(sourceName, newName) {
+  var isEs = state.langFilter === 'es';
+  if (!data.instances) data.instances = {};
+  var source = data.instances[sourceName];
+  if (!source) return null;
+  newName = (newName || '').trim();
+  if (!newName) return null;
+  if (data.instances[newName]) {
+    alert(isEs ? '¡Ya existe una instancia con el nombre "' + newName + '"!' : 'An instance named "' + newName + '" already exists!');
+    return null;
+  }
+
+  var cloned = JSON.parse(JSON.stringify(source));
+  data.instances[newName] = cloned;
+  activeInstance = cloned;
+  currentInstanceName = newName;
+  saveCurrentDatabase();
+  updateInstanceSelector();
+  renderAll();
+  return cloned;
+}
+
+function mergeInstanceToMaster(name) {
+  var isEs = state.langFilter === 'es';
+  if (!data.instances) data.instances = {};
+  var inst = data.instances[name];
+  if (!inst || !inst.overwrites) return;
+  var keys = Object.keys(inst.overwrites);
+  if (keys.length === 0) {
+    alert(t('no_overrides'));
+    return;
+  }
+
+  var confirmMsg = t('confirm_merge_master').replace('{name}', name);
+  if (confirm(confirmMsg)) {
+    keys.forEach(function(pathStr) {
+      var val = inst.overwrites[pathStr];
+      var parts = pathStr.split('.');
+      var last = parts[parts.length - 1];
+      var ref = parts.slice(0, -1).reduce(function(acc, k) {
+        if (!acc[k]) acc[k] = {};
+        return acc[k];
+      }, data);
+      ref[last] = val;
+    });
+
+    inst.overwrites = {};
+    saveCurrentDatabase();
+    renderAll();
+    alert(isEs ? 'Anulaciones de la instancia "' + name + '" fusionadas en el CV Maestro.' : 'Overrides from instance "' + name + '" successfully merged into Master CV.');
+  }
+}
+
+function showDuplicateInstanceModal(sourceName) {
+  var isEs = state.langFilter === 'es';
+  var defaultName = (sourceName || 'Instance') + '_Copy';
+  var newName = prompt(t('enter_duplicate_instance_name'), defaultName);
+  if (newName) {
+    duplicateInstance(sourceName, newName);
   }
 }
 
@@ -364,24 +469,30 @@ function showInstanceManagerModal() {
   var isEs = state.langFilter === 'es';
   var rows = list.map(function(name) {
     var isActive = (name === currentInstanceName);
-    return '<div class="row" style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-2) 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
-      + '<span><strong>' + esc(name) + '</strong>' + (isActive ? ' <span class="pill" style="font-size:10px; background:oklch(from var(--color-primary) l c h / .15); color:var(--color-primary); border:1px solid var(--color-primary)">' + (isEs ? 'Activo' : 'Active') + '</span>' : '') + '</span>'
-      + '<div style="display:flex; gap:var(--space-2)">'
+    var inst = (data.instances && data.instances[name]) || {};
+    var overrideCount = inst.overwrites ? Object.keys(inst.overwrites).length : 0;
+    var countBadge = overrideCount > 0 ? ' <span class="pill" style="font-size:10px; background:oklch(from var(--color-primary) l c h / .1); color:var(--color-primary)">' + overrideCount + ' ' + (isEs ? 'anulaciones' : 'overrides') + '</span>' : '';
+
+    return '<div class="row" style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-2) 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08); flex-wrap:wrap; gap:var(--space-2)">'
+      + '<span><strong>' + esc(name) + '</strong>' + (isActive ? ' <span class="pill" style="font-size:10px; background:oklch(from var(--color-primary) l c h / .15); color:var(--color-primary); border:1px solid var(--color-primary)">' + (isEs ? 'Activo' : 'Active') + '</span>' : '') + countBadge + '</span>'
+      + '<div style="display:flex; gap:var(--space-1); flex-wrap:wrap">'
       + '<button class="btn btn-ghost btn-xs" onclick="loadInstance(\'' + esc(name) + '\'); document.getElementById(\'instanceManagerModal\').remove();">' + (isEs ? 'Cargar' : 'Load') + '</button>'
+      + '<button class="btn btn-ghost btn-xs" onclick="showDuplicateInstanceModal(\'' + esc(name) + '\'); document.getElementById(\'instanceManagerModal\').remove(); showInstanceManagerModal();">📋 ' + (isEs ? 'Duplicar' : 'Duplicate') + '</button>'
+      + (overrideCount > 0 ? '<button class="btn btn-ghost btn-xs" onclick="mergeInstanceToMaster(\'' + esc(name) + '\'); document.getElementById(\'instanceManagerModal\').remove(); showInstanceManagerModal();">⚡ ' + (isEs ? 'Fusionar' : 'Merge') + '</button>' : '')
       + '<button class="btn btn-danger btn-xs" onclick="deleteInstance(\'' + esc(name) + '\'); document.getElementById(\'instanceManagerModal\').remove(); showInstanceManagerModal();">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
       + '</div>'
       + '</div>';
   }).join('') || '<div class="muted tiny" style="padding:var(--space-4) 0">' + (isEs ? 'No hay instancias guardadas todavía.' : 'No custom CV Instances saved yet.') + '</div>';
 
-  modal.innerHTML = '<div class="modal" style="max-width:500px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); box-shadow:var(--shadow-md)">'
+  modal.innerHTML = '<div class="modal" style="max-width:580px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); box-shadow:var(--shadow-md)">'
     + '<div class="modal-header"><h3>' + (isEs ? 'Administrar Instancias de CV' : 'Manage CV Instances') + '</h3></div>'
     + '<div class="modal-body">'
-    + '<div class="tiny muted" style="margin-bottom:var(--space-3)">' + (isEs ? 'Las instancias se guardan dentro del archivo .cv activo.' : 'Instances are saved inside the active .cv file.') + '</div>'
+    + '<div class="tiny muted" style="margin-bottom:var(--space-3)">' + (isEs ? 'Las instancias adaptadas se guardan estrictamente dentro del archivo .cv activo.' : 'Tailored instances are saved strictly inside the active .cv file.') + '</div>'
     + '<div style="display:flex; gap:var(--space-2); margin-bottom:var(--space-4)">'
-    + '<button class="btn btn-primary" id="createInstanceBtn" style="flex:1">' + (isEs ? '+ Crear Instancia' : '+ Create New Instance') + '</button>'
+    + '<button class="btn btn-primary" id="createInstanceBtn" style="flex:1">' + (isEs ? '+ Crear Nueva Instancia' : '+ Create New Instance') + '</button>'
     + '</div>'
     + '<div><strong>' + (isEs ? 'Instancias Guardadas:' : 'Saved Instances:') + '</strong></div>'
-    + '<div style="max-height:250px; overflow-y:auto; margin-top:var(--space-2)">' + rows + '</div>'
+    + '<div style="max-height:280px; overflow-y:auto; margin-top:var(--space-2)">' + rows + '</div>'
     + '</div>'
     + '<div class="modal-footer">'
     + '<button class="btn btn-ghost" id="closeInstanceManagerBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'

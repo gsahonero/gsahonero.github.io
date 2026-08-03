@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CV JSON to LaTeX Builder</title>
+<title>CVbuilder</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=boska@400,500,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 </head>
@@ -148,7 +149,10 @@
   <aside class="panel sidebar">
     <div class="stack">
       <div class="split" style="align-items:center">
-        <div class="sectiontitle">Sections</div>
+        <div style="display:flex; align-items:center; gap:var(--space-2)">
+          <button id="toggleSidebarBtn" class="btn btn-ghost iconbtn" title="Collapse sidebar" aria-label="Collapse sidebar" style="width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold">◀</button>
+          <div class="sectiontitle">Sections</div>
+        </div>
         <div style="display:flex; align-items:center; gap:var(--space-2)">
           <span class="pill"><span class="ok">&#9679;</span><span id="sectionCount">0</span></span>
           <button id="addSectionBtn" class="btn btn-ghost" style="min-height:24px; padding:2px 8px; font-size:var(--text-xs)">+ Add</button>
@@ -192,6 +196,16 @@
               <option value="palatino">Elegant Palatino</option>
             </select>
           </div>
+
+          <div>
+            <label class="tiny" id="themeTextAlignSelectLbl" style="font-weight:600">Text Alignment</label>
+            <select id="themeTextAlignSelect" class="db-select" style="width:100%; height:34px; margin-top:4px; font-weight:600; font-size:13px; border-radius:var(--radius-sm); border:1.5px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text); padding:0 10px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap">
+              <option value="left">Left Aligned</option>
+              <option value="justify">Justified</option>
+              <option value="center">Center Aligned</option>
+              <option value="right">Right Aligned</option>
+            </select>
+          </div>
         </div>
 
         <div style="margin-top:var(--space-2); padding-top:var(--space-3); border-top:1px solid oklch(from var(--color-text) l c h / .1)">
@@ -213,6 +227,17 @@
               </div>
               <input type="range" id="photoTopSlider" min="-40" max="60" value="0" style="width:100%; cursor:pointer">
             </div>
+          </div>
+        </div>
+
+        <div style="margin-top:var(--space-2); padding-top:var(--space-3); border-top:1px solid oklch(from var(--color-text) l c h / .1)">
+          <div class="sectiontitle" id="headerSpacingSectionTitle" style="margin-bottom:var(--space-3)">Header & Layout Spacing</div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+              <label class="tiny" id="headerSpacerSliderLbl" style="font-weight:600">Header Spacer (Gap between Title & Date)</label>
+              <span id="headerSpacerVal" class="mono tiny" style="font-weight:700; color:var(--color-primary)">20px</span>
+            </div>
+            <input type="range" id="headerSpacerSlider" min="0" max="100" value="20" style="width:100%; cursor:pointer">
           </div>
         </div>
 
@@ -257,14 +282,24 @@
           <div class="sectiontitle">Live HTML Preview</div>
           <button class="btn btn-ghost" id="openHtmlWindowBtn" style="min-height:30px; padding:4px 10px; font-size:var(--text-xs)">Open in New Window</button>
         </div>
-        <iframe id="htmlPreviewFrame" sandbox="allow-scripts" srcdoc="Loading preview..." style="flex:1; width: 100%; min-height: 450px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: white; margin:0"></iframe>
+        <iframe id="htmlPreviewFrame" sandbox="allow-scripts allow-same-origin" srcdoc="Loading preview..." style="flex:1; width: 100%; min-height: 450px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: white; margin:0"></iframe>
       </div>
       
       <!-- LaTeX Source Panel -->
       <div id="latexPrevTab" class="stack hidden" style="flex:1; display:flex; flex-direction:column">
         <div class="split" style="margin-bottom: var(--space-2)">
-          <div class="sectiontitle">Rendered LaTeX Code</div>
-          <button class="btn btn-primary" id="copyLatexCodeBtn" style="min-height:30px; padding:4px 10px; font-size:var(--text-xs)">Copy Code</button>
+          <div class="sectiontitle" id="renderedLatexTitleLbl">Rendered LaTeX Code</div>
+          <div style="display:flex; gap:var(--space-2); align-items:center">
+            <select id="latexCompilerSelect" title="Select online LaTeX compilation service" style="height:30px; padding:0 8px; font-size:var(--text-xs); font-weight:600; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text); cursor:pointer">
+              <option value="ytotech">YtoTech LaTeX-on-HTTP (POST)</option>
+              <option value="latexonline">LaTeX.Online (GET)</option>
+            </select>
+            <button class="btn btn-ghost" id="copyLatexCodeBtn" style="min-height:30px; padding:4px 10px; font-size:var(--text-xs)">Copy Code</button>
+            <button class="btn btn-primary" id="latexTabPdfBtn" style="min-height:30px; padding:4px 10px; font-size:var(--text-xs); display:flex; align-items:center; gap:4px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px; height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export PDF</span>
+            </button>
+          </div>
         </div>
         <div id="latexPreview" class="preview" style="flex:1; min-height: 450px; overflow:auto; margin:0; padding:var(--space-3); border:1px solid var(--color-border); border-radius:var(--radius-lg); background:var(--color-surface-offset); font-family:monospace; white-space:pre-wrap"></div>
       </div>
@@ -281,9 +316,91 @@
 
   <!-- ── RIGHT OUTLINE ── -->
   <aside class="panel outlinepane" aria-label="Section outline">
-    <div class="outline-title">Outline</div>
+    <div class="outline-title" style="display:flex; align-items:center; justify-content:space-between">
+      <span>Outline</span>
+      <button id="toggleOutlineBtn" class="btn btn-ghost iconbtn" title="Collapse outline" aria-label="Collapse outline" style="width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold">▶</button>
+    </div>
     <div id="outlineBox"></div>
   </aside>
+</div>
+
+<!-- PDF Export Format Selection Modal -->
+<div id="pdfFormatModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pdfFormatTitleLbl">
+    <header>
+      <strong id="pdfFormatTitleLbl">Export PDF Document</strong>
+      <button class="btn btn-ghost" onclick="closeModal('pdfFormatModal')" aria-label="Close modal" style="min-height:auto; padding:4px 8px">&times;</button>
+    </header>
+    <div class="body stack">
+      <div id="pdfFormatDesc" style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2)">
+        Select your preferred PDF export format and compilation engine:
+      </div>
+      
+      <div class="stack" style="gap:var(--space-3)">
+        <!-- Option 1: LaTeX Engine -->
+        <label id="pdfFormatLatexCard" style="display:flex; gap:var(--space-3); padding:var(--space-3); background:var(--color-surface-offset); border:2px solid var(--color-primary); border-radius:var(--radius-lg); cursor:pointer">
+          <input type="radio" name="pdfFormatChoice" value="latex" checked style="width:18px; height:18px; margin-top:2px; cursor:pointer">
+          <div>
+            <div style="font-weight:700; font-size:var(--text-sm); color:var(--color-text)" id="pdfFormatLatexTitle">LaTeX Engine (Typeset PDF)</div>
+            <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:2px" id="pdfFormatLatexDesc">
+              Compiles your document into a professional, publication-quality PDF via an online LaTeX compiler.
+            </div>
+          </div>
+        </label>
+
+        <!-- Option 2: HTML Browser Print -->
+        <label id="pdfFormatHtmlCard" style="display:flex; gap:var(--space-3); padding:var(--space-3); background:var(--color-surface-offset); border:1px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-lg); cursor:pointer">
+          <input type="radio" name="pdfFormatChoice" value="html" style="width:18px; height:18px; margin-top:2px; cursor:pointer">
+          <div>
+            <div style="font-weight:700; font-size:var(--text-sm); color:var(--color-text)" id="pdfFormatHtmlTitle">HTML Browser Print</div>
+            <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:2px" id="pdfFormatHtmlDesc">
+              Opens your live HTML preview in a new window ready for browser printing or saving to PDF.
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div class="split" style="margin-top:var(--space-4)">
+        <button class="btn btn-ghost" onclick="closeModal('pdfFormatModal')" id="cancelPdfFormatBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmPdfFormatBtn">
+          <span id="confirmPdfFormatBtnText">Continue</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Remote LaTeX PDF Export Privacy Modal -->
+<div id="latexExportModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="latexExportTitleLbl">
+    <header>
+      <strong id="latexExportTitleLbl">Remote LaTeX PDF Export Privacy Notice</strong>
+      <button class="btn btn-ghost" onclick="closeModal('latexExportModal')" aria-label="Close modal" style="min-height:auto; padding:4px 8px">&times;</button>
+    </header>
+    <div class="body stack">
+      <div style="display:flex; gap:var(--space-3); align-items:flex-start; background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="width:28px; height:28px; flex-shrink:0; margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div id="latexExportNoticeBody" style="font-size:var(--text-sm); line-height:1.5">
+          To compile your document into a high-quality PDF via LaTeX, your resume data and LaTeX code will be transmitted over HTTPS to a remote compilation service (<strong id="selectedServerNameText">latex.ytotech.com</strong>).
+          <br><br>
+          Please note that your data may be processed on remote servers during PDF generation. By proceeding, you acknowledge this transmission.
+        </div>
+      </div>
+      
+      <div style="display:flex; align-items:center; gap:var(--space-2); margin-top:var(--space-1)">
+        <input type="checkbox" id="dontAskLatexExportCheck" style="width:16px; height:16px; cursor:pointer">
+        <label for="dontAskLatexExportCheck" id="dontAskLatexExportLbl" class="tiny" style="cursor:pointer; font-weight:600">Don't ask again during this session</label>
+      </div>
+
+      <div class="split" style="margin-top:var(--space-3)">
+        <button class="btn btn-ghost" id="cancelLatexExportBtn" onclick="closeModal('latexExportModal')">Cancel</button>
+        <button class="btn btn-primary" id="confirmLatexExportBtn" style="display:flex; align-items:center; gap:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="confirmLatexExportBtnText">Proceed & Export PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- hidden inputs -->
@@ -520,7 +637,7 @@
       <strong id="helpScratchTitleLbl">How to create your CV from scratch</strong>
       <button class="iconbtn" id="closeHelpScratchModal" aria-label="Close">&#x2715;</button>
     </header>
-    <div class="body">
+    <div class="body" id="helpScratchBody">
       <!-- Content populated dynamically based on translation selection -->
     </div>
   </div>
@@ -558,7 +675,7 @@
       <strong id="helpUsageTitleLbl">How to use CV Builder</strong>
       <button class="iconbtn" id="closeHelpUsageModal" aria-label="Close">&#x2715;</button>
     </header>
-    <div class="body">
+    <div class="body" id="helpUsageBody">
       <!-- Content populated dynamically based on translation selection -->
     </div>
   </div>
@@ -571,7 +688,7 @@
       <strong id="helpTemplatesTitleLbl">How to use Templates</strong>
       <button class="iconbtn" id="closeHelpTemplatesModal" aria-label="Close">&#x2715;</button>
     </header>
-    <div class="body">
+    <div class="body" id="helpTemplatesBody">
       <!-- Content populated dynamically based on translation selection -->
     </div>
   </div>
@@ -624,7 +741,7 @@
     </a>
   </div>
   <div class="statusbar-right" style="display:flex; align-items:center; gap:var(--space-4)">
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.7.0</button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.7.1</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme" style="background:none; border:none; padding:0; cursor:pointer; font-size:var(--text-sm); line-height:1; display:flex; align-items:center; justify-content:center; color:var(--color-text-muted)">&#9790;</button>
   </div>
 </footer>
@@ -637,7 +754,11 @@
 <script src="js/compiler.js"></script>
 <script src="js/database.js"></script>
 <script src="js/editor.js"></script>
+<script src="presets/tours.js"></script>
 <script src="js/tour.js"></script>
+<script src="configs/guide_scratch.js"></script>
+<script src="configs/guide_usage.js"></script>
+<script src="configs/guide_templates.js"></script>
 <script src="js/app.js"></script>
 
 <script>
@@ -648,6 +769,7 @@ el('importCvFileInput').onchange = function(e) {
     importDatabaseFile(file);
     closeModal('dbManagerModal');
   }
+  e.target.value = '';
 };
 
 el('tplFileInput').onchange = function(e) {
@@ -687,12 +809,7 @@ el('copyLatexCodeBtn').onclick = function() {
 };
 
 el('openHtmlWindowBtn').onclick = function() {
-  var w = window.open();
-  if (w) {
-    w.document.open();
-    w.document.write(renderHtmlContent());
-    w.document.close();
-  }
+  openHtmlWindow(false);
 };
 
 // Tab view toggler events binders

@@ -1,0 +1,80 @@
+window.TOURS_CONFIG = {
+  "defaultTour": "welcome",
+  "tours": {
+    "welcome": {
+      "id": "welcome",
+      "title": {
+        "en": "Welcome Tour Guide",
+        "es": "Guía de bienvenida"
+      },
+      "steps": [
+        {
+          "target": ".db-selector",
+          "title": {
+            "en": "Manage CV Databases",
+            "es": "Administrar bases de datos de CV"
+          },
+          "content": {
+            "en": "Select, rename, duplicate, or import different CV profiles here. All data is saved automatically in your browser.",
+            "es": "Selecciona, renombra, duplica o importa diferentes perfiles de CV aquí. Todos los datos se guardan automáticamente en tu navegador."
+          }
+        },
+        {
+          "target": ".instance-selector",
+          "title": {
+            "en": "Tailored CV Instances",
+            "es": "Instancias de CV personalizadas"
+          },
+          "content": {
+            "en": "Create and switch between tailored instances of your CV for specific job applications without modifying your master CV data.",
+            "es": "Crea y cambia entre versiones personalizadas de tu CV para ofertas específicas sin modificar tu base de datos principal."
+          }
+        },
+        {
+          "target": "#addSectionBtn",
+          "title": {
+            "en": "Add & Delete Sections",
+            "es": "Añadir y eliminar secciones"
+          },
+          "content": {
+            "en": "Click here to add new predefined or custom sections. You can delete empty sections from their edit cards.",
+            "es": "Haz clic aquí para añadir secciones personalizadas o predefinidas. Puedes eliminar secciones vacías desde sus tarjetas de edición."
+          }
+        },
+        {
+          "target": ".left-pane",
+          "title": {
+            "en": "Workspace Editors",
+            "es": "Editores del espacio de trabajo"
+          },
+          "content": {
+            "en": "Edit form fields, modify the LaTeX preamble, or edit live HTML code in this left-hand workspace.",
+            "es": "Modifica los campos del formulario, edita el preámbulo de LaTeX o cambia el código HTML directamente en este panel izquierdo."
+          }
+        },
+        {
+          "target": ".right-pane",
+          "title": {
+            "en": "Live Previews & Downloads",
+            "es": "Vista previa en vivo y descargas"
+          },
+          "content": {
+            "en": "Switch tabs to preview the HTML view, check the generated LaTeX code, or click \"Download PDF\" to compile your document!",
+            "es": "Cambia de pestaña para ver la previsualización en HTML, comprobar el código LaTeX generado o haz clic en \"Descargar PDF\" para compilar tu documento."
+          }
+        },
+        {
+          "target": "#langFilterSelect",
+          "title": {
+            "en": "Bilingual Resumes",
+            "es": "Currículums bilingües"
+          },
+          "content": {
+            "en": "Tag entries as English or Spanish, then toggle the global output language filter to instantly render either version. If you want to take this tour again, just click on the \"Welcome Tour Guide\" option inside the Help menu!",
+            "es": "Etiqueta elementos como inglés o español, y cambia el filtro de idioma global para renderizar al instante cualquiera de las versiones. Si quieres volver a realizar la guía, haz clic en la opción \"Guía de bienvenida\" dentro del menú de Ayuda."
+          }
+        }
+      ]
+    }
+  }
+};

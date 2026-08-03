@@ -8,7 +8,9 @@ var state = {
   dirty: false,
   langFilter: 'all',
   themeAccentColor: '#2563eb',
-  themeFont: 'sans'
+  themeFont: 'sans',
+  themeTextAlign: 'left',
+  headerSpacer: 20
 };
 var activeInstance = null;
 var currentInstanceName = 'None (Master CV)';
@@ -94,6 +96,7 @@ function renderAll() {
   renderOutline();
   renderEditor();
   renderLatex();
+  renderHtmlPreview();
   renderSchema();
 }
 
@@ -109,6 +112,8 @@ function closeModal(id) {
 
 // ── ACTIONS ──
 function exportDatabaseFile() {
+  saveCurrentInstance();
+  saveCurrentDatabase();
   var cleanData = clone(data);
   delete cleanData._templates;
   delete cleanData.templates;
@@ -895,29 +900,579 @@ el('downloadTexBtn').onclick = function() {
   downloadTexFile();
 };
 
+var dontAskLatexPrivacySession = false;
+
+function openHtmlWindow(triggerPrint) {
+  var htmlContent = renderHtmlContent();
+  if (triggerPrint) {
+    var printScript = '\n<script>window.onload = function() { setTimeout(function() { window.print(); }, 350); };</script>\n';
+    if (htmlContent.indexOf('</body>') !== -1) {
+      htmlContent = htmlContent.replace('</body>', printScript + '</body>');
+    } else {
+      htmlContent += printScript;
+    }
+  }
+
+  var w = window.open();
+  if (w) {
+    w.document.open();
+    w.document.write(htmlContent);
+    w.document.close();
+  }
+}
+
+function openPdfExportFormatModal() {
+  openModal('pdfFormatModal');
+}
+
+function confirmPdfExportFormatChoice() {
+  closeModal('pdfFormatModal');
+  var choices = document.getElementsByName('pdfFormatChoice');
+  var selectedChoice = 'latex';
+  for (var i = 0; i < choices.length; i++) {
+    if (choices[i].checked) {
+      selectedChoice = choices[i].value;
+      break;
+    }
+  }
+
+  if (selectedChoice === 'html') {
+    openHtmlWindow(true);
+  } else {
+    handlePdfExportRequest();
+  }
+}
+
+function handlePdfExportRequest() {
+  if (dontAskLatexPrivacySession) {
+    executeLatexPdfExport();
+  } else {
+    var sName = (state && state.latexCompilerService === 'latexonline') ? 'latexonline.cc' : 'latex.ytotech.com';
+    var serverTxtEl = el('selectedServerNameText');
+    if (serverTxtEl) serverTxtEl.textContent = sName;
+    openModal('latexExportModal');
+  }
+}
+
+async function executeLatexPdfExport() {
+  closeModal('latexExportModal');
+  
+  var dontAskCheck = el('dontAskLatexExportCheck');
+  if (dontAskCheck && dontAskCheck.checked) {
+    dontAskLatexPrivacySession = true;
+  }
+
+  var btnTextEls = [el('topbarPdfBtnText'), el('confirmLatexExportBtnText')];
+  btnTextEls.forEach(function(b) {
+    if (b) {
+      if (!b.dataset.origText) b.dataset.origText = b.textContent;
+      b.textContent = (state && state.langFilter === 'es' ? 'Compilando PDF...' : 'Compiling PDF...');
+    }
+  });
+
+  try {
+    var latexCode = (el('latexPreview') && el('latexPreview').textContent) || renderTemplate(DEFAULT_LATEX_TEMPLATE, buildTemplateContext('latex'), texEscape);
+    var service = (state && state.latexCompilerService) || 'ytotech';
+    
+    var pdfBlob = await compilePdfFromLatex(latexCode, service);
+    
+    var fn = 'CVbuilder_Resume.pdf';
+    if (data && data.basics) {
+      var fname = (data.basics.firstname || '').trim();
+      var lname = (data.basics.lastname || '').trim();
+      if (fname || lname) {
+        fn = (fname + '_' + lname + '_CV.pdf').replace(/\s+/g, '_');
+      }
+    }
+    
+    downloadBlob(pdfBlob, fn);
+  } catch (err) {
+    console.error(err);
+    alert((state && state.langFilter === 'es' ? 'Error al compilar PDF mediante LaTeX: ' : 'Failed to compile PDF via LaTeX: ') + err.message);
+  } finally {
+    btnTextEls.forEach(function(b) {
+      if (b && b.dataset.origText) {
+        b.textContent = b.dataset.origText;
+      }
+    });
+  }
+}
+
 var oldPdfBtn = el('downloadPdfBtn');
-if (oldPdfBtn) oldPdfBtn.onclick = downloadPdfFile;
+if (oldPdfBtn) oldPdfBtn.onclick = openPdfExportFormatModal;
 
 var topbarPdf = el('topbarPdfBtn');
-if (topbarPdf) topbarPdf.onclick = downloadPdfFile;
+if (topbarPdf) topbarPdf.onclick = openPdfExportFormatModal;
 
 var menuPdf = el('menuDownloadPdfBtn');
-if (menuPdf) menuPdf.onclick = downloadPdfFile;
+if (menuPdf) menuPdf.onclick = openPdfExportFormatModal;
 
 var htmlPrevPdf = el('htmlPrevPdfBtn');
-if (htmlPrevPdf) htmlPrevPdf.onclick = downloadPdfFile;
+if (htmlPrevPdf) htmlPrevPdf.onclick = openPdfExportFormatModal;
+
+var latexTabPdf = el('latexTabPdfBtn');
+if (latexTabPdf) latexTabPdf.onclick = openPdfExportFormatModal;
+
+var confirmPdfFormatBtn = el('confirmPdfFormatBtn');
+if (confirmPdfFormatBtn) confirmPdfFormatBtn.onclick = confirmPdfExportFormatChoice;
+
+var confirmExportBtn = el('confirmLatexExportBtn');
+if (confirmExportBtn) confirmExportBtn.onclick = executeLatexPdfExport;
+
+var latexCompilerSelect = el('latexCompilerSelect');
+if (latexCompilerSelect) {
+  latexCompilerSelect.onchange = function(e) {
+    state.latexCompilerService = e.target.value;
+    var serverTxtEl = el('selectedServerNameText');
+    if (serverTxtEl) {
+      serverTxtEl.textContent = (e.target.value === 'latexonline') ? 'latexonline.cc' : 'latex.ytotech.com';
+    }
+  };
+}
+
+function handleGuideAction(type, modalId) {
+  if (modalId) closeModal(modalId);
+  switch (type) {
+    case 'startBlankCv':
+      startBlankCv();
+      break;
+    case 'openDbManagerModal':
+      openDbManagerModal();
+      break;
+    case 'jumpBasics':
+      state.activeSection = 'basics';
+      renderSectionList();
+      renderOutline();
+      renderEditor();
+      break;
+    case 'openAddSectionAssistant':
+      openAddSectionAssistant();
+      break;
+    case 'openAddInstanceModal':
+      openModal('addInstanceModal');
+      break;
+    case 'switchPreviewHtml':
+      switchPreviewTab('html');
+      break;
+    case 'switchPreviewLatex':
+      switchPreviewTab('latex');
+      break;
+    case 'exportDatabaseFile':
+      exportDatabaseFile();
+      break;
+    case 'exportPdf':
+      exportPdf();
+      break;
+    case 'switchTabEditor':
+      switchTab('editor');
+      break;
+    case 'switchTabCustomizer':
+      switchTab('customizer');
+      break;
+    case 'switchTabLatex':
+      switchTab('latex');
+      break;
+    case 'switchTabHtml':
+      switchTab('html');
+      break;
+    case 'openStyleManagerModal':
+      openModal('styleManagerModal');
+      break;
+    default:
+      break;
+  }
+}
+
+var currentScratchStep = 1;
+var guideScratchData = typeof GUIDE_SCRATCH_CONFIG !== 'undefined' ? GUIDE_SCRATCH_CONFIG : null;
+
+function loadGuideScratchConfig(callback) {
+  if (guideScratchData) {
+    if (callback) callback(guideScratchData);
+    return;
+  }
+  if (typeof fetch === 'function') {
+    fetch('configs/guide_scratch.json')
+      .then(function(res) { return res.json(); })
+      .then(function(json) {
+        guideScratchData = json;
+        if (callback) callback(guideScratchData);
+      })
+      .catch(function() {
+        if (callback) callback(null);
+      });
+  } else {
+    if (callback) callback(null);
+  }
+}
+
+function renderInteractiveScratchGuide(stepIdx) {
+  if (stepIdx !== undefined) currentScratchStep = stepIdx;
+  if (currentScratchStep < 1) currentScratchStep = 1;
+  if (currentScratchStep > 6) currentScratchStep = 6;
+
+  var scratchBody = el('helpScratchBody') || document.querySelector('#helpScratchModal .body');
+  if (!scratchBody) return;
+
+  var cfg = guideScratchData || (typeof GUIDE_SCRATCH_CONFIG !== 'undefined' ? GUIDE_SCRATCH_CONFIG : null);
+  if (!cfg) {
+    loadGuideScratchConfig(function() { renderInteractiveScratchGuide(stepIdx); });
+    return;
+  }
+
+  var isEs = state.langFilter === 'es';
+  var langKey = isEs ? 'es' : 'en';
+  var steps = cfg.steps || [];
+  var totalSteps = steps.length || 6;
+  var pct = Math.round((currentScratchStep / totalSteps) * 100);
+
+  var currentStepData = steps[currentScratchStep - 1] || {};
+  var content = currentStepData.content ? currentStepData.content[langKey] : {};
+
+  var html = '';
+
+  // 1. Progress Bar
+  html += '<div style="margin-bottom:var(--space-4); background:var(--color-surface); padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-divider)">';
+  html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-2); font-size:var(--text-xs); color:var(--color-text-muted)">';
+  html += '    <span style="font-weight:700; color:var(--color-primary)">' + (isEs ? 'Paso ' + currentScratchStep + ' de ' + totalSteps : 'Step ' + currentScratchStep + ' of ' + totalSteps) + '</span>';
+  html += '    <span style="font-weight:600">' + pct + '% ' + (isEs ? 'Completado' : 'Completed') + '</span>';
+  html += '  </div>';
+  html += '  <div style="height:6px; background:oklch(from var(--color-text) l c h / .1); border-radius:3px; overflow:hidden">';
+  html += '    <div style="height:100%; width:' + pct + '%; background:var(--color-primary); transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius:3px"></div>';
+  html += '  </div>';
+
+  // 2. Step Tabs
+  html += '  <div style="display:flex; gap:var(--space-2); margin-top:var(--space-3); overflow-x:auto; padding-bottom:4px">';
+  for (var i = 1; i <= totalSteps; i++) {
+    var active = i === currentScratchStep;
+    var sMeta = (steps[i - 1] && steps[i - 1].meta && steps[i - 1].meta[langKey]) || { title: 'Step ' + i, icon: '📍' };
+    html += '    <button onclick="renderInteractiveScratchGuide(' + i + ')" class="btn ' + (active ? 'btn-primary' : 'btn-ghost') + ' btn-xs" style="flex-shrink:0; font-size:11px; padding:4px 8px; border-radius:var(--radius-md); display:flex; align-items:center; gap:4px">';
+    html += '      <span>' + sMeta.icon + '</span><span>' + i + '. ' + esc(sMeta.title) + '</span>';
+    html += '    </button>';
+  }
+  html += '  </div>';
+  html += '</div>';
+
+  // 3. Step Content Card
+  html += '<div style="background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); border:1.5px solid var(--color-border); box-shadow:0 4px 12px rgba(0,0,0,0.04); margin-bottom:var(--space-4)">';
+  html += '  <h3 style="margin-top:0; font-size:var(--text-lg); display:flex; align-items:center; gap:8px; color:var(--color-primary)">' + (content.title || '') + '</h3>';
+  if (content.description) {
+    html += '  <p style="line-height:1.6; color:var(--color-text-muted)">' + content.description + '</p>';
+  }
+
+  // Cards Grid
+  if (content.cards && content.cards.length) {
+    html += '  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--space-3); margin:var(--space-4) 0">';
+    content.cards.forEach(function(card) {
+      html += '    <div style="background:var(--color-bg); padding:var(--space-4); border-radius:var(--radius-md); border:1px solid var(--color-divider)">';
+      html += '      <div style="font-weight:700; margin-bottom:4px">' + card.title + '</div>';
+      html += '      <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:12px">' + card.description + '</p>';
+      if (card.action) {
+        html += '      <button onclick="handleGuideAction(\'' + card.action.type + '\', \'helpScratchModal\')" class="btn btn-' + card.action.style + ' btn-sm" style="width:100%">' + card.action.label + '</button>';
+      }
+      html += '    </div>';
+    });
+    html += '  </div>';
+  }
+
+  // ProTip
+  if (content.proTip) {
+    html += '  <div style="background:var(--color-bg); padding:var(--space-4); border-radius:var(--radius-md); border-left:4px solid var(--color-primary); margin:var(--space-4) 0">';
+    html += '    <div style="font-weight:700; margin-bottom:4px; font-size:var(--text-sm)">' + content.proTip.title + '</div>';
+    html += '    <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0">' + content.proTip.text + '</p>';
+    html += '  </div>';
+  }
+
+  // Box
+  if (content.box) {
+    html += '  <div style="background:var(--color-bg); padding:var(--space-4); border-radius:var(--radius-md); border:1px solid var(--color-divider); margin:var(--space-4) 0">';
+    html += '    <div style="font-weight:700; margin-bottom:4px; font-size:var(--text-sm)">' + content.box.title + '</div>';
+    html += '    <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:8px">' + content.box.text + '</p>';
+    html += '  </div>';
+  }
+
+  // Actions
+  if (content.actions && content.actions.length) {
+    html += '  <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; margin-top:var(--space-4)">';
+    content.actions.forEach(function(act) {
+      html += '    <button onclick="handleGuideAction(\'' + act.type + '\', \'helpScratchModal\')" class="btn btn-' + act.style + ' btn-sm">' + act.label + '</button>';
+    });
+    html += '  </div>';
+  }
+
+  html += '</div>';
+
+  // 4. Footer Navigation
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-3); border-top:1px solid var(--color-divider); padding-top:var(--space-4)">';
+  if (currentScratchStep > 1) {
+    html += '  <button onclick="renderInteractiveScratchGuide(' + (currentScratchStep - 1) + ')" class="btn btn-ghost btn-sm">⬅️ ' + (isEs ? 'Anterior' : 'Previous') + '</button>';
+  } else {
+    html += '  <div></div>';
+  }
+
+  if (currentScratchStep < totalSteps) {
+    html += '  <button onclick="renderInteractiveScratchGuide(' + (currentScratchStep + 1) + ')" class="btn btn-primary btn-sm">' + (isEs ? 'Siguiente' : 'Next') + ' ➡️</button>';
+  } else {
+    html += '  <button onclick="closeModal(\'helpScratchModal\');" class="btn btn-primary btn-sm">🚀 ' + (isEs ? '¡Comenzar a Editar!' : 'Finish & Start Editing!') + '</button>';
+  }
+  html += '</div>';
+
+  scratchBody.innerHTML = html;
+}
+
+var currentUsageTab = 1;
+var guideUsageData = typeof GUIDE_USAGE_CONFIG !== 'undefined' ? GUIDE_USAGE_CONFIG : null;
+
+function loadGuideUsageConfig(callback) {
+  if (guideUsageData) {
+    if (callback) callback(guideUsageData);
+    return;
+  }
+  if (typeof fetch === 'function') {
+    fetch('configs/guide_usage.json')
+      .then(function(res) { return res.json(); })
+      .then(function(json) {
+        guideUsageData = json;
+        if (callback) callback(guideUsageData);
+      })
+      .catch(function() {
+        if (callback) callback(null);
+      });
+  } else {
+    if (callback) callback(null);
+  }
+}
+
+function renderInteractiveUsageGuide(tabIdx) {
+  if (tabIdx !== undefined) currentUsageTab = tabIdx;
+  if (currentUsageTab < 1) currentUsageTab = 1;
+  if (currentUsageTab > 6) currentUsageTab = 6;
+
+  var usageBody = el('helpUsageBody') || document.querySelector('#helpUsageModal .body');
+  if (!usageBody) return;
+
+  var cfg = guideUsageData || (typeof GUIDE_USAGE_CONFIG !== 'undefined' ? GUIDE_USAGE_CONFIG : null);
+  if (!cfg) {
+    loadGuideUsageConfig(function() { renderInteractiveUsageGuide(tabIdx); });
+    return;
+  }
+
+  var isEs = state.langFilter === 'es';
+  var langKey = isEs ? 'es' : 'en';
+  var components = cfg.components || [];
+  var totalTabs = components.length || 6;
+
+  var currentCompData = components[currentUsageTab - 1] || {};
+  var content = currentCompData.content ? currentCompData.content[langKey] : {};
+
+  var html = '';
+
+  // 1. Component Selector Tab Bar
+  html += '<div style="margin-bottom:var(--space-4); background:var(--color-surface); padding:var(--space-3); border-radius:var(--radius-lg); border:1px solid var(--color-divider)">';
+  html += '  <div style="font-size:var(--text-xs); font-weight:700; color:var(--color-text-muted); margin-bottom:var(--space-2)">' + (isEs ? 'EXPLORADOR DE COMPONENTES DE CVBUILDER:' : 'CVBUILDER COMPONENT ARCHITECTURE EXPLORER:') + '</div>';
+  html += '  <div style="display:flex; gap:var(--space-2); overflow-x:auto; padding-bottom:4px">';
+  for (var i = 1; i <= totalTabs; i++) {
+    var active = i === currentUsageTab;
+    var cMeta = (components[i - 1] && components[i - 1].meta && components[i - 1].meta[langKey]) || { title: 'Component ' + i, icon: '⚙️' };
+    html += '    <button onclick="renderInteractiveUsageGuide(' + i + ')" class="btn ' + (active ? 'btn-primary' : 'btn-ghost') + ' btn-xs" style="flex-shrink:0; font-size:11px; padding:4px 8px; border-radius:var(--radius-md); display:flex; align-items:center; gap:4px">';
+    html += '      <span>' + cMeta.icon + '</span><span>' + i + '. ' + esc(cMeta.title) + '</span>';
+    html += '    </button>';
+  }
+  html += '  </div>';
+  html += '</div>';
+
+  // 2. Component Card Deep Dive
+  html += '<div style="background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); border:1.5px solid var(--color-border); box-shadow:0 4px 12px rgba(0,0,0,0.04); margin-bottom:var(--space-4)">';
+  html += '  <h3 style="margin-top:0; font-size:var(--text-lg); display:flex; align-items:center; gap:8px; color:var(--color-primary)">' + (content.title || '') + '</h3>';
+  if (content.description) {
+    html += '  <p style="line-height:1.6; color:var(--color-text-muted)">' + content.description + '</p>';
+  }
+
+  // Grid
+  if (content.grid && content.grid.length) {
+    html += '  <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin:var(--space-4) 0">';
+    content.grid.forEach(function(item) {
+      var borderStyle = item.border ? 'border-left:4px solid ' + item.border : 'border:1px solid var(--color-divider)';
+      html += '    <div style="background:var(--color-bg); padding:var(--space-3); border-radius:var(--radius-md); ' + borderStyle + '">';
+      html += '      <div style="font-weight:700; font-size:var(--text-xs); color:var(--color-primary); margin-bottom:4px">' + item.title + '</div>';
+      html += '      <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; line-height:1.4">' + item.text + '</p>';
+      html += '    </div>';
+    });
+    html += '  </div>';
+  }
+
+  // Feature Box
+  if (content.box) {
+    var borderStyle = content.box.border ? 'border-left:4px solid ' + content.box.border : 'border:1px solid var(--color-divider)';
+    html += '  <div style="background:var(--color-bg); padding:var(--space-4); border-radius:var(--radius-md); ' + borderStyle + '; margin:var(--space-4) 0">';
+    html += '    <div style="font-weight:700; margin-bottom:4px; font-size:var(--text-sm)">' + content.box.title + '</div>';
+    if (content.box.text) {
+      html += '    <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; line-height:1.5">' + content.box.text + '</p>';
+    }
+    if (content.box.items && content.box.items.length) {
+      html += '    <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:18px; line-height:1.6">';
+      content.box.items.forEach(function(it) {
+        html += '      <li>' + it + '</li>';
+      });
+      html += '    </ul>';
+    }
+    html += '  </div>';
+  }
+
+  // Actions
+  if (content.actions && content.actions.length) {
+    html += '  <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; margin-top:var(--space-4)">';
+    content.actions.forEach(function(act) {
+      html += '    <button onclick="handleGuideAction(\'' + act.type + '\', \'helpUsageModal\')" class="btn btn-' + act.style + ' btn-sm">' + act.label + '</button>';
+    });
+    html += '  </div>';
+  }
+
+  html += '</div>';
+
+  // 3. Footer Navigation
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-3); border-top:1px solid var(--color-divider); padding-top:var(--space-4)">';
+  if (currentUsageTab > 1) {
+    html += '  <button onclick="renderInteractiveUsageGuide(' + (currentUsageTab - 1) + ')" class="btn btn-ghost btn-sm">⬅️ ' + (isEs ? 'Anterior' : 'Previous') + '</button>';
+  } else {
+    html += '  <div></div>';
+  }
+
+  if (currentUsageTab < totalTabs) {
+    html += '  <button onclick="renderInteractiveUsageGuide(' + (currentUsageTab + 1) + ')" class="btn btn-primary btn-sm">' + (isEs ? 'Siguiente' : 'Next') + ' ➡️</button>';
+  } else {
+    html += '  <button onclick="closeModal(\'helpUsageModal\');" class="btn btn-primary btn-sm">🚀 ' + (isEs ? '¡Entendido!' : 'Got it!') + '</button>';
+  }
+  html += '</div>';
+
+  usageBody.innerHTML = html;
+}
+
+var currentTemplatesTab = 1;
+var guideTemplatesData = typeof GUIDE_TEMPLATES_CONFIG !== 'undefined' ? GUIDE_TEMPLATES_CONFIG : null;
+
+function loadGuideTemplatesConfig(callback) {
+  if (guideTemplatesData) {
+    if (callback) callback(guideTemplatesData);
+    return;
+  }
+  if (typeof fetch === 'function') {
+    fetch('configs/guide_templates.json')
+      .then(function(res) { return res.json(); })
+      .then(function(json) {
+        guideTemplatesData = json;
+        if (callback) callback(guideTemplatesData);
+      })
+      .catch(function() {
+        if (callback) callback(null);
+      });
+  } else {
+    if (callback) callback(null);
+  }
+}
+
+function renderInteractiveTemplatesGuide(tabIdx) {
+  if (tabIdx !== undefined) currentTemplatesTab = tabIdx;
+  if (currentTemplatesTab < 1) currentTemplatesTab = 1;
+  if (currentTemplatesTab > 5) currentTemplatesTab = 5;
+
+  var templatesBody = el('helpTemplatesBody') || document.querySelector('#helpTemplatesModal .body');
+  if (!templatesBody) return;
+
+  var cfg = guideTemplatesData || (typeof GUIDE_TEMPLATES_CONFIG !== 'undefined' ? GUIDE_TEMPLATES_CONFIG : null);
+  if (!cfg) {
+    loadGuideTemplatesConfig(function() { renderInteractiveTemplatesGuide(tabIdx); });
+    return;
+  }
+
+  var isEs = state.langFilter === 'es';
+  var langKey = isEs ? 'es' : 'en';
+  var components = cfg.components || [];
+  var totalTabs = components.length || 5;
+
+  var currentCompData = components[currentTemplatesTab - 1] || {};
+  var content = currentCompData.content ? currentCompData.content[langKey] : {};
+
+  var html = '';
+
+  // 1. Component Selector Tab Bar
+  html += '<div style="margin-bottom:var(--space-4); background:var(--color-surface); padding:var(--space-3); border-radius:var(--radius-lg); border:1px solid var(--color-divider)">';
+  html += '  <div style="font-size:var(--text-xs); font-weight:700; color:var(--color-text-muted); margin-bottom:var(--space-2)">' + (isEs ? 'EXPLORADOR DE PLANTILLAS Y ESTILOS:' : 'CVBUILDER STYLE & TEMPLATE ARCHITECTURE:') + '</div>';
+  html += '  <div style="display:flex; gap:var(--space-2); overflow-x:auto; padding-bottom:4px">';
+  for (var i = 1; i <= totalTabs; i++) {
+    var active = i === currentTemplatesTab;
+    var cMeta = (components[i - 1] && components[i - 1].meta && components[i - 1].meta[langKey]) || { title: 'Component ' + i, icon: '🎨' };
+    html += '    <button onclick="renderInteractiveTemplatesGuide(' + i + ')" class="btn ' + (active ? 'btn-primary' : 'btn-ghost') + ' btn-xs" style="flex-shrink:0; font-size:11px; padding:4px 8px; border-radius:var(--radius-md); display:flex; align-items:center; gap:4px">';
+    html += '      <span>' + cMeta.icon + '</span><span>' + i + '. ' + esc(cMeta.title) + '</span>';
+    html += '    </button>';
+  }
+  html += '  </div>';
+  html += '</div>';
+
+  // 2. Component Card Deep Dive
+  html += '<div style="background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); border:1.5px solid var(--color-border); box-shadow:0 4px 12px rgba(0,0,0,0.04); margin-bottom:var(--space-4)">';
+  html += '  <h3 style="margin-top:0; font-size:var(--text-lg); display:flex; align-items:center; gap:8px; color:var(--color-primary)">' + (content.title || '') + '</h3>';
+  if (content.description) {
+    html += '  <p style="line-height:1.6; color:var(--color-text-muted)">' + content.description + '</p>';
+  }
+
+  // Feature Box (Elements, Usage & What to Expect)
+  if (content.box) {
+    html += '  <div style="background:var(--color-bg); padding:var(--space-4); border-radius:var(--radius-md); border:1px solid var(--color-divider); margin:var(--space-4) 0">';
+    html += '    <div style="font-weight:700; margin-bottom:4px; font-size:var(--text-sm)">' + content.box.title + '</div>';
+    if (content.box.items && content.box.items.length) {
+      html += '    <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:18px; line-height:1.6">';
+      content.box.items.forEach(function(it) {
+        html += '      <li style="margin-bottom:4px">' + it + '</li>';
+      });
+      html += '    </ul>';
+    }
+    html += '  </div>';
+  }
+
+  // Actions
+  if (content.actions && content.actions.length) {
+    html += '  <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; margin-top:var(--space-4)">';
+    content.actions.forEach(function(act) {
+      html += '    <button onclick="handleGuideAction(\'' + act.type + '\', \'helpTemplatesModal\')" class="btn btn-' + act.style + ' btn-sm">' + act.label + '</button>';
+    });
+    html += '  </div>';
+  }
+
+  html += '</div>';
+
+  // 3. Footer Navigation
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-3); border-top:1px solid var(--color-divider); padding-top:var(--space-4)">';
+  if (currentTemplatesTab > 1) {
+    html += '  <button onclick="renderInteractiveTemplatesGuide(' + (currentTemplatesTab - 1) + ')" class="btn btn-ghost btn-sm">⬅️ ' + (isEs ? 'Anterior' : 'Previous') + '</button>';
+  } else {
+    html += '  <div></div>';
+  }
+
+  if (currentTemplatesTab < totalTabs) {
+    html += '  <button onclick="renderInteractiveTemplatesGuide(' + (currentTemplatesTab + 1) + ')" class="btn btn-primary btn-sm">' + (isEs ? 'Siguiente' : 'Next') + ' ➡️</button>';
+  } else {
+    html += '  <button onclick="closeModal(\'helpTemplatesModal\');" class="btn btn-primary btn-sm">🚀 ' + (isEs ? '¡Entendido!' : 'Got it!') + '</button>';
+  }
+  html += '</div>';
+
+  templatesBody.innerHTML = html;
+}
 
 // Help menu binders
 el('helpScratchBtn').onclick = function() {
   closeAllDropdowns();
+  renderInteractiveScratchGuide(1);
   openModal('helpScratchModal');
 };
 el('helpUsageBtn').onclick = function() {
   closeAllDropdowns();
+  renderInteractiveUsageGuide(1);
   openModal('helpUsageModal');
 };
 el('helpTemplatesBtn').onclick = function() {
   closeAllDropdowns();
+  renderInteractiveTemplatesGuide(1);
   openModal('helpTemplatesModal');
 };
 el('helpTourBtn').onclick = function() {
@@ -932,6 +1487,37 @@ el('helpDiagnosticsBtn').onclick = function() {
 el('closeHelpScratchModal').onclick = function() { closeModal('helpScratchModal'); };
 el('closeHelpUsageModal').onclick = function() { closeModal('helpUsageModal'); };
 el('closeHelpTemplatesModal').onclick = function() { closeModal('helpTemplatesModal'); };
+
+// Sidebar & Outline collapse toggles
+var sidebarToggleElem = el('toggleSidebarBtn');
+if (sidebarToggleElem) {
+  sidebarToggleElem.onclick = function() {
+    var appContainer = document.querySelector('.app');
+    var sidebar = document.querySelector('.sidebar');
+    if (appContainer && sidebar) {
+      appContainer.classList.toggle('sidebar-collapsed');
+      sidebar.classList.toggle('collapsed');
+      var isCollapsed = sidebar.classList.contains('collapsed');
+      sidebarToggleElem.textContent = isCollapsed ? '▶' : '◀';
+      sidebarToggleElem.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    }
+  };
+}
+
+var outlineToggleElem = el('toggleOutlineBtn');
+if (outlineToggleElem) {
+  outlineToggleElem.onclick = function() {
+    var appContainer = document.querySelector('.app');
+    var outlinepane = document.querySelector('.outlinepane');
+    if (appContainer && outlinepane) {
+      appContainer.classList.toggle('outline-collapsed');
+      outlinepane.classList.toggle('collapsed');
+      var isCollapsed = outlinepane.classList.contains('collapsed');
+      outlineToggleElem.textContent = isCollapsed ? '◀' : '▶';
+      outlineToggleElem.title = isCollapsed ? 'Expand outline' : 'Collapse outline';
+    }
+  };
+}
 el('closeDiagnosticsModal').onclick = function() { closeModal('diagnosticsModal'); };
 
 el('diagRunBtn').onclick = runDiagnostics;
@@ -991,6 +1577,17 @@ if (photoTopSlider) {
     renderLatex();
   };
 }
+
+var headerSpacerSlider = el('headerSpacerSlider');
+if (headerSpacerSlider) {
+  headerSpacerSlider.oninput = function(e) {
+    state.headerSpacer = parseInt(e.target.value, 10);
+    var valEl = el('headerSpacerVal');
+    if (valEl) valEl.textContent = e.target.value + 'px';
+    saveActiveStyle();
+    renderAll();
+  };
+}
 el('themeAccentHex').oninput = function(e) {
   var val = e.target.value;
   if (val.indexOf('#') !== 0) val = '#' + val;
@@ -1006,6 +1603,13 @@ el('themeFontSelect').onchange = function(e) {
   saveActiveStyle();
   renderLatex();
 };
+if (el('themeTextAlignSelect')) {
+  el('themeTextAlignSelect').onchange = function(e) {
+    state.themeTextAlign = e.target.value;
+    saveActiveStyle();
+    renderAll();
+  };
+}
 
 // Template editor auto-save (debounced 800ms)
 var tplSaveTimer = null;
@@ -1339,19 +1943,239 @@ if (userLang.indexOf('es') === 0) {
 updateInstanceSelector();
 var dbList = listDatabases();
 loadDatabase(dbList[0]);
+renderInteractiveScratchGuide(1);
+renderInteractiveUsageGuide(1);
+renderInteractiveTemplatesGuide(1);
 
 if (!localStorage.getItem('cvbuilder_visited')) {
   setTimeout(startWelcomeTour, 1000);
 }
 
-window.addEventListener('load', function() {
+function hideLoadingScreen() {
+  var loader = el('loadingScreen');
+  if (loader) {
+    loader.classList.add('hidden');
+    loader.style.opacity = '0';
+    loader.style.pointerEvents = 'none';
+    setTimeout(function() {
+      if (loader && loader.parentNode) {
+        loader.parentNode.removeChild(loader);
+      }
+    }, 500);
+  }
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(hideLoadingScreen, 300);
+} else {
+  window.addEventListener('load', function() {
+    setTimeout(hideLoadingScreen, 300);
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(hideLoadingScreen, 300);
+  });
+}
+setTimeout(hideLoadingScreen, 1500);
+
+// ── REVERSE FOCUS CONTEXT MENU ──
+var pendingContextPath = null;
+
+function focusEditorElement(targetPath) {
+  if (!targetPath) return;
+
+  var cleanPath = String(targetPath).trim();
+  var parts = cleanPath.split('.');
+  var secKey = parts[0];
+
+  console.log('[Preview Click Focus] Target path:', cleanPath, '| Section:', secKey);
+
+  if (typeof state !== 'undefined') {
+    state.activeSection = secKey;
+    renderSectionList();
+    renderOutline();
+    renderEditor();
+  }
+
   setTimeout(function() {
-    var loader = el('loadingScreen');
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(function() {
-        loader.remove();
-      }, 500);
+    var editorEl = el('editorContainer') || el('editorTab');
+    if (!editorEl) return;
+
+    var targetCard = null;
+    var targetInput = null;
+
+    if (parts.length >= 2 && !isNaN(parts[1])) {
+      var entryId = 'entry-' + secKey + '-' + parts[1];
+      targetCard = el(entryId);
     }
-  }, 1500);
+
+    if (!targetCard && parts.length >= 2) {
+      var fieldId = 'field-' + secKey + '-' + parts[1];
+      targetCard = el(fieldId);
+    }
+
+    var inputs = editorEl.querySelectorAll('input, textarea');
+    if (targetCard) {
+      targetInput = targetCard.querySelector('input:not([type=checkbox]), textarea');
+    }
+
+    if (!targetInput) {
+      for (var i = 0; i < inputs.length; i++) {
+        var p = inputs[i].getAttribute('data-path') || inputs[i].id || '';
+        if (p === cleanPath || (p && p.indexOf(cleanPath) === 0)) {
+          targetInput = inputs[i];
+          targetCard = targetInput.closest('.entry') || targetInput.closest('.card') || targetInput.closest('.propcard');
+          break;
+        }
+      }
+    }
+
+    if (!targetInput && parts.length >= 2) {
+      var itemPrefix = parts[0] + '.' + parts[1];
+      for (var j = 0; j < inputs.length; j++) {
+        var p = inputs[j].getAttribute('data-path') || '';
+        if (p && p.indexOf(itemPrefix) === 0) {
+          targetInput = inputs[j];
+          targetCard = targetInput.closest('.entry') || targetInput.closest('.card') || targetInput.closest('.propcard');
+          break;
+        }
+      }
+    }
+
+    var scrollTarget = targetCard || targetInput || editorEl.querySelector('.card');
+    if (scrollTarget) {
+      console.log('[Preview Click Focus] Scrolling and focusing element ID:', scrollTarget.id || targetPath);
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      var highlightEl = targetCard || (targetInput ? (targetInput.closest('.kv') || targetInput.parentElement) : null);
+      if (highlightEl) {
+        highlightEl.style.transition = 'outline 0.3s ease, box-shadow 0.3s ease';
+        highlightEl.style.outline = '2.5px solid #2563eb';
+        highlightEl.style.borderRadius = '6px';
+        highlightEl.style.boxShadow = '0 0 14px rgba(37, 99, 235, 0.35)';
+        setTimeout(function() {
+          if (highlightEl) {
+            highlightEl.style.outline = 'none';
+            highlightEl.style.boxShadow = 'none';
+          }
+        }, 1800);
+      }
+    }
+
+    if (targetInput) {
+      try { targetInput.focus(); } catch (e) {}
+    }
+  }, 120);
+}
+
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+
+  if (e.data.action === 'previewClickFocus') {
+    var raw = e.data.rawId || e.data.targetPath;
+    if (raw) {
+      var targetPath = parseItemIdToPath(raw) || raw.replace(/^section-/, '');
+      if (targetPath) {
+        focusEditorElement(targetPath);
+      }
+    }
+  }
 });
+
+function parseItemIdToPath(itemId) {
+  if (!itemId || itemId.indexOf('item-') !== 0) return null;
+  var raw = itemId.substring(5);
+
+  var knownKeys = [];
+  if (typeof data !== 'undefined' && data) {
+    knownKeys = Object.keys(data);
+  } else if (typeof state !== 'undefined' && state.sections) {
+    knownKeys = Object.keys(state.sections);
+  }
+  
+  knownKeys.sort(function(a, b) { return b.length - a.length; });
+
+  for (var i = 0; i < knownKeys.length; i++) {
+    var k = knownKeys[i];
+    if (raw === k) return k;
+    if (raw.indexOf(k + '-') === 0) {
+      var rest = raw.substring(k.length + 1).replace(/-/g, '.');
+      return k + '.' + rest;
+    }
+  }
+
+  return raw.replace(/-/g, '.');
+}
+
+function getIframeElementPath(targetNode) {
+  if (!targetNode) return (typeof state !== 'undefined' && state.activeSection) || 'basics';
+
+  var itemEl = targetNode.closest ? targetNode.closest('[id^="item-"]') : null;
+  if (itemEl && itemEl.id) {
+    var parsed = parseItemIdToPath(itemEl.id);
+    if (parsed) return parsed;
+  }
+
+  var entryEl = targetNode.closest ? targetNode.closest('.entry, .skills-card, li') : null;
+  var secEl = targetNode.closest ? targetNode.closest('[id^="section-"]') : null;
+
+  if (entryEl && secEl && secEl.id) {
+    var secKey = secEl.id.replace(/^section-/, '');
+    var parent = entryEl.parentElement;
+    if (parent) {
+      var siblings = Array.prototype.slice.call(parent.children).filter(function(child) {
+        return child.classList && (child.classList.contains('entry') || child.classList.contains('skills-card') || child.tagName === 'LI');
+      });
+      var idx = siblings.indexOf(entryEl);
+      if (idx !== -1) {
+        return secKey + '.' + idx;
+      }
+    }
+    return secKey;
+  }
+
+  if (secEl && secEl.id) {
+    return secEl.id.replace(/^section-/, '');
+  }
+
+  return (typeof state !== 'undefined' && state.activeSection) || 'basics';
+}
+
+function attachIframeEventListeners() {
+  var frame = el('htmlPreviewFrame');
+  if (!frame) return;
+
+  try {
+    var doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+    if (!doc || !doc.body) return;
+
+    try {
+      var existingStyle = doc.getElementById('pointerCursorStyle');
+      if (!existingStyle && doc.head) {
+        var style = doc.createElement('style');
+        style.id = 'pointerCursorStyle';
+        style.textContent = 'body, section, main, header { cursor: default !important; } .entry, [id^="item-"], [id^="section-"], h1, h2, h3, h4, h5, h6, p, li, span, a, img, strong, em, u, b, i, .subtitle, .contact-info > div, .kv-list > li, .entry-header, .entry-description, .entry-subheader { cursor: pointer !important; }';
+        doc.head.appendChild(style);
+      }
+    } catch (e) {}
+
+    if (doc._listenersAttached) return;
+    doc._listenersAttached = true;
+
+    doc.addEventListener('click', function(e) {
+      if (!e.target || !e.target.closest) return;
+      if (e.target.closest('a')) return;
+
+      var contentEl = e.target.closest('[id^="item-"], [id^="section-"], .entry, h1, h2, h3, h4, p, li, span, img, strong, em, .subtitle, .contact-info > div');
+      if (!contentEl) return;
+
+      var targetPath = getIframeElementPath(contentEl);
+      if (targetPath) {
+        focusEditorElement(targetPath);
+      }
+    }, true);
+  } catch (e) {
+    console.warn('Could not attach iframe listeners:', e);
+  }
+}
+
+setInterval(attachIframeEventListeners, 400);

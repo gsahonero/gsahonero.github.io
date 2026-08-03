@@ -1,38 +1,130 @@
 var tourActiveStep = 0;
-var TOUR_STEPS = [
-  {
-    target: '#dbSelect',
-    title: 'Manage CV Databases',
-    content: 'Select, rename, duplicate, or import different CV profiles here. All data is saved automatically in your browser.'
-  },
-  {
-    target: '#styleSelect',
-    title: 'Choose Layout Styles',
-    content: 'Select different layout styles or open the Style Manager to load presets, configure section mappers, or import/export styles.'
-  },
-  {
-    target: '#addSectionBtn',
-    title: 'Add & Delete Sections',
-    content: 'Click here to add new predefined or custom sections. You can delete empty sections from their edit cards.'
-  },
-  {
-    target: '.left-pane',
-    title: 'Workspace Editors',
-    content: 'Edit form fields, modify the LaTeX preamble, or edit live HTML code in this left-hand workspace.'
-  },
-  {
-    target: '.right-pane',
-    title: 'Live Previews & Downloads',
-    content: 'Switch tabs to preview the HTML view, check the generated LaTeX code, or click "Download PDF" to compile your document!'
-  },
-  {
-    target: '#langFilterSelect',
-    title: 'Bilingual Resumes',
-    content: 'Tag entries as English or Spanish, then toggle the global output language filter to instantly render either version. If you want to take this tour again, just click on the "Welcome Tour Guide" option inside the Help menu!'
-  }
-];
+var activeTourId = 'welcome';
 
-function startWelcomeTour() {
+var DEFAULT_TOURS_CONFIG = {
+  defaultTour: 'welcome',
+  tours: {
+    welcome: {
+      id: 'welcome',
+      title: {
+        en: 'Welcome Tour Guide',
+        es: 'Guía de bienvenida'
+      },
+      steps: [
+        {
+          target: '.db-selector',
+          title: {
+            en: 'Manage CV Databases',
+            es: 'Administrar bases de datos de CV'
+          },
+          content: {
+            en: 'Select, rename, duplicate, or import different CV profiles here. All data is saved automatically in your browser.',
+            es: 'Selecciona, renombra, duplica o importa diferentes perfiles de CV aquí. Todos los datos se guardan automáticamente en tu navegador.'
+          }
+        },
+        {
+          target: '.instance-selector',
+          title: {
+            en: 'Tailored CV Instances',
+            es: 'Instancias de CV personalizadas'
+          },
+          content: {
+            en: 'Create and switch between tailored instances of your CV for specific job applications without modifying your master CV data.',
+            es: 'Crea y cambia entre versiones personalizadas de tu CV para ofertas específicas sin modificar tu base de datos principal.'
+          }
+        },
+        {
+          target: '#addSectionBtn',
+          title: {
+            en: 'Add & Delete Sections',
+            es: 'Añadir y eliminar secciones'
+          },
+          content: {
+            en: 'Click here to add new predefined or custom sections. You can delete empty sections from their edit cards.',
+            "es": 'Haz clic aquí para añadir secciones personalizadas o predefinidas. Puedes eliminar secciones vacías desde sus tarjetas de edición.'
+          }
+        },
+        {
+          target: '.left-pane',
+          title: {
+            en: 'Workspace Editors',
+            es: 'Editores del espacio de trabajo'
+          },
+          content: {
+            en: 'Edit form fields, modify the LaTeX preamble, or edit live HTML code in this left-hand workspace.',
+            es: 'Modifica los campos del formulario, edita el preámbulo de LaTeX o cambia el código HTML directamente en este panel izquierdo.'
+          }
+        },
+        {
+          target: '.right-pane',
+          title: {
+            en: 'Live Previews & Downloads',
+            es: 'Vista previa en vivo y descargas'
+          },
+          content: {
+            en: 'Switch tabs to preview the HTML view, check the generated LaTeX code, or click "Download PDF" to compile your document!',
+            es: 'Cambia de pestaña para ver la previsualización en HTML, comprobar el código LaTeX generado o haz clic en "Descargar PDF" para compilar tu documento.'
+          }
+        },
+        {
+          target: '#langFilterSelect',
+          title: {
+            en: 'Bilingual Resumes',
+            es: 'Currículums bilingües'
+          },
+          content: {
+            en: 'Tag entries as English or Spanish, then toggle the global output language filter to instantly render either version. If you want to take this tour again, just click on the "Welcome Tour Guide" option inside the Help menu!',
+            es: 'Etiqueta elementos como inglés o español, y cambia el filtro de idioma global para renderizar al instante cualquiera de las versiones. Si quieres volver a realizar la guía, haz clic en la opción "Guía de bienvenida" dentro del menú de Ayuda.'
+          }
+        }
+      ]
+    }
+  }
+};
+
+var toursConfig = (typeof window !== 'undefined' && window.TOURS_CONFIG) ? window.TOURS_CONFIG : JSON.parse(JSON.stringify(DEFAULT_TOURS_CONFIG));
+var TOUR_STEPS = (toursConfig.tours && toursConfig.tours.welcome && toursConfig.tours.welcome.steps) ? toursConfig.tours.welcome.steps : [];
+
+// Attempt to load scalable tour configuration from external JSON if on HTTP server
+(function loadToursConfig() {
+  if (typeof window !== 'undefined' && window.TOURS_CONFIG) {
+    toursConfig = window.TOURS_CONFIG;
+    if (toursConfig.tours && toursConfig.tours.welcome && toursConfig.tours.welcome.steps) {
+      TOUR_STEPS = toursConfig.tours.welcome.steps;
+    }
+    return;
+  }
+  
+  if (typeof fetch === 'function' && typeof window !== 'undefined' && window.location && window.location.protocol !== 'file:') {
+    fetch('presets/tours.json')
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP error ' + res.status);
+        return res.json();
+      })
+      .then(function(json) {
+        if (json && json.tours) {
+          toursConfig = json;
+          if (toursConfig.tours && toursConfig.tours.welcome && toursConfig.tours.welcome.steps) {
+            TOUR_STEPS = toursConfig.tours.welcome.steps;
+          }
+        }
+      })
+      .catch(function(err) {
+        // Silent fallback
+      });
+  }
+})();
+
+function startTour(tourId) {
+  tourId = tourId || 'welcome';
+  activeTourId = tourId;
+  
+  var tour = toursConfig.tours && toursConfig.tours[tourId];
+  if (!tour) {
+    tour = DEFAULT_TOURS_CONFIG.tours.welcome;
+  }
+  
+  TOUR_STEPS = tour.steps || [];
   tourActiveStep = 0;
   removeTourDom();
   
@@ -50,6 +142,10 @@ function startWelcomeTour() {
   showTourStep();
 }
 
+function startWelcomeTour() {
+  startTour('welcome');
+}
+
 function endWelcomeTour() {
   removeTourDom();
   localStorage.setItem('cvbuilder_visited', 'true');
@@ -57,12 +153,24 @@ function endWelcomeTour() {
 
 function removeTourDom() {
   var b = el('tourBackdrop');
-  if (b) b.remove();
+  if (b) {
+    if (typeof b.remove === 'function') b.remove();
+    else if (b.parentNode) b.parentNode.removeChild(b);
+  }
   var p = el('tourPopover');
-  if (p) p.remove();
+  if (p) {
+    if (typeof p.remove === 'function') p.remove();
+    else if (p.parentNode) p.parentNode.removeChild(p);
+  }
   document.querySelectorAll('.tour-highlight').forEach(function(x) {
     x.classList.remove('tour-highlight');
   });
+}
+
+function getLocalizedText(obj, lang) {
+  if (!obj) return '';
+  if (typeof obj === 'string') return obj;
+  return obj[lang] || obj['en'] || Object.values(obj)[0] || '';
 }
 
 function showTourStep() {
@@ -70,12 +178,12 @@ function showTourStep() {
     x.classList.remove('tour-highlight');
   });
   
-  if (tourActiveStep >= TOUR_STEPS.length) {
+  if (!TOUR_STEPS || tourActiveStep >= TOUR_STEPS.length) {
     endWelcomeTour();
     return;
   }
   
-  var isEs = state.langFilter === 'es';
+  var lang = (state && state.langFilter === 'es') ? 'es' : 'en';
   var step = TOUR_STEPS[tourActiveStep];
   var targetEl = document.querySelector(step.target);
   
@@ -84,29 +192,8 @@ function showTourStep() {
   
   popover.innerHTML = '';
   
-  var titleText = step.title;
-  var contentText = step.content;
-  if (isEs) {
-    if (step.target === '#dbSelect') {
-      titleText = 'Administrar bases de datos de CV';
-      contentText = 'Selecciona, renombra, duplica o importa diferentes perfiles de CV aquí. Todos los datos se guardan automáticamente en tu navegador.';
-    } else if (step.target === '#styleSelect') {
-      titleText = 'Elegir estilos de diseño';
-      contentText = 'Selecciona diferentes estilos o abre el Administrador de Estilos para cargar plantillas, configurar mapeos de secciones o importar/exportar estilos.';
-    } else if (step.target === '#addSectionBtn') {
-      titleText = 'Añadir y eliminar secciones';
-      contentText = 'Haz clic aquí para añadir secciones personalizadas o predefinidas. Puedes eliminar secciones vacías desde sus tarjetas de edición.';
-    } else if (step.target === '.left-pane') {
-      titleText = 'Editores del espacio de trabajo';
-      contentText = 'Modifica los campos del formulario, edita el preámbulo de LaTeX o cambia el código HTML directamente en este panel izquierdo.';
-    } else if (step.target === '.right-pane') {
-      titleText = 'Vista previa en vivo y descargas';
-      contentText = 'Cambia de pestaña para ver la previsualización en HTML, comprobar el código LaTeX generado o haz clic en "Descargar PDF" para compilar tu documento.';
-    } else if (step.target === '#langFilterSelect') {
-      titleText = 'Currículums bilingües';
-      contentText = 'Etiqueta elementos como inglés o español, y cambia el filtro de idioma global para renderizar al instante cualquiera de las versiones. Si quieres volver a realizar la guía, haz clic en la opción "Guía de bienvenida" dentro del menú de Ayuda.';
-    }
-  }
+  var titleText = getLocalizedText(step.title, lang);
+  var contentText = getLocalizedText(step.content, lang);
   
   var title = document.createElement('h4');
   title.textContent = (tourActiveStep + 1) + '/' + TOUR_STEPS.length + ': ' + titleText;
@@ -129,14 +216,14 @@ function showTourStep() {
   
   var skipBtn = document.createElement('button');
   skipBtn.className = 'btn btn-ghost btn-xs';
-  skipBtn.textContent = isEs ? 'Omitir' : 'Skip';
+  skipBtn.textContent = lang === 'es' ? 'Omitir' : 'Skip';
   skipBtn.onclick = endWelcomeTour;
   leftGroup.appendChild(skipBtn);
   
   if (tourActiveStep > 0) {
     var prevBtn = document.createElement('button');
     prevBtn.className = 'btn btn-ghost btn-xs';
-    prevBtn.textContent = isEs ? 'Anterior' : 'Prev';
+    prevBtn.textContent = lang === 'es' ? 'Anterior' : 'Prev';
     prevBtn.onclick = function() {
       tourActiveStep--;
       showTourStep();
@@ -147,7 +234,7 @@ function showTourStep() {
   
   var nextBtn = document.createElement('button');
   nextBtn.className = 'btn btn-primary btn-xs';
-  nextBtn.textContent = (tourActiveStep === TOUR_STEPS.length - 1) ? (isEs ? 'Finalizar' : 'Finish') : (isEs ? 'Siguiente' : 'Next');
+  nextBtn.textContent = (tourActiveStep === TOUR_STEPS.length - 1) ? (lang === 'es' ? 'Finalizar' : 'Finish') : (lang === 'es' ? 'Siguiente' : 'Next');
   nextBtn.onclick = function() {
     tourActiveStep++;
     showTourStep();

@@ -1,0 +1,202 @@
+{
+  "guideId": "templates",
+  "components": [
+    {
+      "tab": 1,
+      "meta": {
+        "es": { "title": "Estilos y Colores", "icon": "🎨" },
+        "en": { "title": "Visual Customizer", "icon": "🎨" }
+      },
+      "content": {
+        "es": {
+          "title": "🎨 Componente 1: Personalización Visual y Temas",
+          "description": "El Personalizador Visual te permite modificar los colores de acento, tipografías y fuentes de tu documento sin escribir código.",
+          "box": {
+            "title": "💡 Elementos, Uso y Qué Esperar",
+            "items": [
+              "<strong>¿Qué elementos contiene?:</strong> Selector de temas ModernCV (Casual, Classic, Banking, Oldstyle, Fancy), selector de color de acento y tipografías.",
+              "<strong>¿Qué debo hacer?:</strong> Abre la pestaña <em>Personalizador Visual</em> en el editor y elige tus colores y fuentes preferidos.",
+              "<strong>¿Qué debo esperar?:</strong> La vista previa en HTML y la compilación en LaTeX se actualizan de inmediato con el nuevo diseño visual."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabCustomizer", "label": "🎨 Abrir Personalizador Visual", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "🎨 Component 1: Visual Theme & Color Customizer",
+          "description": "The Visual Customizer enables you to change accent colors, typography fonts, and ModernCV layout themes without writing code.",
+          "box": {
+            "title": "💡 Elements, Usage & What to Expect",
+            "items": [
+              "<strong>What elements are included?:</strong> ModernCV theme selector (Casual, Classic, Banking, Oldstyle, Fancy), accent color picker, and font family dropdowns.",
+              "<strong>What do I do?:</strong> Open the <em>Visual Customizer</em> tab in the editor and pick your preferred visual theme settings.",
+              "<strong>What to expect?:</strong> Both live HTML preview and compiled LaTeX PDF output update instantly to reflect your custom styling."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabCustomizer", "label": "🎨 Open Visual Customizer", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 2,
+      "meta": {
+        "es": { "title": "Mapeadores", "icon": "🗺️" },
+        "en": { "title": "Section Mappers", "icon": "🗺️" }
+      },
+      "content": {
+        "es": {
+          "title": "🗺️ Componente 2: Mapeadores de Sección de LaTeX",
+          "description": "Los Mapeadores conectan tus campos de datos con los comandos macro específicos de LaTeX (ej. <code>\\cventry</code>, <code>\\cvitem</code>, <code>\\cvlistitem</code>).",
+          "box": {
+            "title": "📌 Elementos, Uso y Qué Esperar",
+            "items": [
+              "<strong>¿Qué elementos contiene?:</strong> Mapeos configurables por tipo de sección (educación, experiencia, publicaciones, premios, habilidades).",
+              "<strong>¿Qué debo hacer?:</strong> Selecciona cómo deseas que se formatee cada tipo de entrada (ej. formato de 2 columnas o lista con viñetas).",
+              "<strong>¿Qué debo esperar?:</strong> El compilador de LaTeX genera bloques de código con la estructura macro elegida."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabLatex", "label": "🗺️ Ver Mapeadores en Editor LaTeX", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "🗺️ Component 2: LaTeX Section Mappers & Contracts",
+          "description": "Section Mappers connect your database fields to specific LaTeX commands (e.g., <code>\\cventry</code>, <code>\\cvitem</code>, <code>\\cvlistitem</code>).",
+          "box": {
+            "title": "📌 Elements, Usage & What to Expect",
+            "items": [
+              "<strong>What elements are included?:</strong> Configurable mapping profiles for each section type (education, experience, publications, awards, skills).",
+              "<strong>What do I do?:</strong> Choose how each entry type should be formatted (e.g. 2-column entries vs bulleted lists).",
+              "<strong>What to expect?:</strong> The LaTeX compiler converts your structured data into formatted macro blocks automatically."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabLatex", "label": "🗺️ View Section Mappers in Editor", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 3,
+      "meta": {
+        "es": { "title": "Plantilla HTML", "icon": "📄" },
+        "en": { "title": "HTML Template", "icon": "📄" }
+      },
+      "content": {
+        "es": {
+          "title": "📄 Componente 3: Editor de Plantilla HTML",
+          "description": "Controla el marcado HTML y los estilos CSS con los que se construye la vista previa en el navegador.",
+          "box": {
+            "title": "📄 Elementos, Uso y Qué Esperar",
+            "items": [
+              "<strong>¿Qué elementos contiene?:</strong> Editor de código HTML con soporte para expresiones de plantilla y botón de restablecimiento.",
+              "<strong>¿Qué debo hacer?:</strong> Modifica la estructura HTML o agrega clases CSS personalizadas para ajustar la vista previa web.",
+              "<strong>¿Qué debo esperar?:</strong> El iframe de vista previa en tiempo real renderiza tu plantilla HTML modificada."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabHtml", "label": "📄 Abrir Editor HTML", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "📄 Component 3: HTML Template Editor",
+          "description": "Controls the HTML markup structure and CSS styling used to render the live web preview iframe.",
+          "box": {
+            "title": "📄 Elements, Usage & What to Expect",
+            "items": [
+              "<strong>What elements are included?:</strong> HTML code editor supporting macro expressions and template reset triggers.",
+              "<strong>What do I do?:</strong> Edit HTML structure or add custom CSS rules to adjust web layout.",
+              "<strong>What to expect?:</strong> The live preview iframe immediately renders your custom HTML template."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabHtml", "label": "📄 Open HTML Template Editor", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 4,
+      "meta": {
+        "es": { "title": "Plantilla LaTeX", "icon": "📜" },
+        "en": { "title": "LaTeX Template", "icon": "📜" }
+      },
+      "content": {
+        "es": {
+          "title": "📜 Componente 4: Preámbulo y Plantilla LaTeX",
+          "description": "Permite personalizar el preámbulo de LaTeX, importar paquetes (<code>\\usepackage{}</code>) y ajustar márgenes y geometría.",
+          "box": {
+            "title": "📜 Elementos, Uso y Qué Esperar",
+            "items": [
+              "<strong>¿Qué elementos contiene?:</strong> Editor de preámbulo y estructura principal de ModernCV LaTeX.",
+              "<strong>¿Qué debo hacer?:</strong> Añade paquetes de LaTeX adicionales o modifica comandos globales de formato.",
+              "<strong>¿Qué debo esperar?:</strong> Código <code>.tex</code> 100% compatible con TeX Live, Overleaf y compiladores en línea."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabLatex", "label": "📜 Abrir Editor LaTeX", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "📜 Component 4: Custom LaTeX Preamble & Packages",
+          "description": "Allows customizing the LaTeX preamble, importing packages (<code>\\usepackage{}</code>), and adjusting document margins and page geometry.",
+          "box": {
+            "title": "📜 Elements, Usage & What to Expect",
+            "items": [
+              "<strong>What elements are included?:</strong> Full ModernCV LaTeX template editor with pre-loaded macro slots.",
+              "<strong>What do I do?:</strong> Add extra LaTeX packages or custom macro definitions for specialized formatting.",
+              "<strong>What to expect?:</strong> Production <code>.tex</code> source code 100% compatible with TeX Live, Overleaf, and online TeX engines."
+            ]
+          },
+          "actions": [
+            { "type": "switchTabLatex", "label": "📜 Open LaTeX Template Editor", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 5,
+      "meta": {
+        "es": { "title": "Administrar Estilos", "icon": "💾" },
+        "en": { "title": "Style Manager", "icon": "💾" }
+      },
+      "content": {
+        "es": {
+          "title": "💾 Componente 5: Administrador de Estilos (Almacenados en .cv)",
+          "description": "¡Los archivos <code>.cvstyle</code> están totalmente obsoletos! Todos los estilos visuales, colores, fuentes, preámbulos y mapeadores se guardan directamente dentro de tu archivo de base de datos <code>.cv</code>.",
+          "box": {
+            "title": "💾 Elementos, Uso y Qué Esperar",
+            "items": [
+              "<strong>¿Qué elementos contiene?:</strong> Selector de estilos guardados en la base de datos local y modal de administración de preajustes de estilo.",
+              "<strong>¿Qué debo hacer?:</strong> Crea, duplica, renombra o cambia entre estilos visuales dentro de tu base de datos activa.",
+              "<strong>¿Qué debo esperar?:</strong> Tus configuraciones estéticas quedan 100% guardadas en tu archivo <code>.cv</code> al exportar o guardar tu base de datos."
+            ]
+          },
+          "actions": [
+            { "type": "openStyleManagerModal", "label": "🎨 Abrir Administrador de Estilos", "style": "primary" },
+            { "type": "exportDatabaseFile", "label": "💾 Descargar Base de Datos (.cv)", "style": "ghost" }
+          ]
+        },
+        "en": {
+          "title": "💾 Component 5: Style Manager & Presets (Saved in .cv)",
+          "description": "Legacy <code>.cvstyle</code> files are completely deprecated! All visual theme settings, colors, fonts, preambles, and section mappers are saved directly inside your single <code>.cv</code> database file.",
+          "box": {
+            "title": "💾 Elements, Usage & What to Expect",
+            "items": [
+              "<strong>What elements are included?:</strong> Saved style selector dropdown and style preset management modal within your active database.",
+              "<strong>What do I do?:</strong> Create, duplicate, rename, or switch visual theme presets directly inside your database.",
+              "<strong>What to expect?:</strong> All styling settings are saved losslessly inside your <code>.cv</code> file when you save or export your database."
+            ]
+          },
+          "actions": [
+            { "type": "openStyleManagerModal", "label": "🎨 Open Style Manager Modal", "style": "primary" },
+            { "type": "exportDatabaseFile", "label": "💾 Download Database (.cv)", "style": "ghost" }
+          ]
+        }
+      }
+    }
+  ]
+}

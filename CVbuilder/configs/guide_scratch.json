@@ -1,0 +1,181 @@
+{
+  "guideId": "scratch",
+  "steps": [
+    {
+      "step": 1,
+      "meta": {
+        "es": { "title": "Comienzo", "icon": "🚀" },
+        "en": { "title": "Start", "icon": "🚀" }
+      },
+      "content": {
+        "es": {
+          "title": "🚀 Paso 1: Elige cómo comenzar tu CV",
+          "description": "Puedes comenzar con un lienzo en blanco para construir tu CV desde cero o cargar un perfil de investigación existente para explorar las funciones.",
+          "cards": [
+            {
+              "title": "✨ CV en Blanco",
+              "description": "Comienza con datos vacíos y define solo tus secciones.",
+              "action": { "type": "startBlankCv", "label": "⚡ Crear CV en Blanco", "style": "primary" }
+            },
+            {
+              "title": "📂 Perfil de Ejemplo",
+              "description": "Carga una base de datos completa para ver ejemplos.",
+              "action": { "type": "openDbManagerModal", "label": "📁 Ver Bases de Datos", "style": "ghost" }
+            }
+          ]
+        },
+        "en": {
+          "title": "🚀 Step 1: Choose how to start your CV",
+          "description": "You can start with a clean blank canvas to build your CV completely from scratch, or load an existing profile to explore features.",
+          "cards": [
+            {
+              "title": "✨ Blank CV",
+              "description": "Start with empty fields and add only your own sections.",
+              "action": { "type": "startBlankCv", "label": "⚡ Start Blank CV Now", "style": "primary" }
+            },
+            {
+              "title": "📂 Sample Profile",
+              "description": "Load a full database with pre-filled entries as reference.",
+              "action": { "type": "openDbManagerModal", "label": "📁 Manage Databases", "style": "ghost" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 2,
+      "meta": {
+        "es": { "title": "Datos Básicos", "icon": "👤" },
+        "en": { "title": "Basics", "icon": "👤" }
+      },
+      "content": {
+        "es": {
+          "title": "👤 Paso 2: Completa tus Datos Personales",
+          "description": "Selecciona la sección <strong>basics</strong> en el panel izquierdo. Completa tu nombre, título profesional, correo, sitio web, ubicación e intereses de investigación.",
+          "proTip": {
+            "title": "💡 Consejo Pro: Foto de Perfil",
+            "text": "Puedes subir una foto local o ingresar una URL. Además, el resumen de Intereses de Investigación se renderiza como texto completo arriba de tus secciones."
+          },
+          "actions": [
+            { "type": "jumpBasics", "label": "✏️ Ir a Editar Datos Básicos", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "👤 Step 2: Fill in Personal & Contact Details",
+          "description": "Click the <strong>basics</strong> section in the left sidebar. Fill in your name, professional title, email, homepage, location, and research summary.",
+          "proTip": {
+            "title": "💡 Pro Tip: Profile Photo & Summary",
+            "text": "You can upload a local image or paste a URL. The Research Interests summary renders as full-width text directly below your header."
+          },
+          "actions": [
+            { "type": "jumpBasics", "label": "✏️ Jump to Basics Editor", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "step": 3,
+      "meta": {
+        "es": { "title": "Secciones", "icon": "🎓" },
+        "en": { "title": "Sections", "icon": "🎓" }
+      },
+      "content": {
+        "es": {
+          "title": "🎓 Paso 3: Añade Secciones y Entradas",
+          "description": "Estructura tu CV añadiendo secciones personalizadas (Educación, Experiencia, Publicaciones, Docencia, Premios, Habilidades). Usa el asistente para previsualizar estructuras.",
+          "actions": [
+            { "type": "openAddSectionAssistant", "label": "➕ Asistente de Nueva Sección", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "🎓 Step 3: Add Sections & Content Entries",
+          "description": "Structure your CV by adding custom sections (Education, Work Experience, Publications, Teaching, Awards, Skills). Use the section assistant to choose pre-built structures.",
+          "actions": [
+            { "type": "openAddSectionAssistant", "label": "➕ Open Section Assistant", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "step": 4,
+      "meta": {
+        "es": { "title": "Instancias CV", "icon": "🎯" },
+        "en": { "title": "Tailoring", "icon": "🎯" }
+      },
+      "content": {
+        "es": {
+          "title": "🎯 Paso 4: Crea Instancias de CV Adaptadas",
+          "description": "Adapta tu CV para convocatorias específicas sin duplicar tus datos. Activa o desactiva casillas <strong>Include</strong> en secciones, entradas o campos individuales (como fechas o cursos).",
+          "box": {
+            "title": "🎯 Selector de Instancia Activa",
+            "text": "Usa el menú desplegable de instancias en la barra superior para cambiar entre tu CV Maestro y tus versiones adaptadas."
+          },
+          "actions": [
+            { "type": "openAddInstanceModal", "label": "🎯 Crear Nueva Instancia Adaptada", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "🎯 Step 4: Create Tailored CV Instances",
+          "description": "Tailor your CV for specific job applications without duplicating your database! Toggle <strong>Include</strong> checkboxes on individual sections, entries, or specific fields (like end dates or course lists).",
+          "box": {
+            "title": "🎯 Active Instance Selector",
+            "text": "Use the topbar instance dropdown to switch seamlessly between your Master CV and tailored variants."
+          },
+          "actions": [
+            { "type": "openAddInstanceModal", "label": "🎯 Create Tailored Instance Now", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "step": 5,
+      "meta": {
+        "es": { "title": "Vista Previa", "icon": "👁️" },
+        "en": { "title": "Preview", "icon": "👁️" }
+      },
+      "content": {
+        "es": {
+          "title": "👁️ Paso 5: Previsualización en Tiempo Real",
+          "description": "Observa la actualización en tiempo real en la pestaña de <strong>Vista Previa HTML</strong> o en el código fuente <strong>LaTeX</strong>. En la vista previa HTML, ¡haz clic en cualquier elemento para enfocar su editor!",
+          "actions": [
+            { "type": "switchPreviewHtml", "label": "📄 Ver Vista Previa HTML", "style": "primary" },
+            { "type": "switchPreviewLatex", "label": "📜 Ver Código LaTeX", "style": "ghost" }
+          ]
+        },
+        "en": {
+          "title": "👁️ Step 5: Real-Time HTML & LaTeX Preview",
+          "description": "Watch live updates in the <strong>HTML Preview</strong> tab or inspect production-ready <strong>LaTeX</strong> source code. In HTML preview, click any rendered text to jump directly to its editor field!",
+          "actions": [
+            { "type": "switchPreviewHtml", "label": "📄 View HTML Preview", "style": "primary" },
+            { "type": "switchPreviewLatex", "label": "📜 View LaTeX Source", "style": "ghost" }
+          ]
+        }
+      }
+    },
+    {
+      "step": 6,
+      "meta": {
+        "es": { "title": "Guardar y Exportar", "icon": "💾" },
+        "en": { "title": "Save & Export", "icon": "💾" }
+      },
+      "content": {
+        "es": {
+          "title": "💾 Paso 6: Guarda y Exporta tu CV",
+          "description": "Guarda tu base de datos de forma local en formato <code>.cv</code> para nunca perder tus cambios. Cuando estés listo, exporta tu código <code>.tex</code> o compila tu PDF vectorial.",
+          "actions": [
+            { "type": "exportDatabaseFile", "label": "💾 Descargar Base de Datos (.cv)", "style": "primary" },
+            { "type": "exportPdf", "label": "📄 Exportar PDF", "style": "ghost" }
+          ]
+        },
+        "en": {
+          "title": "💾 Step 6: Save & Export Your CV",
+          "description": "Save your database locally as a <code>.cv</code> file so your work is preserved. When ready, download raw <code>.tex</code> source code or compile a print-ready vector PDF.",
+          "actions": [
+            { "type": "exportDatabaseFile", "label": "💾 Download Database (.cv)", "style": "primary" },
+            { "type": "exportPdf", "label": "📄 Export PDF Document", "style": "ghost" }
+          ]
+        }
+      }
+    }
+  ]
+}

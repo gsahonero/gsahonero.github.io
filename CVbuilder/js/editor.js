@@ -35,6 +35,64 @@ function updateEntryWarningIcon(inputEl) {
   }
 }
 
+function setupAutoExpandInput(inputEl) {
+  if (!inputEl || inputEl._autoExpandBound) return;
+  if (inputEl.type === 'checkbox' || inputEl.type === 'file' || inputEl.type === 'radio') return;
+  inputEl._autoExpandBound = true;
+
+  inputEl.style.whiteSpace = 'pre-wrap';
+  inputEl.style.wordBreak = 'break-word';
+  inputEl.style.overflowWrap = 'break-word';
+  inputEl.style.resize = 'none';
+  inputEl.style.transition = 'height 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-height 0.22s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease';
+
+  var updateHeight = function() {
+    var val = inputEl.value || '';
+    if (inputEl.tagName === 'INPUT') {
+      var isOverflowing = (inputEl.scrollWidth > (inputEl.clientWidth + 5)) || (val.length > 30);
+      if (isOverflowing) {
+        inputEl.style.height = '62px';
+        inputEl.style.paddingTop = '6px';
+        inputEl.style.paddingBottom = '6px';
+      }
+    } else if (inputEl.tagName === 'TEXTAREA') {
+      inputEl.style.height = 'auto';
+      var baseH = inputEl.classList.contains('input-single-row') ? 32 : 80;
+      var newH = Math.max(baseH, inputEl.scrollHeight + 4);
+      inputEl.style.height = newH + 'px';
+    }
+  };
+
+  var collapse = function() {
+    var val = inputEl.value || '';
+    if (inputEl.tagName === 'INPUT') {
+      inputEl.style.height = '32px';
+      inputEl.style.paddingTop = '0px';
+      inputEl.style.paddingBottom = '0px';
+    } else if (inputEl.tagName === 'TEXTAREA') {
+      var baseH = inputEl.classList.contains('input-single-row') ? 32 : 80;
+      if (val.length <= 30) {
+        inputEl.style.height = baseH + 'px';
+      } else {
+        updateHeight();
+      }
+    }
+  };
+
+  inputEl.addEventListener('focus', updateHeight);
+  inputEl.addEventListener('click', updateHeight);
+  inputEl.addEventListener('input', updateHeight);
+  inputEl.addEventListener('blur', collapse);
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('focusin', function(e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      setupAutoExpandInput(e.target);
+    }
+  }, true);
+}
+
 function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   var displayVal = getInstanceValue(propPath, masterVal);
   var isOverridden = activeInstance && activeInstance.overwrites && (propPath in activeInstance.overwrites);
@@ -46,16 +104,19 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   wrapper.style.gap = 'var(--space-1)';
   
   var inputHtml = isTextarea 
-    ? '<textarea style="width:100%; min-height:80px; padding:var(--space-2); border-radius:var(--radius-sm); border:1.5px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text); font-family:inherit; resize:vertical">' + esc(displayVal) + '</textarea>'
-    : '<input value="' + esc(displayVal) + '" style="width:100%; padding:0 var(--space-2); height:32px; border-radius:var(--radius-sm); border:1.5px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text); font-family:inherit">';
+    ? '<textarea class="auto-expand-field" style="width:100%; min-height:80px; padding:var(--space-2); border-radius:var(--radius-sm); border:1.5px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text); font-family:inherit; resize:none; overflow:hidden; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;">' + esc(displayVal) + '</textarea>'
+    : '<textarea rows="1" class="auto-expand-field input-single-row" style="width:100%; min-height:32px; height:32px; padding:5px var(--space-2); border-radius:var(--radius-sm); border:1.5px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text); font-family:inherit; resize:none; overflow:hidden; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;">' + esc(displayVal) + '</textarea>';
   
   var overrideControls = '';
   if (activeInstance) {
     var isEs = state.langFilter === 'es';
     var resetText = isEs ? 'Restablecer' : 'Reset';
-    overrideControls = '<div class="override-status-bar" style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--space-1); gap:var(--space-2)">'
-      + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:600; color:' + (isOverridden ? 'var(--color-primary)' : 'var(--color-text-muted)') + '">'
-      + (isOverridden ? (isEs ? '🟢 Anulación adaptada' : '🟢 Tailored Override') : (isEs ? '⚪ Usando valor maestro' : '⚪ Using Master Value'))
+    var overrideMsg = isEs
+      ? '🟢 Anulación adaptada [Instancia: ' + currentInstanceName + ']'
+      : '🟢 Tailored Override [Instance: ' + currentInstanceName + ']';
+    overrideControls = '<div class="override-status-bar" style="display:' + (isOverridden ? 'flex' : 'none') + '; justify-content:space-between; align-items:center; margin-top:var(--space-1); gap:var(--space-2)">'
+      + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:600; color:var(--color-primary)">'
+      + overrideMsg
       + '</span>'
       + '<div class="status-buttons" style="display:flex; gap:var(--space-1)">'
       + (isOverridden ? '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>' : '')
@@ -66,45 +127,60 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   wrapper.innerHTML = '<div class="kv" style="align-items: flex-start"><div class="mono" style="margin-top: 6px">value</div>' + inputHtml + '</div>' + overrideControls;
   
   var inputEl = wrapper.querySelector('input, textarea');
-  inputEl.oninput = function(e) {
-    var val = e.target.value;
-    if (activeInstance) {
-      var statusBar = wrapper.querySelector('.override-status-bar');
-      if (statusBar) {
-        var label = statusBar.querySelector('.status-label');
-        var buttonsDiv = statusBar.querySelector('.status-buttons');
-        
-        var isEs = state.langFilter === 'es';
-        label.textContent = isEs ? '🟢 Anulación adaptada (sin guardar)' : '🟢 Tailored Override (Unsaved)';
-        label.style.color = 'var(--color-primary)';
-        label.style.fontWeight = '700';
-        
-        var kv = wrapper.querySelector('.kv');
-        if (kv) {
-          kv.style.borderLeft = '3px solid var(--color-primary)';
-          kv.style.paddingLeft = 'var(--space-2)';
-        }
-        
-        if (!statusBar.querySelector('[data-apply]')) {
+  var secKey = propPath.split('.')[0];
+  if (inputEl) {
+    inputEl.setAttribute('data-path', propPath);
+    var focusHandler = function() {
+      if (typeof state !== 'undefined') state.activeSection = secKey;
+      focusHtmlPreviewItem(propPath);
+    };
+    inputEl.onfocus = focusHandler;
+    inputEl.onclick = focusHandler;
+    inputEl.oninput = function(e) {
+      var val = e.target.value;
+      if (typeof state !== 'undefined') state.activeSection = secKey;
+      if (activeInstance && currentInstanceName !== 'None (Master CV)') {
+        if (!activeInstance.overwrites) activeInstance.overwrites = {};
+        activeInstance.overwrites[propPath] = val;
+        saveCurrentInstance();
+
+        var statusBar = wrapper.querySelector('.override-status-bar');
+        if (statusBar) {
+          statusBar.style.display = 'flex';
+          var label = statusBar.querySelector('.status-label');
+          var buttonsDiv = statusBar.querySelector('.status-buttons');
+          
+          var isEs = state.langFilter === 'es';
+          label.textContent = isEs
+            ? '🟢 Anulación adaptada [Instancia: ' + currentInstanceName + ']'
+            : '🟢 Tailored Override [Instance: ' + currentInstanceName + ']';
+          label.style.color = 'var(--color-primary)';
+          label.style.fontWeight = '700';
+          
+          var kv = wrapper.querySelector('.kv');
+          if (kv) {
+            kv.style.borderLeft = '3px solid var(--color-primary)';
+            kv.style.paddingLeft = 'var(--space-2)';
+          }
+          
           var resetText = isEs ? 'Restablecer' : 'Reset';
-          var saveText = isEs ? 'Guardar instancia' : 'Save instance';
-          buttonsDiv.innerHTML = '<button class="btn btn-xs btn-primary" data-apply>' + saveText + '</button>'
-            + '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>';
-            
-          buttonsDiv.querySelector('[data-apply]').onclick = function() {
-            setInstanceOverride(propPath, inputEl.value);
-            renderAll();
-          };
-          buttonsDiv.querySelector('[data-reset]').onclick = function() {
-            resetInstanceOverride(propPath);
-          };
+          buttonsDiv.innerHTML = '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>';
+          var resetBtn = buttonsDiv.querySelector('[data-reset]');
+          if (resetBtn) {
+            resetBtn.onclick = function() {
+              resetInstanceOverride(propPath);
+            };
+          }
         }
+        renderLatex();
+        renderSchema();
+        updateHtmlPreviewContent();
+      } else {
+        setPath(pathArray, val);
       }
-    } else {
-      setPath(pathArray, val);
-    }
-    updateEntryWarningIcon(inputEl);
-  };
+      updateEntryWarningIcon(inputEl);
+    };
+}
   
   if (isOverridden) {
     var resetBtn = wrapper.querySelector('[data-reset]');
@@ -118,14 +194,21 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   return wrapper;
 }
 
-function initSections(){
+function initSections() {
   if (Array.isArray(data.basics) && data.basics.length > 0) {
     data.basics = data.basics[0];
   }
   normalizeSkills();
+  if (!data._sections) data._sections = {};
   Object.keys(data).forEach(function(k){
-    if(k==='_templates'||k==='templates'||k==='_hiddenFields'||k==='instances'||k.indexOf('_')===0) return;
-    if(!state.sections[k]) state.sections[k]={include:true,title:human(k)};
+    if(k==='_templates'||k==='templates'||k==='_hiddenFields'||k==='instances'||k==='_sections'||k.indexOf('_')===0) return;
+    var savedTitle = (data._sections[k] && data._sections[k].title) ? data._sections[k].title : human(k);
+    var savedInc = (data._sections[k] && data._sections[k].include !== undefined) ? data._sections[k].include : true;
+    if(!state.sections[k]) {
+      state.sections[k] = { include: savedInc, title: savedTitle };
+    } else if (!state.sections[k].title) {
+      state.sections[k].title = savedTitle;
+    }
     initPropertyNames(k,data[k]);
     if(Array.isArray(data[k])) data[k].forEach(function(item){
       if(isObj(item)&&!('selected' in item)) item.selected=true;
@@ -270,6 +353,24 @@ function renderOutline(){
     leftGroup.style.flex = '1';
     leftGroup.style.overflow = 'hidden';
 
+    if (!state.collapsedOutlineSections) state.collapsedOutlineSections = {};
+    var isCollapsed = !!state.collapsedOutlineSections[k];
+
+    if (isCollapsed) {
+      sec.classList.add('collapsed');
+    }
+
+    var toggleSpan = document.createElement('span');
+    toggleSpan.className = 'outline-sec-toggle';
+    toggleSpan.innerHTML = isCollapsed ? '▶' : '▼';
+    toggleSpan.title = isEs ? (isCollapsed ? 'Expandir sección' : 'Colapsar sección') : (isCollapsed ? 'Expand section' : 'Collapse section');
+    toggleSpan.onclick = function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      state.collapsedOutlineSections[k] = !state.collapsedOutlineSections[k];
+      renderOutline();
+    };
+
     var dragSpan = document.createElement('span');
     dragSpan.className = 'drag-handle';
     dragSpan.setAttribute('draggable', 'true');
@@ -277,7 +378,7 @@ function renderOutline(){
     dragSpan.style.cursor = 'grab';
     dragSpan.style.fontSize = '12px';
     dragSpan.style.color = 'var(--color-text-muted)';
-    dragSpan.style.marginRight = '4px';
+    dragSpan.style.marginRight = '2px';
     dragSpan.style.userSelect = 'none';
     dragSpan.textContent = '⋮⋮';
 
@@ -286,6 +387,7 @@ function renderOutline(){
     secA.style.fontWeight='700'; secA.style.color='var(--color-primary)';
     secA.innerHTML='<span class="olabel">'+esc(human(k))+'</span>';
 
+    leftGroup.appendChild(toggleSpan);
     leftGroup.appendChild(dragSpan);
     leftGroup.appendChild(secA);
 
@@ -476,7 +578,7 @@ function bindPropRename(root){
         markDirty();
       }
       renderLatex();
-      renderHtmlPreview();
+      updateHtmlPreviewContent();
       renderSchema();
     };
   });
@@ -596,39 +698,57 @@ function renderEditor(){
   var cardUpBtn = el('secCardMoveUpBtn');
   if (cardUpBtn) cardUpBtn.onclick = function() { moveSectionOrder(k, 'up'); };
   var cardDownBtn = el('secCardMoveDownBtn');
-  if (cardDownBtn) cardDownBtn.onclick = function() { moveSectionOrder(k, 'down'); };
-  el('includeSectionBox').onchange=function(e){ state.sections[k].include=e.target.checked; markDirty(); renderLatex(); };
-  
-  function checkPromptSaveInstance(newTitle) {
-    if (!state.sections[k]) state.sections[k] = {};
-    state.sections[k].title = newTitle;
-    markDirty();
-    renderLatex();
-    renderHtmlPreview();
-    
+  el('includeSectionBox').onchange = function(e) {
+    var inc = e.target.checked;
+    state.sections[k].include = inc;
     if (activeInstance && currentInstanceName !== 'None (Master CV)') {
+      if (!activeInstance.sections) activeInstance.sections = {};
+      if (!activeInstance.sections[k]) activeInstance.sections[k] = {};
+      activeInstance.sections[k].include = inc;
       saveCurrentInstance();
     } else {
-      var msg = isEs
-        ? 'Ha modificado el título de salida de la sección "' + human(k) + '".\nLos títulos de salida personalizados se almacenan en las Instancias de CV.\n¿Desea crear o guardar una Instancia de CV ahora para conservar este título?'
-        : 'You modified the section output title for "' + human(k) + '".\nCustom section output titles are stored in CV Instances.\nWould you like to create or save a CV Instance now to retain this custom title?';
-      if (confirm(msg)) {
-        createNewInstancePrompt('Tailored_' + (human(k).replace(/\s+/g, '_')));
-      }
+      if (!data._sections) data._sections = {};
+      if (!data._sections[k]) data._sections[k] = {};
+      data._sections[k].include = inc;
+      saveCurrentDatabase();
     }
-  }
-
-  el('sectionTitleInput').oninput=function(e){
-    state.sections[k].title=e.target.value;
-    el('sectionTitleInput2').value=e.target.value;
     markDirty();
     renderLatex();
+    updateHtmlPreviewContent();
+    renderOutline();
   };
-  el('sectionTitleInput').onchange=function(e){
-    checkPromptSaveInstance(e.target.value);
+  
+  function syncSectionTitle(newTitle) {
+    if (!state.sections[k]) state.sections[k] = {};
+    state.sections[k].title = newTitle;
+
+    if (!data._sections) data._sections = {};
+    if (!data._sections[k]) data._sections[k] = {};
+    data._sections[k].title = newTitle;
+
+    if (activeInstance && currentInstanceName !== 'None (Master CV)') {
+      if (!activeInstance.sections) activeInstance.sections = {};
+      if (!activeInstance.sections[k]) activeInstance.sections[k] = {};
+      activeInstance.sections[k].title = newTitle;
+      saveCurrentInstance();
+    } else {
+      saveCurrentDatabase();
+    }
+
+    markDirty();
+    renderLatex();
+    updateHtmlPreviewContent();
+  }
+
+  el('sectionTitleInput').oninput = function(e) {
+    var val = e.target.value;
+    el('sectionTitleInput2').value = val;
+    syncSectionTitle(val);
   };
-  el('sectionTitleInput2').onchange=function(e){
-    checkPromptSaveInstance(e.target.value);
+  el('sectionTitleInput2').oninput = function(e) {
+    var val = e.target.value;
+    el('sectionTitleInput').value = val;
+    syncSectionTitle(val);
   };
   
   if (k !== 'basics') {
@@ -802,8 +922,17 @@ function renderSkillsGroup(path,arr,propPath,keyName){
       +'<strong style="padding-left:var(--space-3)">'+esc(item.name||('item '+(i+1)))+'</strong></div>'
       +'<button class="btn btn-danger btn-xs" data-del-skill style="height:20px; padding:0 6px; font-size:var(--text-xxs)">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
       +'</div>'
-      +'<div class="kv"><div class="mono">' + (isEs ? 'Etiqueta' : 'Label') + '</div><input type="text" value="'+esc(item.name||'')+'"></div>';
-    (function(itm){ row.querySelector('input[type=checkbox]').onchange=function(e){ if (itm) itm.selected=e.target.checked; markDirty(); renderLatex(); renderSchema(); }; })(item);
+    (function(itm){
+      row.querySelector('input[type=checkbox]').onchange = function(e){
+        if (itm) itm.selected = e.target.checked;
+        if (activeInstance && currentInstanceName !== 'None (Master CV)') saveCurrentInstance();
+        else saveCurrentDatabase();
+        markDirty();
+        renderLatex();
+        updateHtmlPreviewContent();
+        renderSchema();
+      };
+    })(item);
     (function(itm,rw){
       rw.querySelector('input[type=text]').oninput=function(e){
         if (itm) {
@@ -957,7 +1086,7 @@ function renderArrayFields(key,arr){
           itm.lang = e.target.value;
           markDirty();
           renderLatex();
-          renderHtmlPreview();
+          updateHtmlPreviewContent();
           renderSchema();
         };
       })(item);
@@ -983,12 +1112,14 @@ function renderArrayFields(key,arr){
           activeInstance.visibility[key][idx] = e.target.checked;
           saveCurrentInstance();
           renderLatex();
-          renderHtmlPreview();
+          updateHtmlPreviewContent();
           renderSchema();
         } else {
           if (isObj(itm)) itm.selected = e.target.checked;
+          saveCurrentDatabase();
           markDirty();
           renderLatex();
+          updateHtmlPreviewContent();
           renderSchema();
         }
         updateEntryWarningIcon(selCheckbox);
@@ -1005,7 +1136,7 @@ function resolve(path){ return path.reduce(function(acc,key){ return acc[key]; }
 function setPath(path,value){
   var last=path[path.length-1];
   var ref=path.slice(0,-1).reduce(function(acc,key){ return acc[key]; },data);
-  ref[last]=value; markDirty(); renderLatex(); renderSchema(); renderOutline();
+  ref[last]=value; markDirty(); renderLatex(); renderSchema(); updateHtmlPreviewContent();
 }
 
 function addEntry(key){

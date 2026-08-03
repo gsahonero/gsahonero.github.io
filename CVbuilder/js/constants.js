@@ -1,5 +1,13 @@
-var APP_VERSION = '0.7.0';
+var APP_VERSION = '0.7.1';
 var CHANGELOG = [
+  {version:'0.7.1', changes:[
+    'Collapsible Sidebars & Outline Tree: Added panel collapse buttons for both the left sidebar (52px strip) and right outline pane (42px strip), as well as interactive section item tree expand/collapse chevrons (▼ / ▶).',
+    'Interactive Guided Help System: Built interactive 6-step/card guided wizards for "How to create your CV from scratch", "How to use CV Builder" (Component Architecture), and "How to use Templates" (Style & Theme Architecture) with direct action triggers.',
+    'Dynamic Config Engine: Powered interactive help guides using standalone JSON configuration files (guide_scratch.json, guide_usage.json, guide_templates.json) with fallback pre-loaders supporting offline file:// and HTTP execution.',
+    'Deprecation of .cvstyle Files: Consolidated all visual theme settings, ModernCV layout choices, accent colors, typography fonts, HTML templates, and LaTeX preambles directly inside the self-contained .cv database format.',
+    'Full-Width Research Interests in LaTeX: Updated ModernCV LaTeX compiler to render Research Interests summaries as clean, unindented full-width text directly under section headers.',
+    'Generalizable Property Include Checkboxes: Fixed data-field-include checkboxes across all entry levels (including dates, courses, and dissertations) in both HTML and LaTeX renderers.'
+  ]},
   {version:'0.7.0', changes:[
     'Modular Architectural Split: Separated the monolithic index.html file into distinct stylesheet and script layers (main.css, constants.js, translations.js, compiler.js, database.js, editor.js, tour.js, and app.js).',
     'Embedded System Diagnostics: Added an in-app system unit test dashboard accessible via Help -> Run Diagnostics, fully compatible with local file:// executions.'
@@ -86,16 +94,17 @@ var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 {{#basics.location}}\\address{{{basics.location}}}{{/basics.location}}
 {{#basics.email}}\\email{{{basics.email}}}{{/basics.email}}
 {{#basics.homepage}}\\homepage{{{basics.homepage}}}{{/basics.homepage}}
-{{#basics.photo}}\\photo[70pt][0.4pt]{{{basics.photo}}}{{/basics.photo}}
+{{#has_photo}}\\photo[70pt][0.4pt]{{{photo_filename}}}{{/has_photo}}
 \\hyphenation{Universidad}
 
 \\begin{document}
+{{&theme.textAlignLatex}}
 \\makecvtitle
 \\vspace{-1em}
 
 {{#has_research_interests}}
 \\section{{{labels.basics.research_interests}}}
-\\cvlistitem{{{basics.research_interests}}}
+{{{basics.research_interests}}}
 {{/has_research_interests}}
 
 \\renewcommand{\\listitemsymbol}{}
@@ -111,6 +120,9 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>{{basics.firstname}} {{basics.lastname}} - CV</title>
 <style>
+  body, h1, h2, h3, p, section, .entry, .entry-description, .entry-subheader, .contact-info, .kv-list, ul, li {
+    {{&theme.textAlignCss}}
+  }
   body {
     {{&theme.fontCss}}
     line-height: 1.6;
@@ -119,6 +131,16 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
     margin: 40px auto;
     padding: 0 20px;
     background: #fff;
+  }
+  .contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    font-size: 0.9em;
+    {{&theme.textAlignFlexCss}}
   }
   h1 {
     font-size: 2.5em;
@@ -159,7 +181,10 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
   .entry-header {
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
+    gap: {{&theme.headerSpacer}}px;
     font-weight: bold;
+    {{&theme.textAlignFlexCss}}
   }
   .entry-subheader {
     font-style: italic;
@@ -175,32 +200,140 @@ var DEFAULT_HTML_TEMPLATE = `<!DOCTYPE html>
     padding: 0;
     list-style: none;
   }
-  .skills-list li {
-    margin-bottom: 8px;
+  body, section, main, header {
+    cursor: default !important;
+  }
+  .entry, [id^="item-"], [id^="section-"], h1, h2, h3, h4, h5, h6, p, li, span, a, img, strong, em, u, b, i, .subtitle, .contact-info > div, .kv-list > li, .entry-header, .entry-description, .entry-subheader {
+    cursor: pointer !important;
   }
 </style>
+<script>
+function getElementPath(el) {
+  if (!el) return 'basics';
+  
+  var itemEl = el.closest('[id^="item-"]');
+  if (itemEl && itemEl.id) {
+    return itemEl.id.replace(/^item-/, '').replace(/-/g, '.');
+  }
+
+  var secEl = el.closest('[id^="section-"]');
+  if (secEl && secEl.id) {
+    return secEl.id.replace(/^section-/, '');
+  }
+
+  var anySec = el.closest('section, header, .entry, .contact-info, body');
+  if (anySec && anySec.id) {
+    return anySec.id.replace(/^(item|section)-/, '').replace(/-/g, '.');
+  }
+
+  return 'basics';
+}
+
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  var action = e.data.action;
+  
+  if (action === 'scrollToItem' || action === 'scrollToSection') {
+    var path = String(e.data.propPath || e.data.sectionId || '');
+    var parts = path.replace(/^section-/, '').split(/[\.\-]/);
+    var sectionKey = parts[0];
+    
+    var target = null;
+    if (e.data.propPath) {
+      var sanitized = 'item-' + e.data.propPath.replace(/\./g, '-');
+      target = document.getElementById(sanitized);
+      if (!target && parts.length >= 2) {
+        target = document.getElementById('item-' + parts[0] + '-' + parts[1]);
+      }
+    }
+    
+    if (!target) {
+      var secId = 'section-' + sectionKey;
+      target = document.getElementById(secId) || document.getElementById(sectionKey);
+    }
+    
+    if (!target) {
+      var headings = document.querySelectorAll('h1, h2, h3, header, section');
+      for (var i = 0; i < headings.length; i++) {
+        var txt = (headings[i].textContent || '').trim().toLowerCase();
+        if (txt && (txt.indexOf(sectionKey.toLowerCase()) !== -1)) {
+          target = headings[i].closest('section') || headings[i].closest('header') || headings[i];
+          break;
+        }
+      }
+    }
+
+    if (target) {
+      var rect = target.getBoundingClientRect();
+      var viewH = window.innerHeight || document.documentElement.clientHeight;
+      var viewW = window.innerWidth || document.documentElement.clientWidth;
+      var isVisible = (rect.top >= 0 && rect.bottom <= viewH && rect.left >= 0 && rect.right <= viewW);
+
+      if (!e.data.force && isVisible) {
+        return;
+      }
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.style.transition = 'outline 0.3s ease, box-shadow 0.3s ease';
+      target.style.outline = '2.5px solid #2563eb';
+      target.style.borderRadius = '6px';
+      target.style.boxShadow = '0 0 12px rgba(37, 99, 235, 0.3)';
+      setTimeout(function() {
+        if (target) {
+          target.style.outline = 'none';
+          target.style.boxShadow = 'none';
+        }
+      }, 1800);
+    }
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.closest && e.target.closest('a')) return;
+  var contentEl = e.target && e.target.closest ? e.target.closest('[id^="item-"], .entry, h1, h2, h3, p, li, span, img, .subtitle, .contact-info > div, section, header') : null;
+  if (!contentEl) return;
+
+  var rawId = '';
+  var itemEl = contentEl.closest('[id^="item-"]');
+  if (itemEl && itemEl.id) {
+    rawId = itemEl.id;
+  } else {
+    var secEl = contentEl.closest('[id^="section-"]');
+    if (secEl && secEl.id) {
+      rawId = secEl.id;
+    }
+  }
+
+  if (rawId) {
+    window.parent.postMessage({
+      action: 'previewClickFocus',
+      rawId: rawId
+    }, '*');
+  }
+});
+</script>
 </head>
 <body>
 
-  <header style="display:flex; align-items:center; margin-bottom:15px">
+  <header id="section-basics" style="display:flex; align-items:center; margin-bottom:15px">
     <div>
-      <h1 style="margin:0">{{basics.firstname}} {{basics.lastname}}</h1>
-      <div class="subtitle" style="margin-top:4px; margin-bottom:0">{{basics.title}}</div>
+      <h1 id="item-basics-firstname" style="margin:0">{{basics.firstname}} {{basics.lastname}}</h1>
+      <div id="item-basics-title" class="subtitle" style="margin-top:4px; margin-bottom:0">{{basics.title}}</div>
     </div>
     {{#basics.photo}}
-    <img src="{{basics.photo}}" alt="Profile photo" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #{{{theme.accentColor}}}; flex-shrink:0; margin-left:{{theme.photoLeftOffset}}px; margin-top:{{theme.photoTopOffset}}px;">
+    <img id="item-basics-photo" src="{{basics.photo}}" alt="Profile photo" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #{{{theme.accentColor}}}; flex-shrink:0; margin-left:{{theme.photoLeftOffset}}px; margin-top:{{theme.photoTopOffset}}px;">
     {{/basics.photo}}
   </header>
   <div class="contact-info">
-    {{#basics.email}}<div>{{labels.basics.email}}: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
-    {{#basics.homepage}}<div>{{labels.basics.homepage}}: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
-    {{#basics.location}}<div>{{labels.basics.location}}: {{basics.location}}</div>{{/basics.location}}
+    {{#basics.email}}<div id="item-basics-email">{{labels.basics.email}}: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
+    {{#basics.homepage}}<div id="item-basics-homepage">{{labels.basics.homepage}}: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
+    {{#basics.location}}<div id="item-basics-location">{{labels.basics.location}}: {{basics.location}}</div>{{/basics.location}}
   </div>
 
   {{#basics.research_interests}}
-  <section>
+  <section id="section-research_interests">
     <h2>{{labels.basics.research_interests}}</h2>
-    <p>{{basics.research_interests}}</p>
+    <p id="item-basics-research_interests">{{basics.research_interests}}</p>
   </section>
   {{/basics.research_interests}}
 
@@ -580,28 +713,28 @@ var STYLE_PRESETS = {
 </style>
 </head>
 <body>
-  <div class="header-banner">
-    <h1>{{basics.firstname}} {{basics.lastname}}</h1>
-    <div class="subtitle">{{basics.title}}</div>
+  <div class="header-banner" id="section-basics">
+    <h1 id="item-basics-firstname">{{basics.firstname}} {{basics.lastname}}</h1>
+    <div id="item-basics-title" class="subtitle">{{basics.title}}</div>
     <div class="contact-info">
-      {{#basics.email}}<div>Email: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
-      {{#basics.homepage}}<div>Web: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
-      {{#basics.location}}<div>Location: {{basics.location}}</div>{{/basics.location}}
+      {{#basics.email}}<div id="item-basics-email">Email: <a href="mailto:{{basics.email}}">{{basics.email}}</a></div>{{/basics.email}}
+      {{#basics.homepage}}<div id="item-basics-homepage">Web: <a href="{{basics.homepage}}" target="_blank">{{basics.homepage}}</a></div>{{/basics.homepage}}
+      {{#basics.location}}<div id="item-basics-location">Location: {{basics.location}}</div>{{/basics.location}}
     </div>
   </div>
 
   <div class="container">
     {{#basics.research_interests}}
-    <section>
+    <section id="section-research_interests">
       <h2>Executive Summary</h2>
-      <p>{{basics.research_interests}}</p>
+      <p id="item-basics-research_interests">{{basics.research_interests}}</p>
     </section>
     {{/basics.research_interests}}
 
-    <section>
+    <section id="section-education">
       <h2>Education</h2>
       {{#education}}
-      <div class="entry">
+      <div class="entry" id="item-education-{{_idx}}">
         <div class="entry-header">
           <span>{{degree}} - {{institution}}</span>
           <span>{{date_paren}}</span>
@@ -612,10 +745,10 @@ var STYLE_PRESETS = {
       {{/education}}
     </section>
 
-    <section>
+    <section id="section-work_experience">
       <h2>Professional Experience</h2>
       {{#work_experience}}
-      <div class="entry">
+      <div class="entry" id="item-work_experience-{{_idx}}">
         <div class="entry-header">
           <span>{{role}} - {{organization}}</span>
           <span>{{date_dash}}</span>
@@ -626,11 +759,11 @@ var STYLE_PRESETS = {
       {{/work_experience}}
     </section>
 
-    <section>
+    <section id="section-skills">
       <h2>Key Skills</h2>
       <div class="skills-grid">
         {{#skills}}
-        <div class="skills-card">
+        <div class="skills-card" id="item-skills-{{_idx}}">
           <strong>{{group}}</strong>
           <div style="margin-top: 5px; font-size:0.9em; color:#475569">{{items_csv}}</div>
         </div>

@@ -191,9 +191,12 @@ function htmlEscape(s) {
   return str;
 }
 
-function texEscape(s) {
-  if (s == null) return '';
-  var str = String(s);
+function texEscape(str) {
+  if (typeof str !== 'string') return str;
+
+  if (/^[a-zA-Z0-9_\-.]+\.(png|jpg|jpeg|gif|pdf|eps)$/i.test(str)) {
+    return str;
+  }
 
   var placeholders = [];
 
@@ -206,7 +209,7 @@ function texEscape(s) {
       'cvitemwithcomment','cvlistitem','vspace','hspace','par','smallskip',
       'medskip','bigskip','makeatletter','makeatother','compiledPublications',
       'compiledAbstracts','noindent','hangindent','hangafter','hbox','hss',
-      'parbox','textit','textbf','textquotedblleft','textquotedblright'
+      'parbox','textit','textbf','textquotedblleft','textquotedblright','photo'
     ];
     if (recognized.indexOf(cmdName) !== -1 || cmdName.indexOf('cv') === 0) {
       placeholders.push(match);
@@ -245,7 +248,8 @@ function applyOverwrites(obj, overwrites) {
   });
 }
 
-function buildTemplateContext() {
+function buildTemplateContext(format) {
+  format = format || 'html';
   var root = clone(data);
   
   // Apply instance visibility filters and overwrites
@@ -255,6 +259,10 @@ function buildTemplateContext() {
 
   // Pre-calculate has_ tags for template blocks
   Object.keys(root).forEach(function(key) {
+    if (key === 'instances' || key === '_style' || key.indexOf('_') === 0) {
+      root['has_' + key] = false;
+      return;
+    }
     var isIncluded = true;
     if (state.sections[key] && state.sections[key].include === false) {
       isIncluded = false;
@@ -291,8 +299,13 @@ function buildTemplateContext() {
   Object.keys(root).forEach(function(key) {
     var val = root[key];
     if (Array.isArray(val)) {
-      root[key] = val.map(function(item) {
-        return prepareContext(item, root);
+      root[key] = val.map(function(item, idx) {
+        var prepped = prepareContext(item, root);
+        if (isObj(prepped)) {
+          prepped._idx = idx;
+          prepped._item_id = key + '-' + idx;
+        }
+        return prepped;
       });
     }
   });
@@ -302,9 +315,31 @@ function buildTemplateContext() {
     accentColor: state.themeAccentColor ? state.themeAccentColor.replace('#', '').toUpperCase() : '2563EB',
     fontCss: getFontCss(state.themeFont),
     fontLatex: getFontLatex(state.themeFont),
+    textAlignCss: getTextAlignCss(state.themeTextAlign),
+    textAlignFlexCss: getTextAlignFlexCss(state.themeTextAlign),
+    textAlignLatex: getTextAlignLatex(state.themeTextAlign),
+    textAlign: state.themeTextAlign || 'left',
+    headerSpacer: state.headerSpacer !== undefined ? state.headerSpacer : 20,
     photoLeftOffset: state.photoLeftOffset !== undefined ? state.photoLeftOffset : 40,
     photoTopOffset: state.photoTopOffset !== undefined ? state.photoTopOffset : 0
   };
+
+  // Handle profile photo metadata for LaTeX and HTML templates
+  if (data && data.basics && data.basics.photo) {
+    var photoStr = String(data.basics.photo).trim();
+    if (photoStr) {
+      root.has_photo = true;
+      var ext = 'png';
+      if (photoStr.indexOf('image/jpeg') !== -1 || photoStr.indexOf('image/jpg') !== -1 || photoStr.toLowerCase().indexOf('.jpg') !== -1 || photoStr.toLowerCase().indexOf('.jpeg') !== -1) {
+        ext = 'jpg';
+      }
+      root.photo_filename = 'profile_photo.' + ext;
+    } else {
+      root.has_photo = false;
+    }
+  } else {
+    root.has_photo = false;
+  }
 
   // Add customized property/field names mappings
   root.labels = {};
@@ -324,6 +359,32 @@ function buildTemplateContext() {
     }
   });
 
+  // Handle research_interests metadata and fallback label for LaTeX and HTML
+  var resInterestsRaw = (data && data.basics && data.basics.research_interests) || (data && data.research_interests) || '';
+  if (typeof resInterestsRaw === 'object' && resInterestsRaw) {
+    if (Array.isArray(resInterestsRaw)) {
+      resInterestsRaw = resInterestsRaw.map(function(x) { return typeof x === 'string' ? x : (x.name || x.description || ''); }).filter(Boolean).join(', ');
+    } else if (resInterestsRaw.description) {
+      resInterestsRaw = resInterestsRaw.description;
+    }
+  }
+  var resStr = String(resInterestsRaw || '').trim();
+  var isResVisible = isFieldVisible('basics.research_interests') && isFieldVisible('research_interests') && (!state.sections.research_interests || state.sections.research_interests.include !== false);
+
+  if (resStr && isResVisible) {
+    root.has_research_interests = true;
+    if (!root.basics) root.basics = {};
+    root.basics.research_interests = resStr;
+  } else {
+    root.has_research_interests = false;
+  }
+
+  if (!root.labels.basics) root.labels.basics = {};
+  if (!root.labels.basics.research_interests) {
+    var isEs = state.langFilter === 'es';
+    root.labels.basics.research_interests = state.propertyNames['basics.research_interests'] || (isEs ? 'Intereses de Investigación' : 'Research Interests');
+  }
+
   // Add Spanish sections translation support
   root.sections = {};
   Object.keys(state.sections).forEach(function(key) {
@@ -335,12 +396,14 @@ function buildTemplateContext() {
   // Automatic Section Compilation for HTML and LaTeX
   var htmlSections = [];
   var latexSections = [];
-  var ignoreKeys = ['basics', 'research_interests', '_templates', 'templates', '_hiddenFields', 'all_sections', 'labels', 'theme', 'sections'];
+  var ignoreKeys = ['basics', 'research_interests', '_templates', 'templates', '_hiddenFields', 'all_sections', 'labels', 'theme', 'sections', 'instances'];
   
   Object.keys(data).forEach(function(key) {
     if (ignoreKeys.indexOf(key) !== -1 || key.indexOf('_') === 0) return;
+    if (state.sections[key] && state.sections[key].include === false) return;
+    if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] === false) return;
     
-    var val = root[key] !== undefined ? root[key] : data[key];
+    var val = data[key];
     if (!val) return;
     
     var htmlSec = renderAutoSectionHtml(key, val);
@@ -352,31 +415,94 @@ function buildTemplateContext() {
   
   root.all_sections_html = htmlSections.join('\n\n');
   root.all_sections_latex = latexSections.join('\n\n');
-  root.all_sections = root.all_sections_html;
+  root.all_sections = (format === 'latex') ? root.all_sections_latex : root.all_sections_html;
 
   return root;
 }
 
+function isFieldVisible(path) {
+  if (!path) return true;
+  if (activeInstance && activeInstance.visibility && activeInstance.visibility[path] !== undefined) {
+    return activeInstance.visibility[path] !== false;
+  }
+  if (typeof data !== 'undefined' && data && data._hiddenFields && data._hiddenFields[path] !== undefined) {
+    return !data._hiddenFields[path];
+  }
+  return true;
+}
+
+function getVisibleObject(item, basePath) {
+  if (item == null) return item;
+  if (typeof item !== 'object') {
+    return isFieldVisible(basePath) ? item : undefined;
+  }
+  if (Array.isArray(item)) {
+    return item.filter(function(sub, idx) {
+      var subPath = basePath ? (basePath + '.' + idx) : String(idx);
+      if (!isFieldVisible(subPath)) return false;
+      if (isObj(sub) && sub.selected === false) return false;
+      return true;
+    }).map(function(sub, idx) {
+      var subPath = basePath ? (basePath + '.' + idx) : String(idx);
+      return getVisibleObject(sub, subPath);
+    });
+  }
+
+  var cleanObj = {};
+  Object.keys(item).forEach(function(k) {
+    if (k === 'selected' || k === 'lang' || k === '_parent' || k === '_idx' || k === '_item_id') {
+      cleanObj[k] = item[k];
+      return;
+    }
+    var propPath = basePath ? (basePath + '.' + k) : k;
+    if (!isFieldVisible(propPath)) {
+      return;
+    }
+    var val = item[k];
+    if (Array.isArray(val)) {
+      cleanObj[k] = val.filter(function(sub, idx) {
+        var subPath = propPath + '.' + idx;
+        if (!isFieldVisible(subPath)) return false;
+        if (isObj(sub) && sub.selected === false) return false;
+        return true;
+      }).map(function(sub, idx) {
+        var subPath = propPath + '.' + idx;
+        return getVisibleObject(sub, subPath);
+      });
+    } else if (isObj(val)) {
+      cleanObj[k] = getVisibleObject(val, propPath);
+    } else {
+      cleanObj[k] = val;
+    }
+  });
+
+  return cleanObj;
+}
+
 function renderAutoSectionHtml(key, val) {
+  if (key === 'instances' || key === '_style' || key.indexOf('_') === 0) return '';
   if (state.sections[key] && state.sections[key].include === false) return '';
   if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] === false) return '';
   if (!val) return '';
   
   var title = (state.sections[key] && state.sections[key].title) || human(key);
-  var html = '<section>\n  <h2>' + htmlEscape(title) + '</h2>\n';
+  var html = '<section id="section-' + key + '">\n  <h2>' + htmlEscape(title) + '</h2>\n';
   
-  if (isObj(val)) {
+  if (isObj(val) && !Array.isArray(val)) {
+    var visVal = getVisibleObject(val, key);
+    if (!visVal || !Object.keys(visVal).length) return '';
     html += '  <ul class="kv-list">\n';
-    Object.keys(val).forEach(function(g) {
-      if (Array.isArray(val[g])) {
-        var list = val[g].filter(function(x) { return !isObj(x) || x.selected !== false; });
-        if (!list.length) return;
-        var gLabel = state.propertyNames[key + '.' + g] || human(g);
-        var csv = list.map(function(x) { return typeof x === 'string' ? x : (x.name || x.label || x.language || ''); }).filter(Boolean).join(', ');
-        html += '    <li><strong>' + htmlEscape(gLabel) + ':</strong> ' + htmlEscape(csv) + '</li>\n';
-      } else if (val[g] != null) {
-        var kLabel = state.propertyNames[key + '.' + g] || human(g);
-        html += '    <li><strong>' + htmlEscape(kLabel) + ':</strong> ' + htmlEscape(String(val[g])) + '</li>\n';
+    Object.keys(visVal).forEach(function(g) {
+      if (g === 'selected' || g === 'lang') return;
+      var itemPath = key + '.' + g;
+      if (Array.isArray(visVal[g])) {
+        if (!visVal[g].length) return;
+        var gLabel = state.propertyNames[itemPath] || human(g);
+        var csv = visVal[g].map(function(x) { return typeof x === 'string' ? x : (x.name || x.label || x.language || ''); }).filter(Boolean).join(', ');
+        if (csv) html += '    <li id="item-' + key + '-' + g + '"><strong>' + htmlEscape(gLabel) + ':</strong> ' + htmlEscape(csv) + '</li>\n';
+      } else if (visVal[g] != null) {
+        var kLabel = state.propertyNames[itemPath] || human(g);
+        html += '    <li id="item-' + key + '-' + g + '"><strong>' + htmlEscape(kLabel) + ':</strong> ' + htmlEscape(String(visVal[g])) + '</li>\n';
       }
     });
     html += '  </ul>\n</section>';
@@ -384,8 +510,11 @@ function renderAutoSectionHtml(key, val) {
   }
   
   if (Array.isArray(val)) {
-    var activeItems = val.filter(function(item) {
+    var activeItems = val.filter(function(item, idx) {
+      var itemPath = key + '.' + idx;
+      if (!isFieldVisible(itemPath)) return false;
       if (isObj(item) && item.selected === false) return false;
+      if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] && Array.isArray(activeInstance.visibility[key]) && activeInstance.visibility[key][idx] === false) return false;
       if (state.langFilter && state.langFilter !== 'all' && isObj(item) && item.lang) {
         if (item.lang !== 'all' && item.lang !== state.langFilter) return false;
       }
@@ -397,7 +526,13 @@ function renderAutoSectionHtml(key, val) {
     
     if (isPubLike) {
       html += '  <ul>\n';
-      activeItems.forEach(function(it) {
+      activeItems.forEach(function(rawIt, idx) {
+        var realIdx = val.indexOf(rawIt);
+        if (realIdx === -1) realIdx = idx;
+        var itemPath = key + '.' + realIdx;
+        var it = getVisibleObject(rawIt, itemPath);
+        if (!it) return;
+
         var line = '';
         if (it.authors) line += htmlEscape(it.authors) + '. ';
         if (it.title) line += '"' + htmlEscape(it.title) + '." ';
@@ -405,35 +540,66 @@ function renderAutoSectionHtml(key, val) {
         if (it.year || it.date) line += htmlEscape(it.year || it.date);
         if (it.type) line += ' (' + htmlEscape(it.type) + ')';
         if (!it.venue && !it.title && it.description) line += htmlEscape(it.description);
-        html += '    <li>' + line + '</li>\n';
+        if (line.trim()) html += '    <li id="item-' + key + '-' + realIdx + '">' + line + '</li>\n';
       });
       html += '  </ul>\n';
     } else {
-      activeItems.forEach(function(it) {
+      activeItems.forEach(function(rawIt, idx) {
+        var realIdx = val.indexOf(rawIt);
+        if (realIdx === -1) realIdx = idx;
+        var itemPath = key + '.' + realIdx;
+        var it = getVisibleObject(rawIt, itemPath);
+        if (!it) return;
+
         if (!isObj(it)) {
-          html += '  <div class="entry">' + htmlEscape(String(it)) + '</div>\n';
+          html += '  <div class="entry" id="item-' + key + '-' + realIdx + '">' + htmlEscape(String(it)) + '</div>\n';
           return;
         }
+
         var headerLeft = it.role || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '';
         var headerRight = joinDate(it.start, it.end, 'dash') || it.year || it.date || '';
-        var subheader = it.organization || it.institution || it.company || it.publisher || it.vendor || it.department || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
-        var desc = it.description || it.details || it.summary || it.highlights || it.dissertation || '';
-        if (Array.isArray(it.courses) && it.courses.length) {
-          var cCsv = it.courses.map(function(c){ return typeof c === 'string' ? c : (c.name || ''); }).join(', ');
-          desc = '<em>Courses:</em> ' + cCsv + (desc ? '<br>' + desc : '');
-        }
         
-        html += '  <div class="entry">\n';
-        html += '    <div class="entry-header">\n';
+        var orgInstDept = '';
+        if (it.organization && it.department) orgInstDept = it.organization + ', ' + it.department;
+        else if (it.institution && it.department) orgInstDept = it.institution + ', ' + it.department;
+        else if (it.organization) orgInstDept = it.organization;
+        else if (it.institution) orgInstDept = it.institution;
+        else if (it.department) orgInstDept = it.department;
+
+        var subheader = orgInstDept || it.company || it.publisher || it.vendor || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
+        
+        var descParts = [];
+        if (it.dissertation) {
+          descParts.push('<em>Dissertation:</em> ' + htmlEscape(it.dissertation));
+        }
+        var mainDesc = it.description || it.details || it.summary || it.highlights || '';
+        if (mainDesc) {
+          descParts.push(htmlEscape(mainDesc));
+        }
+
+        if (Array.isArray(it.courses) && it.courses.length) {
+          var cCsv = it.courses.map(function(c){ return typeof c === 'string' ? c : (c.name || ''); }).filter(Boolean).join(', ');
+          if (cCsv) descParts.push('<em>Courses:</em> ' + cCsv);
+        }
+
+        var desc = descParts.join('<br>');
+
+        if (!headerLeft && !headerRight && !subheader && !desc) return;
+
+        var spacer = (state.headerSpacer !== undefined) ? state.headerSpacer : 20;
+        html += '  <div class="entry" id="item-' + key + '-' + realIdx + '">\n';
+        html += '    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:' + spacer + 'px;">\n';
         html += '      <span>' + htmlEscape(headerLeft + (subheader ? ' - ' + subheader : '')) + '</span>\n';
-        if (headerRight) html += '      <span>' + htmlEscape(headerRight) + '</span>\n';
+        if (headerRight) html += '      <span style="white-space:nowrap;">' + htmlEscape(headerRight) + '</span>\n';
         html += '    </div>\n';
         if (desc) html += '    <div class="entry-description">' + desc + '</div>\n';
         html += '  </div>\n';
       });
     }
   } else if (typeof val === 'string') {
-    html += '  <p>' + htmlEscape(val) + '</p>\n';
+    if (isFieldVisible(key)) {
+      html += '  <p>' + htmlEscape(val) + '</p>\n';
+    }
   }
   
   html += '</section>';
@@ -441,6 +607,7 @@ function renderAutoSectionHtml(key, val) {
 }
 
 function renderAutoSectionLatex(key, val) {
+  if (key === 'instances' || key === '_style' || key.indexOf('_') === 0) return '';
   if (state.sections[key] && state.sections[key].include === false) return '';
   if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] === false) return '';
   if (!val) return '';
@@ -448,25 +615,31 @@ function renderAutoSectionLatex(key, val) {
   var title = (state.sections[key] && state.sections[key].title) || human(key);
   var tex = '\\section{' + latexText(title) + '}\n';
   
-  if (isObj(val)) {
-    Object.keys(val).forEach(function(g) {
-      if (Array.isArray(val[g])) {
-        var list = val[g].filter(function(x) { return !isObj(x) || x.selected !== false; });
-        if (!list.length) return;
-        var gLabel = latexText(state.propertyNames[key + '.' + g] || human(g));
-        var csv = list.map(function(x) { return typeof x === 'string' ? x : (x.name || x.label || x.language || ''); }).filter(Boolean).join(', ');
-        tex += '\\cvitemwithcomment{' + gLabel + '}{\\parbox[t]{0.85\\textwidth}{' + latexText(csv) + '}}{}\n';
-      } else if (val[g] != null) {
-        var kLabel = latexText(state.propertyNames[key + '.' + g] || human(g));
-        tex += '\\cvitemwithcomment{' + kLabel + '}{\\parbox[t]{0.85\\textwidth}{' + latexText(String(val[g])) + '}}{}\n';
+  if (isObj(val) && !Array.isArray(val)) {
+    var visVal = getVisibleObject(val, key);
+    if (!visVal || !Object.keys(visVal).length) return '';
+    Object.keys(visVal).forEach(function(g) {
+      if (g === 'selected' || g === 'lang') return;
+      var itemPath = key + '.' + g;
+      if (Array.isArray(visVal[g])) {
+        if (!visVal[g].length) return;
+        var gLabel = latexText(state.propertyNames[itemPath] || human(g));
+        var csv = visVal[g].map(function(x) { return typeof x === 'string' ? x : (x.name || x.label || x.language || ''); }).filter(Boolean).join(', ');
+        if (csv) tex += '\\cvitemwithcomment{' + gLabel + '}{\\parbox[t]{0.85\\textwidth}{' + latexText(csv) + '}}{}\n';
+      } else if (visVal[g] != null) {
+        var kLabel = latexText(state.propertyNames[itemPath] || human(g));
+        tex += '\\cvitemwithcomment{' + kLabel + '}{\\parbox[t]{0.85\\textwidth}{' + latexText(String(visVal[g])) + '}}{}\n';
       }
     });
     return tex;
   }
   
   if (Array.isArray(val)) {
-    var activeItems = val.filter(function(item) {
+    var activeItems = val.filter(function(item, idx) {
+      var itemPath = key + '.' + idx;
+      if (!isFieldVisible(itemPath)) return false;
       if (isObj(item) && item.selected === false) return false;
+      if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] && Array.isArray(activeInstance.visibility[key]) && activeInstance.visibility[key][idx] === false) return false;
       if (state.langFilter && state.langFilter !== 'all' && isObj(item) && item.lang) {
         if (item.lang !== 'all' && item.lang !== state.langFilter) return false;
       }
@@ -477,7 +650,13 @@ function renderAutoSectionLatex(key, val) {
     var isPubLike = activeItems.every(function(it) { return isObj(it) && (it.authors || (it.title && (it.venue || it.publisher))); });
     
     if (isPubLike) {
-      activeItems.forEach(function(it) {
+      activeItems.forEach(function(rawIt, idx) {
+        var realIdx = val.indexOf(rawIt);
+        if (realIdx === -1) realIdx = idx;
+        var itemPath = key + '.' + realIdx;
+        var it = getVisibleObject(rawIt, itemPath);
+        if (!it) return;
+
         var authors = latexText(it.authors || '');
         var pTitle = latexText(it.title || '');
         var venue = latexText(it.venue || it.publisher || '');
@@ -486,25 +665,54 @@ function renderAutoSectionLatex(key, val) {
         tex += '\\cvitem{-}{' + authors + '. \\textquotedblleft ' + pTitle + '.\\textquotedblright\\ \\textit{' + venue + '}. ' + year + typ + '.}\n';
       });
     } else {
-      activeItems.forEach(function(it) {
+      activeItems.forEach(function(rawIt, idx) {
+        var realIdx = val.indexOf(rawIt);
+        if (realIdx === -1) realIdx = idx;
+        var itemPath = key + '.' + realIdx;
+        var it = getVisibleObject(rawIt, itemPath);
+        if (!it) return;
+
         if (!isObj(it)) {
           tex += '\\cvitem{-}{' + latexText(String(it)) + '}\n';
           return;
         }
+
         var dateStr = joinDate(it.start, it.end, 'dash') || latexText(it.year || it.date || '');
         var title1 = latexText(it.role || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '');
-        var title2 = latexText(it.organization || it.institution || it.company || it.publisher || it.vendor || it.department || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '');
-        var desc = latexText(it.description || it.details || it.summary || it.highlights || it.dissertation || '');
-        if (Array.isArray(it.courses) && it.courses.length) {
-          var cCsv = latexText(it.courses.map(function(c){ return typeof c === 'string' ? c : (c.name || ''); }).join(', '));
-          desc = '\\textbf{' + latexText(it.institution || '') + '} (' + latexText(it.level || '') + '). \\textit{Courses:} ' + cCsv;
+        
+        var texOrgInstDept = '';
+        if (it.organization && it.department) texOrgInstDept = it.organization + ', ' + it.department;
+        else if (it.institution && it.department) texOrgInstDept = it.institution + ', ' + it.department;
+        else if (it.organization) texOrgInstDept = it.organization;
+        else if (it.institution) texOrgInstDept = it.institution;
+        else if (it.department) texOrgInstDept = it.department;
+
+        var subheaderVal = texOrgInstDept || it.company || it.publisher || it.vendor || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
+        var title2 = latexText(subheaderVal);
+        
+        var texDescParts = [];
+        if (it.dissertation) {
+          texDescParts.push('Dissertation: \\textit{' + latexText(it.dissertation) + '}');
         }
+        var mainTexDesc = latexText(it.description || it.details || it.summary || it.highlights || '');
+        if (mainTexDesc) {
+          texDescParts.push(mainTexDesc);
+        }
+
+        if (Array.isArray(it.courses) && it.courses.length) {
+          var cCsv = latexText(it.courses.map(function(c){ return typeof c === 'string' ? c : (c.name || ''); }).filter(Boolean).join(', '));
+          if (cCsv) texDescParts.push('\\textit{Courses:} ' + cCsv);
+        }
+
+        var desc = texDescParts.join(' \\\\ ');
         
         tex += '\\cventry{' + dateStr + '}{' + title1 + '}{' + title2 + '}{}{}{' + desc + '}\n';
       });
     }
   } else if (typeof val === 'string') {
-    tex += '\\cvlistitem{' + latexText(val) + '}\n';
+    if (isFieldVisible(key)) {
+      tex += '\\cvlistitem{' + latexText(val) + '}\n';
+    }
   }
   
   return tex;
@@ -532,18 +740,286 @@ function getFontLatex(font) {
   }
 }
 
+function getTextAlignCss(align) {
+  switch(align) {
+    case 'center': return 'text-align: center !important;';
+    case 'right': return 'text-align: right !important;';
+    case 'justify': return 'text-align: justify !important; text-justify: inter-word;';
+    case 'left':
+    default: return 'text-align: left !important;';
+  }
+}
+
+function getTextAlignFlexCss(align) {
+  switch(align) {
+    case 'center': return 'justify-content: center !important; text-align: center !important;';
+    case 'right': return 'justify-content: flex-end !important; text-align: right !important;';
+    case 'justify': return 'justify-content: space-between !important; text-align: justify !important;';
+    case 'left':
+    default: return 'justify-content: flex-start !important; text-align: left !important;';
+  }
+}
+
+function getTextAlignLatex(align) {
+  switch(align) {
+    case 'center': return '\\centering';
+    case 'right': return '\\raggedleft';
+    case 'left': return '\\raggedright';
+    case 'justify':
+    default: return '';
+  }
+}
+
 function renderHtmlContent() {
   if (!Object.keys(data).length) return 'Upload or create a CV database to generate HTML.';
-  var tplText = el('htmlTplEditor').value || DEFAULT_HTML_TEMPLATE;
-  var context = buildTemplateContext();
+  var tplText = (el('htmlTplEditor') && el('htmlTplEditor').value) || DEFAULT_HTML_TEMPLATE;
+  if (tplText.indexOf('theme.textAlign') === -1) {
+    if (tplText.indexOf('</style>') !== -1) {
+      tplText = tplText.replace('</style>', '  body, h1, h2, h3, p, section, .entry, .entry-description, .entry-subheader, .contact-info, .kv-list, ul, li {\n    {{&theme.textAlignCss}}\n  }\n  .contact-info, .entry-header {\n    {{&theme.textAlignFlexCss}}\n  }\n</style>');
+    } else {
+      tplText = DEFAULT_HTML_TEMPLATE;
+    }
+  }
+  var context = buildTemplateContext('html');
   return renderTemplate(tplText, context, htmlEscape);
 }
 
-function renderHtmlPreview() {
+function findIframeSectionTarget(doc, sectionKey) {
+  if (!doc || !sectionKey) return null;
+  var secId = sectionKey.indexOf('section-') === 0 ? sectionKey : 'section-' + sectionKey;
+  var rawKey = sectionKey.replace(/^section-/, '').toLowerCase();
+
+  var elById = doc.getElementById(secId) || doc.getElementById(rawKey);
+  if (elById) return elById;
+
+  var elByQuery = doc.querySelector('[id*="' + rawKey + '"]');
+  if (elByQuery) return elByQuery;
+
+  var headings = doc.querySelectorAll('h1, h2, h3, header, section');
+  for (var i = 0; i < headings.length; i++) {
+    var txt = (headings[i].textContent || '').trim().toLowerCase();
+    if (txt && (txt.indexOf(rawKey) !== -1 || rawKey.indexOf(txt) !== -1)) {
+      return headings[i].closest('section') || headings[i].closest('header') || headings[i];
+    }
+  }
+
+  return doc.querySelector('section, header') || doc.body;
+}
+
+function isElementInIframeViewport(targetEl, win) {
+  if (!targetEl || !win) return false;
+  try {
+    var rect = targetEl.getBoundingClientRect();
+    var viewH = win.innerHeight || (win.document && win.document.documentElement ? win.document.documentElement.clientHeight : 800);
+    var viewW = win.innerWidth || (win.document && win.document.documentElement ? win.document.documentElement.clientWidth : 1200);
+    
+    return (
+      rect.top >= 0 &&
+      rect.bottom <= viewH &&
+      rect.left >= 0 &&
+      rect.right <= viewW
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+function findIframeItemTarget(doc, propPath) {
+  if (!doc || !propPath) return null;
+
+  var parts = String(propPath).trim().split('.');
+  var sectionKey = parts[0];
+
+  var sanitized = 'item-' + parts.join('-');
+  var elById = doc.getElementById(sanitized);
+  if (elById) return elById;
+
+  if (parts.length >= 2 && !isNaN(parseInt(parts[1], 10))) {
+    var entryId = 'item-' + parts[0] + '-' + parts[1];
+    var entryEl = doc.getElementById(entryId);
+    if (entryEl) return entryEl;
+  }
+
+  if (parts.length >= 2) {
+    var groupId = 'item-' + parts[0] + '-' + parts[1];
+    var groupEl = doc.getElementById(groupId);
+    if (groupEl) return groupEl;
+  }
+
+  return findIframeSectionTarget(doc, sectionKey);
+}
+
+var lastFocusedItemPath = null;
+
+function focusHtmlPreviewItem(propPath, force) {
+  var frame = el('htmlPreviewFrame');
+  if (!frame || !propPath) return;
+
+  var cleanPath = String(propPath).trim();
+  if (!force && lastFocusedItemPath === cleanPath) {
+    return;
+  }
+  lastFocusedItemPath = cleanPath;
+
+  if (frame.contentWindow) {
+    try {
+      frame.contentWindow.postMessage({ action: 'scrollToItem', propPath: cleanPath, force: !!force }, '*');
+    } catch (e) {}
+  }
+
+  try {
+    var doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+    var win = frame.contentWindow || window;
+    if (doc) {
+      var target = findIframeItemTarget(doc, cleanPath);
+      if (target) {
+        if (!force && isElementInIframeViewport(target, win)) {
+          return;
+        }
+
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.transition = 'outline 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease';
+        target.style.outline = '2.5px solid #2563eb';
+        target.style.borderRadius = '6px';
+        target.style.boxShadow = '0 0 12px rgba(37, 99, 235, 0.3)';
+        setTimeout(function() {
+          if (target) {
+            target.style.outline = 'none';
+            target.style.boxShadow = 'none';
+          }
+        }, 1800);
+      }
+    }
+  } catch (e) {
+    console.warn('Could not focus iframe item:', e);
+  }
+}
+
+var lastFocusedSection = null;
+
+function focusHtmlPreviewSection(targetSectionId, force) {
   var frame = el('htmlPreviewFrame');
   if (!frame) return;
+
+  var sectionKey = targetSectionId || (typeof state !== 'undefined' && state.activeSection) || 'basics';
+  var secId = sectionKey.indexOf('section-') === 0 ? sectionKey : 'section-' + sectionKey;
+  var rawKey = secId.replace(/^section-/, '').toLowerCase();
+
+  if (frame.contentWindow) {
+    try {
+      frame.contentWindow.postMessage({ action: 'scrollToSection', sectionId: secId, force: !!force }, '*');
+    } catch (e) {}
+  }
+
+  try {
+    var doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+    var win = frame.contentWindow || window;
+    if (doc) {
+      var target = findIframeSectionTarget(doc, sectionKey);
+      if (target) {
+        if (!force && isElementInIframeViewport(target, win)) {
+          return;
+        }
+
+        lastFocusedSection = rawKey;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.transition = 'outline 0.3s ease, box-shadow 0.3s ease';
+        target.style.outline = '2.5px solid #2563eb';
+        target.style.borderRadius = '6px';
+        target.style.boxShadow = '0 0 12px rgba(37, 99, 235, 0.25)';
+        setTimeout(function() {
+          if (target) {
+            target.style.outline = 'none';
+            target.style.boxShadow = 'none';
+          }
+        }, 1800);
+      }
+    }
+  } catch (e) {
+    console.warn('Could not focus iframe section:', e);
+  }
+}
+
+function updateHtmlPreviewContent() {
+  var frame = el('htmlPreviewFrame');
+  if (!frame) return;
+
+  try {
+    var doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+    if (doc && doc.body) {
+      var newHtml = renderHtmlContent();
+      var parser = new DOMParser();
+      var parsedDoc = parser.parseFromString(newHtml, 'text/html');
+      if (parsedDoc && parsedDoc.body) {
+        // 1. Remove sections/elements from iframe doc that no longer exist in parsedDoc
+        var existingSections = doc.body.querySelectorAll('section[id], header[id]');
+        existingSections.forEach(function(existingSec) {
+          if (existingSec.id && !parsedDoc.getElementById(existingSec.id)) {
+            existingSec.remove();
+          }
+        });
+
+        // 2. Sync / update / append sections from parsedDoc into iframe doc
+        var newSections = parsedDoc.body.querySelectorAll('section[id], header[id]');
+        newSections.forEach(function(newSec) {
+          if (newSec.id) {
+            var existingSec = doc.getElementById(newSec.id);
+            if (existingSec) {
+              if (existingSec.innerHTML !== newSec.innerHTML) {
+                existingSec.innerHTML = newSec.innerHTML;
+              }
+            } else {
+              doc.body.appendChild(doc.importNode(newSec, true));
+            }
+          }
+        });
+
+        // 3. Sync contact info
+        var newContact = parsedDoc.body.querySelector('.contact-info');
+        var existingContact = doc.querySelector('.contact-info');
+        if (newContact && existingContact) {
+          if (existingContact.innerHTML !== newContact.innerHTML) {
+            existingContact.innerHTML = newContact.innerHTML;
+          }
+        } else if (newContact && !existingContact) {
+          var header = doc.querySelector('header');
+          if (header && header.nextSibling) {
+            doc.body.insertBefore(doc.importNode(newContact, true), header.nextSibling);
+          } else {
+            doc.body.appendChild(doc.importNode(newContact, true));
+          }
+        } else if (!newContact && existingContact) {
+          existingContact.remove();
+        }
+
+        // 4. Fallback full body sync if structure differs
+        if (doc.body.innerHTML !== parsedDoc.body.innerHTML) {
+          var currentScroll = frame.contentWindow ? frame.contentWindow.scrollY : 0;
+          doc.body.innerHTML = parsedDoc.body.innerHTML;
+          if (frame.contentWindow) {
+            frame.contentWindow.scrollTo(0, currentScroll);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Could not update iframe HTML content:', e);
+  }
+}
+
+function renderHtmlPreview(targetSectionId) {
+  var frame = el('htmlPreviewFrame');
+  if (!frame) return;
+
   var html = renderHtmlContent();
   frame.srcdoc = html;
+
+  var secKey = targetSectionId || (typeof state !== 'undefined' && state.activeSection);
+  if (secKey) {
+    setTimeout(function() {
+      focusHtmlPreviewSection(secKey, true);
+    }, 150);
+  }
 }
 
 function latexText(x){ return texEscape(String(x==null?'':x)); }
@@ -599,19 +1075,149 @@ function renderLanguages(items){
     return '\\cvitemwithcomment{'+latexText(l.language||'')+'}{'+latexText(prof)+'}{}'; });
 }
 
+function renderLatexCode() {
+  var tplText = (el('latexTplEditor') && el('latexTplEditor').value) || DEFAULT_LATEX_TEMPLATE;
+  if (tplText.indexOf('theme.textAlign') === -1) {
+    if (tplText.indexOf('\\begin{document}') !== -1) {
+      tplText = tplText.replace('\\begin{document}', '\\begin{document}\n{{&theme.textAlignLatex}}');
+    } else {
+      tplText = DEFAULT_LATEX_TEMPLATE;
+    }
+  }
+  if (tplText.indexOf('{{#basics.photo}}') !== -1) {
+    tplText = tplText.replace('{{#basics.photo}}', '{{#has_photo}}').replace('{{/basics.photo}}', '{{/has_photo}}').replace('{{{basics.photo}}}', '{{{photo_filename}}}');
+  }
+  var context = buildTemplateContext('latex');
+  return renderTemplate(tplText, context, texEscape);
+}
+
 function renderLatex() {
   if (!Object.keys(data).length) {
     var prev = el('latexPreview');
     if (prev) prev.textContent = 'Upload or create a CV database to generate LaTeX.';
     return;
   }
-  var tplText = (el('latexTplEditor') && el('latexTplEditor').value) || DEFAULT_LATEX_TEMPLATE;
-  var context = buildTemplateContext();
-  var rendered = renderTemplate(tplText, context, texEscape);
+  var rendered = renderLatexCode();
   var prevEl = el('latexPreview');
   if (prevEl) prevEl.textContent = rendered;
-  
-  renderHtmlPreview();
 }
 
 function renderSchema(){ el('schemaPreview').textContent=JSON.stringify(data,null,2); }
+
+/**
+ * Converts data.basics.photo into a base64 resource object for YtoTech compilation.
+ */
+async function getPhotoResource() {
+  if (!data || !data.basics || !data.basics.photo) return null;
+  var src = String(data.basics.photo).trim();
+  if (!src) return null;
+
+  var ext = 'png';
+  var rawBase64 = '';
+
+  if (src.indexOf('data:image/') === 0) {
+    var commaIdx = src.indexOf(',');
+    if (commaIdx !== -1) {
+      var header = src.substring(0, commaIdx);
+      if (header.indexOf('image/jpeg') !== -1 || header.indexOf('image/jpg') !== -1) ext = 'jpg';
+      else if (header.indexOf('image/gif') !== -1) ext = 'gif';
+      rawBase64 = src.substring(commaIdx + 1);
+    }
+  } else if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
+    try {
+      if (src.toLowerCase().indexOf('.jpg') !== -1 || src.toLowerCase().indexOf('.jpeg') !== -1) ext = 'jpg';
+      var response = await fetch(src);
+      var buffer = await response.arrayBuffer();
+      var bytes = new Uint8Array(buffer);
+      var binary = '';
+      for (var i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      if (typeof btoa === 'function') {
+        rawBase64 = btoa(binary);
+      } else if (typeof Buffer !== 'undefined') {
+        rawBase64 = Buffer.from(bytes).toString('base64');
+      }
+    } catch (e) {
+      console.warn('Could not fetch remote photo for LaTeX compilation:', e);
+      return null;
+    }
+  }
+
+  if (!rawBase64) return null;
+  return {
+    path: 'profile_photo.' + ext,
+    file: rawBase64
+  };
+}
+
+/**
+ * Compiles LaTeX code into a PDF binary Blob using the requested remote service.
+ * Supported services:
+ *   - 'ytotech': POST to https://latex.ytotech.com/builds/sync
+ *   - 'latexonline': GET to https://latexonline.cc/compile?text=...
+ */
+async function compilePdfFromLatex(latexCode, serviceName) {
+  serviceName = serviceName || (state && state.latexCompilerService) || 'ytotech';
+  
+  if (!latexCode || !latexCode.trim()) {
+    throw new Error('LaTeX code is empty.');
+  }
+
+  if (serviceName === 'latexonline') {
+    var url = 'https://latexonline.cc/compile?text=' + encodeURIComponent(latexCode);
+    var res = await fetch(url);
+    if (!res.ok) {
+      throw new Error('LaTeX.Online server error: ' + res.status + ' ' + res.statusText);
+    }
+    return await res.blob();
+  } else {
+    // Default: YtoTech (POST)
+    var photoRes = await getPhotoResource();
+    var resources = [
+      {
+        main: true,
+        content: latexCode
+      }
+    ];
+    if (photoRes) {
+      resources.push(photoRes);
+    }
+
+    var payload = {
+      compiler: "pdflatex",
+      resources: resources
+    };
+    var res = await fetch('https://latex.ytotech.com/builds/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok && res.status !== 201) {
+      var errText = '';
+      try {
+        errText = await res.text();
+      } catch (e) {}
+      throw new Error('YtoTech LaTeX server error: ' + res.status + (errText ? ' - ' + errText.substring(0, 150) : ''));
+    }
+    return await res.blob();
+  }
+}
+
+/**
+ * Triggers browser download of a Blob file.
+ */
+function downloadBlob(blob, filename) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename || 'CVbuilder_Document.pdf';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() {
+    if (a.parentNode) a.parentNode.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+}

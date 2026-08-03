@@ -1,0 +1,245 @@
+{
+  "guideId": "usage",
+  "components": [
+    {
+      "tab": 1,
+      "meta": {
+        "es": { "title": "Archivo .cv", "icon": "🗄️" },
+        "en": { "title": ".cv Database", "icon": "🗄️" }
+      },
+      "content": {
+        "es": {
+          "title": "🗄️ Componente 1: El Archivo .cv y la Base de Datos Local",
+          "grid": [
+            {
+              "title": "❓ ¿Qué es un archivo .cv?",
+              "text": "Es un documento JSON estructurado y autosuficiente que contiene todo tu historial profesional: tu Perfil Maestro, tus Instancias Adaptadas, tus Mapeadores de LaTeX personalizados y tus Estilos Visuales.",
+              "border": "#3b82f6"
+            },
+            {
+              "title": "⚙️ ¿Cómo funciona y qué hace?",
+              "text": "Funciona 100% de forma local en tu navegador sin servidores externos ni cuentas. Al guardar o exportar, tu archivo .cv se puede transferir libremente entre computadoras conservando todo sin pérdidas.",
+              "border": "#10b981"
+            }
+          ],
+          "actions": [
+            { "type": "exportDatabaseFile", "label": "💾 Descargar Base de Datos .cv Actual", "style": "primary" },
+            { "type": "openDbManagerModal", "label": "📂 Administrar Bases de Datos", "style": "ghost" }
+          ]
+        },
+        "en": {
+          "title": "🗄️ Component 1: The .cv Database & Storage Format",
+          "grid": [
+            {
+              "title": "❓ What is a .cv file?",
+              "text": "It is a self-contained, structured JSON file that stores your entire professional career history: your Master Profile, Tailored Instances, custom LaTeX Mappers, and Visual Theme settings.",
+              "border": "#3b82f6"
+            },
+            {
+              "title": "⚙️ How does it work & what does it do?",
+              "text": "Works 100% locally in your browser with zero cloud dependencies or accounts. Downloading or importing a .cv file preserves your complete dataset and instances losslessly across devices.",
+              "border": "#10b981"
+            }
+          ],
+          "actions": [
+            { "type": "exportDatabaseFile", "label": "💾 Download Current .cv File", "style": "primary" },
+            { "type": "openDbManagerModal", "label": "📂 Manage Local Databases", "style": "ghost" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 2,
+      "meta": {
+        "es": { "title": "Barra Lateral", "icon": "📑" },
+        "en": { "title": "Left Sidebar", "icon": "📑" }
+      },
+      "content": {
+        "es": {
+          "title": "📑 Componente 2: Barra Lateral y Lista de Secciones",
+          "description": "La barra lateral izquierda organiza las secciones de tu CV (Educación, Experiencia, Publicaciones, Habilidades, etc.). Cuenta con un botón de colapsado (<strong>◀ / ▶</strong>) para maximizar el área de trabajo y un contador dinámico de elementos.",
+          "box": {
+            "title": "📌 Funciones Principales",
+            "items": [
+              "<strong>Navegación Rápida:</strong> Haz clic en cualquier sección para cargar de inmediato sus campos en el editor central.",
+              "<strong>Panel Colapsable:</strong> Usa el botón ◀ al lado del título \"Sections\" para replegar la barra a 52px de ancho.",
+              "<strong>Añadir Secciones:</strong> El botón <strong>+ Add</strong> lanza el asistente con plantillas prediseñadas (education, publication, experience, award, etc.)."
+            ]
+          },
+          "actions": [
+            { "type": "openAddSectionAssistant", "label": "➕ Probar Añadir Nueva Sección", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "📑 Component 2: Left Sidebar & Section Panel",
+          "description": "The left sidebar organizes all document sections (Education, Work Experience, Publications, Skills, etc.). It features a panel collapse button (<strong>◀ / ▶</strong>) to maximize workspace width and dynamic item counts.",
+          "box": {
+            "title": "📌 Key Features & Functionality",
+            "items": [
+              "<strong>Instant Switching:</strong> Click any section item to immediately focus its form fields in the editor.",
+              "<strong>Collapsible Panel:</strong> Use the ◀ button next to \"Sections\" header to collapse the sidebar down to a compact 52px strip.",
+              "<strong>Add Custom Sections:</strong> The <strong>+ Add</strong> button opens the assistant with pre-built section templates."
+            ]
+          },
+          "actions": [
+            { "type": "openAddSectionAssistant", "label": "➕ Open Section Assistant", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 3,
+      "meta": {
+        "es": { "title": "Editor y Campos", "icon": "✏️" },
+        "en": { "title": "Form Editor", "icon": "✏️" }
+      },
+      "content": {
+        "es": {
+          "title": "✏️ Componente 3: Editor de Formularios y Controles de Campo",
+          "description": "El editor central convierte estructuras JSON complejas en formularios limpios. Los campos de texto se auto-expanden suavemente al hacer clic para soportar párrafos multilínea sin barras de desplazamiento.",
+          "grid": [
+            {
+              "title": "☑️ Casillas \"Include\" por Propiedad",
+              "text": "Cada propiedad (fechas, cursos, tesis, roles) tiene una casilla Include independiente (data-field-include). Desmarcarla oculta ese campo específico en los compiladores."
+            },
+            {
+              "title": "🏷️ Etiquetas y Títulos de Salida",
+              "text": "Puedes renombrar las etiquetas a la izquierda de cada campo y establecer un Título de Salida personalizado para que aparezca en el CV final."
+            }
+          ],
+          "actions": [
+            { "type": "switchTabEditor", "label": "✏️ Ir al Editor de Formularios", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "✏️ Component 3: Form Editor & Property Field Controls",
+          "description": "The form editor turns complex JSON schema into user-friendly form fields. Input fields expand smoothly on focus to support multi-line wrapped text without horizontal scrollbars.",
+          "grid": [
+            {
+              "title": "☑️ Property \"Include\" Checkboxes",
+              "text": "Every property (dates, courses, dissertation, roles) has an independent Include checkbox. Unchecking it hides that specific field in both HTML and LaTeX renderers."
+            },
+            {
+              "title": "🏷️ Custom Field Labels & Output Titles",
+              "text": "Rename labels directly or set custom section Output Titles to control exact text headers in your output."
+            }
+          ],
+          "actions": [
+            { "type": "switchTabEditor", "label": "✏️ Jump to Form Editor", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 4,
+      "meta": {
+        "es": { "title": "Instancias CV", "icon": "🎯" },
+        "en": { "title": "Instance Engine", "icon": "🎯" }
+      },
+      "content": {
+        "es": {
+          "title": "🎯 Componente 4: Motor de Instancias Adaptadas",
+          "description": "El motor de instancias te permite generar versiones personalizadas de tu CV para diferentes ofertas de trabajo (ej. \"Postulación Investigación\" vs \"Gerente Técnico\") manteniendo una sola base de datos maestra.",
+          "box": {
+            "title": "🧠 ¿Cómo funciona técnicamente?",
+            "text": "Tus datos Maestros permanecen intactos. Cada instancia crea una capa transparente que guarda qué elementos o campos ocultar (visibility) y qué textos sobrescribir. Si editas tus datos maestros, ¡todas tus instancias se actualizan automáticamente!",
+            "border": "#8b5cf6"
+          },
+          "actions": [
+            { "type": "openAddInstanceModal", "label": "🎯 Gestionar e Instanciar CV", "style": "primary" }
+          ]
+        },
+        "en": {
+          "title": "🎯 Component 4: Tailored Instances Engine",
+          "description": "The instance engine enables you to create targeted CV variants for different job roles (e.g., \"Academic Research\" vs \"Tech Manager\") while maintaining a single master database.",
+          "box": {
+            "title": "🧠 How does it work under the hood?",
+            "text": "Your master records remain untouched. Each instance creates a non-destructive mask layer containing hidden field rules and property overrides. Updating master data automatically updates all your tailored instances!",
+            "border": "#8b5cf6"
+          },
+          "actions": [
+            { "type": "openAddInstanceModal", "label": "🎯 Manage & Create Instances", "style": "primary" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 5,
+      "meta": {
+        "es": { "title": "Vista Previa Live", "icon": "👁️" },
+        "en": { "title": "Live Preview", "icon": "👁️" }
+      },
+      "content": {
+        "es": {
+          "title": "👁️ Componente 5: Panel de Vista Previa Live (HTML y LaTeX)",
+          "description": "El panel derecho compila en tiempo real tu documento mientras escribes. Incluye dos modos de vista previa principales y un visor de estructura JSON sin procesar.",
+          "grid": [
+            {
+              "title": "📄 Vista Previa HTML Interactiva",
+              "text": "Renderizado en iframe aislado con enfoque inverso: ¡haz clic en cualquier texto del CV renderizado para saltar automáticamente a su campo en el editor!"
+            },
+            {
+              "title": "📜 Código Fuente LaTeX y PDF",
+              "text": "Genera código moderncv limpio. Puedes conectarte a compiladores en línea (YtoTech / LaTeX.Online) para descargar PDFs vectoriales directo."
+            }
+          ],
+          "actions": [
+            { "type": "switchPreviewHtml", "label": "📄 Probar Vista Previa HTML", "style": "primary" },
+            { "type": "switchPreviewLatex", "label": "📜 Probar Código LaTeX", "style": "ghost" }
+          ]
+        },
+        "en": {
+          "title": "👁️ Component 5: Live Preview Workspace (HTML & LaTeX)",
+          "description": "The right workspace panel renders your document live as you type. It includes two rendering modes and a raw JSON structure inspector.",
+          "grid": [
+            {
+              "title": "📄 Interactive Live HTML Preview",
+              "text": "Rendered in a secure isolated iframe with reverse focus: click any text element in the preview to jump straight to its editor field!"
+            },
+            {
+              "title": "📜 LaTeX Source & PDF Compilation",
+              "text": "Generates clean, production-grade moderncv code. Connects to online TeX servers (YtoTech / LaTeX.Online) for direct vector PDF downloads."
+            }
+          ],
+          "actions": [
+            { "type": "switchPreviewHtml", "label": "📄 View Live HTML Preview", "style": "primary" },
+            { "type": "switchPreviewLatex", "label": "📜 View LaTeX Source Code", "style": "ghost" }
+          ]
+        }
+      }
+    },
+    {
+      "tab": 6,
+      "meta": {
+        "es": { "title": "Árbol de Esquema", "icon": "🌳" },
+        "en": { "title": "Right Outline", "icon": "🌳" }
+      },
+      "content": {
+        "es": {
+          "title": "🌳 Componente 6: Árbol de Esquema y Navegación",
+          "description": "El panel de esquema derecho muestra la jerarquía completa de tu documento. Cuenta con botones de colapsado de panel (<strong>▶ / ◀</strong>), cheurones desplegables por sección (<strong>▼ / ▶</strong>) y botones de reordenado rápido (<strong>↑ / ↓</strong>).",
+          "box": {
+            "title": "🌳 Controles del Árbol de Esquema",
+            "items": [
+              "<strong>Cheurones Colapsables (▼ / ▶):</strong> Pliega o despliega las entradas de cada sección en el esquema.",
+              "<strong>Reordenado Rápido (↑ / ↓):</strong> Mueve una sección arriba o abajo en la jerarquía del documento con un clic.",
+              "<strong>Desplazamiento Suave:</strong> Haz clic en cualquier entrada para desplazarte suavemente a su tarjeta en el editor."
+            ]
+          }
+        },
+        "en": {
+          "title": "🌳 Component 6: Right Outline Tree & Section Hierarchy",
+          "description": "The right outline panel shows your complete document tree hierarchy. Features panel collapse toggles (<strong>▶ / ◀</strong>), item tree chevrons (<strong>▼ / ▶</strong>), and section reorder buttons (<strong>↑ / ↓</strong>).",
+          "box": {
+            "title": "🌳 Outline Tree Controls",
+            "items": [
+              "<strong>Collapsible Chevrons (▼ / ▶):</strong> Collapse or expand individual section item lists in the outline view.",
+              "<strong>Reorder Buttons (↑ / ↓):</strong> Move any section up or down in the document hierarchy instantly.",
+              "<strong>Smooth Anchor Scrolling:</strong> Click any outline item link to smoothly scroll directly to its card in the editor."
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
