@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMAGINE: Ernie Scanner - Hands On Taller UC</title>
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet.js Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+        crossorigin="" />
+        
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo_uc.svg">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       NAVIGATION NAVBAR
+       ========================================================================== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#hero" class="nav-brand">
+        <img src="assets/images/logo_uc.svg" alt="Escudo UC">
+        <img src="assets/images/logo_imagine.png" alt="Logo IMAGINE" style="height: 38px; width: auto; margin-left: 8px;">
+        <span>IMAGINE 2026</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema" style="background: none; border: none; color: var(--color-text-primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: var(--transition-smooth);">
+          <i class="fas fa-sun"></i>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#hero" class="nav-link">Inicio</a></li>
+          <li><a href="#programa" class="nav-link">Programa</a></li>
+          <li><a href="#ubicacion" class="nav-link">Cómo Llegar</a></li>
+          <li><a href="#alimentacion" class="nav-link">Alimentación</a></li>
+          <li><a href="#guia-internacional" class="nav-link">Guía Internacional</a></li>
+        </ul>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==========================================================================
+       HERO SECTION
+       ========================================================================== -->
+  <header id="hero" class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="badge badge-blue">Taller Práctico Hands-On</div>
+          <h1>Hands On Ernie Scanner</h1>
+          <p class="hero-subtitle">Ensamblaje, medición y formación de imágenes con un resonador magnético (MRI) de bajo costo en el Campus San Joaquín de la Pontificia Universidad Católica de Chile.</p>
+          
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <i class="far fa-calendar-alt"></i>
+              <span>10 al 14 de Agosto, 2026</span>
+            </div>
+            <div class="hero-meta-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lab. Low Cost MRI (Piso 2), Ing. Eléctrica UC</span>
+            </div>
+            <div class="hero-meta-item">
+              <i class="fas fa-clock"></i>
+              <span>08:45 a 17:00 Hrs</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-image-container">
+          <img src="assets/images/campus_uc.png" alt="Campus San Joaquín UC" class="hero-image">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       PROGRAM SECTION
+       ========================================================================== -->
+  <section id="programa" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Programa del Taller</h2>
+        <p class="section-subtitle">Planificación diaria y cronograma detallado de actividades prácticas y teóricas para la construcción del scanner ERNIE.</p>
+      </div>
+
+      <div class="program-tabs-container">
+        <!-- Day Selectors Navigation -->
+        <ul class="tabs-nav">
+          <li>
+            <button class="tab-btn" id="tab-btn-day-1">
+              <span class="day-num">Día 1</span>
+              <span class="day-desc">Lunes 10 Ago</span>
+            </button>
+          </li>
+          <li>
+            <button class="tab-btn" id="tab-btn-day-2">
+              <span class="day-num">Día 2</span>
+              <span class="day-desc">Martes 11 Ago</span>
+            </button>
+          </li>
+          <li>
+            <button class="tab-btn" id="tab-btn-day-3">
+              <span class="day-num">Día 3</span>
+              <span class="day-desc">Miércoles 12 Ago</span>
+            </button>
+          </li>
+          <li>
+            <button class="tab-btn" id="tab-btn-day-4">
+              <span class="day-num">Día 4</span>
+              <span class="day-desc">Jueves 13 Ago</span>
+            </button>
+          </li>
+          <li>
+            <button class="tab-btn" id="tab-btn-day-5">
+              <span class="day-num">Día 5</span>
+              <span class="day-desc">Viernes 14 Ago</span>
+            </button>
+          </li>
+        </ul>
+
+        <!-- Day Panels Content -->
+        
+        <!-- DÍA 1 PANEL -->
+        <div class="tab-panel" id="panel-day-1">
+          <div class="panel-header">
+            <div class="panel-header-top">
+              <h3 class="panel-title">Día 1: Ensamblaje y Medición del Arreglo de Halbach</h3>
+              <span class="badge">Foco: B0</span>
+            </div>
+            <p class="panel-goal"><strong>Objetivo del día:</strong> Ensamblar y medir el arreglo de Halbach.</p>
+          </div>
+          
+          <div class="panel-grid">
+            <!-- Materials -->
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-tools"></i> Materiales Necesarios</h4>
+              <div class="materials-grid">
+                <div class="material-item"><i class="fas fa-ring"></i> Anillos impresos (7)</div>
+                <div class="material-item"><i class="fas fa-ring"></i> Tapas impresas (7)</div>
+                <div class="material-item"><i class="fas fa-compress-arrows-alt"></i> Spacers impresos (48)</div>
+                <div class="material-item"><i class="fas fa-magnet"></i> Imanes (99)</div>
+                <div class="material-item"><i class="fas fa-bolt"></i> Pernos de bronce (56)</div>
+                <div class="material-item"><i class="fas fa-circle"></i> Tuercas bronce pernos (56)</div>
+                <div class="material-item"><i class="fas fa-bars"></i> Barras de bronce (8)</div>
+                <div class="material-item"><i class="fas fa-circle"></i> Tuercas bronce barras (8)</div>
+                <div class="material-item"><i class="fas fa-robot"></i> Robot medidor de campo</div>
+                <div class="material-item"><i class="fas fa-wrench"></i> Alicate</div>
+                <div class="material-item"><i class="fas fa-hammer"></i> Martillo</div>
+              </div>
+            </div>
+            <!-- Global Tasks -->
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-clipboard-list"></i> Tareas Globales</h4>
+              <ul class="tasks-list">
+                <li class="task-item"><div class="task-num">1</div><span>Ensamblar el arreglo de imanes de Halbach.</span></li>
+                <li class="task-item"><div class="task-num">2</div><span>Medir el campo magnético utilizando el robot medidor de campo.</span></li>
+                <li class="task-item"><div class="task-num">3</div><span>Realizar shimming adicional de manera opcional (OSII2).</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Timeline / Cronograma -->
+          <div class="glass-card" style="margin-bottom: 40px;">
+            <h4 class="panel-section-title"><i class="fas fa-history"></i> Cronograma de Actividades</h4>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">08:45 - 09:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Bienvenida al día y presentación de personas y objetivos generales.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:00 - 09:25</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Presentación de CAMERA–IMAGINE, objetivos de la semana, resultados esperados y demostración breve del ERNIE funcional.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:25 - 10:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción teórica a B0 y al Halbach. Orientación de imanes, dirección del campo, frecuencia de Larmor, homogeneidad y volumen útil.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:00 - 10:20</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Entrega guías prácticas. Demostración de VICTOR 3000. Medición de polos N/S. Protocolo de seguridad para manipular imanes.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:20 - 10:50</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:50 - 12:15</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Actividad hands-on: clasificación de imanes, verificación de polaridad e inserción en los siete anillos (trabajo individual o parejas).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:15 - 12:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Revisión cruzada: cada grupo revisa la orientación del anillo de otro grupo antes de colocar las tapas.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:40 - 13:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Discusión breve: errores comunes encontrados, consecuencias de invertir un imán y predicción del campo resultante.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">13:00 - 14:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Almuerzo.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:00 - 14:45</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Cierre de anillos y ensamblaje mecánico final del Halbach utilizando las barras, pernos de bronce y spacers.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:45 - 15:15</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción al robot de field mapping: sistema de coordenadas, trayectoria, resolución, formatos de datos, interfaz gráfica y control de motores.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:15 - 15:45</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Medición del fieldmap físico y Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:45 - 16:15</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Visualización del mapa: análisis de frecuencia central, rango de campo, homogeneidad y comparación con el ERNIE de referencia.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:15 - 16:45</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Discusión y cierre: ¿Es suficiente el campo medido para continuar? ¿Qué limitaría la imagen? Explicación del shimming (tópico opcional).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:45 - 17:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Breve presentación de cierre y motivación para el día siguiente. Dejar imprimiendo soporte para bobina RF.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Instructions -->
+          <div class="glass-card">
+            <h4 class="panel-section-title"><i class="fas fa-list-ol"></i> Instrucciones de Construcción Paso a Paso</h4>
+            <div class="steps-list">
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">01</span>
+                  <span class="step-card-title">Bienvenida, introducción y entrega de guías de trabajo impresas.</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">02</span>
+                  <span class="step-card-title">Medición y marcaje de polos norte y sur de los imanes de neodimio con el medidor VICTOR 3000.</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">03</span>
+                  <span class="step-card-title">Repartir los anillos impresos (uno para cada participante/pareja).</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">04</span>
+                  <span class="step-card-title">Verificar la orientación del norte de cada imán hacia la muesca de referencia e insertarlo en los anillos.</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">05</span>
+                  <span class="step-card-title">Realizar la revisión cruzada con otro equipo para validar las orientaciones antes de sellar.</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">06</span>
+                  <span class="step-card-title">Colocar las tapas plásticas de los anillos y montarlos en el riel de barras de bronce con separadores.</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">07</span>
+                  <span class="step-card-title">Montar en el robot medidor de campo y calibrar el sistema de coordenadas.</span>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-card-header">
+                  <span class="step-card-num">08</span>
+                  <span class="step-card-title">Obtener y visualizar la primera estimación del fieldmap (homogeneidad magnética).</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DÍA 2 PANEL -->
+        <div class="tab-panel" id="panel-day-2">
+          <div class="panel-header">
+            <div class="panel-header-top">
+              <h3 class="panel-title">Día 2: Preparación de la Bobina RF y Ajuste VNA</h3>
+              <span class="badge">Foco: B1</span>
+            </div>
+            <p class="panel-goal"><strong>Objetivo del día:</strong> Preparar una bobina de RF para obtener un decaimiento libre de la inducción (FID). Impresión de gradientes.</p>
+          </div>
+          
+          <div class="panel-grid">
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-tools"></i> Materiales Necesarios</h4>
+              <div class="materials-grid">
+                <div class="material-item"><i class="fas fa-ring"></i> Bobinas RF impresas</div>
+                <div class="material-item"><i class="fas fa-ethernet"></i> Cable coaxial (1 por bobina)</div>
+                <div class="material-item"><i class="fas fa-fill-drip"></i> Dieléctrico jaula (goma eva)</div>
+                <div class="material-item"><i class="fas fa-scroll"></i> Lámina de cobre</div>
+                <div class="material-item"><i class="fas fa-microchip"></i> Placas de Tuning & Matching (T&M)</div>
+                <div class="material-item"><i class="fas fa-plug"></i> Cautín y soldadura de estaño</div>
+                <div class="material-item"><i class="fas fa-project-diagram"></i> Analizador Vectorial de Redes (VNA)</div>
+                <div class="material-item"><i class="fas fa-microchip"></i> Capacitores de T&M</div>
+                <div class="material-item"><i class="fas fa-fire"></i> Pistola de silicona caliente</div>
+              </div>
+            </div>
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-clipboard-list"></i> Tareas Globales</h4>
+              <ul class="tasks-list">
+                <li class="task-item"><div class="task-num">1</div><span>Bobinar la antena de radiofrecuencia (RF).</span></li>
+                <li class="task-item"><div class="task-num">2</div><span>Construir la jaula de Faraday de apantallamiento.</span></li>
+                <li class="task-item"><div class="task-num">3</div><span>Calcular y fabricar el circuito de sintonización (Tuning & Matching).</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="glass-card" style="margin-bottom: 40px;">
+            <h4 class="panel-section-title"><i class="fas fa-history"></i> Cronograma de Actividades</h4>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">08:45 - 09:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Bienvenida al día y objetivos generales.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:00 - 09:25</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Recapitulación del día anterior. Relación entre el fieldmap medido, el campo central del Halbach y la frecuencia de resonancia objetivo para la bobina de RF.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:25 - 10:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción teórica a B1 y bobinas RF: inductancia, resonancia, impedancia, campo magnético de bobina solenoidal y transmisión de señales.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:00 - 10:20</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Entrega de guías de trabajo. Presentación del diseño de bobina, número de vueltas, dirección de embobinado y protocolo de soldadura.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:20 - 10:50</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:50 - 11:15</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Actividad hands-on: bobinado de las antenas RF en parejas. Fijación del conductor de cobre y preparación de los terminales.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">11:15 - 11:45</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Instalación del dieléctrico de goma eva y blindaje con lámina de cobre. Conexión del cable coaxial y revisión de continuidad a tierra.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">11:45 - 12:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Discusión breve: efectos de la geometría, número de vueltas y carga sobre la inductancia total y frecuencia de resonancia.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:00 - 12:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción práctica al VNA: interpretación del coeficiente de reflexión (S11), impedancia compleja y uso de la Carta de Smith.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:30 - 13:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Cálculo guiado de capacitancias de sintonización (tuning) y acoplamiento (matching). Selección de capacitores fijos y variables.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">13:00 - 14:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Almuerzo.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:00 - 14:45</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Montaje y soldadura de componentes en la placa de T&M. Primeras mediciones físicas de resonancia.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:45 - 15:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Ajuste fino de la bobina usando el VNA: optimización de la frecuencia de resonancia y el acoplamiento a 50 ohms.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:30 - 16:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:00 - 16:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Construcción y sellado de la caja de blindaje (shielding) para la placa del circuito T&M. Comparación de resultados entre grupos.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:30 - 17:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Cierre: criterios de selección de bobinas funcionales, plan de integración. Dejar preparados los soportes para las bobinas de gradiente.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DÍA 3 PANEL -->
+        <div class="tab-panel" id="panel-day-3">
+          <div class="panel-header">
+            <div class="panel-header-top">
+              <h3 class="panel-title">Día 3: Bobinado de Gradientes e Integración del Sistema</h3>
+              <span class="badge">Foco: B1 y Gradientes</span>
+            </div>
+            <p class="panel-goal"><strong>Objetivo del día:</strong> Conectar todos los sistemas individuales y obtener la primera señal de resonancia magnética (MRI).</p>
+          </div>
+          
+          <div class="panel-grid">
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-tools"></i> Materiales Necesarios</h4>
+              <div class="materials-grid">
+                <div class="material-item"><i class="fas fa-project-diagram"></i> Bobinas de gradiente impresas</div>
+                <div class="material-item"><i class="fas fa-bolt"></i> Cable de cobre esmaltado 0.8mm (25 m)</div>
+                <div class="material-item"><i class="fas fa-tape"></i> Cinta aisladora</div>
+                <div class="material-item"><i class="fas fa-shield-alt"></i> Lámina de cobre jaula externa</div>
+                <div class="material-item"><i class="fas fa-plug"></i> Conectores banana (3)</div>
+                <div class="material-item"><i class="fas fa-ring"></i> Terminales de anillo</div>
+                <div class="material-item"><i class="fas fa-tools"></i> Crimpeadora de terminales</div>
+                <div class="material-item"><i class="fas fa-fire"></i> Silicona caliente</div>
+                <div class="material-item"><i class="fas fa-plug"></i> Cautín y soldadura</div>
+                <div class="material-item"><i class="fas fa-terminal"></i> Consola y osciloscopio</div>
+                <div class="material-item"><i class="fas fa-laptop-code"></i> Computador de control</div>
+                <div class="material-item"><i class="fas fa-wave-square"></i> Amplificador de potencia RF</div>
+                <div class="material-item"><i class="fas fa-car-battery"></i> Fuentes de poder de laboratorio</div>
+                <div class="material-item"><i class="fas fa-robot"></i> Robot medidor de campo</div>
+              </div>
+            </div>
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-clipboard-list"></i> Tareas Globales</h4>
+              <ul class="tasks-list">
+                <li class="task-item"><div class="task-num">1</div><span>Bobinar las tres bobinas físicas de gradiente de campo.</span></li>
+                <li class="task-item"><div class="task-num">2</div><span>Realizar la integración electromecánica (Halbach + gradientes + bobina RF).</span></li>
+                <li class="task-item"><div class="task-num">3</div><span>Programar la secuencia de pulsos Spin Echo en Python y obtener señal.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="glass-card" style="margin-bottom: 40px;">
+            <h4 class="panel-section-title"><i class="fas fa-history"></i> Cronograma de Actividades</h4>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">08:45 - 09:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Bienvenida e introducción a los objetivos prácticos del día.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:00 - 09:25</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Recapitulación de las bobinas RF y presentación del objetivo: pasar de componentes independientes a un sistema de resonancia integrado.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:25 - 10:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción teórica a los gradientes magnéticos: codificación espacial, linealidad, resistencia eléctrica, inductancia y geometría de las bobinas.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:00 - 10:15</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Entrega de guías de trabajo. Demostración del gradiente de referencia, sentido de espiras, número de vueltas y medidas de seguridad eléctrica.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:15 - 10:45</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:45 - 12:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Actividad hands-on: bobinado de las tres bobinas físicas de gradientes (distribución por grupos para bobinar ejes X, Y y Z).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:00 - 12:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Preparación de terminales, instalación de conectores banana, revisión de continuidad y medición experimental de resistencia e inductancia.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:30 - 13:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Revisión cruzada y discusión: detección de errores en sentido de espiras, resistencia y polaridad. Dejar midiendo los gradientes con el robot.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">13:00 - 14:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Almuerzo.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:00 - 14:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Integración física y cableado: ensamblaje del Halbach, gradientes, bobina RF, consola, amplificadores de potencia y líneas de transmisión.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:30 - 15:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Medición del ruido electromagnético de base. Comparación de señales con amplificadores apagados vs encendidos y aislamiento de interferencias.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:00 - 15:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Programación o revisión guiada de la secuencia Spin Echo en Python. Monitoreo de pulsos de RF y sincronización temporal en osciloscopio.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:30 - 16:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Energización del amplificador de RF, sintonía fina de la frecuencia central de excitación y Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:00 - 16:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Ejecución del experimento y obtención del primer eco de espín de resonancia magnética. Calibración del flip angle de los pulsos.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:30 - 17:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Cierre y discusión: análisis de la frecuencia central medida, ancho del eco, SNR. Introducción a los experimentos físicos del día siguiente.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DÍA 4 PANEL -->
+        <div class="tab-panel" id="panel-day-4">
+          <div class="panel-header">
+            <div class="panel-header-top">
+              <h3 class="panel-title">Día 4: Experimentos de Resonancia y Tiempos de Relajación</h3>
+              <span class="badge">Foco: Experimentos RF</span>
+            </div>
+            <p class="panel-goal"><strong>Objetivo del día:</strong> Analizar los efectos de la variación de parámetros físicos y medir tiempos de relajación T1 y T2.</p>
+          </div>
+          
+          <div class="panel-grid">
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-tools"></i> Materiales Necesarios</h4>
+              <div class="materials-grid">
+                <div class="material-item"><i class="fas fa-cogs"></i> Sistema ERNIE completo</div>
+                <div class="material-item"><i class="fas fa-terminal"></i> Consola de adquisición</div>
+                <div class="material-item"><i class="fas fa-flask"></i> Fantomas de ensayo (geometrías y concentraciones H2O variadas)</div>
+              </div>
+            </div>
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-clipboard-list"></i> Tareas Globales</h4>
+              <ul class="tasks-list">
+                <li class="task-item"><div class="task-num">1</div><span>Medir la deriva térmica y su efecto en la frecuencia de Larmor.</span></li>
+                <li class="task-item"><div class="task-num">2</div><span>Realizar experimentos de SNR para distintas geometrías y blindajes.</span></li>
+                <li class="task-item"><div class="task-num">3</div><span>Adquirir mapas de relajación T1 y T2 en un voxel gigante.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="glass-card" style="margin-bottom: 40px;">
+            <h4 class="panel-section-title"><i class="fas fa-history"></i> Cronograma de Actividades</h4>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">08:45 - 09:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Bienvenida al día y objetivos generales.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:00 - 09:25</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Recapitulación de la señal Spin Echo. Introducción teórica a los experimentos del día. Entrega de guías de laboratorio.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:25 - 09:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Experimentos de SNR: comparación de señales usando fantomas con volumen diferente y análisis del impacto de la tapa del blindaje.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:40 - 10:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Experimento de temperatura: observación directa del corrimiento en la frecuencia de resonancia al alterar el clima ambiental (aire acondicionado).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:00 - 10:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Comparación de señales con off-resonance: análisis comparativo del imán de referencia ERNIE vs el OSII2. Evaluación del decaimiento (FID).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:30 - 11:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">11:00 - 11:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción teórica a mapas de relajación: secuencias de Inversión-Recuperación, Spin Echo con TE variable y modelos exponenciales de ajuste.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">11:30 - 12:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Programación de la secuencia de Inversión-Recuperación en la consola y verificación visual del cruce por cero de la magnetización.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:00 - 13:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Adquisición y procesamiento de datos para obtener el mapa de relajación T1 de un Voxel Gigante.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">13:00 - 14:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Almuerzo.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:00 - 14:20</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Análisis numérico del primer conjunto de datos T1 y comparación con la literatura científica. Variación experimental de parámetros.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:20 - 15:20</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Segunda ronda de adquisición de datos T1 para validación estadística y análisis de repetibilidad.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:20 - 15:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Discusión grupal de resultados T1, cálculo de errores y ajuste de curvas exponenciales de decaimiento.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:40 - 16:10</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:10 - 16:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Experimentos con ancho de banda (bandwidth): análisis de la Transformada de Fourier bajo distintas frecuencias de muestreo.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:40 - 17:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Presentación de cierre: criterios para la selección de parámetros óptimos para formación de imágenes 1D y 2D del día final.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DÍA 5 PANEL -->
+        <div class="tab-panel" id="panel-day-5">
+          <div class="panel-header">
+            <div class="panel-header-top">
+              <h3 class="panel-title">Día 5: Gradientes Espaciales y Reconstrucción de Imágenes 2D</h3>
+              <span class="badge">Foco: Formación de Imagen</span>
+            </div>
+            <p class="panel-goal"><strong>Objetivo del día:</strong> Programar secuencias completas de MRI y reconstruir las primeras imágenes bidimensionales (2D) de los fantomas.</p>
+          </div>
+          
+          <div class="panel-grid">
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-tools"></i> Materiales Necesarios</h4>
+              <div class="materials-grid">
+                <div class="material-item"><i class="fas fa-cogs"></i> Sistema ERNIE completo</div>
+                <div class="material-item"><i class="fas fa-terminal"></i> Consola de adquisición</div>
+                <div class="material-item"><i class="fas fa-flask"></i> Fantomas con geometrías complejas</div>
+                <div class="material-item"><i class="fas fa-wave-square"></i> Amplificadores de gradiente físicos</div>
+                <div class="material-item"><i class="fas fa-microchip"></i> Osciloscopio digital</div>
+              </div>
+            </div>
+            <div class="glass-card">
+              <h4 class="panel-section-title"><i class="fas fa-clipboard-list"></i> Tareas Globales</h4>
+              <ul class="tasks-list">
+                <li class="task-item"><div class="task-num">1</div><span>Adquirir perfiles espaciales de fantomas (imágenes 1D).</span></li>
+                <li class="task-item"><div class="task-num">2</div><span>Programar la secuencia de codificación de fase para 2D.</span></li>
+                <li class="task-item"><div class="task-num">3</div><span>Reconstruir la primera imagen 2D mediante Transformada de Fourier 2D-DFT.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="glass-card" style="margin-bottom: 40px;">
+            <h4 class="panel-section-title"><i class="fas fa-history"></i> Cronograma de Actividades</h4>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">08:45 - 09:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Bienvenida al día de cierre y definición de metas.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:00 - 09:25</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Recapitulación de la semana: relación integrada entre B0, B1, gradientes espaciales, relajación térmica y formación de imágenes.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">09:25 - 10:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Introducción teórica a la codificación espacial: gradiente de lectura (readout), codificación de fase, k-space, FOV, resolución espacial y reconstrucción por DFT.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:00 - 10:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Puesta en marcha: cálculo de amplitud y duración de gradientes. Prueba de amplificadores de gradiente e inspección de pulsos en osciloscopio.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">10:30 - 11:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">11:00 - 11:30</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Programación guiada de la secuencia Spin Echo 1D-DFT en Python.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">11:30 - 12:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Adquisición experimental de proyecciones 1D y reconstrucción digital mediante Transformada de Fourier rápida.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">12:00 - 13:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Adquisición de proyecciones rotadas para reconstrucción tomográfica mediante Transformada de Radón Inversa (IRadon).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">13:00 - 14:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Almuerzo.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:00 - 14:20</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Extensión del software a 2D-DFT: incorporación del lazo de codificación de fase y configuración matricial (ej. 32x32).</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:20 - 14:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Calibración final de pulsos físicos en osciloscopio con carga de gradientes activada.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">14:40 - 15:20</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Primera adquisición y procesamiento de imagen bidimensional (2D) de fantoma.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">15:20 - 15:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Coffee Break.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:10 - 16:40</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Optimización de imagen: modificación de FOV, matriz, promedios o ancho de banda. Adquisición comparativa.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-time">16:40 - 17:00</span>
+                  <div class="timeline-text">
+                    <span class="timeline-activity">Presentación final, reflexiones colectivas sobre la integración del scanner, celebración por la primera imagen y próximos pasos académicos.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       LOCATION & DIRECTIONS SECTION
+       ========================================================================== -->
+  <section id="ubicacion" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Ubicación y Logística</h2>
+        <p class="section-subtitle">Instrucciones claras para llegar al Campus San Joaquín y guías detalladas para localizar el laboratorio de resonancia magnética.</p>
+      </div>
+
+      <div class="directions-grid">
+        <!-- Leaflet Map Card -->
+        <div class="glass-card map-card">
+          <div class="map-header-bar">
+            <h3 style="color: #ffffff; margin-bottom: 4px;">Ingeniería Eléctrica UC - Lab. Low Cost MRI</h3>
+            <span class="map-coords"><i class="fas fa-crosshairs"></i> Coordenadas: -33.499938, -70.613785 &bull; 2° Piso</span>
+          </div>
+          <div class="map-wrapper">
+            <div id="map"></div>
+          </div>
+        </div>
+
+        <!-- Route Instructions -->
+        <div class="glass-card">
+          <h3 style="color: #ffffff; margin-bottom: 16px;">¿Cómo llegar al laboratorio?</h3>
+          <p style="color: var(--color-text-secondary); margin-bottom: 24px;">El taller se desarrollará en el <strong>segundo piso</strong> del edificio del Departamento de Ingeniería Eléctrica (Edificio 126 / San Agustín), específicamente en el <strong>Laboratorio de Low Cost MRI</strong>.</p>
+          
+          <div class="route-guides">
+            <div class="route-tab">
+              <button class="route-tab-btn active" id="btn-route-metro">
+                <i class="fas fa-subway"></i> Metro de Santiago
+              </button>
+              <button class="route-tab-btn" id="btn-route-auto">
+                <i class="fas fa-car"></i> Auto / Uber
+              </button>
+            </div>
+
+            <!-- Metro Instructions -->
+            <div class="route-panel active" id="panel-route-metro">
+              <div class="route-step">
+                <div class="route-step-icon">1</div>
+                <div class="route-step-text">
+                  <h4>Estación San Joaquín (Línea 5)</h4>
+                  <p>Toma la Línea 5 y desciende en la estación San Joaquín. La salida principal da directamente frente al acceso peatonal central del Campus San Joaquín (Vicuña Mackenna 4860).</p>
+                </div>
+              </div>
+              <div class="route-step">
+                <div class="route-step-icon">2</div>
+                <div class="route-step-text">
+                  <h4>Caminata hacia Ingeniería</h4>
+                  <p>Ingresa al campus y camina hacia el sector sur-oriente (hacia la derecha cruzando el patio central). Sigue los letreros hacia la Escuela de Ingeniería (Edificios Raúl Devés y San Agustín).</p>
+                </div>
+              </div>
+              <div class="route-step">
+                <div class="route-step-icon">3</div>
+                <div class="route-step-text">
+                  <h4>Edificio 126 y Acceso a Lab</h4>
+                  <p>Ingresa al edificio del Departamento de Ingeniería Eléctrica. Sube las escaleras al <strong>segundo piso</strong> y dirígete al <strong>Laboratorio de Low Cost MRI</strong> en el pasillo principal.</p>
+                </div>
+              </div>
+              
+              <!-- Red.cl Fares -->
+              <div class="fares-container">
+                <h5 class="fares-title"><i class="fas fa-ticket-alt"></i> Tarifas Vigentes Red Movilidad (Vía bip! / QR)</h5>
+                <ul class="fares-list">
+                  <li><span>Metro Horario Punta (07:00 - 08:59)</span><span>$895 CLP</span></li>
+                  <li><span>Metro Horario Valle (09:00 - 17:59)</span><span>$815 CLP</span></li>
+                  <li><span>Metro Horario Bajo (Otros horarios)</span><span>$735 CLP</span></li>
+                  <li><span>Tarifa Buses Red (Plana)</span><span>$795 CLP</span></li>
+                  <li><span>Costo Tarjeta bip! Física</span><span>$1.550 CLP</span></li>
+                  <li><span>Límite de Gasto Mensual (DaleQR)</span><span>$42.000 CLP</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Auto/Uber Instructions -->
+            <div class="route-panel" id="panel-route-auto">
+              <div class="route-step">
+                <div class="route-step-icon"><i class="fas fa-road"></i></div>
+                <div class="route-step-text">
+                  <h4>Acceso por Av. Vicuña Mackenna</h4>
+                  <p>Conduce por Av. Vicuña Mackenna con dirección al 4860 (Macul). El campus cuenta con estacionamientos controlados para visitas (acceso con pago de tarifa por minuto).</p>
+                </div>
+              </div>
+              <div class="route-step">
+                <div class="route-step-icon"><i class="fas fa-parking"></i></div>
+                <div class="route-step-text">
+                  <h4>Estacionamientos Cercanos</h4>
+                  <p>Se recomienda estacionar en el subterráneo del Complejo de Ingeniería Andrónico Luksic Abaroa o en las plazas de estacionamiento cercanas a las canchas deportivas del campus.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       CASINOS & DINING SECTION
+       ========================================================================== -->
+  <section id="alimentacion" class="section" style="background-color: var(--color-bg-alt);">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Opciones de Alimentación</h2>
+        <p class="section-subtitle">Puntos de venta de almuerzos, comida rápida y cafeterías disponibles dentro del campus San Joaquín.</p>
+      </div>
+
+      <div class="casinos-grid">
+        <!-- Casino 1 -->
+        <div class="glass-card casino-card">
+          <div class="casino-card-header">
+            <h4 class="casino-name">Casino Mesón UC</h4>
+            <span class="badge">Autoservicio</span>
+          </div>
+          <p class="casino-location"><i class="fas fa-map-marker-alt"></i> Hall Universitario, Piso 1</p>
+          <p class="casino-details">La alternativa tradicional con menús de almuerzo diarios del día, opciones vegetarianas y platos caseros. Acepta pago con tarjeta Junaeb/BAES.</p>
+          <div class="casino-tags">
+            <span class="casino-tag">Colación</span>
+            <span class="casino-tag">Menú Económico</span>
+            <span class="casino-tag">BAES</span>
+          </div>
+        </div>
+
+        <!-- Casino 2 -->
+        <div class="glass-card casino-card">
+          <div class="casino-card-header">
+            <h4 class="casino-name">Casino Rocknrolla</h4>
+            <span class="badge">Cafetería</span>
+          </div>
+          <p class="casino-location"><i class="fas fa-map-marker-alt"></i> Hall Universitario, Piso 2</p>
+          <p class="casino-details">Variedad en colaciones rápidas, sándwiches calientes, ensaladas y postres en un ambiente cómodo del segundo piso del Hall.</p>
+          <div class="casino-tags">
+            <span class="casino-tag">Sándwiches</span>
+            <span class="casino-tag">Pizzas</span>
+            <span class="casino-tag">Rápido</span>
+          </div>
+        </div>
+
+        <!-- Casino 3 -->
+        <div class="glass-card casino-card">
+          <div class="casino-card-header">
+            <h4 class="casino-name">Fork</h4>
+            <span class="badge">Comida Preparada</span>
+          </div>
+          <p class="casino-location"><i class="fas fa-map-marker-alt"></i> Hall Universitario, Piso 1</p>
+          <p class="casino-details">Platos preparados listos para calentar y consumir, ensaladas gourmet frescas, wraps y opciones saludables con empaque reciclable.</p>
+          <div class="casino-tags">
+            <span class="casino-tag">Saludable</span>
+            <span class="casino-tag">Gourmet</span>
+            <span class="casino-tag">Listo para comer</span>
+          </div>
+        </div>
+
+        <!-- Casino 4 -->
+        <div class="glass-card casino-card">
+          <div class="casino-card-header">
+            <h4 class="casino-name">Restaurant Copper</h4>
+            <span class="badge">A la Carta</span>
+          </div>
+          <p class="casino-location"><i class="fas fa-map-marker-alt"></i> Complejo Luksic, Nivel -1</p>
+          <p class="casino-details">Ofrece una experiencia gastronómica formal con servicio a la mesa, menús ejecutivos diarios y una cafetería integrada de autoservicio.</p>
+          <div class="casino-tags">
+            <span class="casino-tag">Ejecutivo</span>
+            <span class="casino-tag">Servicio a Mesa</span>
+            <span class="casino-tag">Ingeniería</span>
+          </div>
+        </div>
+
+        <!-- Casino 5 -->
+        <div class="glass-card casino-card">
+          <div class="casino-card-header">
+            <h4 class="casino-name">Subway / Starbucks</h4>
+            <span class="badge">Franquicias</span>
+          </div>
+          <p class="casino-location"><i class="fas fa-map-marker-alt"></i> Aulas Pataguas / Cercano al Templo</p>
+          <p class="casino-details">Cadenas internacionales convenientes para snacks rápidos, sándwiches armados a tu gusto o café de especialidad y bollería.</p>
+          <div class="casino-tags">
+            <span class="casino-tag">Sub</span>
+            <span class="casino-tag">Café</span>
+            <span class="casino-tag">Snack</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Warning Notice -->
+      <div class="notice-box">
+        <i class="fas fa-info-circle"></i>
+        <div class="notice-box-text">
+          <h4>Nota sobre costos de alimentación</h4>
+          <p>Le informamos a los participantes que, si bien la organización del taller no cuenta con convenios o tarifas oficiales reguladas para los casinos externos del campus, el rango de precio promedio estimado por almuerzo o colación completa fluctúa usualmente entre los <strong>$6.000 y $10.000 pesos chilenos</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       INTERNATIONAL ATTENDEE GUIDE
+       ========================================================================== -->
+  <section id="guia-internacional" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Guía para Asistentes Internacionales</h2>
+        <p class="section-subtitle">Consejos de conectividad, normas institucionales de seguridad y sugerencias turísticas para participantes extranjeros (Bolivia, Perú, entre otros).</p>
+      </div>
+
+      <div class="intl-grid">
+        <!-- Connectivity & Security Column -->
+        <div class="intl-column">
+          <div class="glass-card intl-section">
+            <h3 class="intl-title"><i class="fas fa-wifi"></i> Conectividad Móvil</h3>
+            <ul class="intl-list">
+              <li class="intl-item success-border">
+                <div class="intl-item-header"><i class="fas fa-sim-card"></i> Adquisición de SIM Cards Locales</div>
+                <p>Para evitar cobros excesivos por roaming internacional, se recomienda comprar un chip prepago local (de compañías como Entel, WOM o Movistar). Estos chips se pueden adquirir en quioscos, tiendas de conveniencia o en el aeropuerto por un costo aproximado de $2.000 a $5.000 CLP, y activarse recargando bolsas de datos a tarifas muy económicas.</p>
+              </li>
+            </ul>
+          </div>
+
+          <div class="glass-card intl-section">
+            <h3 class="intl-title"><i class="fas fa-shield-halved"></i> Recomendaciones de Seguridad</h3>
+            <ul class="intl-list">
+              <li class="intl-item danger-border">
+                <div class="intl-item-header"><i class="fas fa-mobile-alt"></i> Exposición de dispositivos en vía pública</div>
+                <p>A fin de resguardar sus pertenencias personales y evitar hurtos por sorpresa, le recomendamos encarecidamente evitar el uso o exhibición de teléfonos móviles, cámaras fotográficas y computadores personales en la vía pública o cerca de los accesos a estaciones de transporte público.</p>
+              </li>
+              <li class="intl-item danger-border">
+                <div class="intl-item-header"><i class="fas fa-moon"></i> Horarios de tránsito y desplazamientos</div>
+                <p>Es aconsejable planificar los traslados de regreso para realizarse antes de las 20:30 horas, y evitar transitar en solitario por calles secundarias o de poca iluminación a altas horas de la noche. Para traslados nocturnos, se recomienda utilizar aplicaciones de transporte registradas (Uber, Cabify, Didi) o solicitar servicios de radiotaxis oficiales.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Sights & Tourism Column -->
+        <div class="glass-card intl-section" style="height: 100%;">
+          <h3 class="intl-title"><i class="fas fa-compass"></i> Turismo en Santiago tras el taller</h3>
+          <p style="color: var(--color-text-secondary); margin-bottom: 20px;">Santiago cuenta con atractivos de gran interés turístico, accesibles de forma directa e integrada a través de la red del Metro de Santiago:</p>
+          
+          <ul class="intl-list">
+            <li class="intl-item">
+              <div class="intl-item-header"><i class="fas fa-building"></i> Sky Costanera (Mirador de la ciudad)</div>
+              <p>El mirador más alto de Sudamérica, ubicado en el edificio Gran Torre Santiago (Mall Costanera Center). <br><strong>Cómo llegar:</strong> Metro Tobalaba (Línea 1 / Línea 4), combinación directa en Vicente Valdés desde el Campus.</p>
+            </li>
+            <li class="intl-item">
+              <div class="intl-item-header"><i class="fas fa-tree"></i> Parque Metropolitano y Cerro San Cristóbal</div>
+              <p>Mirador panorámico de la cordillera y la cuenca de Santiago, accesible vía funicular o teleférico para una tarde al aire libre. <br><strong>Cómo llegar:</strong> Metro Baquedano (Línea 1 / Línea 5) y caminar hacia el sector de Bellavista.</p>
+            </li>
+            <li class="intl-item">
+              <div class="intl-item-header"><i class="fas fa-utensils"></i> Barrio Italia (Cena y Antigüedades)</div>
+              <p>Un pintoresco sector de conservación histórica repleto de cafeterías de especialidad, tiendas de diseño local, anticuarios y restaurantes variados. <br><strong>Cómo llegar:</strong> Metro Santa Isabel (Línea 5).</p>
+            </li>
+            <li class="intl-item">
+              <div class="intl-item-header"><i class="fas fa-landmark"></i> Casco Histórico (Santiago Centro)</div>
+              <p>Visita el Palacio de La Moneda, la Plaza de Armas y la Catedral Metropolitana de Santiago para apreciar el patrimonio histórico nacional. <br><strong>Cómo llegar:</strong> Metro Plaza de Armas (Línea 5).</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-logo">
+        <img src="assets/images/logo_uc.svg" alt="Escudo UC">
+        <img src="assets/images/logo_imagine.png" alt="Logo IMAGINE" style="height: 38px; width: auto; margin-left: 10px; filter: brightness(0.9);">
+        <h3>Pontificia Universidad Católica de Chile</h3>
+      </div>
+      <p>Departamento de Ingeniería Eléctrica &bull; Laboratorio de Low Cost MRI</p>
+      <p style="font-size: 0.8rem; color: var(--color-text-muted);">Organizado en el marco del Taller de Resonancia Magnética de Bajo Costo IMAGINE - Agosto 2026</p>
+      <div class="copyright">
+        &copy; 2026 Pontificia Universidad Católica de Chile. Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+          crossorigin=""></script>
+          
+  <!-- Project Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
