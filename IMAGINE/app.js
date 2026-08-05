@@ -174,14 +174,16 @@ function initThemeToggle() {
 
   // Safe check for localStorage availability (crucial for JSDOM/SSR)
   const hasLocalStorage = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
-  const savedTheme = hasLocalStorage ? window.localStorage.getItem('theme') : null;
+  
+  // Default to light theme if no preference has been saved
+  const savedTheme = hasLocalStorage ? (window.localStorage.getItem('theme') || 'light') : 'light';
 
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-theme');
-    if (icon) icon.className = 'fas fa-moon';
-  } else {
+  if (savedTheme === 'dark') {
     document.body.classList.remove('light-theme');
     if (icon) icon.className = 'fas fa-sun';
+  } else {
+    document.body.classList.add('light-theme');
+    if (icon) icon.className = 'fas fa-moon';
   }
 
   themeToggleBtn.addEventListener('click', () => {
