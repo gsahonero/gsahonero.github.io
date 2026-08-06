@@ -829,7 +829,7 @@ img {
   overflow: hidden;
   border: 1px solid var(--color-card-border);
   position: relative;
-  background: #1e293b;
+  background: var(--color-card-bg);
   min-height: 380px;
 }
 

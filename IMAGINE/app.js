@@ -217,8 +217,23 @@ function initMap() {
     scrollWheelZoom: false
   }).setView([lat, lng], 16);
 
-  // Add dark themed tiles matching our design
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  // Enable Ctrl + Scroll to zoom map and prevent browser page zoom
+  const mapDiv = document.getElementById('map');
+  if (mapDiv) {
+    mapDiv.addEventListener('wheel', function(e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+          map.zoomIn();
+        } else {
+          map.zoomOut();
+        }
+      }
+    }, { passive: false });
+  }
+
+  // Add light themed tiles matching our design
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 20
