@@ -129,9 +129,18 @@ body.light-theme .timeline-text,
 body.light-theme .step-card,
 body.light-theme .step-card-header,
 body.light-theme .route-step,
-body.light-theme .intl-item,
+body.light-theme .intl-item {
+  background: rgba(255, 255, 255, 0.9);
+}
+
 body.light-theme .fares-list li {
   background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-secondary);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+body.light-theme .fares-list li span:last-child {
+  color: var(--color-text-primary);
 }
 
 body.light-theme .timeline-marker {
@@ -318,15 +327,22 @@ img {
   color: var(--color-text-primary);
 }
 
-.nav-brand img {
+.logo-uc {
   height: 48px;
   width: auto;
+}
+
+.logo-imagine {
+  height: 38px;
+  width: auto;
+  margin-left: 8px;
 }
 
 .nav-brand span {
   background: linear-gradient(135deg, #ffffff 50%, var(--color-uc-gold));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  white-space: nowrap;
 }
 
 .nav-menu {
@@ -1233,6 +1249,20 @@ img {
     font-size: 2rem;
   }
   
+  .nav-brand {
+    gap: 8px;
+    font-size: 1.1rem;
+  }
+  
+  .logo-uc {
+    height: 38px;
+  }
+  
+  .logo-imagine {
+    height: 30px;
+    margin-left: 4px;
+  }
+  
   .nav-menu {
     display: none; /* Mobile menu hidden by default */
     position: absolute;
@@ -1283,5 +1313,18 @@ img {
   
   .timeline-time {
     width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-brand span {
+    display: none;
+  }
+  .logo-uc {
+    height: 36px;
+  }
+  .logo-imagine {
+    height: 28px;
+    margin-left: 2px;
   }
 }
