@@ -725,3 +725,15 @@ input:focus,textarea:focus,select:focus{
   border-top: 3px solid var(--color-primary) !important;
   background: oklch(from var(--color-primary) l c h / 0.08) !important;
 }
+
+/* ── Compact CV Bullet Lists ── */
+.cv-bullet-list, .entry-description ul {
+  margin: 2px 0 !important;
+  padding-left: 14px !important;
+  list-style-type: disc !important;
+  line-height: 1.35 !important;
+}
+.cv-bullet-list li, .entry-description ul li {
+  margin: 0 0 1px 0 !important;
+  padding: 0 !important;
+}

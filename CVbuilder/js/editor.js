@@ -165,15 +165,27 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   if (activeInstance) {
     var isEs = state.langFilter === 'es';
     var resetText = isEs ? 'Restablecer' : 'Reset';
+    var promoteText = t('save_to_master');
     var overrideMsg = isEs
       ? '🟢 Anulación adaptada [Instancia: ' + currentInstanceName + ']'
       : '🟢 Tailored Override [Instance: ' + currentInstanceName + ']';
-    overrideControls = '<div class="override-status-bar" style="display:' + (isOverridden ? 'flex' : 'none') + '; justify-content:space-between; align-items:center; margin-top:var(--space-1); gap:var(--space-2)">'
-      + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:600; color:var(--color-primary)">'
-      + overrideMsg
-      + '</span>'
+
+    var masterPreviewHtml = '';
+    if (isOverridden) {
+      var displayMasterVal = masterVal === undefined || masterVal === null ? '' : String(masterVal);
+      var shortMaster = displayMasterVal.length > 60 ? displayMasterVal.substring(0, 57) + '...' : displayMasterVal;
+      masterPreviewHtml = '<div class="master-preview-row" style="font-size:10px; color:var(--color-text-muted); margin-top:2px; font-style:italic">'
+        + esc(t('original_master_value')) + ' "' + esc(shortMaster) + '"'
+        + '</div>';
+    }
+
+    overrideControls = '<div class="override-status-bar" style="display:' + (isOverridden ? 'flex' : 'none') + '; justify-content:space-between; align-items:center; margin-top:var(--space-1); gap:var(--space-2); flex-wrap:wrap">'
+      + '<div style="display:flex; flex-direction:column">'
+      + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:700; color:var(--color-primary)">' + overrideMsg + '</span>'
+      + masterPreviewHtml
+      + '</div>'
       + '<div class="status-buttons" style="display:flex; gap:var(--space-1)">'
-      + (isOverridden ? '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>' : '')
+      + (isOverridden ? '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>' + '<button class="btn btn-xs btn-primary" data-promote>' + promoteText + '</button>' : '')
       + '</div>'
       + '</div>';
   }
@@ -198,32 +210,51 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
         activeInstance.overwrites[propPath] = val;
         saveCurrentInstance();
 
+        wrapper.classList.add('overridden');
+
         var statusBar = wrapper.querySelector('.override-status-bar');
         if (statusBar) {
           statusBar.style.display = 'flex';
-          var label = statusBar.querySelector('.status-label');
-          var buttonsDiv = statusBar.querySelector('.status-buttons');
           
           var isEs = state.langFilter === 'es';
-          label.textContent = isEs
+          var overrideMsg = isEs
             ? '🟢 Anulación adaptada [Instancia: ' + currentInstanceName + ']'
             : '🟢 Tailored Override [Instance: ' + currentInstanceName + ']';
-          label.style.color = 'var(--color-primary)';
-          label.style.fontWeight = '700';
+          var resetText = isEs ? 'Restablecer' : 'Reset';
+          var promoteText = t('save_to_master');
+
+          var displayMasterVal = masterVal === undefined || masterVal === null ? '' : String(masterVal);
+          var shortMaster = displayMasterVal.length > 60 ? displayMasterVal.substring(0, 57) + '...' : displayMasterVal;
+          var masterPreviewHtml = '<div class="master-preview-row" style="font-size:10px; color:var(--color-text-muted); margin-top:2px; font-style:italic">'
+            + esc(t('original_master_value')) + ' "' + esc(shortMaster) + '"'
+            + '</div>';
+
+          statusBar.innerHTML = '<div style="display:flex; flex-direction:column">'
+            + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:700; color:var(--color-primary)">' + overrideMsg + '</span>'
+            + masterPreviewHtml
+            + '</div>'
+            + '<div class="status-buttons" style="display:flex; gap:var(--space-1)">'
+            + '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>'
+            + '<button class="btn btn-xs btn-primary" data-promote>' + promoteText + '</button>'
+            + '</div>';
+
+          var resetBtn = statusBar.querySelector('[data-reset]');
+          if (resetBtn) {
+            resetBtn.onclick = function() {
+              resetInstanceOverride(propPath);
+            };
+          }
+          var promoteBtn = statusBar.querySelector('[data-promote]');
+          if (promoteBtn) {
+            promoteBtn.onclick = function() {
+              applyOverrideToMaster(propPath, pathArray);
+            };
+          }
           
           var kv = wrapper.querySelector('.kv');
           if (kv) {
             kv.style.borderLeft = '3px solid var(--color-primary)';
             kv.style.paddingLeft = 'var(--space-2)';
-          }
-          
-          var resetText = isEs ? 'Restablecer' : 'Reset';
-          buttonsDiv.innerHTML = '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>';
-          var resetBtn = buttonsDiv.querySelector('[data-reset]');
-          if (resetBtn) {
-            resetBtn.onclick = function() {
-              resetInstanceOverride(propPath);
-            };
           }
         }
         renderLatex();
@@ -234,7 +265,7 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
       }
       updateEntryWarningIcon(inputEl);
     };
-}
+  }
   
   if (isOverridden) {
     var resetBtn = wrapper.querySelector('[data-reset]');
@@ -243,12 +274,24 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
         resetInstanceOverride(propPath);
       };
     }
+    var promoteBtn = wrapper.querySelector('[data-promote]');
+    if (promoteBtn) {
+      promoteBtn.onclick = function() {
+        applyOverrideToMaster(propPath, pathArray);
+      };
+    }
   }
   
   return wrapper;
 }
 
 function initSections() {
+  if (typeof cleanHtmlFromDatabase === 'function') {
+    cleanHtmlFromDatabase(data);
+    if (activeInstance && activeInstance.overwrites) {
+      cleanHtmlFromDatabase(activeInstance.overwrites);
+    }
+  }
   if (Array.isArray(data.basics) && data.basics.length > 0) {
     data.basics = data.basics[0];
   }
@@ -511,7 +554,7 @@ function renderOutline(){
         a.innerHTML='<span class="olabel">'+esc(label)+'</span><span class="otype">entry</span>';
         lst.appendChild(a);
       });
-    } else if(isObj(v)&&k==='skills'){
+    } else if(isObj(v) && (k === 'skills' || (Object.keys(v).length > 0 && Array.isArray(v[Object.keys(v)[0]])))){
       Object.keys(v).forEach(function(group){
         var a=document.createElement('a'); a.href='#skill-group-'+k+'-'+group; a.className='outline-link';
         a.innerHTML='<span class="olabel">'+esc(human(group))+'</span><span class="otype">group</span>';
@@ -702,6 +745,48 @@ function renderEditor(){
   var title=(state.sections[k]&&state.sections[k].title)||human(k);
   el('sectionTitleInput2').value=title;
   el('sectionTitleInput2').oninput=function(e){ state.sections[k].title=e.target.value; markDirty(); renderLatex(); renderEditor(); };
+  
+  var isEs = state.langFilter === 'es';
+
+  // Tailored Instance active notification banner
+  if (typeof activeInstance !== 'undefined' && activeInstance && currentInstanceName !== 'None (Master CV)') {
+    var banner = document.createElement('div');
+    banner.className = 'instance-active-banner';
+    banner.style.cssText = 'background: oklch(from var(--color-primary) 0.96 c h); border: 1px solid var(--color-primary); color: var(--color-primary-dark, #1e3a8a); padding: var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-weight: 500;';
+    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+      banner.style.cssText = 'background: oklch(from var(--color-primary) 0.15 c h); border: 1px solid var(--color-primary); color: oklch(from var(--color-primary) 0.85 c h); padding: var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-weight: 500;';
+    }
+
+    var overrideKeys = Object.keys(activeInstance.overwrites || {});
+    var overrideCount = overrideKeys.length;
+    var countText = isEs 
+      ? overrideCount + ' ' + (overrideCount === 1 ? 'campo personalizado' : 'campos personalizados')
+      : overrideCount + ' ' + (overrideCount === 1 ? 'tailored field' : 'tailored fields');
+    
+    var titleText = t('editing_tailored_instance', { name: currentInstanceName });
+    var descText = t('changes_apply_this_only');
+
+    banner.innerHTML = '<div>'
+      + '<span style="display:flex; align-items:center; gap:6px">🎯 <strong>' + esc(titleText) + '</strong> <span style="font-weight:normal">(' + countText + '). ' + esc(descText) + '</span></span>'
+      + '</div>'
+      + '<div style="display:flex; gap:var(--space-2); align-items:center; flex-shrink:0">'
+      + '<button class="btn btn-xs btn-ghost" id="instanceBannerBackBtn" style="border:1px solid currentColor">' + esc(t('switch_to_master')) + '</button>'
+      + (overrideCount > 0 ? '<button class="btn btn-xs btn-primary" id="instanceBannerMergeBtn">' + esc(t('merge_all_to_master')) + '</button>' : '')
+      + '</div>';
+    host.appendChild(banner);
+
+    // Bind event handlers
+    banner.querySelector('#instanceBannerBackBtn').onclick = function() {
+      loadInstance('None (Master CV)');
+    };
+    var mergeBtn = banner.querySelector('#instanceBannerMergeBtn');
+    if (mergeBtn) {
+      mergeBtn.onclick = function() {
+        mergeInstanceToMaster(currentInstanceName);
+      };
+    }
+  }
+
   var sec=document.createElement('div'); sec.className='card'; sec.id='sec-card-'+k;
   
   var isEs = state.langFilter === 'es';
@@ -834,6 +919,14 @@ function renderEditor(){
   bindPropRename(host);
 }
 
+function isSkillLikeGroup(val) {
+  if (!Array.isArray(val)) return false;
+  if (val.length === 0) return true;
+  return val.some(function(item) {
+    return isObj(item) && ('name' in item || 'selected' in item);
+  });
+}
+
 function renderObjectFields(path,obj){
   var wrap=document.createElement('div'); wrap.className='subgrid';
   var section=path[0];
@@ -867,7 +960,7 @@ function renderObjectFields(path,obj){
       }
 
       var inner=block.querySelector('.cardbody');
-      if(section==='skills' || (path.length === 1 && val.length > 0 && isObj(val[0]) && 'name' in val[0])) {
+      if(section==='skills' || isSkillLikeGroup(val) || (path.length === 1 && val.length > 0 && isObj(val[0]) && 'name' in val[0])) {
         inner.appendChild(renderSkillsGroup(path.concat(key),val,propPath,key));
       } else {
         val.forEach(function(item,idx){ inner.appendChild(simpleArrayInput(path.concat([key,idx]),item,propPath+'.'+idx)); });
@@ -979,29 +1072,37 @@ function renderSkillsGroup(path,arr,propPath,keyName){
     }
     var row=document.createElement('div'); row.className='entry';
     row.innerHTML='<div class="entryhead" style="display:flex; justify-content:space-between; align-items:center">'
-      +'<div style="display:flex; align-items:center; gap:6px"><label class="pill"><input type="checkbox" '+(item.selected!==false?'checked':'')+'> ' + (isEs ? 'Incluido' : 'Include') + '</label>'
-      +'<strong style="padding-left:var(--space-3)">'+esc(item.name||('item '+(i+1)))+'</strong></div>'
-      +'<button class="btn btn-danger btn-xs" data-del-skill style="height:20px; padding:0 6px; font-size:var(--text-xxs)">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
-      +'</div>'
+      +'<div style="display:flex; align-items:center; gap:6px; flex:1"><label class="pill"><input type="checkbox" '+(item.selected!==false?'checked':'')+'> ' + (isEs ? 'Incluido' : 'Include') + '</label>'
+      +'<input type="text" class="skill-name-input" value="'+esc(item.name||'')+'" placeholder="'+(isEs ? 'Nombre de habilidad...' : 'Skill name...')+'" style="margin-left:var(--space-2); height:26px; padding:2px 8px; font-size:var(--text-xs); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface); color:var(--color-text); flex:1">'
+      +'<strong style="padding-left:var(--space-3); display:none">'+esc(item.name||('item '+(i+1)))+'</strong></div>'
+      +'<button class="btn btn-danger btn-xs" data-del-skill style="height:20px; padding:0 6px; font-size:var(--text-xxs); margin-left:var(--space-2)">' + (isEs ? 'Eliminar' : 'Delete') + '</button>'
+      +'</div>';
     (function(itm){
-      row.querySelector('input[type=checkbox]').onchange = function(e){
-        if (itm) itm.selected = e.target.checked;
-        if (activeInstance && currentInstanceName !== 'None (Master CV)') saveCurrentInstance();
-        else saveCurrentDatabase();
-        markDirty();
-        renderLatex();
-        updateHtmlPreviewContent();
-        renderSchema();
-      };
+      var chk = row.querySelector('input[type=checkbox]');
+      if (chk) {
+        chk.onchange = function(e){
+          if (itm) itm.selected = e.target.checked;
+          if (activeInstance && currentInstanceName !== 'None (Master CV)') saveCurrentInstance();
+          else saveCurrentDatabase();
+          markDirty();
+          renderLatex();
+          updateHtmlPreviewContent();
+          renderSchema();
+        };
+      }
     })(item);
     (function(itm,rw){
-      rw.querySelector('input[type=text]').oninput=function(e){
-        if (itm) {
-          itm.name=e.target.value;
-        }
-        rw.querySelector('strong').textContent=e.target.value||('item '+(i+1));
-        markDirty(); renderLatex(); renderSchema(); renderOutline();
-      };
+      var inp = rw.querySelector('input[type=text]');
+      if (inp) {
+        inp.oninput=function(e){
+          if (itm) {
+            itm.name=e.target.value;
+          }
+          var strEl = rw.querySelector('strong');
+          if (strEl) strEl.textContent=e.target.value||('item '+(i+1));
+          markDirty(); renderLatex(); renderSchema(); renderOutline();
+        };
+      }
     })(item,row);
     (function(idx){
       var delBtn = row.querySelector('[data-del-skill]');

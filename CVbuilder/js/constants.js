@@ -345,52 +345,9 @@ document.addEventListener('click', function(e) {
   </section>
   {{/basics.research_interests}}
 
-  <style>
-    body { position: relative; }
-    .page-break-guide {
-      position: absolute;
-      left: -20px;
-      right: -20px;
-      height: 0;
-      border-bottom: 2px dashed #38bdf8;
-      pointer-events: none;
-      z-index: 9999;
-    }
-    .page-break-guide::after {
-      content: attr(data-label);
-      position: absolute;
-      right: 10px;
-      top: -10px;
-      background: #38bdf8;
-      color: #fff;
-      font-size: 10px;
-      font-weight: bold;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-family: sans-serif;
-    }
-  </style>
-  <script>
-  function renderPageBreakGuides() {
-    document.querySelectorAll('.page-break-guide').forEach(function(el){ el.remove(); });
-    var bodyH = document.body.scrollHeight;
-    var pageH = 1050;
-    var pageNum = 1;
-    var top = pageH;
-    while (top < bodyH) {
-      var guide = document.createElement('div');
-      guide.className = 'page-break-guide';
-      guide.style.top = top + 'px';
-      guide.setAttribute('data-label', 'End of Page ' + pageNum + ' (A4)');
-      document.body.appendChild(guide);
-      pageNum++;
-      top += pageH;
-    }
-  }
-  window.addEventListener('load', renderPageBreakGuides);
-  window.addEventListener('resize', renderPageBreakGuides);
-  setTimeout(renderPageBreakGuides, 300);
-  </script>
+  <main id="all-cv-sections">
+    {{&all_sections}}
+  </main>
  </body>
 </html>`;
 

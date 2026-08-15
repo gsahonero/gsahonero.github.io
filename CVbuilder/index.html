@@ -68,6 +68,9 @@
           <div id="instanceTipDesc">A customized version created for a specific job application without changing your master CV data.</div>
         </div>
       </div>
+      <button id="manageInstancesBtn" class="btn btn-ghost iconbtn" style="width:28px; height:28px; padding:0; display:flex; align-items:center; justify-content:center; border:1px solid oklch(from var(--color-text) l c h / .14); border-radius:var(--radius-md)" title="Manage CV Instances" aria-label="Manage CV Instances">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
       <span id="instanceIndicator" class="hidden" style="background:oklch(from var(--color-primary) l c h / .15); border:1px solid var(--color-primary); color:var(--color-primary); font-size:10px; padding:2px 6px; border-radius:var(--radius-sm); font-weight:700; letter-spacing:0.5px">TAILORED ACTIVE</span>
     </div>
 
@@ -551,70 +554,6 @@
             <label class="tiny" id="selectStructureLbl" style="font-weight:700; margin-bottom:var(--space-2); display:block">Select Section Structure Template</label>
             
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:var(--space-2)" id="sectionStructureCards">
-              
-              <label class="card-radio active" data-preset-type="experience" style="padding:var(--space-2) var(--space-3); border:2px solid var(--color-primary); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">💼</span>
-                  <input type="radio" name="sectionStructure" value="experience" checked style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Experience / Role</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Role, company, dates, & bullets.</div>
-              </label>
-
-              <label class="card-radio" data-preset-type="education" style="padding:var(--space-2) var(--space-3); border:1.5px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">🎓</span>
-                  <input type="radio" name="sectionStructure" value="education" style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Education & Degrees</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Degree, university, dates, dissertation.</div>
-              </label>
-
-              <label class="card-radio" data-preset-type="publication" style="padding:var(--space-2) var(--space-3); border:1.5px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">📚</span>
-                  <input type="radio" name="sectionStructure" value="publication" style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Publications & Papers</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Authors, paper title, venue, & year.</div>
-              </label>
-
-              <label class="card-radio" data-preset-type="teaching" style="padding:var(--space-2) var(--space-3); border:1.5px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">🏫</span>
-                  <input type="radio" name="sectionStructure" value="teaching" style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Teaching & Courses</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Subject, institution, & course lists.</div>
-              </label>
-
-              <label class="card-radio" data-preset-type="award" style="padding:var(--space-2) var(--space-3); border:1.5px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">🏆</span>
-                  <input type="radio" name="sectionStructure" value="award" style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Awards & Honors</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Category, description, & year.</div>
-              </label>
-
-              <label class="card-radio" data-preset-type="skills" style="padding:var(--space-2) var(--space-3); border:1.5px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">🛠️</span>
-                  <input type="radio" name="sectionStructure" value="skills" style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Categorized Skills</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Categories with comma-separated items.</div>
-              </label>
-
-              <label class="card-radio" data-preset-type="simple" style="padding:var(--space-2) var(--space-3); border:1.5px solid oklch(from var(--color-text) l c h / .15); border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease">
-                <div style="display:flex; align-items:center; justify-content:space-between">
-                  <span style="font-size:18px">📝</span>
-                  <input type="radio" name="sectionStructure" value="simple" style="accent-color:var(--color-primary)">
-                </div>
-                <strong style="font-size:var(--text-xs)" class="preset-name">Simple List / Text</strong>
-                <div class="tiny muted preset-desc" style="font-size:10px; line-height:1.2">Basic text entries & bullet points.</div>
-              </label>
-
             </div>
           </div>
         </div>
@@ -765,6 +704,7 @@
 
 
 <!-- ── Module Script Layer Imports ── -->
+<script src="js/section_defs.js"></script>
 <script src="js/constants.js"></script>
 <script src="js/translations.js"></script>
 <script src="js/compiler.js"></script>

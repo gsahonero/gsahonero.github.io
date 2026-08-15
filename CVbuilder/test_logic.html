@@ -1064,6 +1064,13 @@
         
         cleanLocalStorage(win);
 
+        // Send report to local testing runner
+        fetch('/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lastReport)
+        }).catch(err => console.error('Failed to post report:', err));
+
       } catch (err) {
         log('Exception thrown during test run: ' + err.message, 'error');
         console.error(err);
@@ -1071,6 +1078,16 @@
         document.getElementById('runTestsBtn').disabled = false;
       }
     }
+
+    // Auto-run tests once iframe has fully loaded
+    window.addEventListener('load', function() {
+      var iframe = document.getElementById('testTargetFrame');
+      if (iframe) {
+        iframe.addEventListener('load', function() {
+          setTimeout(runLogicTests, 800);
+        });
+      }
+    });
   </script>
 </body>
 </html>

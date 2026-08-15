@@ -29,7 +29,15 @@ var INSTANCE_PREFIX = 'cvbuilder_instance_';
 
 // ── UTILITY HELPERS ──
 function el(id) { return document.getElementById(id); }
-function esc(s) { return htmlEscape(s); }
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 function human(s) {
   if (!s) return '';
   var clean = s.replace(/_/g, ' ');
@@ -38,6 +46,32 @@ function human(s) {
 function slugId(section, idx) { return 'entry-' + section + '-' + idx; }
 function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
+function cleanHtmlFromDatabase(obj) {
+  if (!obj) return obj;
+  if (typeof obj === 'string') {
+    if (/<[a-z][\s\S]*>/i.test(obj)) {
+      return obj
+        .replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ')
+        .split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean).join('\n');
+    }
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    for (var i = 0; i < obj.length; i++) {
+      obj[i] = cleanHtmlFromDatabase(obj[i]);
+    }
+  } else if (typeof obj === 'object' && obj !== null) {
+    Object.keys(obj).forEach(function(k) {
+      if (k === 'instances' || k === '_templates' || k === 'templates') return;
+      obj[k] = cleanHtmlFromDatabase(obj[k]);
+    });
+  }
+  return obj;
+}
 function isDirty() { return state.dirty; }
 function markDirty() {
   state.dirty = true;
@@ -706,6 +740,149 @@ function runDiagnostics() {
       testRuns.push({ id: "4.3", name: "Instance Overrides to Compiler Integration", category: "integration", expected: "Contains 'Architect Override'", actual: passed ? "Passed" : "Failed", passed: passed, latency: latency });
     })();
 
+    // ── SUITE 5: INSTANCE USER INTERACTION & BUTTON TRIGGERS ──
+    // Test 5.1: Verification of "Manage Instances" gear button trigger
+    (function() {
+      var tStart = performance.now();
+      var btn = el('manageInstancesBtn');
+      var passed = false;
+      var actualMsg = "";
+      
+      if (!btn) {
+        actualMsg = "Button manageInstancesBtn not found in DOM";
+      } else {
+        // Trigger click
+        btn.click();
+        var modal = document.getElementById('instanceManagerModal');
+        if (modal) {
+          passed = true;
+          actualMsg = "Successfully triggered Instance Manager Modal";
+          modal.remove(); // Clean up immediately
+        } else {
+          actualMsg = "Clicking button did not spawn instanceManagerModal";
+        }
+      }
+      
+      var tEnd = performance.now();
+      var latency = Math.round(tEnd - tStart);
+      if (passed) totalPassed++; else totalFailed++;
+      appendDiagRow("5.1", "Manage Instances Button", "Verifies the gear button triggers the Instance Manager Modal", "ui-triggers", "Spawns instanceManagerModal", actualMsg, latency, passed);
+      testRuns.push({ id: "5.1", name: "Manage Instances Button", category: "ui-triggers", expected: "Spawns instanceManagerModal", actual: actualMsg, passed: passed, latency: latency });
+    })();
+
+    // Test 5.2: Verification of warning banner "Switch to Master" button
+    (function() {
+      var tStart = performance.now();
+      var backupInst = activeInstance;
+      var backupInstName = currentInstanceName;
+      var backupActiveSection = state.activeSection;
+
+      var passed = false;
+      var actualMsg = "";
+
+      // Set state to look like a tailored instance is active
+      activeInstance = { overwrites: {}, visibility: {}, sections: {} };
+      currentInstanceName = "BannerTestInstance";
+      state.activeSection = "basics";
+
+      try {
+        renderEditor();
+        var backBtn = el('instanceBannerBackBtn');
+        if (!backBtn) {
+          actualMsg = "Switch to Master button not found in active banner";
+        } else {
+          backBtn.click();
+          if (currentInstanceName === "None (Master CV)" && activeInstance === null) {
+            passed = true;
+            actualMsg = "Successfully switched back to Master CV";
+          } else {
+            actualMsg = "Failed to switch to Master. Current: " + currentInstanceName;
+          }
+        }
+      } catch(e) {
+        actualMsg = "Error: " + e.message;
+      } finally {
+        // Restore backup state
+        activeInstance = backupInst;
+        currentInstanceName = backupInstName;
+        state.activeSection = backupActiveSection;
+        renderEditor();
+      }
+
+      var tEnd = performance.now();
+      var latency = Math.round(tEnd - tStart);
+      if (passed) totalPassed++; else totalFailed++;
+      appendDiagRow("5.2", "Switch to Master Banner Button", "Verifies banner button switches back to Master CV mode", "ui-triggers", "Switches to None (Master CV)", actualMsg, latency, passed);
+      testRuns.push({ id: "5.2", name: "Switch to Master Banner Button", category: "ui-triggers", expected: "Switches to None (Master CV)", actual: actualMsg, passed: passed, latency: latency });
+    })();
+
+    // Test 5.3: Verification of field-level "Reset" and "Save to Master" button triggers
+    (function() {
+      var tStart = performance.now();
+      var backupInst = activeInstance;
+      var backupInstName = currentInstanceName;
+      var backupActiveSection = state.activeSection;
+      var backupConfirm = window.confirm;
+
+      var passed = false;
+      var actualMsg = "";
+
+      // Setup a tailored instance with an override
+      activeInstance = {
+        overwrites: { "basics.name": "Override Name" },
+        visibility: {},
+        sections: {}
+      };
+      currentInstanceName = "FieldTestInstance";
+      state.activeSection = "basics";
+
+      // Mock confirm to auto-approve
+      window.confirm = function() { return true; };
+
+      try {
+        renderEditor();
+        var inputs = el('editorTab').querySelectorAll('[data-path="basics.name"]');
+        if (inputs.length === 0) {
+          actualMsg = "Override field inputs not rendered";
+        } else {
+          var fieldWrapper = inputs[0].closest('.input-wrapper');
+          var resetBtn = fieldWrapper.querySelector('[data-reset]');
+          var promoteBtn = fieldWrapper.querySelector('[data-promote]');
+
+          if (!resetBtn || !promoteBtn) {
+            actualMsg = "Reset or Promote buttons not found in field status bar";
+          } else {
+            // Verify promote
+            promoteBtn.click();
+            var promotedVal = data.basics.name;
+            var overrideRemoved = !( "basics.name" in activeInstance.overwrites );
+
+            if (promotedVal === "Override Name" && overrideRemoved) {
+              passed = true;
+              actualMsg = "Successfully promoted override to Master and cleared local state";
+            } else {
+              actualMsg = "Promotion failed. Val: " + promotedVal + ", Override removed: " + overrideRemoved;
+            }
+          }
+        }
+      } catch(e) {
+        actualMsg = "Error: " + e.message;
+      } finally {
+        // Restore backups
+        activeInstance = backupInst;
+        currentInstanceName = backupInstName;
+        state.activeSection = backupActiveSection;
+        window.confirm = backupConfirm;
+        renderEditor();
+      }
+
+      var tEnd = performance.now();
+      var latency = Math.round(tEnd - tStart);
+      if (passed) totalPassed++; else totalFailed++;
+      appendDiagRow("5.3", "Field-Level Override Buttons", "Verifies field-level reset and promote (Save to Master) triggers", "ui-triggers", "Saves to Master and removes local override", actualMsg, latency, passed);
+      testRuns.push({ id: "5.3", name: "Field-Level Override Buttons", category: "ui-triggers", expected: "Saves to Master and removes local override", actual: actualMsg, passed: passed, latency: latency });
+    })();
+
   } catch (err) {
     console.error(err);
   } finally {
@@ -807,8 +984,29 @@ el('customizerPresetsBtn') && (el('customizerPresetsBtn').onclick = function() {
         if (el('latexTplEditor')) el('latexTplEditor').value = preset.latexTemplate;
         if (el('htmlTplEditor')) el('htmlTplEditor').value = preset.htmlTemplate;
         tpl.style = key === 'classic' ? 'classic' : (key === 'corporate' ? 'banking' : 'casual');
+        
+        // Define preset visual style mapping overrides
+        var presetTheme = { accentColor: '#2563eb', font: 'sans', textAlign: 'left' };
+        if (key === 'corporate') {
+          presetTheme.accentColor = '#1e3a8a';
+          presetTheme.font = 'sans';
+        } else if (key === 'tech') {
+          presetTheme.accentColor = '#10b981';
+          presetTheme.font = 'mono';
+        }
+        
+        state.themeAccentColor = presetTheme.accentColor;
+        state.themeFont = presetTheme.font;
+        state.themeTextAlign = presetTheme.textAlign;
+        
+        // Update DOM control inputs in visual customizer to match the preset values
+        if (el('themeAccentColor')) el('themeAccentColor').value = state.themeAccentColor;
+        if (el('themeAccentHex')) el('themeAccentHex').value = state.themeAccentColor;
+        if (el('themeFontSelect')) el('themeFontSelect').value = state.themeFont;
+        if (el('themeTextAlignSelect')) el('themeTextAlignSelect').value = state.themeTextAlign;
+
         saveActiveStyle();
-        renderLatex();
+        renderAll();
         alert(t('preset_applied', { name: preset.name }));
       }
       modal.remove();
@@ -1045,6 +1243,24 @@ if (latexCompilerSelect) {
   };
 }
 
+function switchTab(tabName) {
+  var tabButton = document.querySelector('.left-pane .tab[data-tab="' + tabName + '"]');
+  if (tabButton) {
+    tabButton.click();
+  }
+}
+
+function switchPreviewTab(tabName) {
+  var dataTabVal = tabName;
+  if (tabName === 'html') dataTabVal = 'html-prev';
+  if (tabName === 'latex') dataTabVal = 'latex-prev';
+  if (tabName === 'json') dataTabVal = 'json-prev';
+  var tabButton = document.querySelector('.right-pane .tab[data-tab="' + dataTabVal + '"]');
+  if (tabButton) {
+    tabButton.click();
+  }
+}
+
 function handleGuideAction(type, modalId) {
   if (modalId) closeModal(modalId);
   switch (type) {
@@ -1076,7 +1292,7 @@ function handleGuideAction(type, modalId) {
       exportDatabaseFile();
       break;
     case 'exportPdf':
-      exportPdf();
+      openPdfExportFormatModal();
       break;
     case 'switchTabEditor':
       switchTab('editor');
@@ -1557,6 +1773,12 @@ el('instanceSelect').onchange = function(e) {
   }
 };
 
+if (el('manageInstancesBtn')) {
+  el('manageInstancesBtn').onclick = function() {
+    showInstanceManagerModal();
+  };
+}
+
 el('langFilterSelect').onchange = function(e) {
   state.langFilter = e.target.value;
   updateUITranslations();
@@ -1569,6 +1791,7 @@ el('themeAccentColor').oninput = function(e) {
   el('themeAccentHex').value = e.target.value;
   saveActiveStyle();
   renderLatex();
+  renderHtmlPreview();
 };
 
 var photoLeftSlider = el('photoLeftSlider');
@@ -1579,6 +1802,7 @@ if (photoLeftSlider) {
     if (valEl) valEl.textContent = e.target.value + 'px';
     saveActiveStyle();
     renderLatex();
+    renderHtmlPreview();
   };
 }
 
@@ -1590,6 +1814,7 @@ if (photoTopSlider) {
     if (valEl) valEl.textContent = e.target.value + 'px';
     saveActiveStyle();
     renderLatex();
+    renderHtmlPreview();
   };
 }
 
@@ -1611,12 +1836,14 @@ el('themeAccentHex').oninput = function(e) {
     el('themeAccentColor').value = val;
     saveActiveStyle();
     renderLatex();
+    renderHtmlPreview();
   }
 };
 el('themeFontSelect').onchange = function(e) {
   state.themeFont = e.target.value;
   saveActiveStyle();
   renderLatex();
+  renderHtmlPreview();
 };
 if (el('themeTextAlignSelect')) {
   el('themeTextAlignSelect').onchange = function(e) {
@@ -1640,6 +1867,40 @@ var htmlTplEl = el('htmlTplEditor');
 if (htmlTplEl) htmlTplEl.oninput = scheduleTplSave;
 
 // Custom sections drawer buttons
+// Render wizard cards dynamically from SECTION_DEFS
+function renderSectionWizardCards() {
+  var container = el('sectionStructureCards');
+  if (!container || !window.SECTION_DEFS) return;
+  container.innerHTML = '';
+  
+  window.SECTION_DEFS.forEach(function(def, idx) {
+    var label = document.createElement('label');
+    label.className = 'card-radio' + (idx === 0 ? ' active' : '');
+    label.dataset.presetType = def.id;
+    label.style.cssText = 'padding:var(--space-2) var(--space-3); border:' + (idx === 0 ? '2px solid var(--color-primary)' : '1.5px solid oklch(from var(--color-text) l c h / .15)') + '; border-radius:var(--radius-md); cursor:pointer; background:var(--color-surface); display:flex; flex-direction:column; gap:2px; transition:all 0.15s ease';
+    
+    label.innerHTML = '<div style="display:flex; align-items:center; justify-content:space-between">'
+      + '<span style="font-weight:700; font-size:var(--text-sm); color:var(--color-text)">' + def.icon + ' ' + esc(def.label) + '</span>'
+      + '<input type="radio" name="sectionStructure" value="' + def.id + '" ' + (idx === 0 ? 'checked' : '') + ' style="accent-color:var(--color-primary)">'
+      + '</div>'
+      + '<span style="font-size:var(--text-xxs); color:var(--color-text-muted); line-height:1.3">' + esc(def.description) + '</span>';
+      
+    label.onclick = function() {
+      container.querySelectorAll('.card-radio').forEach(function(c) {
+        c.classList.remove('active');
+        c.style.border = '1.5px solid oklch(from var(--color-text) l c h / .15)';
+      });
+      label.classList.add('active');
+      label.style.border = '2px solid var(--color-primary)';
+      var radio = label.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+      updateAddSectionPreview();
+    };
+    
+    container.appendChild(label);
+  });
+}
+
 function updateAddSectionPreview() {
   var isEs = state.langFilter === 'es';
   var title = el('newSectionTitleInput').value.trim() || (isEs ? 'Título de Sección' : 'Section Title');
@@ -1656,51 +1917,11 @@ function updateAddSectionPreview() {
   var html = '<div style="margin-bottom:8px; font-size:13px; line-height:1.5; color:#333">';
   html += '<h2 style="font-size:1.15em; border-bottom:2px solid ' + accentColor + '; color:' + accentColor + '; margin:0 0 10px 0; padding-bottom:3px; font-weight:700">' + esc(title) + '</h2>';
   
-  switch (structType) {
-    case 'education':
-      html += '<div style="margin-bottom:10px">';
-      html += '  <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95em"><span>PhD in Biomedical Engineering - Universidad Católica</span><span style="font-size:0.85em; color:#666">2022--2026</span></div>';
-      html += '  <div style="font-style:italic; color:#555; font-size:0.85em; margin-top:2px">Dissertation: Low-field MRI Sequence Optimization</div>';
-      html += '  <div style="margin-top:4px; font-size:0.85em; color:#444">Research on sequence design, machine learning, and physical simulations.</div>';
-      html += '</div>';
-      break;
-    case 'publication':
-      html += '<ul style="margin:0; padding-left:16px; font-size:0.85em">';
-      html += '  <li style="margin-bottom:6px">G. Sahonero-Alvarez, R. Coronado, P. Irarrazaval. "Modeling Voxel Signal Dynamics." <em>ISMRM Annual Meeting</em>, 2026 (Digital Poster).</li>';
-      html += '  <li>R. Coronado, G. Sahonero-Alvarez, C. Prieto. "Accelerated DESPOT1 for 3D T1 Brain Mapping." <em>JMRI</em>, 2025.</li>';
-      html += '</ul>';
-      break;
-    case 'teaching':
-      html += '<div style="margin-bottom:10px">';
-      html += '  <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95em"><span>Mechatronics Engineering - Universidad Católica (Undergraduate)</span></div>';
-      html += '  <div style="margin-top:4px; font-size:0.85em; color:#444"><em>Courses:</em> Computer Vision, Servomechanisms, Robotics Lab</div>';
-      html += '</div>';
-      break;
-    case 'award':
-      html += '<ul style="margin:0; padding-left:16px; font-size:0.85em">';
-      html += '  <li style="margin-bottom:6px"><strong>Grant:</strong> Travel Award for ISMRM 2026 Conference (2026)</li>';
-      html += '  <li><strong>Award:</strong> 2nd Place Plurinational Science & Technology Award (2021)</li>';
-      html += '</ul>';
-      break;
-    case 'skills':
-      html += '<ul style="margin:0; padding:0; list-style:none; font-size:0.85em">';
-      html += '  <li style="margin-bottom:6px"><strong>Programming:</strong> MATLAB, Python, Julia, C/C++, R</li>';
-      html += '  <li><strong>MRI & Modeling:</strong> Bloch simulations, Low-field MRI, Sequence optimization</li>';
-      html += '</ul>';
-      break;
-    case 'simple':
-      html += '<div style="margin-bottom:8px; font-size:0.85em">';
-      html += '  <p style="margin:0">Full-stack software and hardware developer for embedded systems and biomedical devices.</p>';
-      html += '</div>';
-      break;
-    case 'experience':
-    default:
-      html += '<div style="margin-bottom:10px">';
-      html += '  <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95em"><span>PhD Researcher - Millennium Institute iHEALTH</span><span style="font-size:0.85em; color:#666">2022--Present</span></div>';
-      html += '  <div style="font-style:italic; color:#555; font-size:0.85em; margin-top:2px">Biomedical Imaging Center</div>';
-      html += '  <div style="margin-top:4px; font-size:0.85em; color:#444">Optimization of low-field MRI pulse sequences using Physics-Informed Neural Networks.</div>';
-      html += '</div>';
-      break;
+  var def = (window.SECTION_DEFS || []).find(function(d) { return d.id === structType; });
+  if (def && def.previewHtml) {
+    html += def.previewHtml;
+  } else {
+    html += '<div style="margin-bottom:10px; font-size:0.85em; color:#444">Custom section content preview.</div>';
   }
   
   html += '</div>';
@@ -1709,6 +1930,7 @@ function updateAddSectionPreview() {
 
 // Add Section Modal Assistant Trigger & Logic
 function openAddSectionAssistant() {
+  renderSectionWizardCards();
   var keyInp = el('newSectionKeyInput');
   if (keyInp) {
     keyInp.value = '';
@@ -1768,21 +1990,6 @@ el('newSectionKeyInput').oninput = function(e) {
   e.target.dataset.manual = 'true';
 };
 
-// Preset card selection click handlers
-document.querySelectorAll('#sectionStructureCards .card-radio').forEach(function(card) {
-  card.onclick = function() {
-    document.querySelectorAll('#sectionStructureCards .card-radio').forEach(function(c) {
-      c.classList.remove('active');
-      c.style.border = '1.5px solid oklch(from var(--color-text) l c h / .15)';
-    });
-    card.classList.add('active');
-    card.style.border = '2px solid var(--color-primary)';
-    var radio = card.querySelector('input[type="radio"]');
-    if (radio) radio.checked = true;
-    updateAddSectionPreview();
-  };
-});
-
 // Confirm Create Section button handler
 el('confirmAddSectionBtn').onclick = function() {
   var isEs = state.langFilter === 'es';
@@ -1802,79 +2009,19 @@ el('confirmAddSectionBtn').onclick = function() {
   var selectedRadio = document.querySelector('input[name="sectionStructure"]:checked');
   var structType = selectedRadio ? selectedRadio.value : 'experience';
   
+  var def = (window.SECTION_DEFS || []).find(function(d) { return d.id === structType; });
   var newSectionData;
-  switch (structType) {
-    case 'education':
-      newSectionData = [{
-        degree: '',
-        institution: '',
-        start: '',
-        end: '',
-        dissertation: '',
-        description: '',
-        selected: true
-      }];
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_education';
-      break;
-    case 'publication':
-      newSectionData = [{
-        authors: '',
-        title: '',
-        venue: '',
-        year: '',
-        type: '',
-        selected: true
-      }];
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'publications';
-      break;
-    case 'teaching':
-      newSectionData = [{
-        course_area: '',
-        institution: '',
-        level: '',
-        courses: [''],
-        description: '',
-        selected: true
-      }];
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_teaching';
-      break;
-    case 'award':
-      newSectionData = [{
-        category: '',
-        description: '',
-        year: '',
-        selected: true
-      }];
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'awards';
-      break;
-    case 'skills':
-      newSectionData = {
-        general: [
-          { name: '', selected: true }
-        ]
-      };
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'skills';
-      break;
-    case 'simple':
-      newSectionData = [{
-        description: '',
-        selected: true
-      }];
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'generic';
-      break;
-    case 'experience':
-    default:
-      newSectionData = [{
-        role: '',
-        organization: '',
-        department: '',
-        start: '',
-        end: '',
-        description: '',
-        selected: true
-      }];
-      if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_work';
-      break;
+  
+  if (def && def.template) {
+    newSectionData = clone(def.template);
+    if (def.mapper && typeof mappers === 'object' && mappers) {
+      mappers[key] = def.mapper;
+    }
+  } else {
+    newSectionData = [{
+      role: '', organization: '', department: '', start: '', end: '', description: '', selected: true
+    }];
+    if (typeof mappers === 'object' && mappers) mappers[key] = 'cventry_work';
   }
   
   data[key] = newSectionData;
@@ -2015,6 +2162,7 @@ function focusEditorElement(targetPath) {
     var editorEl = el('editorContainer') || el('editorTab');
     if (!editorEl) return;
 
+    var isSectionOnlyClick = (parts.length === 1);
     var targetCard = null;
     var targetInput = null;
 
@@ -2025,41 +2173,37 @@ function focusEditorElement(targetPath) {
 
     if (!targetCard && parts.length >= 2) {
       var fieldId = 'field-' + secKey + '-' + parts[1];
-      targetCard = el(fieldId);
+      var skillGroupId = 'skill-group-' + secKey + '-' + parts[1];
+      targetCard = el(fieldId) || el(skillGroupId);
     }
 
-    var inputs = editorEl.querySelectorAll('input, textarea');
-    if (targetCard) {
-      targetInput = targetCard.querySelector('input:not([type=checkbox]), textarea');
+    if (!targetCard) {
+      targetCard = el('sec-card-' + secKey);
+      isSectionOnlyClick = true;
     }
 
-    if (!targetInput) {
-      for (var i = 0; i < inputs.length; i++) {
-        var p = inputs[i].getAttribute('data-path') || inputs[i].id || '';
-        if (p === cleanPath || (p && p.indexOf(cleanPath) === 0)) {
-          targetInput = inputs[i];
-          targetCard = targetInput.closest('.entry') || targetInput.closest('.card') || targetInput.closest('.propcard');
-          break;
-        }
-      }
-    }
+    if (!isSectionOnlyClick && targetCard) {
+      var itemIdx = (parts.length >= 3 && !isNaN(parts[2])) ? parseInt(parts[2], 10) : 0;
+      var cardTextInputs = targetCard.querySelectorAll('input:not([type=checkbox]), textarea');
+      targetInput = cardTextInputs[itemIdx] || cardTextInputs[0];
 
-    if (!targetInput && parts.length >= 2) {
-      var itemPrefix = parts[0] + '.' + parts[1];
-      for (var j = 0; j < inputs.length; j++) {
-        var p = inputs[j].getAttribute('data-path') || '';
-        if (p && p.indexOf(itemPrefix) === 0) {
-          targetInput = inputs[j];
-          targetCard = targetInput.closest('.entry') || targetInput.closest('.card') || targetInput.closest('.propcard');
-          break;
+      if (!targetInput) {
+        var inputs = editorEl.querySelectorAll('input, textarea');
+        for (var i = 0; i < inputs.length; i++) {
+          var p = inputs[i].getAttribute('data-path') || inputs[i].id || '';
+          if (p === cleanPath || (p && p.indexOf(cleanPath) === 0)) {
+            targetInput = inputs[i];
+            break;
+          }
         }
       }
     }
 
     var scrollTarget = targetCard || targetInput || editorEl.querySelector('.card');
     if (scrollTarget) {
-      console.log('[Preview Click Focus] Scrolling and focusing element ID:', scrollTarget.id || targetPath);
-      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var blockAlign = isSectionOnlyClick ? 'start' : 'center';
+      console.log('[Preview Click Focus] Scrolling to', isSectionOnlyClick ? 'section top' : 'element card', 'ID:', scrollTarget.id || targetPath);
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: blockAlign });
 
       var highlightEl = targetCard || (targetInput ? (targetInput.closest('.kv') || targetInput.parentElement) : null);
       if (highlightEl) {
@@ -2076,7 +2220,7 @@ function focusEditorElement(targetPath) {
       }
     }
 
-    if (targetInput) {
+    if (!isSectionOnlyClick && targetInput) {
       try { targetInput.focus(); } catch (e) {}
     }
   }, 120);
@@ -2484,13 +2628,21 @@ function showAiProviderConfigModal() {
     + '  <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Active' : '○ Unconfigured') + '</span>'
     + '</div>'
     + '<div class="modal-body stack" style="gap:var(--space-3)">'
-    + '  <div class="tiny muted">' + (isEs ? 'Seleccione su proveedor de IA (Ollama Local 100% Gratuito/Sin Servidor o Google Gemini Flash):' : 'Select AI Provider (Ollama Local 100% Free & Offline or Google Gemini Flash):') + '</div>'
-    + '  <div><label class="tiny" style="font-weight:700">Provider</label>'
-    + '    <select id="aiProviderSelect" class="db-select" style="width:100%; height:32px; padding:0 8px; font-weight:600; font-size:13px; margin-top:4px">'
-    + '      <option value="ollama" ' + (curS.provider === 'ollama' ? 'selected' : '') + '>Ollama (Local LLM - 100% Offline & Free)</option>'
-    + '      <option value="gemini" ' + (curS.provider === 'gemini' ? 'selected' : '') + '>Google Gemini Flash (Free Google AI Studio Key)</option>'
-    + '    </select>'
+    + '  <div class="tiny muted">' + (isEs ? 'Seleccione su proveedor de IA preferido:' : 'Select your preferred AI provider:') + '</div>'
+    + '  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:4px">'
+    + '    <div id="cardOllamaOpt" style="cursor:pointer; padding:10px; border-radius:var(--radius-md); border:2px solid ' + (curS.provider === 'ollama' ? 'var(--color-primary)' : 'oklch(from var(--color-text) l c h / .15)') + '; background:' + (curS.provider === 'ollama' ? 'oklch(from var(--color-primary) l c h / .08)' : 'var(--color-surface-offset)') + '; text-align:center">'
+    + '      <div style="font-weight:700; font-size:13px; color:var(--color-text)">🦙 Ollama Local</div>'
+    + '      <div class="tiny muted" style="margin-top:2px">' + (isEs ? '100% Sin Servidor / Privado' : '100% Offline & Private') + '</div>'
+    + '    </div>'
+    + '    <div id="cardGeminiOpt" style="cursor:pointer; padding:10px; border-radius:var(--radius-md); border:2px solid ' + (curS.provider === 'gemini' ? 'var(--color-primary)' : 'oklch(from var(--color-text) l c h / .15)') + '; background:' + (curS.provider === 'gemini' ? 'oklch(from var(--color-primary) l c h / .08)' : 'var(--color-surface-offset)') + '; text-align:center">'
+    + '      <div style="font-weight:700; font-size:13px; color:var(--color-text)">✨ Google Gemini</div>'
+    + '      <div class="tiny muted" style="margin-top:2px">' + (isEs ? 'Clave Gratuita Google Studio' : 'Free Google Studio Key') + '</div>'
+    + '    </div>'
     + '  </div>'
+    + '  <select id="aiProviderSelect" style="display:none">'
+    + '    <option value="ollama" ' + (curS.provider === 'ollama' ? 'selected' : '') + '>Ollama</option>'
+    + '    <option value="gemini" ' + (curS.provider === 'gemini' ? 'selected' : '') + '>Gemini</option>'
+    + '  </select>'
     + '  <div id="ollamaFields" style="display:' + (curS.provider === 'ollama' ? 'block' : 'none') + '">'
     + '    <label class="tiny" style="font-weight:700">Ollama Endpoint URL</label>'
     + '    <input type="text" id="ollamaEndpointInput" value="' + esc(curS.ollamaEndpoint || 'http://localhost:11434') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace">'
@@ -2503,8 +2655,15 @@ function showAiProviderConfigModal() {
     + '    <div class="tiny muted" style="margin-top:4px">🔑 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary); font-weight:700; text-decoration:underline">' + (isEs ? 'Obtenga una clave API gratuita de Google Gemini aquí ↗' : 'Get a free Google Gemini API key here ↗') + '</a></div>'
     + '  </div>'
     + '  <div>'
-    + '    <label class="tiny" style="font-weight:700">' + (isEs ? 'Prompt de Sistema (Persona de la IA)' : 'System Prompt (LLM Persona & Instructions)') + '</label>'
-    + '    <textarea id="aiSystemPromptInput" style="width:100%; min-height:60px; padding:6px 8px; font-size:12px; margin-top:4px; font-family:inherit; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text); resize:vertical" placeholder="' + (isEs ? 'Ingrese el prompt de sistema personalizado para la IA...' : 'Enter custom system prompt for LLM...') + '">' + esc(curS.systemPrompt || '') + '</textarea>'
+    + '    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px">'
+    + '      <label class="tiny" style="font-weight:700">' + (isEs ? 'Prompt de Sistema (Persona IA)' : 'System Prompt (LLM Persona)') + '</label>'
+    + '      <div style="display:flex; gap:4px">'
+    + '        <button id="presetResumeBtn" class="btn btn-xs btn-ghost" style="font-size:10px; padding:1px 5px">🎯 Resume</button>'
+    + '        <button id="presetExecBtn" class="btn btn-xs btn-ghost" style="font-size:10px; padding:1px 5px">💼 Executive</button>'
+    + '        <button id="presetTechBtn" class="btn btn-xs btn-ghost" style="font-size:10px; padding:1px 5px">💻 Tech</button>'
+    + '      </div>'
+    + '    </div>'
+    + '    <textarea id="aiSystemPromptInput" style="width:100%; min-height:60px; padding:6px 8px; font-size:12px; font-family:inherit; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); color:var(--color-text); resize:vertical" placeholder="' + (isEs ? 'Ingrese el prompt de sistema personalizado para la IA...' : 'Enter custom system prompt for LLM...') + '">' + esc(curS.systemPrompt || '') + '</textarea>'
     + '  </div>'
     + '  <div id="testConnResult" style="margin-top:var(--space-2); display:none"></div>'
     + '</div>'
@@ -2518,10 +2677,33 @@ function showAiProviderConfigModal() {
   document.body.appendChild(modal);
 
   var providerSelect = modal.querySelector('#aiProviderSelect');
-  providerSelect.onchange = function() {
-    var isOllama = providerSelect.value === 'ollama';
-    modal.querySelector('#ollamaFields').style.display = isOllama ? 'block' : 'none';
-    modal.querySelector('#geminiFields').style.display = isOllama ? 'none' : 'block';
+  var cardOllama = modal.querySelector('#cardOllamaOpt');
+  var cardGemini = modal.querySelector('#cardGeminiOpt');
+  var sysPromptArea = modal.querySelector('#aiSystemPromptInput');
+
+  function setProvider(p) {
+    providerSelect.value = p;
+    var isO = p === 'ollama';
+    modal.querySelector('#ollamaFields').style.display = isO ? 'block' : 'none';
+    modal.querySelector('#geminiFields').style.display = isO ? 'none' : 'block';
+    
+    cardOllama.style.borderColor = isO ? 'var(--color-primary)' : 'oklch(from var(--color-text) l c h / .15)';
+    cardOllama.style.background = isO ? 'oklch(from var(--color-primary) l c h / .08)' : 'var(--color-surface-offset)';
+    cardGemini.style.borderColor = isO ? 'oklch(from var(--color-text) l c h / .15)' : 'var(--color-primary)';
+    cardGemini.style.background = isO ? 'var(--color-surface-offset)' : 'oklch(from var(--color-primary) l c h / .08)';
+  }
+
+  cardOllama.onclick = function() { setProvider('ollama'); };
+  cardGemini.onclick = function() { setProvider('gemini'); };
+
+  modal.querySelector('#presetResumeBtn').onclick = function() {
+    sysPromptArea.value = "You are an expert career consultant, resume writer, and ATS optimization specialist. Help candidates craft compelling, professional, concise, and impact-driven resumes.";
+  };
+  modal.querySelector('#presetExecBtn').onclick = function() {
+    sysPromptArea.value = "Act as a Fortune 500 Senior Executive Recruiter. Evaluate resumes for leadership impact, high-level deliverables, revenue metrics, and strategic positioning.";
+  };
+  modal.querySelector('#presetTechBtn').onclick = function() {
+    sysPromptArea.value = "Act as a Silicon Valley VP of Engineering and Technical Lead. Focus on system architecture, engineering scale, languages, infrastructure, and quantitative tech achievements.";
   };
 
   modal.querySelector('#testAiConnBtn').onclick = function() {
@@ -2596,13 +2778,20 @@ function showAskImproveModal() {
   modal.className = 'modal-backdrop open';
   modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
 
-  modal.innerHTML = '<div class="modal" style="max-width:580px; padding:var(--space-4)">'
-    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
-    + '  <h3>✨ ' + (isEs ? 'Auditoría & Preguntas de Mejora del CV' : 'CV Audit & Improvement Interview') + '</h3>'
+  modal.innerHTML = '<div class="modal" style="max-width:620px; padding:var(--space-4)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:8px; margin-bottom:10px">'
+    + '  <h3 style="margin:0; font-size:15px">✨ ' + (isEs ? 'Auditoría & Preguntas de Mejora del CV' : 'CV Audit & Improvement Interview') + '</h3>'
     + '</div>'
     + '<div class="modal-body stack" style="gap:var(--space-3)">'
-    + '  <div class="tiny muted">' + (isEs ? 'La IA está analizando su CV actual y generando preguntas objetivas:' : 'The AI is analyzing your active CV and generating targeted interview questions:') + '</div>'
-    + '  <div id="critiqueBox" style="min-height:160px; max-height:280px; overflow-y:auto; padding:12px; border-radius:var(--radius-md); background:var(--color-surface-offset); font-size:13px; line-height:1.5; white-space:pre-wrap">⏳ ' + (isEs ? 'Analizando CV y generando preguntas...' : 'Analyzing CV and generating interview questions...') + '</div>'
+    + '  <div class="tiny muted">' + (isEs ? 'La IA está analizando su CV activo y generando preguntas objetivas:' : 'The AI is analyzing your active CV and generating targeted interview questions:') + '</div>'
+    + '  <div id="critiqueBox" style="min-height:160px; max-height:280px; overflow-y:auto; padding:12px; border-radius:var(--radius-md); background:var(--color-surface-offset); font-size:12px; line-height:1.5; border:1px solid oklch(from var(--color-text) l c h / .12)">⏳ ' + (isEs ? 'Analizando CV y generando preguntas...' : 'Analyzing CV and generating interview questions...') + '</div>'
+    + '  <div style="margin-top:6px">'
+    + '    <label class="tiny" style="font-weight:700; display:block; margin-bottom:4px">💬 ' + (isEs ? 'Responda o proporcione detalles/métricas adicionales:' : 'Answer or provide additional details/metrics:') + '</label>'
+    + '    <div style="display:flex; gap:6px">'
+    + '      <input type="text" id="improveResponseInput" placeholder="' + (isEs ? 'ej. Aumenté las ventas un 25% y lideré 4 ingenieros...' : 'e.g. Increased sales by 25% and led 4 engineers...') + '" style="flex:1; height:32px; padding:0 10px; font-size:12px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface); color:var(--color-text); font-family:inherit">'
+    + '      <button id="sendImproveResponseBtn" class="btn btn-xs btn-primary" style="height:32px; padding:0 12px; font-weight:700; font-size:12px">⚡ ' + (isEs ? 'Re-evaluar' : 'Re-evaluate') + '</button>'
+    + '    </div>'
+    + '  </div>'
     + '</div>'
     + '<div class="modal-footer" style="display:flex; justify-content:flex-end; gap:var(--space-2); margin-top:var(--space-3)">'
     + '  <button class="btn btn-ghost" id="closeImproveModalBtn">' + (isEs ? 'Cerrar' : 'Close') + '</button>'
@@ -2613,13 +2802,30 @@ function showAskImproveModal() {
 
   modal.querySelector('#closeImproveModalBtn').onclick = function() { modal.remove(); };
 
-  AIClient.generateCritiqueQuestions(data).then(function(res) {
+  function fetchAudit(extraContext) {
     var box = modal.querySelector('#critiqueBox');
-    if (box) box.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(res) : res;
-  }).catch(function(err) {
-    var box = modal.querySelector('#critiqueBox');
-    if (box) box.textContent = '❌ Error: ' + err.message;
-  });
+    box.innerHTML = '⏳ ' + (isEs ? 'Analizando CV y generando preguntas...' : 'Analyzing CV and generating interview questions...');
+
+    var promptText = "Analyze the following curriculum vitae JSON data:\n" + JSON.stringify(data);
+    if (extraContext) {
+      promptText += "\n\nAdditional user input/context:\n" + extraContext;
+    }
+    promptText += "\n\nIdentify 3 specific, weak, or vague bullet points or sections, and ask targeted interview questions or suggest exact improved rewrite text.";
+
+    AIClient.callLLM(promptText, "You are a professional executive resume auditor conducting an interview.").then(function(res) {
+      if (box) box.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(res) : res;
+    }).catch(function(err) {
+      if (box) box.textContent = '❌ Error: ' + err.message;
+    });
+  }
+
+  fetchAudit();
+
+  modal.querySelector('#sendImproveResponseBtn').onclick = function() {
+    var inputVal = modal.querySelector('#improveResponseInput').value.trim();
+    if (!inputVal) return;
+    fetchAudit(inputVal);
+  };
 }
 
 function showAiFieldSuggestionsModal(inputEl) {
@@ -2676,13 +2882,15 @@ function showAiFieldSuggestionsModal(inputEl) {
     + '<div id="aiLoadingBox" style="display:none; text-align:center; padding:10px 0; font-size:11px; color:var(--color-text-muted)">⏳ ' + (isEs ? 'Generando sugerencia con IA...' : 'Generating AI suggestion...') + '</div>'
     + '<div id="aiSuggestionBox" style="display:none; margin-top:8px">'
     + '  <div class="tiny muted" style="font-weight:700; margin-bottom:4px">' + (isEs ? 'Sugerencia Generada:' : 'Generated Suggestion:') + '</div>'
-    + '  <textarea id="aiSuggestionText" style="width:100%; min-height:70px; padding:6px; font-size:11px; line-height:1.4; border-radius:4px; border:1.5px solid var(--color-primary); background:var(--color-surface-offset); color:var(--color-text); font-family:inherit; resize:none"></textarea>'
+    + '  <div id="aiSuggestionPreview" style="min-height:36px; max-height:150px; overflow-y:auto; padding:6px 8px; font-size:11px; line-height:1.4; border-radius:4px; border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); margin-bottom:6px; word-break:break-word"></div>'
+    + '  <textarea id="aiSuggestionText" style="width:100%; min-height:60px; padding:6px; font-size:11px; line-height:1.4; border-radius:4px; border:1.5px solid var(--color-primary); background:var(--color-surface); color:var(--color-text); font-family:inherit; resize:vertical"></textarea>'
     + '  <button id="applySuggestionBtn" class="btn btn-xs btn-primary" style="width:100%; margin-top:6px; font-weight:700">✅ ' + (isEs ? 'Aplicar Sugerencia al Campo' : 'Apply Suggestion to Field') + '</button>'
     + '</div>';
 
   container.appendChild(pop);
 
   var sugBox = pop.querySelector('#aiSuggestionBox');
+  var sugPreview = pop.querySelector('#aiSuggestionPreview');
   var sugText = pop.querySelector('#aiSuggestionText');
   var loadBox = pop.querySelector('#aiLoadingBox');
   var customInput = pop.querySelector('#aiCustomPromptInput');
@@ -2698,6 +2906,7 @@ function showAiFieldSuggestionsModal(inputEl) {
 
     taskPromise.then(function(result) {
       loadBox.style.display = 'none';
+      if (sugPreview) sugPreview.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(result) : esc(result);
       sugText.value = result;
       sugBox.style.display = 'block';
     }).catch(function(err) {
@@ -2743,9 +2952,15 @@ function showAiFieldSuggestionsModal(inputEl) {
 
   pop.querySelector('#applySuggestionBtn').onclick = function(e) {
     e.stopPropagation();
-    var newText = sugText.value;
-    if (newText) {
-      inputEl.value = newText;
+    var rawText = sugText.value;
+    if (rawText) {
+      var cleanText = rawText.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ');
+      
+      inputEl.value = cleanText.trim();
       inputEl.dispatchEvent(new Event('input', { bubbles: true }));
       pop.remove();
       if (typeof updateFieldAiIcon === 'function') updateFieldAiIcon(inputEl);
@@ -2756,6 +2971,10 @@ function showAiFieldSuggestionsModal(inputEl) {
 function showAiMenu() {
   var isEs = state.langFilter === 'es';
   var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
+  var curS = typeof AIClient !== 'undefined' ? AIClient.getSettings() : {};
+  var activeEngineName = isConfigured 
+    ? (curS.provider === 'gemini' ? 'Google Gemini Flash' : ('Ollama (' + (curS.ollamaModel || 'llama3:latest') + ')'))
+    : (isEs ? 'Sin Configurar' : 'Unconfigured');
 
   var existing = document.querySelector('.ai-action-menu-backdrop');
   if (existing) existing.remove();
@@ -2765,9 +2984,13 @@ function showAiMenu() {
   menuModal.onclick = function(e) { if (e.target === menuModal) menuModal.remove(); };
 
   menuModal.innerHTML = '<div class="modal" style="max-width:440px; padding:var(--space-4); border-radius:var(--radius-lg); background:var(--color-surface); border:1px solid var(--color-border); box-shadow:var(--shadow-lg)">'
-    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:var(--space-2); margin-bottom:var(--space-3)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:var(--space-2); margin-bottom:var(--space-2)">'
     + '  <h3 style="margin:0; font-size:16px; display:flex; align-items:center; gap:6px">🤖 ' + (isEs ? 'Menú de Inteligencia Artificial' : 'AI Assistant Menu') + '</h3>'
-    + '  <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Active' : '○ Unconfigured') + '</span>'
+    + '  <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:' + (isConfigured ? 'rgba(16,185,129,.15); color:var(--color-success)' : 'rgba(239,68,68,.15); color:var(--color-error)') + '">' + (isConfigured ? '● Ready' : '○ Setup Needed') + '</span>'
+    + '</div>'
+    + '<div style="background:var(--color-surface-offset); padding:8px 12px; border-radius:var(--radius-md); font-size:11px; font-weight:600; color:var(--color-text-muted); margin-bottom:var(--space-3); display:flex; justify-content:space-between; align-items:center; border:1px solid oklch(from var(--color-text) l c h / .08)">'
+    + '  <span>⚡ ' + (isEs ? 'Motor Activo:' : 'Active LLM Engine:') + '</span>'
+    + '  <span style="color:var(--color-primary); font-weight:700">' + esc(activeEngineName) + '</span>'
     + '</div>'
     + '<div class="modal-body stack" style="gap:var(--space-2)">'
     + '  <button class="btn btn-ghost" id="menuAiConfigBtn" style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md)">'
@@ -2975,6 +3198,11 @@ function createAiChatWidget() {
     +      (isEs ? '👋 ¡Hola! Soy tu asistente de CV. ¿En qué puedo ayudarte a pulir tu currículum, redactar logros o redactar cartas de presentación hoy?' : '👋 Hello! I am your CV Assistant. How can I help you refine your resume, draft bullet points, or tailor cover letters today?')
     + '  </div>'
     + '</div>'
+    + '<div style="display:flex; gap:4px; padding:6px 10px; border-top:1px solid oklch(from var(--color-text) l c h / .08); background:var(--color-surface-offset); overflow-x:auto">'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Audit my CV experience and bullet points" style="font-size:10px; white-space:nowrap; padding:2px 6px">📊 ' + (isEs ? 'Auditar CV' : 'Audit CV') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Enhance my executive summary" style="font-size:10px; white-space:nowrap; padding:2px 6px">⚡ ' + (isEs ? 'Pulir Resumen' : 'Enhance Summary') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Check ATS power verbs and metrics" style="font-size:10px; white-space:nowrap; padding:2px 6px">🎯 ' + (isEs ? 'Check ATS' : 'Check ATS') + '</button>'
+    + '</div>'
     + '<div style="display:flex; gap:6px; padding:10px; border-top:1px solid oklch(from var(--color-text) l c h / .1); background:var(--color-surface-offset)">'
     + '  <input type="text" id="aiChatInput" placeholder="' + (isEs ? 'Escribe un mensaje...' : 'Type a message...') + '" style="flex:1; height:32px; padding:0 10px; font-size:12px; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface); color:var(--color-text); font-family:inherit">'
     + '  <button id="aiChatSendBtn" class="btn btn-xs btn-primary" style="height:32px; padding:0 12px; font-weight:700; font-size:12px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
@@ -3020,6 +3248,15 @@ function createAiChatWidget() {
     aiChatHistory.push({ role: 'user', content: text });
 
     var sysPrompt = "You are a helpful, professional CV & Career Assistant. Answer the candidate's career, resume, and job search questions concisely and helpfully.";
+    if (typeof data === 'object' && data && Object.keys(data).length > 0) {
+      try {
+        var cvContext = JSON.parse(JSON.stringify(data));
+        delete cvContext.instances;
+        delete cvContext._templates;
+        delete cvContext.templates;
+        sysPrompt += "\n\nCandidate's Current CV Data Context:\n" + JSON.stringify(cvContext, null, 2);
+      } catch (e) {}
+    }
     var conversationPrompt = aiChatHistory.map(function(m) { return (m.role === 'user' ? 'User: ' : 'Assistant: ') + m.content; }).join('\n');
 
     AIClient.callLLM(conversationPrompt, sysPrompt).then(function(reply) {
@@ -3040,6 +3277,13 @@ function createAiChatWidget() {
       msgBox.scrollTop = msgBox.scrollHeight;
     });
   }
+
+  widget.querySelectorAll('.chat-chip').forEach(function(chip) {
+    chip.onclick = function() {
+      inputEl.value = chip.dataset.chip;
+      sendChatMessage();
+    };
+  });
 
   sendBtn.onclick = sendChatMessage;
   inputEl.onkeydown = function(e) {

@@ -155,19 +155,44 @@ var AIClient = (function() {
     }
   }
 
+  function stripHtmlToPlainText(html) {
+    if (!html) return '';
+    var str = String(html);
+    if (!/<[a-z][\s\S]*>/i.test(str)) {
+      return str.trim();
+    }
+    str = str.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n');
+    str = str.replace(/<br\s*\/?>/gi, '\n');
+    str = str.replace(/<\/p>/gi, '\n');
+    str = str.replace(/<[^>]+>/g, '');
+    str = str
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&nbsp;/g, ' ');
+
+    var lines = str.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+    return lines.join('\n');
+  }
+
   async function enhanceBullet(text) {
-    var prompt = "Rewrite the following resume entry into a high-impact, action-driven bullet point with metrics or clear deliverables:\n\n\"" + text + "\"";
-    return await callLLM(prompt);
+    var prompt = "Rewrite the following resume entry into a high-impact, action-driven bullet point with metrics or clear deliverables (return plain text without HTML tags):\n\n\"" + text + "\"";
+    var res = await callLLM(prompt);
+    return stripHtmlToPlainText(res);
   }
 
   async function fixGrammar(text) {
-    var prompt = "Correct any spelling, punctuation, or grammatical errors in the following text while preserving formatting:\n\n\"" + text + "\"";
-    return await callLLM(prompt);
+    var prompt = "Correct any spelling, punctuation, or grammatical errors in the following text while preserving formatting (return plain text without HTML tags):\n\n\"" + text + "\"";
+    var res = await callLLM(prompt);
+    return stripHtmlToPlainText(res);
   }
 
   async function translateContent(text, targetLang) {
-    var prompt = "Translate the following resume text into " + (targetLang === 'es' ? 'Spanish' : 'English') + " accurately:\n\n\"" + text + "\"";
-    return await callLLM(prompt);
+    var prompt = "Translate the following resume text into " + (targetLang === 'es' ? 'Spanish' : 'English') + " accurately (return plain text without HTML tags):\n\n\"" + text + "\"";
+    var res = await callLLM(prompt);
+    return stripHtmlToPlainText(res);
   }
 
   async function generateCritiqueQuestions(cvData) {

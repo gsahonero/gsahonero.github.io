@@ -1,2 +1,6 @@
 PaperAssistant/
-CVbuilder/scratch/
+CVbuilder/
+IMAGINE/node_modules/
+IMAGINE/package-lock.json
+IMAGINE/package.json
+IMAGINE/tests

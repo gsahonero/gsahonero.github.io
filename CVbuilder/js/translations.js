@@ -24,7 +24,13 @@ var DICTIONARY = {
     "instance_duplicated": "Instance \"{name}\" duplicated successfully.",
     "diagnostics_idle": "Idle. Click \"Run Tests\" to execute unit assertions.",
     "unsaved_changes": "Unsaved changes",
-    "changes_saved": "Saved (Clean)"
+    "changes_saved": "Saved (Clean)",
+    "editing_tailored_instance": "Editing Tailored Instance: {name}",
+    "changes_apply_this_only": "Edits made in this mode apply to this tailored version only.",
+    "switch_to_master": "Switch to Master CV",
+    "merge_all_to_master": "Merge All to Master",
+    "save_to_master": "Save to Master",
+    "original_master_value": "Original (Master CV):"
   },
   es: {
     "import_success": "Base de datos de CV \"{name}\" importada con éxito y guardada en el almacenamiento local.",
@@ -51,7 +57,13 @@ var DICTIONARY = {
     "instance_duplicated": "Instancia \"{name}\" duplicada con éxito.",
     "diagnostics_idle": "Inactivo. Presione \"Ejecutar pruebas\" para iniciar las comprobaciones.",
     "unsaved_changes": "Cambios sin guardar",
-    "changes_saved": "Guardado (Limpio)"
+    "changes_saved": "Guardado (Limpio)",
+    "editing_tailored_instance": "Editando Instancia Adaptada: {name}",
+    "changes_apply_this_only": "Los cambios en este modo se aplican solo a esta versión adaptada.",
+    "switch_to_master": "Cambiar al CV Maestro",
+    "merge_all_to_master": "Fusionar Todo al Maestro",
+    "save_to_master": "Guardar al Maestro",
+    "original_master_value": "Original (CV Maestro):"
   }
 };
 

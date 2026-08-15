@@ -93,8 +93,9 @@ function renderTemplate(template, data, escapeFn) {
     });
   }
 
-  var rawRegex = /\{\{\&([a-zA-Z0-9_\\.-]+)\}\}/g;
-  rendered = rendered.replace(rawRegex, function(match, path) {
+  var rawRegex = /\{\{\&([a-zA-Z0-9_\\.-]+)\}\}|\{\{\{([a-zA-Z0-9_\\.-]+)\}\}\}/g;
+  rendered = rendered.replace(rawRegex, function(match, path1, path2) {
+    var path = path1 || path2;
     var val = getPathValue(path, data);
     return val !== undefined && val !== null ? String(val) : '';
   });
@@ -203,39 +204,24 @@ function htmlEscape(s) {
     .replace(/\\\\/g, '<br>')
     .replace(/~/g, '&nbsp;');
 
-  // Parse Bullet Lists (- item, * item, • item)
-  if (/(?:^|\n)\s*[-*•]\s+/m.test(str)) {
-    var lines = str.split(/\r?\n/);
-    var inList = false;
-    var resultLines = [];
+  // Parse Bullet Lists (Multi-line text or explicit hyphens/asterisks/bullets)
+  var hasNewlines = str.indexOf('\n') !== -1;
+  var hasBulletMarkers = /(?:^|\n)\s*[-*•]\s+/m.test(str);
 
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      var listMatch = line.match(/^\s*[-*•]\s+(.*)$/);
-      if (listMatch) {
-        if (!inList) {
-          inList = true;
-          resultLines.push('<ul class="cv-bullet-list" style="margin:4px 0 4px 18px; padding-left:0; list-style-type:disc">');
-        }
-        resultLines.push('  <li style="margin-bottom:2px">' + listMatch[1] + '</li>');
-      } else {
-        if (inList) {
-          inList = false;
-          resultLines.push('</ul>');
-        }
-        if (line.trim()) {
-          resultLines.push(line);
-        }
+  if (hasNewlines || hasBulletMarkers) {
+    var rawLines = str.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+    if (rawLines.length > 1 || hasBulletMarkers) {
+      var resultLines = ['<ul class="cv-bullet-list" style="margin:2px 0; padding-left:14px; list-style-type:disc; line-height:1.35">'];
+      for (var i = 0; i < rawLines.length; i++) {
+        var cleanLine = rawLines[i].replace(/^\s*[-*•]\s+/, '');
+        resultLines.push('  <li style="margin-bottom:1px">' + cleanLine + '</li>');
       }
-    }
-    if (inList) {
       resultLines.push('</ul>');
+      return resultLines.join('\n');
     }
-    str = resultLines.join('\n');
-  } else {
-    str = str.replace(/\n/g, '<br>');
   }
 
+  str = str.replace(/\n/g, '<br>');
   return str;
 }
 
@@ -1114,6 +1100,10 @@ function renderHtmlPreview(targetSectionId) {
   if (!frame) return;
 
   var html = renderHtmlContent();
+  frame._isSrcdocLoading = true;
+  frame.onload = function() {
+    frame._isSrcdocLoading = false;
+  };
   frame.srcdoc = html;
 
   var secKey = targetSectionId || (typeof state !== 'undefined' && state.activeSection);
