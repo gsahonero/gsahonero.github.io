@@ -1243,6 +1243,32 @@ if (latexCompilerSelect) {
   };
 }
 
+// Dynamic CSS injector for visual attention highlights
+(function() {
+  var style = document.createElement('style');
+  style.innerHTML = '\
+    @keyframes highlight-attention-pulse {\
+      0% { box-shadow: 0 0 0 0px var(--color-primary); border-color: var(--color-primary); }\
+      50% { box-shadow: 0 0 0 5px var(--color-primary); border-color: var(--color-primary); }\
+      100% { box-shadow: 0 0 0 0px var(--color-primary); }\
+    }\
+    .highlight-attention {\
+      animation: highlight-attention-pulse 1s ease-in-out 3 !important;\
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;\
+      border-color: var(--color-primary) !important;\
+    }';
+  document.head.appendChild(style);
+})();
+
+function highlightElement(elOrId) {
+  var target = typeof elOrId === 'string' ? el(elOrId) : elOrId;
+  if (!target) return;
+  target.classList.add('highlight-attention');
+  setTimeout(function() {
+    target.classList.remove('highlight-attention');
+  }, 3000);
+}
+
 function switchTab(tabName) {
   var tabButton = document.querySelector('.left-pane .tab[data-tab="' + tabName + '"]');
   if (tabButton) {
@@ -1269,45 +1295,82 @@ function handleGuideAction(type, modalId) {
       break;
     case 'openDbManagerModal':
       openDbManagerModal();
+      setTimeout(function() {
+        highlightElement(document.querySelector('#dbManagerModal .modal'));
+      }, 100);
       break;
     case 'jumpBasics':
+      switchTab('editor');
       state.activeSection = 'basics';
       renderSectionList();
       renderOutline();
       renderEditor();
+      setTimeout(function() {
+        highlightElement('sec-card-basics');
+      }, 100);
       break;
     case 'openAddSectionAssistant':
       openAddSectionAssistant();
+      setTimeout(function() {
+        highlightElement(document.querySelector('#addSectionModal .modal'));
+      }, 100);
       break;
     case 'openAddInstanceModal':
       openModal('addInstanceModal');
+      setTimeout(function() {
+        highlightElement(document.querySelector('#addInstanceModal .modal'));
+      }, 100);
       break;
     case 'switchPreviewHtml':
       switchPreviewTab('html');
+      setTimeout(function() {
+        highlightElement('htmlPrevTab');
+      }, 100);
       break;
     case 'switchPreviewLatex':
       switchPreviewTab('latex');
+      setTimeout(function() {
+        highlightElement('latexPrevTab');
+      }, 100);
       break;
     case 'exportDatabaseFile':
       exportDatabaseFile();
       break;
     case 'exportPdf':
       openPdfExportFormatModal();
+      setTimeout(function() {
+        highlightElement(document.querySelector('#pdfFormatModal .modal'));
+      }, 100);
       break;
     case 'switchTabEditor':
       switchTab('editor');
+      setTimeout(function() {
+        highlightElement('editorTab');
+      }, 100);
       break;
     case 'switchTabCustomizer':
       switchTab('customizer');
+      setTimeout(function() {
+        highlightElement('customizerTab');
+      }, 100);
       break;
     case 'switchTabLatex':
       switchTab('latex');
+      setTimeout(function() {
+        highlightElement('latexTab');
+      }, 100);
       break;
     case 'switchTabHtml':
       switchTab('html');
+      setTimeout(function() {
+        highlightElement('htmlTab');
+      }, 100);
       break;
     case 'openStyleManagerModal':
       openModal('styleManagerModal');
+      setTimeout(function() {
+        highlightElement(document.querySelector('#styleManagerModal .modal'));
+      }, 100);
       break;
     default:
       break;
