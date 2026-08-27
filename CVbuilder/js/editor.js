@@ -381,7 +381,8 @@ function renderSectionList(){
   keys.forEach(function(k){
     var btn=document.createElement('button');
     btn.className='navitem'+(state.activeSection===k?' active':'');
-    btn.innerHTML='<span>'+human(k)+'</span><span class="count">'+countEntries(data[k])+'</span>';
+    var displayTitle = (state.sections[k] && state.sections[k].title) || human(k);
+    btn.innerHTML='<span>'+esc(displayTitle)+'</span><span class="count">'+countEntries(data[k])+'</span>';
     btn.onclick=function(){ state.activeSection=k; renderAll(); scrollOutlineTo(k); };
     list.appendChild(btn);
   });
@@ -482,7 +483,8 @@ function renderOutline(){
     var secA=document.createElement('a');
     secA.href='#sec-card-'+k; secA.className='outline-link'+(state.activeSection===k?' active-section':'');
     secA.style.fontWeight='700'; secA.style.color='var(--color-primary)';
-    secA.innerHTML='<span class="olabel">'+esc(human(k))+'</span>';
+    var displayTitle = (state.sections[k] && state.sections[k].title) || human(k);
+    secA.innerHTML='<span class="olabel">'+esc(displayTitle)+'</span>';
 
     leftGroup.appendChild(toggleSpan);
     leftGroup.appendChild(dragSpan);
@@ -820,7 +822,7 @@ function renderEditor(){
 
   sec.innerHTML='<div class="cardhead" style="display:flex; flex-direction:column; gap:var(--space-2)">'
     +'<div class="split" style="align-items:center">'
-    +'<div><strong>'+human(k)+'</strong><div class="tiny">' + (isEs ? 'Edita campos, selecciona entradas, reordena secciones.' : 'Edit fields, select entries, reorder sections.') + '</div></div>'
+    +'<div><strong>'+esc(title)+'</strong><div class="tiny">' + (isEs ? 'Edita campos, selecciona entradas, reordena secciones.' : 'Edit fields, select entries, reorder sections.') + '</div></div>'
     +'<div style="display:flex; align-items:center; gap:var(--space-2)">'
     +'<label class="pill"><input type="checkbox" '+(state.sections[k].include?'checked':'')+' id="includeSectionBox"> ' + (isEs ? 'Incluir' : 'Include') + '</label>'
     +moveBtnsHtml
@@ -898,9 +900,10 @@ function renderEditor(){
   
   if (k !== 'basics') {
     el('deleteSectionBtn').onclick = function() {
+      var displayTitle = (state.sections[k] && state.sections[k].title) || human(k);
       var msg = isEs 
-        ? '¿Está seguro de que desea eliminar la sección completa "' + human(k) + '"? Esta acción no se puede deshacer.'
-        : 'Are you sure you want to delete the entire "' + human(k) + '" section from your CV? This cannot be undone.';
+        ? '¿Está seguro de que desea eliminar la sección completa "' + displayTitle + '"? Esta acción no se puede deshacer.'
+        : 'Are you sure you want to delete the entire "' + displayTitle + '" section from your CV? This cannot be undone.';
       if (confirm(msg)) {
         delete data[k];
         delete state.sections[k];

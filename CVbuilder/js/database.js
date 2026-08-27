@@ -43,6 +43,13 @@ function loadDatabase(name) {
       if (!data || typeof data !== 'object') {
         data = JSON.parse(JSON.stringify(BASIC_CV));
       }
+      if (typeof CvIntegrityChecker === 'object' && CvIntegrityChecker) {
+        var report = CvIntegrityChecker.validate(data);
+        if (report.totals.errors > 0 || report.totals.warnings > 0) {
+          console.warn("Loaded CV database has integrity anomalies, auto-fixing...", report.totals);
+          data = CvIntegrityChecker.fix(data);
+        }
+      }
       delete data._templates;
       delete data.templates;
       // Ensure instances and _style exist

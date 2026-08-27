@@ -66,7 +66,7 @@ function cleanHtmlFromDatabase(obj) {
     }
   } else if (typeof obj === 'object' && obj !== null) {
     Object.keys(obj).forEach(function(k) {
-      if (k === 'instances' || k === '_templates' || k === 'templates') return;
+      if (k === 'instances' || k === '_templates' || k === 'templates' || k === '_style' || k === '_sections' || k.indexOf('_') === 0) return;
       obj[k] = cleanHtmlFromDatabase(obj[k]);
     });
   }
@@ -163,6 +163,13 @@ function importDatabaseFile(file) {
   reader.onload = function(e) {
     try {
       var imported = JSON.parse(e.target.result);
+      if (typeof CvIntegrityChecker === 'object' && CvIntegrityChecker) {
+        var report = CvIntegrityChecker.validate(imported);
+        if (report.totals.errors > 0 || report.totals.warnings > 0) {
+          console.warn("Imported CV database has integrity anomalies, auto-fixing...", report.totals);
+          imported = CvIntegrityChecker.fix(imported);
+        }
+      }
       var name = file.name.replace(/\.cv$/i, '');
       // Ensure new format keys exist for backward compat
       imported.instances = imported.instances || {};
@@ -396,538 +403,200 @@ function openEditMappersModal() {
   }
 }
 
+// ── CV INTEGRITY CHECKER INTEGRATION ──
+function handleCvIntegrityFileSelect(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  var isEs = state.langFilter === 'es';
+  reader.onload = function(e) {
+    var resultsBody = el('integrityResultsBody');
+    if (!resultsBody) return;
+    resultsBody.innerHTML = '';
+    
+    var totals = { passed: 0, warnings: 0, errors: 0 };
+    var checks = [];
+    var cvData = null;
+    
+    try {
+      cvData = JSON.parse(e.target.result);
+      if (typeof state === 'object' && state) {
+        state.currentIntegrityCvData = cvData;
+        state.currentIntegrityFileName = file.name;
+      }
+      var report = CvIntegrityChecker.validate(cvData);
+      totals = report.totals;
+      checks = report.checks;
+    } catch (err) {
+      if (typeof state === 'object' && state) {
+        state.currentIntegrityCvData = null;
+      }
+      totals.errors = 1;
+      checks.push({
+        component: 'Root Structure',
+        name: 'JSON Parsing',
+        details: (isEs ? 'El archivo no contiene un formato JSON válido: ' : 'File does not contain valid JSON format: ') + err.message,
+        status: 'error'
+      });
+    }
+
+    // Render stats
+    if (el('integrityTotalCount')) el('integrityTotalCount').textContent = totals.passed + totals.warnings + totals.errors;
+    if (el('integrityPassedCount')) el('integrityPassedCount').textContent = totals.passed;
+    if (el('integrityWarningCount')) el('integrityWarningCount').textContent = totals.warnings;
+    if (el('integrityErrorCount')) el('integrityErrorCount').textContent = totals.errors;
+
+    // Render rows
+    checks.forEach(function(check) {
+      var tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid oklch(from var(--color-text) l c h / .08)';
+      
+      var tdComponent = document.createElement('td');
+      tdComponent.style.padding = '10px 16px';
+      tdComponent.innerHTML = '<strong>' + esc(check.component) + '</strong>';
+      
+      var tdName = document.createElement('td');
+      tdName.style.padding = '10px 16px';
+      tdName.textContent = check.name;
+      
+      var tdDetails = document.createElement('td');
+      tdDetails.style.padding = '10px 16px';
+      tdDetails.textContent = check.details;
+      
+      var tdResult = document.createElement('td');
+      tdResult.style.padding = '10px 16px';
+      
+      var badgeClass = check.status === 'success' ? 'passed' : (check.status === 'warning' ? 'warning' : 'failed');
+      var badgeText = check.status === 'success' ? (isEs ? 'APROBADA' : 'PASSED') : (check.status === 'warning' ? (isEs ? 'ADVERTENCIA' : 'WARNING') : (isEs ? 'ERROR' : 'ERROR'));
+      tdResult.innerHTML = '<span class="status-badge ' + badgeClass + '">' + badgeText + '</span>';
+      
+      tr.appendChild(tdComponent);
+      tr.appendChild(tdName);
+      tr.appendChild(tdDetails);
+      tr.appendChild(tdResult);
+      resultsBody.appendChild(tr);
+    });
+
+    // Toggle view
+    if (el('cvIntegrityDropZone')) el('cvIntegrityDropZone').style.display = 'none';
+    if (el('cvIntegrityResultsArea')) el('cvIntegrityResultsArea').style.display = 'flex';
+    if (el('integrityFixBtn')) {
+      if (cvData && (totals.warnings > 0 || totals.errors > 0)) {
+        el('integrityFixBtn').style.display = 'inline-block';
+      } else {
+        el('integrityFixBtn').style.display = 'none';
+      }
+    }
+  };
+  reader.readAsText(file);
+}
+
 // ── LATEX ESCAPING REGISTRY ──
 // texEscape is defined in compiler.js to preserve LaTeX commands like \textbf{}, \textit{}, \href{}, etc.
 
-// ── EMBEDDED SYSTEM DIAGNOSTICS SUITE ──
-var diagLastReport = null;
-
-function runDiagnostics() {
-  var diagResultsBody = el('diagResultsBody');
-  if (!diagResultsBody) return;
-  diagResultsBody.innerHTML = '';
+// ── STANDARD FOR .CV FILES GUIDE ──
+function renderCvStandardGuide() {
+  var body = el('cvStandardBody');
+  if (!body) return;
   
-  var totalPassed = 0;
-  var totalFailed = 0;
-  var testRuns = [];
-  var startSuiteTime = performance.now();
   var isEs = state.langFilter === 'es';
+  var html = '';
   
-  function appendDiagRow(id, name, desc, category, expected, actual, time, passed) {
-    var tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid oklch(from var(--color-text) l c h / .08)';
+  if (isEs) {
+    html += '<div style="font-family:var(--font-sans); color:var(--color-text); line-height:1.5">';
+    html += '  <h2 style="margin-bottom:var(--space-2); color:var(--color-primary)">📖 Especificación Técnica del Formato .cv</h2>';
+    html += '  <p style="font-size:var(--text-sm); margin-bottom:var(--space-4)">El formato de archivo <code>.cv</code> es un estándar abierto basado en JSON para almacenar historiales profesionales completos, configuraciones de compilación y variaciones personalizadas sin dependencias del servidor.</p>';
     
-    var tdName = document.createElement('td');
-    tdName.style.padding = '10px 16px';
-    tdName.innerHTML = '<strong>' + id + ': ' + name + '</strong><div class="tiny muted" style="margin-top:2px">' + desc + '</div>';
+    html += '  <div style="background:var(--color-surface-offset); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:var(--space-3); margin-bottom:var(--space-4); font-size:var(--text-xs)">';
+    html += '    <strong>📋 Especificación de Metadatos de Archivo:</strong>';
+    html += '    <table style="width:100%; border-collapse:collapse; margin-top:6px">';
+    html += '      <tr><td style="padding:4px 0; font-weight:700; width:140px">Extensión de archivo:</td><td><code>.cv</code></td></tr>';
+    html += '      <tr><td style="padding:4px 0; font-weight:700">Formato subyacente:</td><td>JSON (UTF-8, plano)</td></tr>';
+    html += '      <tr><td style="padding:4px 0; font-weight:700">Tipo MIME:</td><td><code>application/json</code></td></tr>';
+    html += '      <tr><td style="padding:4px 0; font-weight:700">Filosofía Core:</td><td>Separación estricta entre Contenido y Presentación (Mantra)</td></tr>';
+    html += '    </table>';
+    html += '  </div>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">1. Estructura de la Raíz (Root Schema)</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-3)">El JSON raíz contiene propiedades de metadatos (prejijadas con guión bajo <code>_</code>) y claves de sección dinámicas:</p>';
+    html += '  <ul style="padding-left:var(--space-4); font-size:var(--text-xs); margin-bottom:var(--space-4); list-style:disc">';
+    html += '    <li style="margin-bottom:6px"><strong><code>basics</code> (Objeto):</strong> Perfil primario e información de contacto (nombre, email, teléfono, sitio web, foto en Base64).</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>_style</code> (Objeto):</strong> Reglas visuales. Almacena las fuentes activas, colores de acento, mappers y plantillas Mustache para las exportaciones en HTML y LaTeX.</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>_sections</code> (Objeto):</strong> Registro del CV. Mapea identificadores de sección con sus títulos de salida e indica si deben incluirse en las compilaciones globales.</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>instances</code> (Objeto):</strong> Diccionario de CVs personalizados (variaciones de salida). Guarda filtros de visibilidad y anulaciones de campos para vacantes específicas.</li>';
+    html += '    <li style="margin-bottom:6px"><strong>Secciones dinámicas (Arrays):</strong> Colecciones de registros como <code>education</code>, <code>work_experience</code> o <code>skills</code>. El compilador las renderiza dinámicamente según la estructura detectada.</li>';
+    html += '  </ul>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">2. Propiedades de los Elementos (Sección Dinámica)</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-3)">Cada registro dentro de una sección tipo lista (Array) soporta los siguientes campos de control estándar:</p>';
+    html += '  <table style="width:100%; border-collapse:collapse; text-align:left; font-size:var(--text-xs); margin-bottom:var(--space-4)">';
+    html += '    <thead><tr style="border-bottom:2.5px solid var(--color-border)"><th style="padding:6px 0">Propiedad</th><th style="padding:6px 0">Tipo</th><th style="padding:6px 0">Descripción</th></tr></thead>';
+    html += '    <tbody>';
+    html += '      <tr style="border-bottom:1px solid var(--color-border)"><td style="padding:6px 0; font-family:monospace">selected</td><td>Boolean</td><td>Determina si el elemento se compila de forma global. Por defecto es <code>true</code>.</td></tr>';
+    html += '      <tr style="border-bottom:1px solid var(--color-border)"><td style="padding:6px 0; font-family:monospace">lang / language</td><td>String</td><td>Idioma del elemento (<code>"es"</code>, <code>"en"</code>, o <code>"all"</code>). Se usa para filtrado dinámico bilingüe.</td></tr>';
+    html += '      <tr style="border-bottom:1px solid var(--color-border)"><td style="padding:6px 0; font-family:monospace">courses</td><td>Array</td><td>Lista de materias, exclusiva de la estrategia docente (<code>cventry_teaching</code>).</td></tr>';
+    html += '    </tbody>';
+    html += '  </table>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">3. Diccionario de Instancias Adaptadas (Multi-CVs)</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-3)">La clave <code>instances</code> mapea perfiles específicos mediante cambios delta sin duplicar el archivo base:</p>';
+    html += '  <ul style="padding-left:var(--space-4); font-size:var(--text-xs); margin-bottom:var(--space-4); list-style:disc">';
+    html += '    <li style="margin-bottom:6px"><strong><code>overwrites</code> (Objeto):</strong> Asocia rutas de puntos (ej. <code>"basics.title"</code> o <code>"education.0.description"</code>) con sus valores personalizados para esa vacante.</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>visibility</code> (Objeto):</strong> Mapea visibilidades de nivel sección (Boolean) o elementos individuales (Arrays de Booleans).</li>';
+    html += '  </ul>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">4. Resiliencia y Auto-Curación</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-4)">El compilador y cargador implementan validaciones automáticas. En caso de detectar plantillas htmlTemplate con etiquetas CSS/HTML dañadas (típicamente debido a sanitizaciones erróneas en versiones antiguas), el motor de carga las repara automáticamente reestableciendo los presets de fábrica, garantizando un funcionamiento estable y sin cuelgues.</p>';
+    html += '</div>';
+  } else {
+    html += '<div style="font-family:var(--font-sans); color:var(--color-text); line-height:1.5">';
+    html += '  <h2 style="margin-bottom:var(--space-2); color:var(--color-primary)">📖 Technical Specification for the .cv File Format</h2>';
+    html += '  <p style="font-size:var(--text-sm); margin-bottom:var(--space-4)">The <code>.cv</code> file format is an open, JSON-based technical specification designed to store comprehensive professional career histories, visual layouts, compiler engines, and tailored resume instances losslessly in a single portable document.</p>';
     
-    var tdCategory = document.createElement('td');
-    tdCategory.style.padding = '10px 16px';
-    tdCategory.innerHTML = '<code>' + category + '</code>';
-    
-    var tdExpected = document.createElement('td');
-    tdExpected.style.padding = '10px 16px';
-    tdExpected.innerHTML = '<pre style="margin:0; font-family:var(--font-mono); font-size:11px; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; max-width:180px; overflow-x:auto">' + esc(expected) + '</pre>';
-    
-    var tdActual = document.createElement('td');
-    tdActual.style.padding = '10px 16px';
-    tdActual.innerHTML = '<pre style="margin:0; font-family:var(--font-mono); font-size:11px; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; max-width:180px; overflow-x:auto">' + esc(actual) + '</pre>';
-    
-    var tdTime = document.createElement('td');
-    tdTime.style.padding = '10px 16px';
-    tdTime.textContent = time + 'ms';
-    
-    var tdResult = document.createElement('td');
-    tdResult.style.padding = '10px 16px';
-    tdResult.innerHTML = passed 
-      ? '<span class="status-badge passed">' + (isEs ? 'Aprobado' : 'Passed') + '</span>' 
-      : '<span class="status-badge failed">' + (isEs ? 'Fallido' : 'Failed') + '</span>';
-      
-    tr.appendChild(tdName);
-    tr.appendChild(tdCategory);
-    tr.appendChild(tdExpected);
-    tr.appendChild(tdActual);
-    tr.appendChild(tdTime);
-    tr.appendChild(tdResult);
-    diagResultsBody.appendChild(tr);
+    html += '  <div style="background:var(--color-surface-offset); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:var(--space-3); margin-bottom:var(--space-4); font-size:var(--text-xs)">';
+    html += '    <strong>📋 File Metadata Specification:</strong>';
+    html += '    <table style="width:100%; border-collapse:collapse; margin-top:6px">';
+    html += '      <tr><td style="padding:4px 0; font-weight:700; width:140px">File Extension:</td><td><code>.cv</code></td></tr>';
+    html += '      <tr><td style="padding:4px 0; font-weight:700">Underlying Format:</td><td>JSON (UTF-8, flat)</td></tr>';
+    html += '      <tr><td style="padding:4px 0; font-weight:700">MIME Type:</td><td><code>application/json</code></td></tr>';
+    html += '      <tr><td style="padding:4px 0; font-weight:700">Core Mantra:</td><td>Strict Separation of Content and Presentation</td></tr>';
+    html += '    </table>';
+    html += '  </div>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">1. Root Schema Specification</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-3)">The root JSON structure is split into internal metadata keys (prefixed with an underscore <code>_</code>) and dynamic data sections:</p>';
+    html += '  <ul style="padding-left:var(--space-4); font-size:var(--text-xs); margin-bottom:var(--space-4); list-style:disc">';
+    html += '    <li style="margin-bottom:6px"><strong><code>basics</code> (Object):</strong> Primary profile and contact metadata (names, professional titles, websites, Base64 profile photo).</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>_style</code> (Object):</strong> Visual theme attributes. Stores active accent colors, font families, compiler strategy mappers, and raw HTML & LaTeX Mustache templates.</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>_sections</code> (Object):</strong> Section registry. Maps database keys to customized output titles and global inclusion state checkboxes.</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>instances</code> (Object):</strong> Registry of tailored resumes. Stores delta visibility filters and field modifications for targeted job applications.</li>';
+    html += '    <li style="margin-bottom:6px"><strong>Dynamic Sections (Arrays):</strong> Custom section lists like <code>education</code>, <code>work_experience</code>, or <code>skills</code> that compile dynamically based on JSON structure.</li>';
+    html += '  </ul>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">2. Entry-Level Control Properties</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-3)">Items within array lists support the following core properties to manage compilation outputs:</p>';
+    html += '  <table style="width:100%; border-collapse:collapse; text-align:left; font-size:var(--text-xs); margin-bottom:var(--space-4)">';
+    html += '    <thead><tr style="border-bottom:2.5px solid var(--color-border)"><th style="padding:6px 0">Property</th><th style="padding:6px 0">Type</th><th style="padding:6px 0">Description</th></tr></thead>';
+    html += '    <tbody>';
+    html += '      <tr style="border-bottom:1px solid var(--color-border)"><td style="padding:6px 0; font-family:monospace">selected</td><td>Boolean</td><td>Determines if the entry is included in compilation output. Defaults to <code>true</code>.</td></tr>';
+    html += '      <tr style="border-bottom:1px solid var(--color-border)"><td style="padding:6px 0; font-family:monospace">lang / language</td><td>String</td><td>Language tag (<code>"en"</code>, <code>"es"</code>, or <code>"all"</code>). Used for instant bilingual resume filtering.</td></tr>';
+    html += '      <tr style="border-bottom:1px solid var(--color-border)"><td style="padding:6px 0; font-family:monospace">courses</td><td>Array</td><td>Nested course list, exclusive to academic teaching strategies (<code>cventry_teaching</code>).</td></tr>';
+    html += '    </tbody>';
+    html += '  </table>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">3. Tailored Resume Mappings (instances)</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-3)">Instead of duplicating files, specialized variations are mapped via delta changes:</p>';
+    html += '  <ul style="padding-left:var(--space-4); font-size:var(--text-xs); margin-bottom:var(--space-4); list-style:disc">';
+    html += '    <li style="margin-bottom:6px"><strong><code>overwrites</code> (Object):</strong> Maps path-based targets (e.g. <code>"basics.title"</code> or <code>"work_experience.1.role"</code>) to custom values for specific target vacancies.</li>';
+    html += '    <li style="margin-bottom:6px"><strong><code>visibility</code> (Object):</strong> Maps visibility filters to section-level keys (Booleans) or individual entries within a section (Arrays of Booleans).</li>';
+    html += '  </ul>';
+
+    html += '  <h3 style="font-size:var(--text-md); margin-bottom:var(--space-2); border-bottom:1px solid var(--color-border); padding-bottom:4px">4. Resiliency & Self-Healing Architecture</h3>';
+    html += '  <p style="font-size:var(--text-xs); margin-bottom:var(--space-4)">The loading and importing system runs automated sanity validations. If visual templates (htmlTemplate) are found without essential style blocks (typically due to sanitizer bugs in older client versions), the system auto-recovers them by re-injecting standard default presets, ensuring a stable execution model.</p>';
+    html += '</div>';
   }
-
-  var backupData = clone(data);
-  var backupCurrentDb = currentDbName;
-  var backupActiveSection = state.activeSection;
-
-  try {
-    // ── SUITE 1: COMPILER & ESCAPING ──
-    // Test 1.1: Escape LaTeX special characters
-    (function() {
-      var tStart = performance.now();
-      var inputStr = "Guillermo & Co % Sales #100 {New} _Project_ ~home^";
-      var expected = "Guillermo \\& Co \\% Sales \\#100 \\{New\\} \\_Project\\_ \\textasciitilde{}home\\textasciicircum{}";
-      var actual = texEscape(inputStr);
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("1.1", "LaTeX Escaping", "Verifies escaping of LaTeX characters", "compiler", expected, actual, latency, passed);
-      testRuns.push({ id: "1.1", name: "LaTeX Escaping", category: "compiler", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // Test 1.2: LaTeX escaping of raw lists of strings
-    (function() {
-      var tStart = performance.now();
-      var inputList = ["A&B", "C%D"];
-      var expected = "A\\&B, C\\%D";
-      var actual = inputList.map(texEscape).join(', ');
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("1.2", "Array Item Escaping", "Escapes lists of items correctly for compiling templates", "compiler", expected, actual, latency, passed);
-      testRuns.push({ id: "1.2", name: "Array Item Escaping", category: "compiler", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // Test 1.3: HTML Preview Render escaping boundaries
-    (function() {
-      var tStart = performance.now();
-      var inputVal = "John <script>alert(1)</" + "script> & Co";
-      var expected = "John &lt;script&gt;alert(1)&lt;/script&gt; &amp; Co";
-      var actual = esc(inputVal);
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("1.3", "HTML Sanitizer Escaping", "Escapes dangerous html script tags to prevent XSS in previews", "compiler", expected, actual, latency, passed);
-      testRuns.push({ id: "1.3", name: "HTML Sanitizer Escaping", category: "compiler", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // Test 1.4: HTML Entity escaping
-    (function() {
-      var tStart = performance.now();
-      var inputVal = "A & B < C > D";
-      var expected = "A &amp; B &lt; C &gt; D";
-      var actual = htmlEscape(inputVal);
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("1.4", "HTML Entity Escaping", "Escapes basic HTML characters to prevent template syntax breakages", "compiler", expected, actual, latency, passed);
-      testRuns.push({ id: "1.4", name: "HTML Entity Escaping", category: "compiler", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // ── SUITE 2: DATA STRUCTURE & LIST OPERATIONS ──
-    // Test 2.1: Reorder items (Move Up)
-    (function() {
-      var tStart = performance.now();
-      data.work = [
-        { role: "Developer A" },
-        { role: "Developer B" },
-        { role: "Developer C" }
-      ];
-      
-      var arr = data.work;
-      var i = 2;
-      var temp = arr[i];
-      arr[i] = arr[i-1];
-      arr[i-1] = temp;
-      
-      var expected = ["Developer A", "Developer C", "Developer B"];
-      var actual = data.work.map(function(w) { return w.role; });
-      var passed = JSON.stringify(actual) === JSON.stringify(expected);
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("2.1", "Entry Move Up", "Swaps list indices correctly to reorder items upward", "data", JSON.stringify(expected), JSON.stringify(actual), latency, passed);
-      testRuns.push({ id: "2.1", name: "Entry Move Up", category: "data", expected: JSON.stringify(expected), actual: JSON.stringify(actual), passed: passed, latency: latency });
-    })();
-
-    // Test 2.2: Reorder items (Move Down)
-    (function() {
-      var tStart = performance.now();
-      var arr = data.work;
-      var i = 0;
-      var temp = arr[i];
-      arr[i] = arr[i+1];
-      arr[i+1] = temp;
-      
-      var expected = ["Developer C", "Developer A", "Developer B"];
-      var actual = data.work.map(function(w) { return w.role; });
-      var passed = JSON.stringify(actual) === JSON.stringify(expected);
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("2.2", "Entry Move Down", "Swaps list indices correctly to reorder items downward", "data", JSON.stringify(expected), JSON.stringify(actual), latency, passed);
-      testRuns.push({ id: "2.2", name: "Entry Move Down", category: "data", expected: JSON.stringify(expected), actual: JSON.stringify(actual), passed: passed, latency: latency });
-    })();
-
-    // Test 2.3: Reorder boundaries checks
-    (function() {
-      var tStart = performance.now();
-      var arr = data.work;
-      var canMoveUp = 0 > 0;
-      var canMoveDown = 2 < arr.length - 1;
-      
-      var expected = { canMoveUp: false, canMoveDown: false };
-      var actual = { canMoveUp: canMoveUp, canMoveDown: canMoveDown };
-      var passed = canMoveUp === expected.canMoveUp && canMoveDown === expected.canMoveDown;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("2.3", "Reorder Boundaries", "Ensures reorder locks indices to bounds [0, length-1]", "data", JSON.stringify(expected), JSON.stringify(actual), latency, passed);
-      testRuns.push({ id: "2.3", name: "Reorder Boundaries", category: "data", expected: JSON.stringify(expected), actual: JSON.stringify(actual), passed: passed, latency: latency });
-    })();
-
-    // Test 2.4: Deep nested key resolution
-    (function() {
-      var tStart = performance.now();
-      data.basics = {
-        location: {
-          city: "La Paz"
-        }
-      };
-      var expected = "La Paz";
-      var actual = resolvePath(["basics", "location", "city"]);
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("2.4", "Nested Key Resolver", "Verifies path resolver fetches values inside nested sub-objects", "data", expected, actual, latency, passed);
-      testRuns.push({ id: "2.4", name: "Nested Key Resolver", category: "data", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // Test 2.5: Dynamic path setter
-    (function() {
-      var tStart = performance.now();
-      setPath(["basics", "location", "city"], "New City");
-      
-      var expected = "New City";
-      var actual = data.basics.location.city;
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("2.5", "Nested Path Setter", "Verifies deep nested setter assigns value at target path array", "data", expected, actual, latency, passed);
-      testRuns.push({ id: "2.5", name: "Nested Path Setter", category: "data", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // ── SUITE 3: LOCAL STORAGE PERSISTENCE ──
-    // Test 3.1: Save new custom database
-    (function() {
-      var tStart = performance.now();
-      currentDbName = "Test_Database";
-      data = { basics: { firstname: "UnitTester" } };
-      saveCurrentDatabase();
-      
-      var list = listDatabases();
-      var expected = true;
-      var actual = list.indexOf("Test_Database") !== -1;
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("3.1", "Save DB LocalStorage", "Checks saving database serializes and registers key in storage", "storage", String(expected), String(actual), latency, passed);
-      testRuns.push({ id: "3.1", name: "Save DB LocalStorage", category: "storage", expected: String(expected), actual: String(actual), passed: passed, latency: latency });
-    })();
-
-    // Test 3.2: Load custom database from storage
-    (function() {
-      var tStart = performance.now();
-      data = { basics: { firstname: "DirtyValue" } };
-      loadDatabase("Test_Database");
-      
-      var expected = "UnitTester";
-      var actual = data.basics.firstname;
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("3.2", "Load DB Storage", "Asserts loading custom database recovers stored data object state", "storage", expected, actual, latency, passed);
-      testRuns.push({ id: "3.2", name: "Load DB Storage", category: "storage", expected: expected, actual: actual, passed: passed, latency: latency });
-    })();
-
-    // Test 3.3: Delete database from storage
-    (function() {
-      var tStart = performance.now();
-      deleteDatabase("Test_Database");
-      
-      var list = listDatabases();
-      var expected = false;
-      var actual = list.indexOf("Test_Database") !== -1;
-      var passed = actual === expected;
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("3.3", "Delete DB Storage", "Asserts database deletion completely destroys localStorage target", "storage", String(expected), String(actual), latency, passed);
-      testRuns.push({ id: "3.3", name: "Delete DB Storage", category: "storage", expected: String(expected), actual: String(actual), passed: passed, latency: latency });
-    })();
-
-    // ── SUITE 4: MODULE INTEGRATION TESTING ──
-    // Test 4.1: Integration: DB to Compiler
-    (function() {
-      var tStart = performance.now();
-      var originalFirstname = data.basics.firstname;
-      data.basics.firstname = "DynamicIntegrationTest";
-      renderLatex();
-      var compiled = el('latexPreview').textContent;
-      var passed = compiled.indexOf("DynamicIntegrationTest") !== -1;
-      data.basics.firstname = originalFirstname;
-      renderLatex();
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("4.1", "DB to Compiler Integration", "Verifies changes in active database instantly compile into the preview panels", "integration", "Contains 'DynamicIntegrationTest'", passed ? "Passed" : "Failed", latency, passed);
-      testRuns.push({ id: "4.1", name: "DB to Compiler Integration", category: "integration", expected: "Contains 'DynamicIntegrationTest'", actual: passed ? "Passed" : "Failed", passed: passed, latency: latency });
-    })();
-
-    // Test 4.2: Integration: Translator to UI
-    (function() {
-      var tStart = performance.now();
-      var backupLang = state.langFilter;
-      state.langFilter = 'es';
-      updateUITranslations();
-      var actualText = el('downloadPdfBtn').textContent;
-      var expectedText = 'Descargar PDF';
-      var passed = actualText === expectedText;
-      state.langFilter = backupLang;
-      updateUITranslations();
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("4.2", "Translator to UI Integration", "Asserts that switching global language updates DOM element labels correctly", "integration", expectedText, actualText, latency, passed);
-      testRuns.push({ id: "4.2", name: "Translator to UI Integration", category: "integration", expected: expectedText, actual: actualText, passed: passed, latency: latency });
-    })();
-
-    // Test 4.3: Integration: Instance Overrides to Compiler
-    (function() {
-      var tStart = performance.now();
-      var backupInstance = activeInstance;
-      var backupInstanceName = currentInstanceName;
-      
-      activeInstance = {
-        name: "IntegrationInstanceTest",
-        masterCvName: currentDbName,
-        overwrites: {
-          "basics.title": "Architect Override"
-        },
-        visibility: {}
-      };
-      currentInstanceName = "IntegrationInstanceTest";
-      renderLatex();
-      var compiled = el('latexPreview').textContent;
-      var passed = compiled.indexOf("Architect Override") !== -1;
-      
-      activeInstance = backupInstance;
-      currentInstanceName = backupInstanceName;
-      renderLatex();
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("4.3", "Instance Overrides to Compiler Integration", "Ensures active tailored instance overwrites compile into previews", "integration", "Contains 'Architect Override'", passed ? "Passed" : "Failed", latency, passed);
-      testRuns.push({ id: "4.3", name: "Instance Overrides to Compiler Integration", category: "integration", expected: "Contains 'Architect Override'", actual: passed ? "Passed" : "Failed", passed: passed, latency: latency });
-    })();
-
-    // ── SUITE 5: INSTANCE USER INTERACTION & BUTTON TRIGGERS ──
-    // Test 5.1: Verification of "Manage Instances" gear button trigger
-    (function() {
-      var tStart = performance.now();
-      var btn = el('manageInstancesBtn');
-      var passed = false;
-      var actualMsg = "";
-      
-      if (!btn) {
-        actualMsg = "Button manageInstancesBtn not found in DOM";
-      } else {
-        // Trigger click
-        btn.click();
-        var modal = document.getElementById('instanceManagerModal');
-        if (modal) {
-          passed = true;
-          actualMsg = "Successfully triggered Instance Manager Modal";
-          modal.remove(); // Clean up immediately
-        } else {
-          actualMsg = "Clicking button did not spawn instanceManagerModal";
-        }
-      }
-      
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("5.1", "Manage Instances Button", "Verifies the gear button triggers the Instance Manager Modal", "ui-triggers", "Spawns instanceManagerModal", actualMsg, latency, passed);
-      testRuns.push({ id: "5.1", name: "Manage Instances Button", category: "ui-triggers", expected: "Spawns instanceManagerModal", actual: actualMsg, passed: passed, latency: latency });
-    })();
-
-    // Test 5.2: Verification of warning banner "Switch to Master" button
-    (function() {
-      var tStart = performance.now();
-      var backupInst = activeInstance;
-      var backupInstName = currentInstanceName;
-      var backupActiveSection = state.activeSection;
-
-      var passed = false;
-      var actualMsg = "";
-
-      // Set state to look like a tailored instance is active
-      activeInstance = { overwrites: {}, visibility: {}, sections: {} };
-      currentInstanceName = "BannerTestInstance";
-      state.activeSection = "basics";
-
-      try {
-        renderEditor();
-        var backBtn = el('instanceBannerBackBtn');
-        if (!backBtn) {
-          actualMsg = "Switch to Master button not found in active banner";
-        } else {
-          backBtn.click();
-          if (currentInstanceName === "None (Master CV)" && activeInstance === null) {
-            passed = true;
-            actualMsg = "Successfully switched back to Master CV";
-          } else {
-            actualMsg = "Failed to switch to Master. Current: " + currentInstanceName;
-          }
-        }
-      } catch(e) {
-        actualMsg = "Error: " + e.message;
-      } finally {
-        // Restore backup state
-        activeInstance = backupInst;
-        currentInstanceName = backupInstName;
-        state.activeSection = backupActiveSection;
-        renderEditor();
-      }
-
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("5.2", "Switch to Master Banner Button", "Verifies banner button switches back to Master CV mode", "ui-triggers", "Switches to None (Master CV)", actualMsg, latency, passed);
-      testRuns.push({ id: "5.2", name: "Switch to Master Banner Button", category: "ui-triggers", expected: "Switches to None (Master CV)", actual: actualMsg, passed: passed, latency: latency });
-    })();
-
-    // Test 5.3: Verification of field-level "Reset" and "Save to Master" button triggers
-    (function() {
-      var tStart = performance.now();
-      var backupInst = activeInstance;
-      var backupInstName = currentInstanceName;
-      var backupActiveSection = state.activeSection;
-      var backupConfirm = window.confirm;
-
-      var passed = false;
-      var actualMsg = "";
-
-      // Setup a tailored instance with an override
-      activeInstance = {
-        overwrites: { "basics.name": "Override Name" },
-        visibility: {},
-        sections: {}
-      };
-      currentInstanceName = "FieldTestInstance";
-      state.activeSection = "basics";
-
-      // Mock confirm to auto-approve
-      window.confirm = function() { return true; };
-
-      try {
-        renderEditor();
-        var inputs = el('editorTab').querySelectorAll('[data-path="basics.name"]');
-        if (inputs.length === 0) {
-          actualMsg = "Override field inputs not rendered";
-        } else {
-          var fieldWrapper = inputs[0].closest('.input-wrapper');
-          var resetBtn = fieldWrapper.querySelector('[data-reset]');
-          var promoteBtn = fieldWrapper.querySelector('[data-promote]');
-
-          if (!resetBtn || !promoteBtn) {
-            actualMsg = "Reset or Promote buttons not found in field status bar";
-          } else {
-            // Verify promote
-            promoteBtn.click();
-            var promotedVal = data.basics.name;
-            var overrideRemoved = !( "basics.name" in activeInstance.overwrites );
-
-            if (promotedVal === "Override Name" && overrideRemoved) {
-              passed = true;
-              actualMsg = "Successfully promoted override to Master and cleared local state";
-            } else {
-              actualMsg = "Promotion failed. Val: " + promotedVal + ", Override removed: " + overrideRemoved;
-            }
-          }
-        }
-      } catch(e) {
-        actualMsg = "Error: " + e.message;
-      } finally {
-        // Restore backups
-        activeInstance = backupInst;
-        currentInstanceName = backupInstName;
-        state.activeSection = backupActiveSection;
-        window.confirm = backupConfirm;
-        renderEditor();
-      }
-
-      var tEnd = performance.now();
-      var latency = Math.round(tEnd - tStart);
-      if (passed) totalPassed++; else totalFailed++;
-      appendDiagRow("5.3", "Field-Level Override Buttons", "Verifies field-level reset and promote (Save to Master) triggers", "ui-triggers", "Saves to Master and removes local override", actualMsg, latency, passed);
-      testRuns.push({ id: "5.3", name: "Field-Level Override Buttons", category: "ui-triggers", expected: "Saves to Master and removes local override", actual: actualMsg, passed: passed, latency: latency });
-    })();
-
-  } catch (err) {
-    console.error(err);
-  } finally {
-    data = backupData;
-    currentDbName = backupCurrentDb;
-    state.activeSection = backupActiveSection;
-    saveCurrentDatabase();
-    renderAll();
-  }
-
-  var endSuiteTime = performance.now();
-  var duration = Math.round(endSuiteTime - startSuiteTime);
   
-  el('diagTotalCount').textContent = testRuns.length;
-  el('diagPassedCount').textContent = totalPassed;
-  el('diagFailedCount').textContent = totalFailed;
-  el('diagDuration').textContent = duration + 'ms';
-  
-  diagLastReport = {
-    suiteName: "CVbuilder Embedded Logic Diagnostic Report",
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent,
-    summary: {
-      total: testRuns.length,
-      passed: totalPassed,
-      failed: totalFailed,
-      durationMs: duration
-    },
-    assertions: testRuns
-  };
-  
-  el('diagDownloadBtn').removeAttribute('disabled');
+  body.innerHTML = html;
 }
-
-function downloadDiagReportFile() {
-  if (!diagLastReport) return;
-  var blob = new Blob([JSON.stringify(diagLastReport, null, 2)], {type: 'application/json'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'cvbuilder_diagnostics_report_' + new Date().toISOString().slice(0,10) + '.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
 // ── STYLE MANAGER (now tied to active instance / CV _style) ──
 // Style preset gallery now accessed via Edit Mappers button in Customizer tab.
 el('modalEditMappersBtn') && (el('modalEditMappersBtn').onclick = function() {
@@ -1773,14 +1442,100 @@ el('helpTourBtn').onclick = function() {
   closeAllDropdowns();
   startWelcomeTour();
 };
-el('helpDiagnosticsBtn').onclick = function() {
+el('helpCvStandardBtn').onclick = function() {
   closeAllDropdowns();
-  openModal('diagnosticsModal');
+  renderCvStandardGuide();
+  openModal('cvStandardModal');
+};
+el('helpCvIntegrityBtn').onclick = function() {
+  closeAllDropdowns();
+  el('cvIntegrityDropZone').style.display = 'block';
+  el('cvIntegrityResultsArea').style.display = 'none';
+  el('cvIntegrityFileInput').value = '';
+  openModal('cvIntegrityModal');
 };
 
 el('closeHelpScratchModal').onclick = function() { closeModal('helpScratchModal'); };
 el('closeHelpUsageModal').onclick = function() { closeModal('helpUsageModal'); };
 el('closeHelpTemplatesModal').onclick = function() { closeModal('helpTemplatesModal'); };
+el('closeCvIntegrityModal').onclick = function() { closeModal('cvIntegrityModal'); };
+
+if (el('cvIntegrityDropZone')) {
+  el('cvIntegrityDropZone').onclick = function() {
+    el('cvIntegrityFileInput').click();
+  };
+}
+if (el('cvIntegrityFileInput')) {
+  el('cvIntegrityFileInput').onchange = function(e) {
+    var file = e.target.files[0];
+    if (file) {
+      handleCvIntegrityFileSelect(file);
+    }
+  };
+}
+if (el('integrityResetBtn')) {
+  el('integrityResetBtn').onclick = function() {
+    el('cvIntegrityDropZone').style.display = 'block';
+    el('cvIntegrityResultsArea').style.display = 'none';
+    if (el('integrityFixBtn')) el('integrityFixBtn').style.display = 'none';
+    el('cvIntegrityFileInput').value = '';
+    var body = el('integrityResultsBody');
+    if (body) body.innerHTML = '';
+  };
+}
+if (el('integrityFixBtn')) {
+  el('integrityFixBtn').onclick = function() {
+    if (!state.currentIntegrityCvData) return;
+    var fixed = CvIntegrityChecker.fix(state.currentIntegrityCvData);
+    var raw = JSON.stringify(fixed, null, 2);
+    
+    var baseName = (state.currentIntegrityFileName || 'database.cv').replace(/\.cv$/i, '');
+    downloadFile(raw, 'application/json', baseName + '_fixed.cv');
+    
+    // Re-validate and update UI
+    var report = CvIntegrityChecker.validate(fixed);
+    if (el('integrityTotalCount')) el('integrityTotalCount').textContent = report.totals.passed + report.totals.warnings + report.totals.errors;
+    if (el('integrityPassedCount')) el('integrityPassedCount').textContent = report.totals.passed;
+    if (el('integrityWarningCount')) el('integrityWarningCount').textContent = report.totals.warnings;
+    if (el('integrityErrorCount')) el('integrityErrorCount').textContent = report.totals.errors;
+    
+    var resultsBody = el('integrityResultsBody');
+    if (resultsBody) {
+      resultsBody.innerHTML = '';
+      var isEs = state.langFilter === 'es';
+      report.checks.forEach(function(check) {
+        var tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid oklch(from var(--color-text) l c h / .08)';
+        
+        var tdComponent = document.createElement('td');
+        tdComponent.style.padding = '10px 16px';
+        tdComponent.innerHTML = '<strong>' + esc(check.component) + '</strong>';
+        
+        var tdName = document.createElement('td');
+        tdName.style.padding = '10px 16px';
+        tdName.textContent = check.name;
+        
+        var tdDetails = document.createElement('td');
+        tdDetails.style.padding = '10px 16px';
+        tdDetails.textContent = check.details;
+        
+        var tdResult = document.createElement('td');
+        tdResult.style.padding = '10px 16px';
+        var badgeClass = check.status === 'success' ? 'passed' : (check.status === 'warning' ? 'warning' : 'failed');
+        var badgeText = check.status === 'success' ? (isEs ? 'APROBADA' : 'PASSED') : (check.status === 'warning' ? (isEs ? 'ADVERTENCIA' : 'WARNING') : (isEs ? 'ERROR' : 'ERROR'));
+        tdResult.innerHTML = '<span class="status-badge ' + badgeClass + '">' + badgeText + '</span>';
+        
+        tr.appendChild(tdComponent);
+        tr.appendChild(tdName);
+        tr.appendChild(tdDetails);
+        tr.appendChild(tdResult);
+        resultsBody.appendChild(tr);
+      });
+    }
+    
+    el('integrityFixBtn').style.display = 'none';
+  };
+}
 
 // Sidebar & Outline collapse toggles
 var sidebarToggleElem = el('toggleSidebarBtn');
@@ -1812,10 +1567,7 @@ if (outlineToggleElem) {
     }
   };
 }
-el('closeDiagnosticsModal').onclick = function() { closeModal('diagnosticsModal'); };
-
-el('diagRunBtn').onclick = runDiagnostics;
-el('diagDownloadBtn').onclick = downloadDiagReportFile;
+el('closeCvStandardModal').onclick = function() { closeModal('cvStandardModal'); };
 
 // Select change observers
 el('dbSelect').onchange = function(e) {

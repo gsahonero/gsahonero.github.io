@@ -18,7 +18,7 @@ var CHANGELOG = [
   ]},
   {version:'0.7.0', changes:[
     'Modular Architectural Split: Separated the monolithic index.html file into distinct stylesheet and script layers (main.css, constants.js, translations.js, compiler.js, database.js, editor.js, tour.js, and app.js).',
-    'Embedded System Diagnostics: Added an in-app system unit test dashboard accessible via Help -> Run Diagnostics, fully compatible with local file:// executions.'
+    'Embedded CV Standard Guide: Added an in-app reference specification dashboard for the .cv database schema, accessible via Help -> Standard for .cv files.'
   ]},
   {version:'0.6.0', changes:[
     'CV Instances: Decoupled master career profiles from tailored application resumes. Custom CV Instances (.cvinstance) let users save context-specific field overwrites, adjust section item visibilities, and apply styling rules without modifying their master databases.',

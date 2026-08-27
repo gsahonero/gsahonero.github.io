@@ -737,3 +737,28 @@ input:focus,textarea:focus,select:focus{
   margin: 0 0 1px 0 !important;
   padding: 0 !important;
 }
+
+/* ── Status Badges for Integrity Checker ── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm, 4px);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-badge.passed, .status-badge.success {
+  background: color-mix(in oklab, var(--color-success) 15%, transparent);
+  color: var(--color-success);
+}
+.status-badge.warning {
+  background: color-mix(in oklab, var(--color-warning) 15%, transparent);
+  color: var(--color-warning);
+}
+.status-badge.failed, .status-badge.error {
+  background: color-mix(in oklab, var(--color-error) 15%, transparent);
+  color: var(--color-error);
+}

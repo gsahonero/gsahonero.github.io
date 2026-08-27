@@ -22,7 +22,6 @@ var DICTIONARY = {
     "duplicate_instance": "Duplicate Instance",
     "enter_duplicate_instance_name": "Enter a name for the duplicated CV Instance:",
     "instance_duplicated": "Instance \"{name}\" duplicated successfully.",
-    "diagnostics_idle": "Idle. Click \"Run Tests\" to execute unit assertions.",
     "unsaved_changes": "Unsaved changes",
     "changes_saved": "Saved (Clean)",
     "editing_tailored_instance": "Editing Tailored Instance: {name}",
@@ -55,7 +54,6 @@ var DICTIONARY = {
     "duplicate_instance": "Duplicar Instancia",
     "enter_duplicate_instance_name": "Ingrese el nombre para la nueva instancia duplicada:",
     "instance_duplicated": "Instancia \"{name}\" duplicada con éxito.",
-    "diagnostics_idle": "Inactivo. Presione \"Ejecutar pruebas\" para iniciar las comprobaciones.",
     "unsaved_changes": "Cambios sin guardar",
     "changes_saved": "Guardado (Limpio)",
     "editing_tailored_instance": "Editando Instancia Adaptada: {name}",
@@ -96,7 +94,55 @@ function updateUITranslations() {
   el('helpUsageBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' + (isEs ? 'Cómo usar CV Builder' : 'How to use CV Builder');
   el('helpTemplatesBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' + (isEs ? 'Cómo usar Estilos' : 'How to use Styles');
   el('helpTourBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V21h2v-5.464"/></svg>' + (isEs ? 'Guía de bienvenida' : 'Welcome Tour Guide');
-  el('helpDiagnosticsBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' + (isEs ? 'Ejecutar diagnósticos' : 'Run Diagnostics');
+  if (el('helpCvStandardBtn')) {
+    el('helpCvStandardBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>' + (isEs ? 'Estándar para archivos .cv' : 'Standard for .cv files');
+  }
+  if (el('cvStandardTitleLbl')) {
+    el('cvStandardTitleLbl').textContent = isEs ? 'Estándar para archivos .cv' : 'Standard for .cv files';
+  }
+  
+  if (el('helpCvIntegrityBtn')) {
+    el('helpCvIntegrityBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5 .5a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' + (isEs ? 'Verificar integridad de .cv' : 'Check .cv Integrity');
+  }
+  if (el('cvIntegrityTitleLbl')) {
+    el('cvIntegrityTitleLbl').textContent = isEs ? 'Verificar integridad de .cv' : 'Check .cv Integrity';
+  }
+  if (el('cvIntegrityPromptText')) {
+    el('cvIntegrityPromptText').textContent = isEs ? 'Arrastra y suelta tu archivo de base de datos .cv aquí, o haz clic para buscar' : 'Drag and drop your .cv database file here, or click to browse';
+  }
+  if (el('cvIntegritySupportedText')) {
+    el('cvIntegritySupportedText').textContent = isEs ? 'Solo se admiten archivos .cv exportados de CVbuilder' : 'Only .cv files exported from CVbuilder are supported';
+  }
+  if (el('integrityResetBtn')) {
+    el('integrityResetBtn').textContent = isEs ? 'Subir otro' : 'Upload Another';
+  }
+  if (el('integrityFixBtn')) {
+    el('integrityFixBtn').textContent = isEs ? 'Auto-corregir y descargar' : 'Auto-Fix & Download';
+  }
+  if (el('lblIntegrityChecksRun')) {
+    el('lblIntegrityChecksRun').textContent = isEs ? 'PRUEBAS EJECUTADAS' : 'CHECKS RUN';
+  }
+  if (el('lblIntegrityPassed')) {
+    el('lblIntegrityPassed').textContent = isEs ? 'APROBADAS' : 'PASSED';
+  }
+  if (el('lblIntegrityWarnings')) {
+    el('lblIntegrityWarnings').textContent = isEs ? 'ADVERTENCIAS' : 'WARNINGS';
+  }
+  if (el('lblIntegrityErrors')) {
+    el('lblIntegrityErrors').textContent = isEs ? 'ERRORES' : 'ERRORS';
+  }
+  if (el('lblIntegrityColComponent')) {
+    el('lblIntegrityColComponent').textContent = isEs ? 'Componente' : 'Component';
+  }
+  if (el('lblIntegrityColCheck')) {
+    el('lblIntegrityColCheck').textContent = isEs ? 'Nombre de prueba' : 'Check Name';
+  }
+  if (el('lblIntegrityColDetails')) {
+    el('lblIntegrityColDetails').textContent = isEs ? 'Detalles' : 'Details';
+  }
+  if (el('lblIntegrityColStatus')) {
+    el('lblIntegrityColStatus').textContent = isEs ? 'Estado' : 'Status';
+  }
  
   // 2. Select box labels & Tooltip guidance
   var dbLbl = document.querySelector('.db-selector span');

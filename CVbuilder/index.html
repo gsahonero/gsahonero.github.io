@@ -128,8 +128,11 @@
           <button class="dropitem" id="helpTourBtn" role="menuitem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V21h2v-5.464"/></svg>Welcome Tour Guide
           </button>
-          <button class="dropitem" id="helpDiagnosticsBtn" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Run Diagnostics
+          <button class="dropitem" id="helpCvStandardBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>Standard for .cv files
+          </button>
+          <button class="dropitem" id="helpCvIntegrityBtn" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5 .5a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Check .cv Integrity
           </button>
         </div>
       </div>
@@ -471,57 +474,79 @@
 
 
 
-<!-- System Diagnostics Modal -->
-<div id="diagnosticsModal" class="modal-backdrop" aria-hidden="true">
-  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="diagnosticsTitleLbl" style="max-width:850px">
+<!-- CV Standard Specification Modal -->
+<div id="cvStandardModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="cvStandardTitleLbl" style="max-width:850px">
     <header>
-      <strong id="diagnosticsTitleLbl">System Diagnostics & Unit Tests</strong>
-      <button class="iconbtn" id="closeDiagnosticsModal" aria-label="Close">&#x2715;</button>
+      <strong id="cvStandardTitleLbl">Standard for .cv files</strong>
+      <button class="iconbtn" id="closeCvStandardModal" aria-label="Close">&#x2715;</button>
+    </header>
+    <div class="body stack" id="cvStandardBody" style="gap:var(--space-4); max-height:550px; overflow-y:auto; padding:var(--space-4)">
+      <!-- Dynamic standard content based on active language is loaded here -->
+    </div>
+  </div>
+</div>
+
+<!-- CV Integrity Check Modal -->
+<div id="cvIntegrityModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="cvIntegrityTitleLbl" style="max-width:850px">
+    <header>
+      <strong id="cvIntegrityTitleLbl">Check .cv Integrity</strong>
+      <button class="iconbtn" id="closeCvIntegrityModal" aria-label="Close">&#x2715;</button>
     </header>
     <div class="body stack" style="gap:var(--space-4)">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-3); border-bottom:1px solid oklch(from var(--color-text) l c h / .08); padding-bottom:var(--space-3)">
-        <div style="display:flex; gap:var(--space-4)">
-          <div class="stack" style="gap:2px">
-            <span class="tiny muted" style="font-weight:700">TESTS RUN</span>
-            <strong id="diagTotalCount" style="font-size:var(--text-lg)">0</strong>
+      
+      <!-- Upload area -->
+      <div id="cvIntegrityDropZone" style="border: 2px dashed oklch(from var(--color-text) l c h / .2); border-radius: var(--radius-md); padding: var(--space-6); text-align: center; cursor: pointer; transition: background-color 0.2s, border-color 0.2s;" ondragover="event.preventDefault(); this.style.backgroundColor='oklch(from var(--color-primary) l c h / .05)';" ondragleave="this.style.backgroundColor='';" ondrop="event.preventDefault(); this.style.backgroundColor=''; handleCvIntegrityFileSelect(event.dataTransfer.files[0]);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto var(--space-3); color: var(--color-text-muted);"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <p style="margin: 0; font-weight: 500;" id="cvIntegrityPromptText">Drag and drop your .cv database file here, or click to browse</p>
+        <span style="font-size: var(--text-xs); color: var(--color-text-muted);" id="cvIntegritySupportedText">Only .cv files exported from CVbuilder are supported</span>
+        <input type="file" id="cvIntegrityFileInput" accept=".cv" style="display: none;">
+      </div>
+
+      <!-- Results section, hidden by default -->
+      <div id="cvIntegrityResultsArea" class="stack" style="gap:var(--space-3); display: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-3); border-bottom:1px solid oklch(from var(--color-text) l c h / .08); padding-bottom:var(--space-3)">
+          <div style="display:flex; gap:var(--space-4)">
+            <div class="stack" style="gap:2px">
+              <span class="tiny muted" style="font-weight:700" id="lblIntegrityChecksRun">CHECKS RUN</span>
+              <strong id="integrityTotalCount" style="font-size:var(--text-lg)">0</strong>
+            </div>
+            <div class="stack" style="gap:2px">
+              <span class="tiny muted" style="font-weight:700; color:var(--color-success)" id="lblIntegrityPassed">PASSED</span>
+              <strong id="integrityPassedCount" style="font-size:var(--text-lg); color:var(--color-success)">0</strong>
+            </div>
+            <div class="stack" style="gap:2px">
+              <span class="tiny muted" style="font-weight:700; color:var(--color-warning)" id="lblIntegrityWarnings">WARNINGS</span>
+              <strong id="integrityWarningCount" style="font-size:var(--text-lg); color:var(--color-warning)">0</strong>
+            </div>
+            <div class="stack" style="gap:2px">
+              <span class="tiny muted" style="font-weight:700; color:var(--color-error)" id="lblIntegrityErrors">ERRORS</span>
+              <strong id="integrityErrorCount" style="font-size:var(--text-lg); color:var(--color-error)">0</strong>
+            </div>
           </div>
-          <div class="stack" style="gap:2px">
-            <span class="tiny muted" style="font-weight:700; color:var(--color-success)">PASSED</span>
-            <strong id="diagPassedCount" style="font-size:var(--text-lg); color:var(--color-success)">0</strong>
-          </div>
-          <div class="stack" style="gap:2px">
-            <span class="tiny muted" style="font-weight:700; color:var(--color-error)">FAILED</span>
-            <strong id="diagFailedCount" style="font-size:var(--text-lg); color:var(--color-error)">0</strong>
-          </div>
-          <div class="stack" style="gap:2px">
-            <span class="tiny muted" style="font-weight:700">DURATION</span>
-            <strong id="diagDuration" style="font-size:var(--text-lg)">0ms</strong>
+          <div style="display:flex; gap:var(--space-2)">
+            <button class="btn btn-xs btn-primary" id="integrityFixBtn" style="min-height:28px; display: none;">Auto-Fix & Download</button>
+            <button class="btn btn-xs btn-secondary" id="integrityResetBtn" style="min-height:28px">Upload Another</button>
           </div>
         </div>
-        <div style="display:flex; gap:var(--space-2)">
-          <button class="btn btn-xs btn-secondary" id="diagDownloadBtn" style="min-height:28px" disabled>Export Report (.json)</button>
-          <button class="btn btn-xs btn-primary" id="diagRunBtn" style="min-height:28px">Run Tests</button>
+
+        <div style="max-height:400px; overflow-y:auto; border:1px solid oklch(from var(--color-text) l c h / .1); border-radius:var(--radius-md)">
+          <table style="width:100%; border-collapse:collapse; text-align:left">
+            <thead>
+              <tr style="background:var(--color-surface-offset); border-bottom:1px solid oklch(from var(--color-text) l c h / .1)">
+                <th id="lblIntegrityColComponent" style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:20%">Component</th>
+                <th id="lblIntegrityColCheck" style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:25%">Check Name</th>
+                <th id="lblIntegrityColDetails" style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:45%">Details</th>
+                <th id="lblIntegrityColStatus" style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:10%">Status</th>
+              </tr>
+            </thead>
+            <tbody id="integrityResultsBody">
+            </tbody>
+          </table>
         </div>
       </div>
-      <div style="max-height:400px; overflow-y:auto; border:1px solid oklch(from var(--color-text) l c h / .1); border-radius:var(--radius-md)">
-        <table style="width:100%; border-collapse:collapse; text-align:left">
-          <thead>
-            <tr style="background:var(--color-surface-offset); border-bottom:1px solid oklch(from var(--color-text) l c h / .1)">
-              <th style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:25%">Test Case</th>
-              <th style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:15%">Category</th>
-              <th style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:20%">Expected</th>
-              <th style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:20%">Actual</th>
-              <th style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:10%">Latency</th>
-              <th style="padding:10px 16px; font-size:var(--text-xs); text-transform:uppercase; color:var(--color-text-muted); width:10%">Status</th>
-            </tr>
-          </thead>
-          <tbody id="diagResultsBody">
-            <tr>
-              <td colspan="6" style="text-align:center; padding:var(--space-6); color:var(--color-text-muted)" id="diagIdleText">Idle. Click "Run Tests" to execute unit assertions.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
     </div>
   </div>
 </div>
@@ -710,6 +735,7 @@
 <script src="js/compiler.js"></script>
 <script src="js/database.js"></script>
 <script src="js/importer.js"></script>
+<script src="js/integrity.js"></script>
 <script src="js/exporter.js"></script>
 <script src="js/ats.js"></script>
 <script src="js/ai.js"></script>
