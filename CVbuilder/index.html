@@ -71,7 +71,7 @@
       <button id="manageInstancesBtn" class="btn btn-ghost iconbtn" style="width:28px; height:28px; padding:0; display:flex; align-items:center; justify-content:center; border:1px solid oklch(from var(--color-text) l c h / .14); border-radius:var(--radius-md)" title="Manage CV Instances" aria-label="Manage CV Instances">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
-      <span id="instanceIndicator" class="hidden" style="background:oklch(from var(--color-primary) l c h / .15); border:1px solid var(--color-primary); color:var(--color-primary); font-size:10px; padding:2px 6px; border-radius:var(--radius-sm); font-weight:700; letter-spacing:0.5px">TAILORED ACTIVE</span>
+      <span id="instanceIndicator" class="hidden" style="background:oklch(from var(--color-primary) l c h / .15); border:1px solid var(--color-primary); color:var(--color-primary); font-size:11px; padding:2px 6px; border-radius:var(--radius-sm); font-weight:700; letter-spacing:0.5px">TAILORED ACTIVE</span>
     </div>
 
     <!-- Menu bar -->
@@ -706,7 +706,7 @@
 
 <footer class="statusbar" style="height:32px; background:var(--color-surface-offset); border-top:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center; padding:0 var(--space-4); font-size:var(--text-xs); color:var(--color-text-muted); z-index:100">
   <div class="statusbar-left" style="display:flex; align-items:center; gap:var(--space-4)">
-    <div id="unsavedBanner" class="clean" role="status" aria-live="polite" style="display:flex; align-items:center; gap:var(--space-1); padding:2px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:600; border:1px solid transparent; transition:all var(--transition)">
+    <div id="unsavedBanner" class="clean" role="status" aria-live="polite" style="display:flex; align-items:center; gap:var(--space-1); padding:2px 8px; border-radius:var(--radius-sm); font-size:12px; font-weight:600; border:1px solid transparent; transition:all var(--transition)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" id="bannerIcon" style="width:12px; height:12px;"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg>
       <span id="bannerText">No unsaved changes</span>
     </div>
@@ -715,13 +715,13 @@
     </a>
   </div>
   <div class="statusbar-right" style="display:flex; align-items:center; gap:var(--space-2)">
-    <button id="bottomBarAiBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-primary) l c h / .3); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-primary); display:flex; align-items:center; gap:4px" title="AI Assistant Settings & Interactive Critique Wizard">
+    <button id="bottomBarAiBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-primary) l c h / .3); background:var(--color-surface); font-size:11px; font-weight:700; cursor:pointer; color:var(--color-primary); display:flex; align-items:center; gap:4px" title="AI Assistant Settings & Interactive Critique Wizard">
       🤖 <span id="bottomBarAiText">AI Assistant</span>
     </button>
-    <button id="bottomBarChatBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-primary) l c h / .3); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-primary); display:flex; align-items:center; gap:4px" title="AI Temporal Chat Assistant">
+    <button id="bottomBarChatBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-primary) l c h / .3); background:var(--color-surface); font-size:11px; font-weight:700; cursor:pointer; color:var(--color-primary); display:flex; align-items:center; gap:4px" title="AI Temporal Chat Assistant">
       💬 <span id="bottomBarChatText">AI Chat</span>
     </button>
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:10px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.8.0</button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:11px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.8.0</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme" style="background:none; border:none; padding:0; cursor:pointer; font-size:var(--text-sm); line-height:1; display:flex; align-items:center; justify-content:center; color:var(--color-text-muted)">&#9790;</button>
   </div>
 </footer>
@@ -738,6 +738,7 @@
 <script src="js/integrity.js"></script>
 <script src="js/exporter.js"></script>
 <script src="js/ats.js"></script>
+<script src="js/ai_tools.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/editor.js"></script>
 <script src="presets/tours.js"></script>

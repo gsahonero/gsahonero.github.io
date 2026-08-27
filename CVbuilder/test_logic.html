@@ -735,8 +735,8 @@
           var backupLang = win.state.langFilter;
           win.state.langFilter = 'es';
           win.updateUITranslations();
-          var actualText = doc.getElementById('downloadPdfBtn').textContent;
-          var expectedText = 'Descargar PDF';
+          var actualText = doc.getElementById('topbarPdfBtnText') ? doc.getElementById('topbarPdfBtnText').textContent : '';
+          var expectedText = 'Exportar PDF';
           var passed = actualText === expectedText;
           win.state.langFilter = backupLang;
           win.updateUITranslations();
@@ -908,7 +908,7 @@
         (function() {
           var tStart = performance.now();
           var fnExists = typeof win.downloadPdfFile === 'function';
-          var pdfBtn = doc.getElementById('downloadPdfBtn');
+          var pdfBtn = doc.getElementById('topbarPdfBtn');
           var btnExists = !!pdfBtn;
           var passed = fnExists && btnExists;
           var tEnd = performance.now();
@@ -1020,6 +1020,96 @@
           testRuns.push({ id: '5.12', name: 'AI Client & Settings', category: 'unit', expected: 'AIClient configured & Settings readable', actual: passed ? 'Passed' : 'Failed', passed, latency });
         })();
 
+        // Test 5.13: Chat Widget behaves correctly when provider is unconfigured
+        (function() {
+          var tStart = performance.now();
+          var backupSettings = win.AIClient.getSettings();
+          
+          // Make unconfigured
+          var unconfSettings = JSON.parse(JSON.stringify(backupSettings));
+          unconfSettings.provider = 'gemini';
+          unconfSettings.geminiApiKey = '';
+          win.AIClient.saveSettings(unconfSettings);
+          
+          // Toggle widget
+          win.toggleAiChatWidget(true);
+          var widget = doc.getElementById('aiChatWidget');
+          var isUnconfiguredBefore = widget && widget.querySelector('#aiChatInput').disabled === true && !!widget.querySelector('.ai-config-prompt-bubble');
+          
+          // Make configured
+          var confSettings = JSON.parse(JSON.stringify(backupSettings));
+          confSettings.provider = 'gemini';
+          confSettings.geminiApiKey = 'AIzaSyFakeKey';
+          win.AIClient.saveSettings(confSettings);
+          
+          var isConfiguredAfter = widget && widget.querySelector('#aiChatInput').disabled === false && !widget.querySelector('.ai-config-prompt-bubble');
+          
+          // Restore settings & Close chat
+          win.AIClient.saveSettings(backupSettings);
+          win.toggleAiChatWidget(false);
+          
+          var passed = isUnconfiguredBefore && isConfiguredAfter;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.13', 'Unconfigured Chat Widget Prompt', 'Ensures chat widget prompts for configuration when unconfigured, and auto-enables once configured', 'integration', 'unconfigured prompt -> active chat', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.13', name: 'Unconfigured Chat Widget Prompt', category: 'integration', expected: 'unconfigured prompt -> active chat', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.14: AI Tools Engine (MCP browser tools integration)
+        (function() {
+          var tStart = performance.now();
+          var exists = typeof win.AITools !== 'undefined';
+          var passed = false;
+          var details = '';
+
+          if (exists) {
+            try {
+              // 1. Create section
+              var res1 = win.AITools.executeTool('createCvSection', { title: 'Test Section', key: 'test_sec', structureType: 'experience' });
+              var hasSec = win.data.test_sec && Array.isArray(win.data.test_sec) && win.state.sections.test_sec && win.state.sections.test_sec.title === 'Test Section';
+              
+              // 2. Add entry
+              var res2 = win.AITools.executeTool('addSectionEntry', { sectionKey: 'test_sec', entryData: { role: 'Software Engineer', organization: 'Testing Inc' } });
+              var entryAdded = win.data.test_sec.length === 2 && win.data.test_sec[1].role === 'Software Engineer';
+              
+              // 3. Rename section
+              var res3 = win.AITools.executeTool('renameCvSection', { sectionKey: 'test_sec', newTitle: 'Renamed Section' });
+              var renamed = win.state.sections.test_sec.title === 'Renamed Section';
+              
+              // 4. Delete entry
+              var res4 = win.AITools.executeTool('deleteSectionEntry', { sectionKey: 'test_sec', index: 0 });
+              var deleted = win.data.test_sec.length === 1;
+              
+              // 5. Update field
+              var res5 = win.AITools.executeTool('updateMasterCvField', { pathStr: 'test_sec.0.organization', value: 'Updated Corp' });
+              var updated = win.data.test_sec[0].organization === 'Updated Corp';
+
+              // Clean up
+              win.state.activeSection = 'basics';
+              delete win.data.test_sec;
+              delete win.state.sections.test_sec;
+              win.renderAll();
+
+              passed = hasSec && entryAdded && renamed && deleted && updated;
+              details = 'hasSec: ' + hasSec + ', entryAdded: ' + entryAdded + ', renamed: ' + renamed + ', deleted: ' + deleted + ', updated: ' + updated;
+            } catch (e) {
+              passed = false;
+              details = 'Exception: ' + e.message;
+            }
+          } else {
+            details = 'win.AITools is undefined';
+          }
+
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.14', 'AI Browser Tools Engine', 'Validates AITools registry and execution of section, entry, and field operations', 'integration', 'All tools executed successfully', passed ? 'Passed' : ('Failed (' + details + ')'), latency, passed);
+          testRuns.push({ id: '5.14', name: 'AI Browser Tools Engine', category: 'integration', expected: 'All tools executed successfully', actual: passed ? 'Passed' : ('Failed (' + details + ')'), passed, latency });
+        })();
+
         // Finalize test metrics
         var endSuiteTime = performance.now();
         var suiteDuration = Math.round(endSuiteTime - startSuiteTime);
@@ -1074,20 +1164,58 @@
       } catch (err) {
         log('Exception thrown during test run: ' + err.message, 'error');
         console.error(err);
+        var errorReport = {
+          protocolName: "CVbuilder Extensive Functionality Test Suite",
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          durationMs: 0,
+          statistics: {
+            totalTests: testRuns.length + 1,
+            passed: totalPassed,
+            failed: totalFailed + 1,
+            successRate: '0%'
+          },
+          assertions: testRuns.concat([{
+            id: 'EXCEPTION',
+            name: 'Unhandled Exception',
+            category: 'error',
+            expected: 'No unhandled exception',
+            actual: err.message + (err.stack ? '\nStack:\n' + err.stack : ''),
+            passed: false,
+            latency: 0
+          }])
+        };
+        fetch('/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(errorReport)
+        }).catch(err2 => console.error('Failed to post error report:', err2));
       } finally {
         document.getElementById('runTestsBtn').disabled = false;
       }
     }
 
     // Auto-run tests once iframe has fully loaded
-    window.addEventListener('load', function() {
-      var iframe = document.getElementById('testTargetFrame');
+    (function() {
+      var testsStarted = false;
+      var iframe = document.getElementById('logicAppFrame');
       if (iframe) {
-        iframe.addEventListener('load', function() {
+        function triggerTests() {
+          if (testsStarted) return;
+          testsStarted = true;
           setTimeout(runLogicTests, 800);
-        });
+        }
+        try {
+          if (iframe.contentWindow && iframe.contentWindow.document && iframe.contentWindow.document.readyState === 'complete') {
+            triggerTests();
+          } else {
+            iframe.addEventListener('load', triggerTests);
+          }
+        } catch(e) {
+          iframe.addEventListener('load', triggerTests);
+        }
       }
-    });
+    })();
   </script>
 </body>
 </html>

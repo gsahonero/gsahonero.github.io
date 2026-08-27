@@ -2426,6 +2426,9 @@ function updateAiUiState() {
       }
     }
   }
+  if (typeof updateAiChatWidgetState === 'function') {
+    updateAiChatWidgetState();
+  }
 }
 
 function showAiProviderConfigModal() {
@@ -2436,6 +2439,19 @@ function showAiProviderConfigModal() {
   var modal = document.createElement('div');
   modal.className = 'modal-backdrop open';
   modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  var mockOllamaFields = '<div id="ollamaFields" style="display:' + (curS.provider === 'ollama' ? 'block' : 'none') + '">'
+    + '    <label class="tiny" style="font-weight:700">Ollama Endpoint URL</label>'
+    + '    <input type="text" id="ollamaEndpointInput" value="' + esc(curS.ollamaEndpoint || 'http://localhost:11434') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace">'
+    + '    <label class="tiny" style="font-weight:700; margin-top:8px; display:block">Model Name</label>'
+    + '    <input type="text" id="ollamaModelInput" value="' + esc(curS.ollamaModel || 'llama3:latest') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="llama3:latest, qwen2.5:latest, etc.">'
+    + '    <div style="margin-top:8px; padding:8px; background:oklch(from var(--color-warning) l c h / .1); border:1px solid var(--color-warning); border-radius:var(--radius-sm); font-size:10px; line-height:1.4; color:var(--color-text)">'
+    + '      ⚠️ <strong>' + (isEs ? 'Configuración de CORS Requerida:' : 'CORS Configuration Required:') + '</strong><br>'
+    +        (isEs ? 'Para conectar CVbuilder a Ollama, debe habilitar CORS:' : 'To connect CVbuilder to Ollama, you must enable CORS:') + '<br>'
+    + '      • <strong>Windows:</strong> ' + (isEs ? 'Cierre Ollama. En CMD ejecute <code>setx OLLAMA_ORIGINS "*"</code> y reinicie Ollama.' : 'Close Ollama. In CMD run <code>setx OLLAMA_ORIGINS "*"</code> and restart Ollama.') + '<br>'
+    + '      • <strong>Mac/Linux:</strong> <code>OLLAMA_ORIGINS="*" ollama serve</code>'
+    + '    </div>'
+    + '  </div>';
 
   modal.innerHTML = '<div class="modal" style="max-width:540px; padding:var(--space-4); border-radius:var(--radius-lg)">'
     + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:var(--space-2); margin-bottom:var(--space-3)">'
@@ -2458,12 +2474,7 @@ function showAiProviderConfigModal() {
     + '    <option value="ollama" ' + (curS.provider === 'ollama' ? 'selected' : '') + '>Ollama</option>'
     + '    <option value="gemini" ' + (curS.provider === 'gemini' ? 'selected' : '') + '>Gemini</option>'
     + '  </select>'
-    + '  <div id="ollamaFields" style="display:' + (curS.provider === 'ollama' ? 'block' : 'none') + '">'
-    + '    <label class="tiny" style="font-weight:700">Ollama Endpoint URL</label>'
-    + '    <input type="text" id="ollamaEndpointInput" value="' + esc(curS.ollamaEndpoint || 'http://localhost:11434') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace">'
-    + '    <label class="tiny" style="font-weight:700; margin-top:8px; display:block">Model Name</label>'
-    + '    <input type="text" id="ollamaModelInput" value="' + esc(curS.ollamaModel || 'llama3:latest') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="llama3:latest, qwen2.5:latest, etc.">'
-    + '  </div>'
+    +    mockOllamaFields
     + '  <div id="geminiFields" style="display:' + (curS.provider === 'gemini' ? 'block' : 'none') + '">'
     + '    <label class="tiny" style="font-weight:700">Google Gemini API Key</label>'
     + '    <input type="password" id="geminiApiKeyInput" value="' + esc(curS.geminiApiKey || '') + '" style="width:100%; height:32px; padding:0 8px; font-size:12px; margin-top:4px; font-family:monospace" placeholder="AIzaSy...">'
@@ -2679,26 +2690,26 @@ function showAiFieldSuggestionsModal(inputEl) {
   }
 
   pop.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(from var(--color-text) l c h / .1); padding-bottom:6px; margin-bottom:8px">'
-    + '  <strong style="font-size:12px; display:flex; align-items:center; gap:4px; color:var(--color-primary)">✨ ' + (isEs ? 'Asistente de Campo IA' : 'AI Field Assistant') + '</strong>'
+    + '  <strong style="font-size:13px; display:flex; align-items:center; gap:4px; color:var(--color-primary)">✨ ' + (isEs ? 'Asistente de Campo IA' : 'AI Field Assistant') + '</strong>'
     + '  <button class="close-pop-btn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:13px; font-weight:700; line-height:1">✕</button>'
     + '</div>'
     + '<div style="display:flex; gap:4px; margin-bottom:8px">'
-    + '  <button id="aiEnhanceBtn" class="btn btn-xs btn-primary" style="flex:1; font-weight:700; font-size:11px">⚡ ' + (isEs ? 'Pulir' : 'Polish') + '</button>'
-    + '  <button id="aiGrammarBtn" class="btn btn-xs btn-ghost" style="flex:1; font-weight:700; font-size:11px; border:1px solid oklch(from var(--color-text) l c h / .12)">✏️ ' + (isEs ? 'Gramática' : 'Grammar') + '</button>'
-    + '  <button id="aiTranslateBtn" class="btn btn-xs btn-ghost" style="flex:1; font-weight:700; font-size:11px; border:1px solid oklch(from var(--color-text) l c h / .12)">🌐 ' + (isEs ? 'Traducir' : 'Translate') + '</button>'
+    + '  <button id="aiEnhanceBtn" class="btn btn-xs btn-primary" style="flex:1; font-weight:700; font-size:12px">⚡ ' + (isEs ? 'Pulir' : 'Polish') + '</button>'
+    + '  <button id="aiGrammarBtn" class="btn btn-xs btn-ghost" style="flex:1; font-weight:700; font-size:12px; border:1px solid oklch(from var(--color-text) l c h / .12)">✏️ ' + (isEs ? 'Gramática' : 'Grammar') + '</button>'
+    + '  <button id="aiTranslateBtn" class="btn btn-xs btn-ghost" style="flex:1; font-weight:700; font-size:12px; border:1px solid oklch(from var(--color-text) l c h / .12)">🌐 ' + (isEs ? 'Traducir' : 'Translate') + '</button>'
     + '</div>'
     + '<div style="margin-top:6px; border-top:1px solid oklch(from var(--color-text) l c h / .08); padding-top:6px">'
-    + '  <label style="font-size:10px; font-weight:700; color:var(--color-text-muted); display:block; margin-bottom:3px">💬 ' + (isEs ? 'Instrucción / Prompt sobre este campo:' : 'Prompt about this field:') + '</label>'
+    + '  <label style="font-size:12px; font-weight:700; color:var(--color-text-muted); display:block; margin-bottom:3px">💬 ' + (isEs ? 'Instrucción / Prompt sobre este campo:' : 'Prompt about this field:') + '</label>'
     + '  <div style="display:flex; gap:4px">'
-    + '    <input type="text" id="aiCustomPromptInput" placeholder="' + (isEs ? 'ej. Resumir en 15 palabras...' : 'e.g. Make concise & executive...') + '" style="flex:1; height:26px; padding:0 6px; font-size:11px; border-radius:4px; border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface-offset); color:var(--color-text); font-family:inherit">'
-    + '    <button id="aiSubmitCustomBtn" class="btn btn-xs btn-primary" style="height:26px; font-weight:700; font-size:11px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
+    + '    <input type="text" id="aiCustomPromptInput" placeholder="' + (isEs ? 'ej. Resumir en 15 palabras...' : 'e.g. Make concise & executive...') + '" style="flex:1; height:26px; padding:0 6px; font-size:12px; border-radius:4px; border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface-offset); color:var(--color-text); font-family:inherit">'
+    + '    <button id="aiSubmitCustomBtn" class="btn btn-xs btn-primary" style="height:26px; font-weight:700; font-size:12px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
     + '  </div>'
     + '</div>'
-    + '<div id="aiLoadingBox" style="display:none; text-align:center; padding:10px 0; font-size:11px; color:var(--color-text-muted)">⏳ ' + (isEs ? 'Generando sugerencia con IA...' : 'Generating AI suggestion...') + '</div>'
+    + '<div id="aiLoadingBox" style="display:none; text-align:center; padding:10px 0; font-size:12px; color:var(--color-text-muted)">⏳ ' + (isEs ? 'Generando sugerencia con IA...' : 'Generating AI suggestion...') + '</div>'
     + '<div id="aiSuggestionBox" style="display:none; margin-top:8px">'
     + '  <div class="tiny muted" style="font-weight:700; margin-bottom:4px">' + (isEs ? 'Sugerencia Generada:' : 'Generated Suggestion:') + '</div>'
-    + '  <div id="aiSuggestionPreview" style="min-height:36px; max-height:150px; overflow-y:auto; padding:6px 8px; font-size:11px; line-height:1.4; border-radius:4px; border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); margin-bottom:6px; word-break:break-word"></div>'
-    + '  <textarea id="aiSuggestionText" style="width:100%; min-height:60px; padding:6px; font-size:11px; line-height:1.4; border-radius:4px; border:1.5px solid var(--color-primary); background:var(--color-surface); color:var(--color-text); font-family:inherit; resize:vertical"></textarea>'
+    + '  <div id="aiSuggestionPreview" style="min-height:36px; max-height:150px; overflow-y:auto; padding:6px 8px; font-size:12px; line-height:1.4; border-radius:4px; border:1px solid oklch(from var(--color-text) l c h / .15); background:var(--color-surface-offset); margin-bottom:6px; word-break:break-word"></div>'
+    + '  <textarea id="aiSuggestionText" style="width:100%; min-height:60px; padding:6px; font-size:12px; line-height:1.4; border-radius:4px; border:1.5px solid var(--color-primary); background:var(--color-surface); color:var(--color-text); font-family:inherit; resize:vertical"></textarea>'
     + '  <button id="applySuggestionBtn" class="btn btn-xs btn-primary" style="width:100%; margin-top:6px; font-weight:700">✅ ' + (isEs ? 'Aplicar Sugerencia al Campo' : 'Apply Suggestion to Field') + '</button>'
     + '</div>';
 
@@ -2820,7 +2831,7 @@ function showAiMenu() {
     + '    <span style="font-size:18px">🌐</span>'
     + '    <div style="text-align:left"><div>' + (isEs ? 'Traducir CV Completo' : 'Translate CV') + '</div><div class="tiny muted">' + (isEs ? 'Traducción masiva a nueva instancia adaptada' : 'Bulk translate into new tailored instance') + '</div></div>'
     + '  </button>'
-    + '  <button class="btn btn-ghost" id="menuAiChatBtn" ' + (!isConfigured ? 'disabled title="' + (isEs ? 'Configure el proveedor de IA primero' : 'Please configure AI provider first') + '"' : '') + ' style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md); ' + (!isConfigured ? 'opacity:0.45; cursor:not-allowed;' : '') + '">'
+    + '  <button class="btn btn-ghost" id="menuAiChatBtn" style="width:100%; justify-content:flex-start; height:46px; font-weight:600; font-size:13px; gap:10px; padding:0 12px; border:1px solid oklch(from var(--color-text) l c h / .12); border-radius:var(--radius-md)">'
     + '    <span style="font-size:18px">💬</span>'
     + '    <div style="text-align:left"><div>' + (isEs ? 'Chat Temporal' : 'Temporal Chat') + '</div><div class="tiny muted">' + (isEs ? 'Asistente conversacional flotante en tiempo real' : 'Interactive floating conversation assistant') + '</div></div>'
     + '  </button>'
@@ -2850,7 +2861,6 @@ function showAiMenu() {
   };
 
   menuModal.querySelector('#menuAiChatBtn').onclick = function() {
-    if (!isConfigured) return;
     menuModal.remove();
     toggleAiChatWidget(true);
   };
@@ -2972,6 +2982,82 @@ function buildOverwritesFromObject(obj, prefix) {
 
 var aiChatHistory = [];
 
+function updateAiChatWidgetState() {
+  var widget = document.getElementById('aiChatWidget');
+  if (!widget) return;
+
+  var isEs = (typeof state === 'object' && state && state.langFilter === 'es');
+  var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
+
+  var msgBox = widget.querySelector('#aiChatMessages');
+  var inputEl = widget.querySelector('#aiChatInput');
+  var sendBtn = widget.querySelector('#aiChatSendBtn');
+  var chips = widget.querySelectorAll('.chat-chip');
+
+  if (!isConfigured) {
+    if (inputEl) {
+      inputEl.disabled = true;
+      inputEl.placeholder = isEs ? 'Configure el proveedor de IA primero...' : 'Configure AI provider first...';
+    }
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.style.opacity = '0.5';
+      sendBtn.style.cursor = 'not-allowed';
+    }
+    chips.forEach(function(chip) {
+      chip.style.opacity = '0.5';
+      chip.style.cursor = 'not-allowed';
+    });
+
+    if (msgBox) {
+      var existingPrompt = msgBox.querySelector('.ai-config-prompt-bubble');
+      if (!existingPrompt) {
+        msgBox.innerHTML = '';
+        var promptBubble = document.createElement('div');
+        promptBubble.className = 'ai-config-prompt-bubble';
+        promptBubble.style.cssText = 'background:oklch(from var(--color-error) l c h / .1); border:1px solid oklch(from var(--color-error) l c h / .2); color:var(--color-text); padding:12px; border-radius:var(--radius-md); max-width:92%; align-self:flex-start; display:flex; flex-direction:column; gap:10px; margin-bottom:10px;';
+        
+        var textDiv = document.createElement('div');
+        textDiv.innerHTML = isEs 
+          ? '🔌 <strong>Configuración de IA Requerida</strong><br>Para chatear con el asistente, primero configure su proveedor de IA (Ollama Local o Google Gemini).' 
+          : '🔌 <strong>AI Configuration Required</strong><br>To chat with the assistant, please configure your AI provider (Local Ollama or Google Gemini) first.';
+        promptBubble.appendChild(textDiv);
+
+        var btn = document.createElement('button');
+        btn.className = 'btn btn-xs btn-primary';
+        btn.style.cssText = 'align-self:flex-start; font-weight:700;';
+        btn.textContent = isEs ? 'Configurar Proveedor' : 'Configure Provider';
+        btn.onclick = function() {
+          showAiProviderConfigModal();
+        };
+        promptBubble.appendChild(btn);
+
+        msgBox.appendChild(promptBubble);
+      }
+    }
+  } else {
+    if (inputEl) {
+      inputEl.disabled = false;
+      inputEl.placeholder = isEs ? 'Escribe un mensaje...' : 'Type a message...';
+    }
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.style.opacity = '';
+      sendBtn.style.cursor = '';
+    }
+    chips.forEach(function(chip) {
+      chip.style.opacity = '';
+      chip.style.cursor = '';
+    });
+
+    if (msgBox && msgBox.querySelector('.ai-config-prompt-bubble')) {
+      msgBox.innerHTML = '<div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
+        + (isEs ? '👋 ¡Hola! Soy tu asistente de CV. ¿En qué puedo ayudarte a pulir tu currículum, redactar logros o redactar cartas de presentación hoy?' : '👋 Hello! I am your CV Assistant. How can I help you refine your resume, draft bullet points, or tailor cover letters today?')
+        + '</div>';
+    }
+  }
+}
+
 function toggleAiChatWidget(show) {
   var widget = document.getElementById('aiChatWidget');
   if (!widget) {
@@ -2986,8 +3072,9 @@ function toggleAiChatWidget(show) {
   }
 
   if (widget.style.display === 'flex') {
+    updateAiChatWidgetState();
     var inputEl = widget.querySelector('#aiChatInput');
-    if (inputEl) inputEl.focus();
+    if (inputEl && !inputEl.disabled) inputEl.focus();
   }
 }
 
@@ -3008,19 +3095,19 @@ function createAiChatWidget() {
     + '    <button id="closeChatBtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:14px; font-weight:700" title="' + (isEs ? 'Cerrar chat' : 'Close Chat') + '">✕</button>'
     + '  </div>'
     + '</div>'
-    + '<div id="aiChatMessages" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:12px; line-height:1.45">'
+    + '<div id="aiChatMessages" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:13px; line-height:1.45">'
     + '  <div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
     +      (isEs ? '👋 ¡Hola! Soy tu asistente de CV. ¿En qué puedo ayudarte a pulir tu currículum, redactar logros o redactar cartas de presentación hoy?' : '👋 Hello! I am your CV Assistant. How can I help you refine your resume, draft bullet points, or tailor cover letters today?')
     + '  </div>'
     + '</div>'
     + '<div style="display:flex; gap:4px; padding:6px 10px; border-top:1px solid oklch(from var(--color-text) l c h / .08); background:var(--color-surface-offset); overflow-x:auto">'
-    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Audit my CV experience and bullet points" style="font-size:10px; white-space:nowrap; padding:2px 6px">📊 ' + (isEs ? 'Auditar CV' : 'Audit CV') + '</button>'
-    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Enhance my executive summary" style="font-size:10px; white-space:nowrap; padding:2px 6px">⚡ ' + (isEs ? 'Pulir Resumen' : 'Enhance Summary') + '</button>'
-    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Check ATS power verbs and metrics" style="font-size:10px; white-space:nowrap; padding:2px 6px">🎯 ' + (isEs ? 'Check ATS' : 'Check ATS') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Audit my CV experience and bullet points" style="font-size:12px; white-space:nowrap; padding:2px 6px">📊 ' + (isEs ? 'Auditar CV' : 'Audit CV') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Enhance my executive summary" style="font-size:12px; white-space:nowrap; padding:2px 6px">⚡ ' + (isEs ? 'Pulir Resumen' : 'Enhance Summary') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Check ATS power verbs and metrics" style="font-size:12px; white-space:nowrap; padding:2px 6px">🎯 ' + (isEs ? 'Check ATS' : 'Check ATS') + '</button>'
     + '</div>'
     + '<div style="display:flex; gap:6px; padding:10px; border-top:1px solid oklch(from var(--color-text) l c h / .1); background:var(--color-surface-offset)">'
-    + '  <input type="text" id="aiChatInput" placeholder="' + (isEs ? 'Escribe un mensaje...' : 'Type a message...') + '" style="flex:1; height:32px; padding:0 10px; font-size:12px; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface); color:var(--color-text); font-family:inherit">'
-    + '  <button id="aiChatSendBtn" class="btn btn-xs btn-primary" style="height:32px; padding:0 12px; font-weight:700; font-size:12px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
+    + '  <input type="text" id="aiChatInput" placeholder="' + (isEs ? 'Escribe un mensaje...' : 'Type a message...') + '" style="flex:1; height:32px; padding:0 10px; font-size:13px; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface); color:var(--color-text); font-family:inherit">'
+    + '  <button id="aiChatSendBtn" class="btn btn-xs btn-primary" style="height:32px; padding:0 12px; font-weight:700; font-size:13px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
     + '</div>';
 
   document.body.appendChild(widget);
@@ -3033,8 +3120,13 @@ function createAiChatWidget() {
 
   widget.querySelector('#clearChatBtn').onclick = function() {
     aiChatHistory = [];
-    msgBox.innerHTML = '<div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
-      + (isEs ? '👋 Chat reiniciado. ¿En qué te ayudo?' : '👋 Chat reset. How can I assist you?') + '</div>';
+    var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
+    if (!isConfigured) {
+      updateAiChatWidgetState();
+    } else {
+      msgBox.innerHTML = '<div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
+        + (isEs ? '👋 Chat reiniciado. ¿En qué te ayudo?' : '👋 Chat reset. How can I assist you?') + '</div>';
+    }
   };
 
   function sendChatMessage() {
@@ -3063,24 +3155,39 @@ function createAiChatWidget() {
     aiChatHistory.push({ role: 'user', content: text });
 
     var sysPrompt = "You are a helpful, professional CV & Career Assistant. Answer the candidate's career, resume, and job search questions concisely and helpfully.";
-    if (typeof data === 'object' && data && Object.keys(data).length > 0) {
-      try {
-        var cvContext = JSON.parse(JSON.stringify(data));
-        delete cvContext.instances;
-        delete cvContext._templates;
-        delete cvContext.templates;
-        sysPrompt += "\n\nCandidate's Current CV Data Context:\n" + JSON.stringify(cvContext, null, 2);
-      } catch (e) {}
-    }
-    var conversationPrompt = aiChatHistory.map(function(m) { return (m.role === 'user' ? 'User: ' : 'Assistant: ') + m.content; }).join('\n');
+    sysPrompt += "\n\nYou have access to browser-level tools to view and modify the candidate's CV, sections, and instances. Always use the appropriate tools whenever requested or needed to perform operations (like creating a tailored instance for a job, renaming a section, adding section entries, or updating fields). Do not write raw LaTeX instructions if a tool can do it directly. If you modify fields, write overrides, or create instances, explain your changes briefly to the candidate.";
 
-    AIClient.callLLM(conversationPrompt, sysPrompt).then(function(reply) {
+    var activeProgressBubbles = {};
+    function onProgress(ev) {
+      if (ev.type === 'tool_start') {
+        var pBubble = document.createElement('div');
+        pBubble.style.cssText = 'background:oklch(from var(--color-text) l c h / .05); border:1px dashed oklch(from var(--color-text) l c h / .15); color:var(--color-text-muted); padding:6px 10px; border-radius:var(--radius-md); max-width:90%; align-self:flex-start; font-family:monospace; font-size:12px; margin-top:2px;';
+        pBubble.innerHTML = '⚙️ Executing <strong>' + ev.name + '</strong>...';
+        msgBox.appendChild(pBubble);
+        msgBox.scrollTop = msgBox.scrollHeight;
+        activeProgressBubbles[ev.name] = pBubble;
+      } else if (ev.type === 'tool_end') {
+        var pBubble = activeProgressBubbles[ev.name];
+        if (pBubble) {
+          if (ev.response && ev.response.error) {
+            pBubble.style.color = 'var(--color-error)';
+            pBubble.innerHTML = '❌ Failed <strong>' + ev.name + '</strong>: ' + ev.response.error;
+          } else {
+            pBubble.style.color = 'var(--color-success)';
+            pBubble.innerHTML = '✅ Success <strong>' + ev.name + '</strong>';
+          }
+          delete activeProgressBubbles[ev.name];
+        }
+      }
+    }
+
+    AIClient.chatWithTools(aiChatHistory, sysPrompt, onProgress).then(function(resObj) {
       loadBubble.remove();
-      aiChatHistory.push({ role: 'assistant', content: reply });
+      aiChatHistory = resObj.history;
 
       var botBubble = document.createElement('div');
       botBubble.style.cssText = 'background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start; word-break:break-word;';
-      botBubble.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(reply) : reply;
+      botBubble.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(resObj.text) : resObj.text;
       msgBox.appendChild(botBubble);
       msgBox.scrollTop = msgBox.scrollHeight;
     }).catch(function(err) {
@@ -3095,6 +3202,8 @@ function createAiChatWidget() {
 
   widget.querySelectorAll('.chat-chip').forEach(function(chip) {
     chip.onclick = function() {
+      var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
+      if (!isConfigured) return;
       inputEl.value = chip.dataset.chip;
       sendChatMessage();
     };
@@ -3107,6 +3216,7 @@ function createAiChatWidget() {
       sendChatMessage();
     }
   };
+  updateAiChatWidgetState();
 }
 
 // Initial state sync & Chat widget init

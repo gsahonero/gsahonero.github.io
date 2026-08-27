@@ -236,12 +236,253 @@ var AIClient = (function() {
     }
   }
 
+  async function chatWithTools(history, overrideSystemPrompt, onProgress) {
+    var s = getSettings();
+    var sysPrompt = overrideSystemPrompt || s.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    var maxTurns = 5;
+    var currentTurn = 0;
+    var activeHistory = JSON.parse(JSON.stringify(history));
+
+    while (currentTurn < maxTurns) {
+      currentTurn++;
+      
+      if (s.provider === 'gemini') {
+        if (!s.geminiApiKey) throw new Error("Gemini API Key is missing. Please configure it in AI Settings.");
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (s.geminiModel || 'gemini-2.5-flash') + ':generateContent?key=' + encodeURIComponent(s.geminiApiKey.trim());
+        
+        var geminiContents = activeHistory.map(function(msg) {
+          if (msg.role === 'user' && msg.content) {
+            return { role: 'user', parts: [{ text: msg.content }] };
+          }
+          if (msg.role === 'assistant' && msg.content) {
+            return { role: 'model', parts: [{ text: msg.content }] };
+          }
+          if (msg.role === 'assistant' && msg.toolCalls) {
+            return {
+              role: 'model',
+              parts: msg.toolCalls.map(function(tc) {
+                return { functionCall: { name: tc.name, args: tc.args } };
+              })
+            };
+          }
+          if (msg.role === 'user' && msg.toolResponses) {
+            return {
+              role: 'user',
+              parts: msg.toolResponses.map(function(tr) {
+                return { functionResponse: { name: tr.name, response: { result: tr.response } } };
+              })
+            };
+          }
+          return { role: 'user', parts: [{ text: '' }] };
+        });
+
+        var payload = {
+          systemInstruction: { parts: [{ text: sysPrompt }] },
+          contents: geminiContents,
+          tools: [{ functionDeclarations: AITools.DECLARATIONS }]
+        };
+
+        var res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          var errText = await res.text();
+          throw new Error('Gemini Error (' + res.status + '): ' + errText.substring(0, 150));
+        }
+
+        var resData = await res.json();
+        var candidate = resData.candidates && resData.candidates[0];
+        if (!candidate || !candidate.content || !candidate.content.parts) {
+          throw new Error("Unexpected response from Gemini API");
+        }
+
+        var parts = candidate.content.parts;
+        var hasToolCalls = false;
+        var toolCallsList = [];
+
+        parts.forEach(function(part) {
+          if (part.functionCall) {
+            hasToolCalls = true;
+            var callId = 'call_' + Math.random().toString(36).substr(2, 9);
+            toolCallsList.push({
+              id: callId,
+              name: part.functionCall.name,
+              args: part.functionCall.args
+            });
+          }
+        });
+
+        if (hasToolCalls) {
+          activeHistory.push({ role: 'assistant', toolCalls: toolCallsList });
+
+          var toolResponsesList = [];
+          for (var i = 0; i < toolCallsList.length; i++) {
+            var call = toolCallsList[i];
+            if (typeof onProgress === 'function') {
+              onProgress({ type: 'tool_start', name: call.name, args: call.args });
+            }
+
+            var result;
+            try {
+              result = AITools.executeTool(call.name, call.args);
+            } catch (err) {
+              result = { error: err.message };
+            }
+
+            if (typeof onProgress === 'function') {
+              onProgress({ type: 'tool_end', name: call.name, response: result });
+            }
+
+            toolResponsesList.push({
+              id: call.id,
+              name: call.name,
+              response: result
+            });
+          }
+
+          activeHistory.push({ role: 'user', toolResponses: toolResponsesList });
+          continue;
+        }
+
+        var replyText = parts.map(function(p) { return p.text || ''; }).join('\n').trim();
+        return { text: replyText, history: activeHistory };
+
+      } else {
+        var baseUrl = (s.ollamaEndpoint || 'http://localhost:11434').replace(/\/$/, '');
+        var modelName = s.ollamaModel || 'llama3:latest';
+        var url = baseUrl + '/v1/chat/completions';
+
+        var ollamaMessages = [{ role: 'system', content: sysPrompt }];
+        activeHistory.forEach(function(msg) {
+          if (msg.role === 'user' && msg.content) {
+            ollamaMessages.push({ role: 'user', content: msg.content });
+          } else if (msg.role === 'assistant' && msg.content) {
+            ollamaMessages.push({ role: 'assistant', content: msg.content });
+          } else if (msg.role === 'assistant' && msg.toolCalls) {
+            ollamaMessages.push({
+              role: 'assistant',
+              tool_calls: msg.toolCalls.map(function(tc) {
+                return {
+                  id: tc.id,
+                  type: 'function',
+                  function: { name: tc.name, arguments: JSON.stringify(tc.args) }
+                };
+              })
+            });
+          } else if (msg.role === 'user' && msg.toolResponses) {
+            msg.toolResponses.forEach(function(tr) {
+              ollamaMessages.push({
+                role: 'tool',
+                tool_call_id: tr.id,
+                name: tr.name,
+                content: JSON.stringify(tr.response)
+              });
+            });
+          }
+        });
+
+        var openAiTools = AITools.DECLARATIONS.map(function(dec) {
+          return {
+            type: 'function',
+            function: {
+              name: dec.name,
+              description: dec.description,
+              parameters: {
+                type: dec.parameters.type.toLowerCase(),
+                properties: dec.parameters.properties,
+                required: dec.parameters.required
+              }
+            }
+          };
+        });
+
+        var payload = {
+          model: modelName,
+          messages: ollamaMessages,
+          tools: openAiTools,
+          stream: false
+        };
+
+        var res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          var errText = await res.text();
+          throw new Error('Ollama Error (' + res.status + '): ' + errText.substring(0, 150));
+        }
+
+        var resData = await res.json();
+        var choice = resData.choices && resData.choices[0];
+        if (!choice || !choice.message) {
+          throw new Error("Unexpected response from Ollama API");
+        }
+
+        var message = choice.message;
+        if (message.tool_calls && message.tool_calls.length > 0) {
+          var toolCallsList = message.tool_calls.map(function(tc) {
+            var parsedArgs = {};
+            try {
+              parsedArgs = typeof tc.function.arguments === 'string' ? JSON.parse(tc.function.arguments) : tc.function.arguments;
+            } catch(e) {}
+            return {
+              id: tc.id,
+              name: tc.function.name,
+              args: parsedArgs
+            };
+          });
+
+          activeHistory.push({ role: 'assistant', toolCalls: toolCallsList });
+
+          var toolResponsesList = [];
+          for (var i = 0; i < toolCallsList.length; i++) {
+            var call = toolCallsList[i];
+            if (typeof onProgress === 'function') {
+              onProgress({ type: 'tool_start', name: call.name, args: call.args });
+            }
+
+            var result;
+            try {
+              result = AITools.executeTool(call.name, call.args);
+            } catch (err) {
+              result = { error: err.message };
+            }
+
+            if (typeof onProgress === 'function') {
+              onProgress({ type: 'tool_end', name: call.name, response: result });
+            }
+
+            toolResponsesList.push({
+              id: call.id,
+              name: call.name,
+              response: result
+            });
+          }
+
+          activeHistory.push({ role: 'user', toolResponses: toolResponsesList });
+          continue;
+        }
+
+        var replyText = message.content || '';
+        return { text: replyText.trim(), history: activeHistory };
+      }
+    }
+
+    throw new Error("Exceeded maximum tool calling loop iterations.");
+  }
+
   return {
     getSettings: getSettings,
     saveSettings: saveSettings,
     isConfigured: isConfigured,
     testConnection: testConnection,
     callLLM: callLLM,
+    chatWithTools: chatWithTools,
     enhanceBullet: enhanceBullet,
     fixGrammar: fixGrammar,
     translateContent: translateContent,

@@ -132,7 +132,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 .outline-sec-toggle {
   cursor: pointer;
   user-select: none;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--color-text-muted);
   width: 18px;
   height: 18px;
@@ -230,7 +230,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
   display:inline-flex;
   align-items:center;
   gap:4px;
-  font-size:10px;
+  font-size:12px;
   font-weight:600;
   color:var(--color-primary);
   text-decoration:none;
@@ -258,7 +258,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
   0% { transform: rotate(-10deg) scale(1.1); }
   100% { transform: rotate(15deg) scale(1.1); }
 }
-.version-badge{display:inline-flex;align-items:center;height:24px;padding:0 var(--space-2);border-radius:var(--radius-full);border:1px solid oklch(from var(--color-text) l c h / .14);background:var(--color-surface-offset);font-size:10px;font-weight:700;cursor:pointer;transition: all var(--transition)}
+.version-badge{display:inline-flex;align-items:center;height:24px;padding:0 var(--space-2);border-radius:var(--radius-full);border:1px solid oklch(from var(--color-text) l c h / .14);background:var(--color-surface-offset);font-size:12px;font-weight:700;cursor:pointer;transition: all var(--transition)}
 .version-badge:hover{background:var(--color-border);transform: translateY(-1px);}
 
 /* ── unsaved indicator ── */
@@ -266,7 +266,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
   display:flex;align-items:center;gap:var(--space-1);
   padding:4px var(--space-2);
   border-radius:var(--radius-full);
-  font-size:11px;font-weight:600;
+  font-size:12px;font-weight:600;
   border:1px solid transparent;
   transition:all var(--transition);
 }
@@ -350,12 +350,12 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);o
 /* ── utilities ── */
 .stack{display:grid;gap:var(--space-3)}
 .muted{color:var(--color-text-muted)}.tiny{font-size:var(--text-xs);color:var(--color-text-muted)}
-.sectiontitle{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint)}
+.sectiontitle{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint)}
 .navlist{display:grid;gap:4px}
 .navitem{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:9px 12px;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;text-align:left;width:100%;font-size:var(--text-sm);transition: all var(--transition)}
 .navitem:hover{background:var(--color-surface-offset);color:var(--color-text)}
 .navitem.active{background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-offset));border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border));color:var(--color-text);font-weight:600}
-.count{font-size:10px;font-weight:700;padding:2px 6px;border-radius:var(--radius-full);background:var(--color-surface-offset);color:var(--color-text-muted)}
+.count{font-size:11px;font-weight:700;padding:2px 6px;border-radius:var(--radius-full);background:var(--color-surface-offset);color:var(--color-text-muted)}
 .navitem.active .count{background:var(--color-surface);color:var(--color-primary)}
 .toolbar{display:flex;flex-wrap:wrap;gap:var(--space-2)}
 .split{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3)}
@@ -404,14 +404,14 @@ input:focus,textarea:focus,select:focus{
 .help-section code{background:var(--color-surface-offset);padding:2px 6px;border-radius:var(--radius-sm);font-size:.85em;font-family:ui-monospace,Consolas,monospace}
 
 /* ── outline panel ── */
-.outline-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);margin-bottom:var(--space-3)}
+.outline-title{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);margin-bottom:var(--space-3)}
 .outline-section{margin-bottom:var(--space-3)}
 .outline-list{display:grid;gap:2px}
 .outline-link{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:var(--radius-md);font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition: all var(--transition)}
 .outline-link:hover{background:var(--color-surface-offset);color:var(--color-text)}
 .outline-link.active-section{background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface-offset));border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border));color:var(--color-text);font-weight:700}
 .outline-link .olabel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.outline-link .otype{flex-shrink:0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;opacity:.45;margin-left:4px}
+.outline-link .otype{flex-shrink:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;opacity:.45;margin-left:4px}
 
 /* ── welcome tour ── */
 .topbar:has(.tour-highlight) {
@@ -745,7 +745,7 @@ input:focus,textarea:focus,select:focus{
   justify-content: center;
   padding: 2px 8px;
   border-radius: var(--radius-sm, 4px);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
