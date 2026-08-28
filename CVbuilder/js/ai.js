@@ -237,6 +237,7 @@ var AIClient = (function() {
   }
 
   async function chatWithTools(history, overrideSystemPrompt, onProgress) {
+    var aiTools = window.AITools || { DECLARATIONS: [], executeTool: function(name) { return { error: "AITools is not defined. Please reload your browser." }; } };
     var s = getSettings();
     var sysPrompt = overrideSystemPrompt || s.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     var maxTurns = 5;
@@ -279,7 +280,7 @@ var AIClient = (function() {
         var payload = {
           systemInstruction: { parts: [{ text: sysPrompt }] },
           contents: geminiContents,
-          tools: [{ functionDeclarations: AITools.DECLARATIONS }]
+          tools: [{ functionDeclarations: aiTools.DECLARATIONS }]
         };
 
         var res = await fetch(url, {
@@ -327,7 +328,7 @@ var AIClient = (function() {
 
             var result;
             try {
-              result = AITools.executeTool(call.name, call.args);
+              result = aiTools.executeTool(call.name, call.args);
             } catch (err) {
               result = { error: err.message };
             }
@@ -384,7 +385,7 @@ var AIClient = (function() {
           }
         });
 
-        var openAiTools = AITools.DECLARATIONS.map(function(dec) {
+        var openAiTools = aiTools.DECLARATIONS.map(function(dec) {
           return {
             type: 'function',
             function: {
@@ -448,7 +449,7 @@ var AIClient = (function() {
 
             var result;
             try {
-              result = AITools.executeTool(call.name, call.args);
+              result = aiTools.executeTool(call.name, call.args);
             } catch (err) {
               result = { error: err.message };
             }

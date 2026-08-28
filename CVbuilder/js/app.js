@@ -3156,6 +3156,16 @@ function createAiChatWidget() {
 
     var sysPrompt = "You are a helpful, professional CV & Career Assistant. Answer the candidate's career, resume, and job search questions concisely and helpfully.";
     sysPrompt += "\n\nYou have access to browser-level tools to view and modify the candidate's CV, sections, and instances. Always use the appropriate tools whenever requested or needed to perform operations (like creating a tailored instance for a job, renaming a section, adding section entries, or updating fields). Do not write raw LaTeX instructions if a tool can do it directly. If you modify fields, write overrides, or create instances, explain your changes briefly to the candidate.";
+    
+    if (typeof data === 'object' && data && Object.keys(data).length > 0) {
+      try {
+        var cvContext = JSON.parse(JSON.stringify(data));
+        delete cvContext.instances;
+        delete cvContext._templates;
+        delete cvContext.templates;
+        sysPrompt += "\n\nCandidate's Current CV Data Context:\n" + JSON.stringify(cvContext, null, 2);
+      } catch (e) {}
+    }
 
     var activeProgressBubbles = {};
     function onProgress(ev) {
@@ -3212,8 +3222,10 @@ function createAiChatWidget() {
   sendBtn.onclick = sendChatMessage;
   inputEl.onkeydown = function(e) {
     if (e.key === 'Enter') {
-      e.preventDefault();
-      sendChatMessage();
+      if (!e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
     }
   };
   updateAiChatWidgetState();
