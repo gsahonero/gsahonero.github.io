@@ -29,6 +29,118 @@ var INSTANCE_PREFIX = 'cvbuilder_instance_';
 
 // ── UTILITY HELPERS ──
 function el(id) { return document.getElementById(id); }
+
+function showToast(message, type, duration) {
+  type = type || 'info';
+  duration = duration || 3200;
+  var container = el('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    document.body.appendChild(container);
+  }
+  var toast = document.createElement('div');
+  toast.className = 'toast-item toast-' + type;
+
+  var icon = 'ℹ️';
+  if (type === 'success') icon = '✓';
+  else if (type === 'error') icon = '✕';
+  else if (type === 'warning') icon = '⚠️';
+
+  toast.innerHTML = '<span style="font-size:16px; font-weight:800">' + icon + '</span>'
+    + '<span style="flex:1">' + esc(message) + '</span>'
+    + '<button style="background:none; border:none; padding:0; cursor:pointer; color:inherit; opacity:0.65; font-size:14px" onclick="this.parentElement.remove()">✕</button>';
+
+  container.appendChild(toast);
+
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(20px)';
+    setTimeout(function() { toast.remove(); }, 220);
+  }, duration);
+}
+window.showToast = showToast;
+
+function showShortcutsModal() {
+  var existing = el('shortcutsModal');
+  if (existing) existing.remove();
+
+  var isEs = typeof state === 'object' && state && state.langFilter === 'es';
+  var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  var modKey = isMac ? '⌘' : 'Ctrl';
+
+  var modal = document.createElement('div');
+  modal.id = 'shortcutsModal';
+  modal.className = 'modal-backdrop open';
+  modal.innerHTML = '<div class="modal" style="max-width:440px; padding:var(--space-4)">'
+    + '<div class="modal-header" style="display:flex; justify-content:space-between; align-items:center">'
+    + '  <h3 style="margin:0">⌨️ ' + (isEs ? 'Atajos de Teclado' : 'Keyboard Shortcuts') + '</h3>'
+    + '  <button class="iconbtn" onclick="this.closest(\'.modal-backdrop\').remove()">✕</button>'
+    + '</div>'
+    + '<div class="modal-body stack" style="gap:var(--space-3); margin-top:var(--space-3)">'
+    + '  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
+    + '    <span>' + (isEs ? 'Guardar Base de Datos' : 'Save CV Database') + '</span>'
+    + '    <div><kbd class="key-hint">' + modKey + '</kbd> + <kbd class="key-hint">S</kbd></div>'
+    + '  </div>'
+    + '  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
+    + '    <span>' + (isEs ? 'Exportar a PDF' : 'Export to PDF') + '</span>'
+    + '    <div><kbd class="key-hint">' + modKey + '</kbd> + <kbd class="key-hint">P</kbd></div>'
+    + '  </div>'
+    + '  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid oklch(from var(--color-text) l c h / .08)">'
+    + '    <span>' + (isEs ? 'Ver este menú de atajos' : 'Open shortcuts guide') + '</span>'
+    + '    <div><kbd class="key-hint">' + modKey + '</kbd> + <kbd class="key-hint">/</kbd></div>'
+    + '  </div>'
+    + '  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0">'
+    + '    <span>' + (isEs ? 'Cerrar cualquier ventana modal' : 'Close active modal') + '</span>'
+    + '    <div><kbd class="key-hint">Esc</kbd></div>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="modal-footer" style="margin-top:var(--space-3); text-align:right">'
+    + '  <button class="btn btn-primary" onclick="this.closest(\'.modal-backdrop\').remove()">' + (isEs ? 'Entendido' : 'Got it') + '</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+window.showShortcutsModal = showShortcutsModal;
+
+window.addEventListener('keydown', function(e) {
+  var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  var cmdKey = isMac ? e.metaKey : e.ctrlKey;
+
+  if (cmdKey && (e.key === 's' || e.key === 'S')) {
+    e.preventDefault();
+    if (typeof saveCurrentDatabase === 'function') {
+      saveCurrentDatabase();
+      showToast(state.langFilter === 'es' ? 'Cambios guardados con éxito.' : 'Changes saved successfully.', 'success');
+    }
+    return;
+  }
+
+  if (cmdKey && (e.key === 'p' || e.key === 'P')) {
+    e.preventDefault();
+    if (typeof openPdfExportFormatModal === 'function') {
+      openPdfExportFormatModal();
+    }
+    return;
+  }
+
+  if (cmdKey && (e.key === '/' || e.key === '?')) {
+    e.preventDefault();
+    showShortcutsModal();
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    var openBackdrops = document.querySelectorAll('.modal-backdrop.open');
+    if (openBackdrops.length > 0) {
+      openBackdrops[openBackdrops.length - 1].classList.remove('open');
+      if (openBackdrops[openBackdrops.length - 1].id === 'shortcutsModal') {
+        openBackdrops[openBackdrops.length - 1].remove();
+      }
+    }
+  }
+});
+
 function esc(s) {
   if (s == null) return '';
   return String(s)

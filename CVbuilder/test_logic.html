@@ -547,6 +547,60 @@
           testRuns.push({ id: "1.4", name: "HTML Entity Escaping", category: "compiler", expected, actual, passed, latency });
         })();
 
+        // Test 1.5: LaTeX Unicode typography escaping (curly quotes, dashes, ellipses)
+        (function() {
+          var tStart = performance.now();
+          var inputStr = "Colegio Alemán “Mariscal Braun” – ‘1997’—2024…";
+          var expected = "Colegio Alemán ``Mariscal Braun'' -- `1997'---2024\\dots{}";
+          var actual = escapeLatex(inputStr);
+          var passed = actual === expected;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.5", "LaTeX Unicode Typography Escaping", "Escapes unicode quotes, dashes, and ellipses for pdflatex", "compiler", expected, actual, latency, passed);
+          testRuns.push({ id: "1.5", name: "LaTeX Unicode Typography Escaping", category: "compiler", expected, actual, passed, latency });
+        })();
+
+        // Test 1.6: LaTeX Command Macro Argument Preservation in renderTemplate
+        (function() {
+          var tStart = performance.now();
+          var tpl = "\\title{{{basics.title}}}\n\\address{{{basics.location}}}\n\\definecolor{color1}{HTML}{{{theme.accentColor}}}";
+          var ctx = {
+            basics: { title: "Senior Developer", location: "La Paz, Bolivia" },
+            theme: { accentColor: "2563EB" }
+          };
+          var rendered = win.renderTemplate(tpl, ctx, win.texEscape);
+          var passed = rendered.indexOf("\\title{ Senior Developer }") !== -1 &&
+                       rendered.indexOf("\\address{ La Paz, Bolivia }") !== -1 &&
+                       rendered.indexOf("\\definecolor{color1}{HTML}{ 2563EB }") !== -1;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.6", "LaTeX Macro Argument Preservation", "Preserves LaTeX argument braces around {{tag}} without eating syntax", "compiler", "Valid LaTeX braces", passed ? "Valid LaTeX braces" : rendered, latency, passed);
+          testRuns.push({ id: "1.6", name: "LaTeX Macro Argument Preservation", category: "compiler", expected: "Valid LaTeX braces", actual: passed ? "Valid LaTeX braces" : rendered, passed, latency });
+        })();
+
+        // Test 1.7: Language Proficiency in Auto Section Compilation
+        (function() {
+          var tStart = performance.now();
+          var langVal = [
+            { language: "German", proficiency: "Fluent / C1", selected: true }
+          ];
+          var texRes = win.renderAutoSectionLatex('languages', langVal);
+          var htmlRes = win.renderAutoSectionHtml('languages', langVal);
+          var passed = texRes.indexOf("\\cvitemwithcomment{German}{Fluent / C1}{}") !== -1 &&
+                       htmlRes.indexOf("German") !== -1 &&
+                       htmlRes.indexOf("Fluent / C1") !== -1;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+          
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow("1.7", "Language Proficiency Rendering", "Formats language entries with proficiency in moderncv and HTML", "compiler", "German with Fluent / C1", passed ? "German with Fluent / C1" : texRes, latency, passed);
+          testRuns.push({ id: "1.7", name: "Language Proficiency Rendering", category: "compiler", expected: "German with Fluent / C1", actual: passed ? "German with Fluent / C1" : texRes, passed, latency });
+        })();
+
         /* ===================================================================
            SUITE 2: DATA MANIPULATION & STATE RESOLVER
            =================================================================== */
@@ -835,10 +889,15 @@
           testRuns.push({ id: '5.3', name: 'closeAllDropdowns Uses .open', category: 'regression', expected: String(expected), actual: String(actual), passed, latency });
         })();
 
-        // Test 5.4: All Style Manager modal buttons have onclick handlers
+        // Test 5.4: All Core Modal dialog buttons have active onclick handlers
         (function() {
           var tStart = performance.now();
-          var ids = ['modalCreateStyleBtn', 'modalStylePresetsBtn', 'modalEditMappersBtn', 'modalImportStyleBtn', 'closeStyleManagerModal', 'closePresetGalleryModal', 'closeEditMappersModal', 'applyMappersBtn'];
+          var ids = [
+            'modalCreateDbBtn', 'modalImportCvBtn', 'closeDbManagerModal',
+            'closeEditMappersModal', 'applyMappersBtn', 'closeHelpScratchModal',
+            'closeHelpUsageModal', 'closeHelpTemplatesModal', 'closeCvIntegrityModal',
+            'closeCvStandardModal', 'closeVersionModal'
+          ];
           var missing = ids.filter(function(id) {
             var el = doc.getElementById(id);
             return !el || typeof el.onclick !== 'function';
@@ -850,8 +909,8 @@
           var latency = Math.round(tEnd - tStart);
 
           if (passed) totalPassed++; else totalFailed++;
-          appendResultRow('5.4', 'Style Manager Buttons Wired', 'Checks that all Style Manager modal buttons have onclick handlers — regression guard for the missing bindings bug', 'regression', expected, actual, latency, passed);
-          testRuns.push({ id: '5.4', name: 'Style Manager Buttons Wired', category: 'regression', expected, actual, passed, latency });
+          appendResultRow('5.4', 'Core Modal Buttons Wired', 'Checks that all Core Modal dialog buttons have active onclick handlers — regression guard for missing modal button bindings', 'regression', expected, actual, latency, passed);
+          testRuns.push({ id: '5.4', name: 'Core Modal Buttons Wired', category: 'regression', expected, actual, passed, latency });
         })();
 
         // Test 5.5: Mappers JSON round-trip via applyMappersBtn logic
@@ -983,9 +1042,28 @@
         (function() {
           var tStart = performance.now();
           var sampleData = {
-            basics: { firstname: "Alex", lastname: "Morgan", email: "alex@example.com", location: "San Francisco, CA" },
-            work: [{ role: "Engineer", organization: "Tech", description: "Engineered, developed, and optimized scalable distributed systems" }],
-            education: [{ degree: "Ph.D.", institution: "MIT" }]
+            basics: {
+              firstname: "Alex",
+              lastname: "Morgan",
+              title: "Staff Software Engineer",
+              email: "alex@example.com",
+              location: "San Francisco, CA",
+              homepage: "https://linkedin.com/in/alexmorgan",
+              summary: "Seasoned technical leader and software engineer with extensive background building resilient high-throughput cloud infrastructure and distributed architectures. Passionate about system observability, high availability, performance metrics, and developer productivity."
+            },
+            work: [{
+              role: "Staff Software Engineer",
+              organization: "Tech Innovations Corp",
+              description: "Spearheaded and engineered distributed microservices architecture that scaled to 500k daily users worldwide. Developed and optimized streaming data pipelines, reducing latency by 45%. Negotiated and architected cloud infrastructure, cutting operational spending by $200000 across 25 production clusters. Mentored 12 junior engineers and established high standards for testing, CI/CD automation, and site reliability engineering across multiple global cross-functional engineering teams."
+            }],
+            education: [{
+              degree: "Ph.D. in Computer Science",
+              institution: "Massachusetts Institute of Technology (MIT)"
+            }],
+            skills: {
+              languages: ["JavaScript", "TypeScript", "Python", "Go", "Rust"],
+              infrastructure: ["Kubernetes", "Docker", "AWS", "GCP", "PostgreSQL", "Redis"]
+            }
           };
 
           var res = win.ATSChecker.calculateAtsScore(sampleData);

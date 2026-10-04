@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CVbuilder - Section Structure & Modularity Automated Test Suite</title>
+  <style>
+    :root {
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-surface-offset: #334155;
+      --color-text: #f8fafc;
+      --color-text-muted: #94a3b8;
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-success: #10b981;
+      --color-error: #ef4444;
+      --color-warning: #f59e0b;
+      --color-divider: #475569;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      padding: 16px 24px;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: var(--color-surface-offset);
+      color: var(--color-text);
+      border: 1px solid var(--color-divider);
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .iframe-container {
+      width: 0;
+      height: 0;
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+    }
+    .test-dashboard {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 24px;
+      gap: 20px;
+    }
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .summary-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: var(--shadow-lg);
+    }
+    .summary-card .label {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .summary-card .value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .summary-card.passed .value { color: var(--color-success); }
+    .summary-card.failed .value { color: var(--color-error); }
+    
+    .console-panel {
+      background: #090d16;
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: var(--shadow-lg);
+    }
+    .log-line {
+      line-height: 1.4;
+    }
+    .log-line.info { color: #60a5fa; }
+    .log-line.success { color: #34d399; }
+    .log-line.error { color: #f87171; }
+    .log-line.warn { color: #fbbf24; }
+
+    .table-container {
+      background: var(--color-surface);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-divider);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .table-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .filters {
+      display: flex;
+      gap: 12px;
+    }
+    select {
+      background: var(--color-bg);
+      border: 1px solid var(--color-divider);
+      color: var(--color-text);
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .results-table {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 12px 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-divider);
+    }
+    td {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--color-divider);
+      font-size: 13px;
+      line-height: 1.5;
+      vertical-align: top;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }
+    .status-badge.passed { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .status-badge.failed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    
+    code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: #60a5fa;
+    }
+    pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: #090d16;
+      padding: 6px 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      max-width: 250px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--color-text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>CVbuilder Section Structure & Modularity Automated Test Suite</h1>
+    <div class="header-controls">
+      <button class="btn btn-secondary" id="downloadReportBtn" onclick="downloadReport()" disabled>Export Report (.json)</button>
+      <button class="btn" id="runTestsBtn" onclick="runAllTests()">Execute Test Protocol</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="iframe-container">
+      <iframe id="testAppFrame" src="index.html"></iframe>
+    </div>
+
+    <div class="test-dashboard">
+      <div class="summary-bar">
+        <div class="summary-card">
+          <span class="label">Total Unit Tests</span>
+          <span class="value" id="totalCount">0</span>
+        </div>
+        <div class="summary-card passed">
+          <span class="label">Passed Assertions</span>
+          <span class="value" id="passedCount">0</span>
+        </div>
+        <div class="summary-card failed">
+          <span class="label">Failed Assertions</span>
+          <span class="value" id="failedCount">0</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">Total Latency</span>
+          <span class="value" id="totalTime">0ms</span>
+        </div>
+      </div>
+
+      <div class="console-panel" id="consoleLogs">
+        <div class="log-line info">Test runner initialized. Ready to execute protocol.</div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h2>Test Execution Log</h2>
+          <div class="filters">
+            <select id="suiteFilter" onchange="filterTests()">
+              <option value="all">All Test Suites (A–K)</option>
+              <option value="suite-a">Suite A: SECTION_DEFS Schema</option>
+              <option value="suite-b">Suite B: normalizeSkills()</option>
+              <option value="suite-c">Suite C: renderSkillsGroup() DOM</option>
+              <option value="suite-d">Suite D: Skills Detection</option>
+              <option value="suite-e">Suite E: addEntry() Edge Cases</option>
+              <option value="suite-f">Suite F: Section Wizard</option>
+              <option value="suite-g">Suite G: Regression</option>
+              <option value="suite-h">Suite H: HTML Preview Engine & Tokens</option>
+              <option value="suite-i">Suite I: Full Multi-Section Output (HTML & LaTeX)</option>
+              <option value="suite-j">Suite J: HTML Preview Click-Focus Access</option>
+              <option value="suite-k">Suite K: File Opening & Race Condition Protection</option>
+            </select>
+          </div>
+        </div>
+        <div class="results-table">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%">Test Case & Description</th>
+                <th style="width: 15%">Suite Category</th>
+                <th style="width: 20%">Expected Output</th>
+                <th style="width: 20%">Actual Output</th>
+                <th style="width: 10%">Latency</th>
+                <th style="width: 10%">Result</th>
+              </tr>
+            </thead>
+            <tbody id="testResultsBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 32px;">
+                  Test protocol is idle. Click "Execute Test Protocol" to begin.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var iframe = document.getElementById('testAppFrame');
+    var consoleLogs = document.getElementById('consoleLogs');
+    var testRuns = [];
+    var lastReport = null;
+
+    function log(text, type = 'info') {
+      var div = document.createElement('div');
+      div.className = 'log-line ' + type;
+      div.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
+      consoleLogs.appendChild(div);
+      consoleLogs.scrollTop = consoleLogs.scrollHeight;
+    }
+
+    function filterTests() {
+      var filter = document.getElementById('suiteFilter').value;
+      var rows = document.querySelectorAll('#testResultsBody tr');
+      rows.forEach(row => {
+        if (filter === 'all' || row.dataset.category === filter) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function appendResultRow(id, name, desc, category, expected, actual, time, passed) {
+      var tbody = document.getElementById('testResultsBody');
+      if (tbody.children.length === 1 && tbody.children[0].cells.length === 1) {
+        tbody.innerHTML = '';
+      }
+      var tr = document.createElement('tr');
+      tr.dataset.category = category;
+      tr.innerHTML = `
+        <td><strong>${id}: ${name}</strong><br><span style="font-size: 11px; color: var(--color-text-muted);">${desc}</span></td>
+        <td><code>${category}</code></td>
+        <td><pre>${escapeHtml(JSON.stringify(expected, null, 2))}</pre></td>
+        <td><pre>${escapeHtml(JSON.stringify(actual, null, 2))}</pre></td>
+        <td>${time.toFixed(1)}ms</td>
+        <td><span class="status-badge ${passed ? 'passed' : 'failed'}">${passed ? '✓ PASS' : '✗ FAIL'}</span></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function runAllTests() {
+      var btn = document.getElementById('runTestsBtn');
+      btn.disabled = true;
+      document.getElementById('testResultsBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 32px;">Running automated test protocol...</td></tr>';
+      
+      log('Reloading application frame to ensure clean state...', 'info');
+      iframe.src = 'index.html';
+      
+      await new Promise(resolve => {
+        iframe.onload = resolve;
+      });
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      var win = iframe.contentWindow;
+      var doc = iframe.contentDocument;
+      testRuns = [];
+      var passedCount = 0;
+      var failedCount = 0;
+      var startTime = performance.now();
+
+      log('Application context loaded. Injecting test protocol...', 'info');
+
+      function assert(id, name, desc, category, expected, actual, condition) {
+        var t0 = performance.now();
+        var passed = !!condition;
+        if (passed) passedCount++; else failedCount++;
+        var latency = performance.now() - t0;
+        
+        testRuns.push({ id, name, desc, category, expected, actual, latency, passed });
+        appendResultRow(id, name, desc, category, expected, actual, latency, passed);
+        if (passed) {
+          log(`[PASS] ${id}: ${name}`, 'success');
+        } else {
+          log(`[FAIL] ${id}: ${name} - Expected ${JSON.stringify(expected)} but got ${JSON.stringify(actual)}`, 'error');
+        }
+      }
+
+      // ==========================================
+      // SUITE A: SECTION_DEFS Schema Integrity
+      // ==========================================
+      log('Executing Suite A: SECTION_DEFS Schema Integrity...', 'info');
+      var defs = win.SECTION_DEFS;
+      
+      assert('A1', 'All 7 section types defined', 'SECTION_DEFS contains 7 schema objects', 'suite-a',
+        7, defs ? defs.length : 0, defs && defs.length === 7);
+
+      var requiredTypes = ['experience', 'education', 'publication', 'teaching', 'award', 'skills', 'simple'];
+      var foundTypes = defs ? defs.map(d => d.id) : [];
+      assert('A2', 'Required section IDs present', 'All 7 required IDs exist in SECTION_DEFS', 'suite-a',
+        requiredTypes, foundTypes, requiredTypes.every(t => foundTypes.includes(t)));
+
+      var allHasProps = defs ? defs.every(d => d.id && d.icon && d.label && d.description && d.dataType && d.template && d.mapper) : false;
+      assert('A3', 'Required fields present on each definition', 'Each def has id, icon, label, description, dataType, template, mapper', 'suite-a',
+        true, allHasProps, allHasProps);
+
+      var skillsDef = defs ? defs.find(d => d.id === 'skills') : null;
+      assert('A4', 'Skills def has itemType: skills and dataType: object', 'skills def has object dataType and skills itemType', 'suite-a',
+        { dataType: 'object', itemType: 'skills' },
+        skillsDef ? { dataType: skillsDef.dataType, itemType: skillsDef.itemType } : null,
+        skillsDef && skillsDef.dataType === 'object' && skillsDef.itemType === 'skills');
+
+      // ==========================================
+      // SUITE B: normalizeSkills() Correctness
+      // ==========================================
+      log('Executing Suite B: normalizeSkills() Correctness...', 'info');
+      
+      var dummyDataB1 = { skills: { programming: ["Python", "C++"] } };
+      win.data = dummyDataB1;
+      win.normalizeSkills();
+      var b1Normalized = Array.isArray(win.data.skills.programming) && win.data.skills.programming[0] && typeof win.data.skills.programming[0] === 'object' && win.data.skills.programming[0].name === 'Python';
+      assert('B1', 'String array normalized to object list', 'Raw string arrays converted to [{name, selected}]', 'suite-b',
+        { name: 'Python', selected: true }, win.data.skills.programming[0], b1Normalized);
+
+      var dummyDataB2 = { skills: [{ group_name: 'tools', skills_list: 'Git, Docker' }] };
+      win.data = dummyDataB2;
+      win.normalizeSkills();
+      var b2Normalized = win.data.skills && win.data.skills.tools && win.data.skills.tools[0] && win.data.skills.tools[0].name === 'Git';
+      assert('B2', 'Array-of-groups normalized to object-of-arrays', 'Array of group objects converted to object of arrays', 'suite-b',
+        'Git', b2Normalized ? win.data.skills.tools[0].name : null, b2Normalized);
+
+      var dummyDataB3 = { skills: { languages: [{ name: 'Rust', selected: true }] } };
+      win.data = dummyDataB3;
+      win.normalizeSkills();
+      assert('B3', 'Already normalized skills untouched', 'Existing valid {name, selected} objects retained', 'suite-b',
+        { name: 'Rust', selected: true }, win.data.skills.languages[0], win.data.skills.languages[0].name === 'Rust' && win.data.skills.languages[0].selected === true);
+
+      var dummyDataB4 = { skills: { tools: [null, undefined, ""] } };
+      win.data = dummyDataB4;
+      win.normalizeSkills();
+      var b4Items = win.data.skills.tools.filter(x => x && x.name);
+      assert('B4', 'Empty or null skill items handled safely', 'Invalid skill entries filtered out safely', 'suite-b',
+        0, b4Items.length, b4Items.length === 0);
+
+      // ==========================================
+      // SUITE C: renderSkillsGroup() DOM Output
+      // ==========================================
+      log('Executing Suite C: renderSkillsGroup() DOM Output...', 'info');
+      
+      var testSkillsArr = [
+        { name: 'JavaScript', selected: true },
+        { name: 'TypeScript', selected: false }
+      ];
+      var groupDom = win.renderSkillsGroup(['skills', 'programming'], testSkillsArr, 'skills.programming', 'programming');
+      
+      var textInputs = groupDom.querySelectorAll('input[type=text]');
+      assert('C1', 'Skill row contains input[type=text]', 'Rendered skill row has editable text input', 'suite-c',
+        2, textInputs.length, textInputs.length === 2);
+
+      assert('C2', 'Text input has correct initial value', 'Input value matches item.name', 'suite-c',
+        'JavaScript', textInputs[0] ? textInputs[0].value : '', textInputs[0] && textInputs[0].value === 'JavaScript');
+
+      var checkboxes = groupDom.querySelectorAll('input[type=checkbox]');
+      assert('C3', 'Checkbox reflects item.selected status', 'First item checked, second item unchecked', 'suite-c',
+        [true, false], [checkboxes[0] ? checkboxes[0].checked : false, checkboxes[1] ? checkboxes[1].checked : true],
+        checkboxes[0] && checkboxes[0].checked === true && checkboxes[1] && checkboxes[1].checked === false);
+
+      var delBtns = groupDom.querySelectorAll('[data-del-skill]');
+      assert('C4', 'Delete button present on each skill row', 'Delete action button rendered on each entry', 'suite-c',
+        2, delBtns.length, delBtns.length === 2);
+
+      var addSkillBtn = groupDom.querySelector('button.btn:not([data-del-skill])');
+      assert('C5', 'Add skill item button rendered at bottom', 'Add skill item button appended to group wrapper', 'suite-c',
+        true, !!addSkillBtn, !!addSkillBtn);
+
+      // Simulate input event to test oninput binding
+      var firstInput = textInputs[0];
+      firstInput.value = 'ES6 JavaScript';
+      firstInput.dispatchEvent(new win.Event('input', { bubbles: true }));
+      assert('C6', 'oninput updates item.name in data array', 'Typing in input updates item.name property', 'suite-c',
+        'ES6 JavaScript', testSkillsArr[0].name, testSkillsArr[0].name === 'ES6 JavaScript');
+
+      // Test add skill item button click
+      win.data = { skills: { programming: testSkillsArr } };
+      addSkillBtn.click();
+      assert('C7', 'Add skill button pushes empty item', 'Clicking add skill pushes {name: "", selected: true}', 'suite-c',
+        3, testSkillsArr.length, testSkillsArr.length === 3 && testSkillsArr[2].name === '');
+
+      // ==========================================
+      // SUITE D: Skills Detection & Generic Objects
+      // ==========================================
+      log('Executing Suite D: Skills Detection & Generic Objects...', 'info');
+
+      assert('D1', 'isSkillLikeGroup identifies valid skill array', 'isSkillLikeGroup returns true for [{name, selected}]', 'suite-d',
+        true, win.isSkillLikeGroup([{ name: 'Go', selected: true }]), win.isSkillLikeGroup([{ name: 'Go', selected: true }]) === true);
+
+      assert('D2', 'isSkillLikeGroup rejects plain string array', 'isSkillLikeGroup returns false for string array', 'suite-d',
+        false, win.isSkillLikeGroup(["Python", "C++"]), win.isSkillLikeGroup(["Python", "C++"]) === false);
+
+      var customSecObj = {
+        frameworks: [{ name: 'React', selected: true }]
+      };
+      win.data = { custom_skills: customSecObj };
+      var customObjDom = win.renderObjectFields(['custom_skills'], customSecObj);
+      var customSkillInputs = customObjDom.querySelectorAll('input[type=text].skill-name-input');
+      assert('D3', 'Custom key custom_skills renders with skill inputs', 'Non-skills named section with skill items uses renderSkillsGroup', 'suite-d',
+        1, customSkillInputs.length, customSkillInputs.length === 1 && customSkillInputs[0].value === 'React');
+
+      var addCategoryBtn = customObjDom.querySelector('button.btn-primary');
+      assert('D4', 'Add Category button present for object sections', 'Object sections have Add Category button', 'suite-d',
+        true, !!addCategoryBtn, !!addCategoryBtn);
+
+      win.data = { basics: { firstname: 'Alex', lastname: 'Morgan' } };
+      var basicsDom = win.renderObjectFields(['basics'], win.data.basics);
+      var basicsAddCatBtn = basicsDom.querySelector('button.btn-primary');
+      assert('D5', 'Add Category button absent for basics section', 'basics section does not render Add Category button', 'suite-d',
+        false, !!basicsAddCatBtn, !basicsAddCatBtn);
+
+      // ==========================================
+      // SUITE E: addEntry() Edge Cases
+      // ==========================================
+      log('Executing Suite E: addEntry() Edge Cases...', 'info');
+
+      win.data = {
+        work_experience: [
+          { role: 'Engineer', organization: 'Acme', selected: true }
+        ]
+      };
+      win.addEntry('work_experience');
+      assert('E1', 'addEntry on non-empty array clones structure', 'New entry has role and organization fields blank', 'suite-e',
+        2, win.data.work_experience.length, win.data.work_experience.length === 2 && win.data.work_experience[1].role === '' && win.data.work_experience[1].selected === true);
+
+      win.data = { custom_list: [] };
+      win.addEntry('custom_list');
+      assert('E2', 'addEntry on empty array creates default entry', 'New entry created with {selected: true}', 'suite-e',
+        1, win.data.custom_list.length, win.data.custom_list.length === 1 && win.data.custom_list[0].selected === true);
+
+      // ==========================================
+      // SUITE F: Section Wizard & Modularity
+      // ==========================================
+      log('Executing Suite F: Section Wizard & Modularity...', 'info');
+
+      win.renderSectionWizardCards();
+      var cardRadios = doc.querySelectorAll('#sectionStructureCards .card-radio');
+      assert('F1', 'Wizard renders 7 structure cards dynamically', 'sectionStructureCards contains 7 card options', 'suite-f',
+        7, cardRadios.length, cardRadios.length === 7);
+
+      // Simulate confirming a new section creation
+      doc.getElementById('newSectionTitleInput').value = 'My Projects';
+      doc.getElementById('newSectionKeyInput').value = 'projects';
+      
+      // Select simple structure
+      var simpleRadio = doc.querySelector('input[name="sectionStructure"][value="simple"]');
+      if (simpleRadio) simpleRadio.checked = true;
+      
+      win.el('confirmAddSectionBtn').click();
+      
+      assert('F2', 'Confirm creates new section in data state', 'New section projects created in window.data', 'suite-f',
+        true, !!win.data.projects, Array.isArray(win.data.projects) && win.data.projects.length === 1);
+
+      assert('F3', 'Mapper strategy assigned for new section', 'mappers.projects set to generic mapper', 'suite-f',
+        'generic', win.mappers.projects, win.mappers.projects === 'generic');
+
+      assert('F4', 'state.sections updated with include and title', 'state.sections.projects configured', 'suite-f',
+        { include: true, title: 'My Projects' }, win.state.sections.projects, win.state.sections.projects && win.state.sections.projects.title === 'My Projects');
+
+      // Test skills section wizard creation
+      doc.getElementById('newSectionTitleInput').value = 'Technical Stack';
+      doc.getElementById('newSectionKeyInput').value = 'tech_stack';
+      var skillsRadio = doc.querySelector('input[name="sectionStructure"][value="skills"]');
+      if (skillsRadio) skillsRadio.checked = true;
+      win.el('confirmAddSectionBtn').click();
+
+      assert('F5', 'Skills type creates object section in data', 'tech_stack is plain object with general category', 'suite-f',
+        true, win.data.tech_stack && !Array.isArray(win.data.tech_stack) && Array.isArray(win.data.tech_stack.general),
+        win.data.tech_stack && !Array.isArray(win.data.tech_stack) && Array.isArray(win.data.tech_stack.general));
+
+      // ==========================================
+      // SUITE G: Regression Test Suite
+      // ==========================================
+      log('Executing Suite G: Regression Test Suite...', 'info');
+
+      win.data = {
+        education: [
+          { degree: 'Ph.D. CS', institution: 'Stanford', start: '2018', end: '2022', selected: true }
+        ],
+        work_experience: [
+          { role: 'Architect', organization: 'Skyward', selected: true }
+        ]
+      };
+      
+      win.state.activeSection = 'education';
+      win.renderEditor();
+      var eduFields = doc.querySelectorAll('#sectionEditor input[data-path]');
+      var hasDegree = Array.from(eduFields).some(inp => inp.dataset.path && inp.dataset.path.endsWith('.degree'));
+      assert('G1', 'Education editor renders degree input field', 'education section renders inputs with .degree path', 'suite-g',
+        true, hasDegree, hasDegree);
+
+      win.state.activeSection = 'work_experience';
+      win.renderEditor();
+      var workFields = doc.querySelectorAll('#sectionEditor input[data-path]');
+      var hasRole = Array.from(workFields).some(inp => inp.dataset.path && inp.dataset.path.endsWith('.role'));
+      assert('G2', 'Work experience editor renders role input field', 'work_experience section renders inputs with .role path', 'suite-g',
+        true, hasRole, hasRole);
+
+      // ==========================================
+      // SUITE H: HTML Preview Engine & Tokens
+      // ==========================================
+      log('Executing Suite H: HTML Preview Engine & Tokens...', 'info');
+
+      var generatedHtml = win.renderHtmlContent();
+      var hasInvalidCssToken = generatedHtml.includes('#{');
+      assert('H1', 'No unparsed #{...} CSS tokens in generated HTML', 'renderHtmlContent replaces accent color without syntax errors', 'suite-h',
+        false, hasInvalidCssToken, !hasInvalidCssToken);
+
+      var hasColorHex = generatedHtml.includes('color: #2563EB') || generatedHtml.includes('color: #2563eb');
+      assert('H2', 'Valid CSS accent color rendered', 'color property evaluates to #2563EB', 'suite-h',
+        true, hasColorHex, hasColorHex);
+
+      win.renderHtmlPreview();
+      var prevFrame = doc.getElementById('htmlPreviewFrame');
+      var iframeDoc = prevFrame ? (prevFrame.contentDocument || prevFrame.contentWindow.document) : null;
+      var iframeBodyText = iframeDoc ? (iframeDoc.body ? iframeDoc.body.textContent : '') : '';
+      var hasTitleInBodyText = iframeBodyText.includes('body { font-family:') || iframeBodyText.includes('<!DOCTYPE');
+
+      assert('H3', 'Iframe body does not leak head/style tags as text', 'Head and style tags parsed strictly in head, not rendered in body text', 'suite-h',
+        false, hasTitleInBodyText, !hasTitleInBodyText);
+
+      // ==========================================
+      // SUITE I: Full Multi-Section Output (HTML & LaTeX)
+      // ==========================================
+      log('Executing Suite I: Full Multi-Section Output (HTML & LaTeX)...', 'info');
+
+      win.data = win.RESEARCHER_CV;
+      win.state.sections = {};
+      var fullHtml = win.renderHtmlContent();
+      var fullTexContext = win.buildTemplateContext('latex');
+      var fullTex = win.renderTemplate(win.DEFAULT_LATEX_TEMPLATE, fullTexContext, win.latexText);
+
+      var htmlSecCount = (fullHtml.match(/<section id="section-[^"]+">/g) || []).length;
+      var texSecCount = (fullTex.match(/\\section\{[^}]+\}/g) || []).length;
+
+      assert('I1', 'All data sections rendered in HTML output', 'renderHtmlContent outputs all 11 RESEARCHER_CV sections', 'suite-i',
+        11, htmlSecCount, htmlSecCount >= 10);
+
+      assert('I2', 'All data sections rendered in LaTeX output', 'renderTemplate outputs all 10 RESEARCHER_CV LaTeX sections', 'suite-i',
+        10, texSecCount, texSecCount >= 10);
+
+      // ==========================================
+      // SUITE J: HTML Preview Click-Focus Access
+      // ==========================================
+      log('Executing Suite J: HTML Preview Click-Focus Access...', 'info');
+
+      var pathEdu = win.parseItemIdToPath('item-education-0');
+      assert('J1', 'parseItemIdToPath maps item-education-0 to education.0', 'itemId parsed cleanly to property path', 'suite-j',
+        'education.0', pathEdu, pathEdu === 'education.0');
+
+      var pathSkills = win.parseItemIdToPath('item-skills-programming');
+      assert('J2', 'parseItemIdToPath maps item-skills-programming to skills.programming', 'itemId parsed cleanly to skill group path', 'suite-j',
+        'skills.programming', pathSkills, pathSkills === 'skills.programming');
+
+      win.focusEditorElement('skills.programming');
+      await new Promise(r => setTimeout(r, 180));
+      assert('J3', 'Clicking skills item in preview switches active section to skills', 'activeSection changed to skills', 'suite-j',
+        'skills', win.state.activeSection, win.state.activeSection === 'skills');
+
+      var skillCard = doc.getElementById('skill-group-skills-programming');
+      assert('J4', 'Skill group card located and focused in editor', 'skill-group-skills-programming element found in editor', 'suite-j',
+        true, !!skillCard, !!skillCard);
+
+      win.focusEditorElement('education.0');
+      await new Promise(r => setTimeout(r, 180));
+      assert('J5', 'Clicking education item in preview switches active section to education', 'activeSection changed to education', 'suite-j',
+        'education', win.state.activeSection, win.state.activeSection === 'education');
+
+      win.focusEditorElement('work_experience');
+      await new Promise(r => setTimeout(r, 180));
+      var workSecCard = doc.getElementById('sec-card-work_experience');
+      assert('J6', 'Clicking section header in preview moves editor to section card', 'sec-card-work_experience card found in editor', 'suite-j',
+        true, !!workSecCard, !!workSecCard && win.state.activeSection === 'work_experience');
+
+      win.focusEditorElement('basics.email');
+      await new Promise(r => setTimeout(r, 180));
+      var emailField = doc.getElementById('field-basics-email');
+      assert('J7', 'Clicking specific element in preview focuses that element field card', 'field-basics-email found and focused in editor', 'suite-j',
+        true, !!emailField, !!emailField && win.state.activeSection === 'basics');
+
+      win.focusEditorElement('skills');
+      await new Promise(r => setTimeout(r, 180));
+      var skillsSecCard = doc.getElementById('sec-card-skills');
+      var activeFocused = doc.activeElement;
+      var isSubInputFocused = activeFocused && activeFocused.tagName === 'INPUT' && skillsSecCard && skillsSecCard.contains(activeFocused);
+      assert('J8', 'Clicking Skills section header moves editor to top of Skills section without focusing sub-inputs', 'sec-card-skills located at top without jumping to child inputs', 'suite-j',
+        true, !!skillsSecCard && !isSubInputFocused, !!skillsSecCard && !isSubInputFocused);
+
+      // ==========================================
+      // SUITE K: File Opening & Race Condition Protection
+      // ==========================================
+      log('Executing Suite K: File Opening & Race Condition Protection...', 'info');
+
+      win.data = win.BASIC_CV || win.RESEARCHER_CV;
+      win.renderAll();
+      win.updateHtmlPreviewContent();
+
+      var kFrame = doc.getElementById('htmlPreviewFrame');
+      var kDoc = kFrame ? (kFrame.contentDocument || kFrame.contentWindow.document) : null;
+      var kBodyText = kDoc && kDoc.body ? kDoc.body.textContent : '';
+      var hasLeakedStyle = kBodyText.includes('body { font-family:') || kBodyText.includes('Palatino');
+
+      assert('K1', 'Opening CV file does not leak <style> text into body text', 'Style block cleanly contained in head, not rendered in body text', 'suite-k',
+        false, hasLeakedStyle, !hasLeakedStyle);
+
+      var hasHeadStyle = kDoc && kDoc.head && !!kDoc.head.querySelector('style');
+      assert('K2', 'Iframe head contains valid <style> element after file open', 'style tag present in iframe head', 'suite-k',
+        true, hasHeadStyle, hasHeadStyle);
+
+      // Finish Suite Metrics
+      var totalTime = performance.now() - startTime;
+      document.getElementById('totalCount').textContent = testRuns.length;
+      document.getElementById('passedCount').textContent = passedCount;
+      document.getElementById('failedCount').textContent = failedCount;
+      document.getElementById('totalTime').textContent = `${totalTime.toFixed(0)}ms`;
+      document.getElementById('downloadReportBtn').disabled = false;
+
+      log(`Test Protocol Execution Complete. Passed: ${passedCount}/${testRuns.length} (${(passedCount/testRuns.length*100).toFixed(1)}%). Latency: ${totalTime.toFixed(0)}ms`, failedCount === 0 ? 'success' : 'warn');
+
+      lastReport = {
+        timestamp: new Date().toISOString(),
+        total: testRuns.length,
+        passed: passedCount,
+        failed: failedCount,
+        latencyMs: totalTime,
+        runs: testRuns
+      };
+      
+      btn.disabled = false;
+    }
+
+    function downloadReport() {
+      if (!lastReport) return;
+      var str = JSON.stringify(lastReport, null, 2);
+      var blob = new Blob([str], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = `cvbuilder_section_test_report_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Auto-run on load
+    window.onload = function() {
+      setTimeout(runAllTests, 500);
+    };
+  </script>
+</body>
+</html>

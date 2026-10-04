@@ -295,10 +295,20 @@
       <!-- HTML Preview Panel -->
       <div id="htmlPrevTab" class="stack" style="flex:1; display:flex; flex-direction:column">
         <div class="split" style="margin-bottom: var(--space-2)">
-          <div class="sectiontitle">Live HTML Preview</div>
-          <button class="btn btn-ghost" id="openHtmlWindowBtn" style="min-height:30px; padding:4px 10px; font-size:var(--text-xs)">Open in New Window</button>
+          <div class="sectiontitle" style="display:flex; align-items:center; gap:8px">
+            <span>Live HTML Preview</span>
+            <span class="preview-page-pill" id="previewPageIndicator">📄 A4 Draft</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:var(--space-2)">
+            <div class="preview-zoom-controls" title="Preview Scale">
+              <button class="preview-zoom-btn" id="zoomOutBtn" title="Zoom Out">−</button>
+              <button class="preview-zoom-btn" id="zoomResetBtn" title="Reset Zoom" style="font-size:11px; width:auto; padding:0 6px">100%</button>
+              <button class="preview-zoom-btn" id="zoomInBtn" title="Zoom In">+</button>
+            </div>
+            <button class="btn btn-ghost" id="openHtmlWindowBtn" style="min-height:30px; padding:4px 10px; font-size:var(--text-xs)">Open in New Window</button>
+          </div>
         </div>
-        <iframe id="htmlPreviewFrame" sandbox="allow-scripts allow-same-origin" srcdoc="Loading preview..." style="flex:1; width: 100%; min-height: 450px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: white; margin:0"></iframe>
+        <iframe id="htmlPreviewFrame" sandbox="allow-scripts allow-same-origin" srcdoc="Loading preview..." style="flex:1; width: 100%; min-height: 450px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: white; margin:0; transition: transform 0.15s ease; transform-origin: top center"></iframe>
       </div>
       
       <!-- LaTeX Source Panel -->
@@ -721,7 +731,7 @@
     <button id="bottomBarChatBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 8px; border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-primary) l c h / .3); background:var(--color-surface); font-size:11px; font-weight:700; cursor:pointer; color:var(--color-primary); display:flex; align-items:center; gap:4px" title="AI Temporal Chat Assistant">
       💬 <span id="bottomBarChatText">AI Chat</span>
     </button>
-    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:11px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.8.0</button>
+    <button id="versionBtn" class="version-badge" aria-haspopup="dialog" style="height:22px; padding:0 var(--space-2); border-radius:var(--radius-sm); border:1px solid oklch(from var(--color-text) l c h / .14); background:var(--color-surface); font-size:11px; font-weight:700; cursor:pointer; color:var(--color-text-muted);">v0.9.0</button>
     <button class="iconbtn" data-theme-toggle aria-label="Switch theme" style="background:none; border:none; padding:0; cursor:pointer; font-size:var(--text-sm); line-height:1; display:flex; align-items:center; justify-content:center; color:var(--color-text-muted)">&#9790;</button>
   </div>
 </footer>
@@ -763,7 +773,7 @@ el('tplFileInput').onchange = function(e) {
   var file = e.target.files[0];
   if (file) {
     importStyleFile(file);
-    closeModal('styleManagerModal');
+    if (el('styleManagerModal')) closeModal('styleManagerModal');
   }
   // Reset input so the same file can be re-imported
   e.target.value = '';
@@ -791,13 +801,47 @@ el('resetHtmlTplBtn').onclick = function() {
 el('copyLatexCodeBtn').onclick = function() {
   var code = el('latexPreview').textContent;
   navigator.clipboard.writeText(code).then(function() {
-    alert(state.langFilter === 'es' ? 'Código LaTeX copiado al portapapeles.' : 'LaTeX code copied to clipboard!');
+    if (typeof showToast === 'function') {
+      showToast(state.langFilter === 'es' ? 'Código LaTeX copiado al portapapeles.' : 'LaTeX code copied to clipboard!', 'success');
+    } else {
+      alert(state.langFilter === 'es' ? 'Código LaTeX copiado al portapapeles.' : 'LaTeX code copied to clipboard!');
+    }
   });
 };
 
 el('openHtmlWindowBtn').onclick = function() {
   openHtmlWindow(false);
 };
+
+// Preview Zoom Controls
+var currentPreviewZoom = 1.0;
+function applyPreviewZoom() {
+  var frame = el('htmlPreviewFrame');
+  if (frame) {
+    frame.style.transform = 'scale(' + currentPreviewZoom + ')';
+    frame.style.width = (100 / currentPreviewZoom) + '%';
+  }
+  var resetBtn = el('zoomResetBtn');
+  if (resetBtn) resetBtn.textContent = Math.round(currentPreviewZoom * 100) + '%';
+}
+if (el('zoomOutBtn')) {
+  el('zoomOutBtn').onclick = function() {
+    currentPreviewZoom = Math.max(0.6, Math.round((currentPreviewZoom - 0.1) * 10) / 10);
+    applyPreviewZoom();
+  };
+}
+if (el('zoomInBtn')) {
+  el('zoomInBtn').onclick = function() {
+    currentPreviewZoom = Math.min(1.4, Math.round((currentPreviewZoom + 0.1) * 10) / 10);
+    applyPreviewZoom();
+  };
+}
+if (el('zoomResetBtn')) {
+  el('zoomResetBtn').onclick = function() {
+    currentPreviewZoom = 1.0;
+    applyPreviewZoom();
+  };
+}
 
 // Tab view toggler events binders
 document.querySelectorAll('.left-pane .tab').forEach(function(tab) {

@@ -1,3 +1,19 @@
+function getSectionDefaultTitle(key) {
+  var isDocEs = (typeof state !== 'undefined' && state.langFilter === 'es') || (typeof state !== 'undefined' && state.sections && Object.keys(state.sections).some(function(k) {
+    var title = (state.sections[k] && state.sections[k].title) || '';
+    return /educaci[oó]n|experiencia|habilidades|idiomas|proyectos/i.test(title);
+  }));
+  if (isDocEs) {
+    if (key === 'skills') return 'Habilidades';
+    if (key === 'languages') return 'Idiomas';
+    if (key === 'education') return 'Educación';
+    if (key === 'work_experience' || key === 'experience') return 'Experiencia Laboral';
+    if (key === 'publications' || key === 'publication') return 'Publicaciones';
+    if (key === 'projects' || key === 'project') return 'Proyectos';
+  }
+  return human(key);
+}
+
 function getPropertyName(itemPath, fallbackKey) {
   if (activeInstance && activeInstance.propertyNames && activeInstance.propertyNames[itemPath] !== undefined && activeInstance.propertyNames[itemPath] !== '') {
     return activeInstance.propertyNames[itemPath];
@@ -5,7 +21,19 @@ function getPropertyName(itemPath, fallbackKey) {
   if (typeof state !== 'undefined' && state.propertyNames && state.propertyNames[itemPath] !== undefined && state.propertyNames[itemPath] !== '') {
     return state.propertyNames[itemPath];
   }
-  return fallbackKey !== undefined ? fallbackKey : human((itemPath || '').split('.').pop());
+  var field = (itemPath || '').split('.').pop();
+  if (fallbackKey !== undefined && fallbackKey !== field) return fallbackKey;
+  var isDocEs = (typeof state !== 'undefined' && state.langFilter === 'es') || (typeof state !== 'undefined' && state.sections && Object.keys(state.sections).some(function(k) {
+    var title = (state.sections[k] && state.sections[k].title) || '';
+    return /educaci[oó]n|experiencia|habilidades|idiomas|proyectos/i.test(title);
+  }));
+  if (isDocEs) {
+    if (field === 'programming') return 'Programación';
+    if (field === 'tools') return 'Herramientas';
+    if (field === 'frameworks') return 'Frameworks / Bibliotecas';
+    if (field === 'languages') return 'Idiomas';
+  }
+  return human(field);
 }
 
 function renderTemplate(template, data, escapeFn) {
@@ -91,6 +119,20 @@ function renderTemplate(template, data, escapeFn) {
       
       return renderTemplate(innerContent, data, escapeFn);
     });
+  }
+
+  if (escapeFn === texEscape) {
+    // 1. Disambiguate LaTeX command argument braces: \cmd{{{tag}}} or }{{{tag}}} -> \cmd{ {{tag}} }
+    var texCmdBraceRe = /(\\[a-zA-Z@*]+(?:\[[^\]]*\])*|\}|[a-zA-Z0-9_])\{(\{\{[a-zA-Z0-9_.-]+\}\})\}/g;
+    var prevTex;
+    do {
+      prevTex = rendered;
+      rendered = rendered.replace(texCmdBraceRe, '$1{ $2 }');
+    } while (rendered !== prevTex);
+
+    // 2. Any remaining standalone {{{tag}}} in LaTeX should be normalized to {{tag}}
+    // so it is properly texEscaped and doesn't eat outer syntax or leave unescaped text
+    rendered = rendered.replace(/\{\{\{([a-zA-Z0-9_.-]+)\}\}\}/g, '{{$1}}');
   }
 
   var rawRegex = /\{\{\&([a-zA-Z0-9_\\.-]+)\}\}|\{\{\{([a-zA-Z0-9_\\.-]+)\}\}\}/g;
@@ -295,8 +337,19 @@ function texEscape(str) {
     .replace(/\$/g, '\\$')
     .replace(/#/g, '\\#')
     .replace(/_/g, '\\_')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
     .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
+    .replace(/\^/g, '\\textasciicircum{}')
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, function(ch) {
+      return (ch === '\u201D' || ch === '\u2033') ? "''" : "``";
+    })
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, function(ch) {
+      return (ch === '\u2019' || ch === '\u2032') ? "'" : "`";
+    })
+    .replace(/[\u2013]/g, '--')
+    .replace(/[\u2014]/g, '---')
+    .replace(/[\u2026]/g, '\\dots{}');
 
   for (var i = 0; i < placeholders.length; i++) {
     str = str.replace('@@TEXCMD' + i + '@@', placeholders[i]);
@@ -457,10 +510,14 @@ function buildTemplateContext(format) {
   }
 
   if (!root.labels.basics) root.labels.basics = {};
-  var isEs = state.langFilter === 'es';
+  var isDocEs = (typeof state !== 'undefined' && state.langFilter === 'es') || (typeof state !== 'undefined' && state.sections && Object.keys(state.sections).some(function(k) {
+    var title = (state.sections[k] && state.sections[k].title) || '';
+    return /educaci[oó]n|experiencia|habilidades|idiomas|proyectos/i.test(title);
+  }));
+  var isEs = isDocEs;
   var ensureBasicsLabel = function(field, defaultText) {
     var fullPath = 'basics.' + field;
-    root.labels.basics[field] = getPropertyName(fullPath, field) || defaultText;
+    root.labels.basics[field] = getPropertyName(fullPath, defaultText);
   };
 
   ensureBasicsLabel('firstname', isEs ? 'Nombre' : 'First Name');
@@ -474,9 +531,9 @@ function buildTemplateContext(format) {
 
   // Add Spanish sections translation support
   root.sections = {};
-  Object.keys(state.sections).forEach(function(key) {
+  Object.keys(state.sections || {}).forEach(function(key) {
     root.sections[key] = {
-      title: state.sections[key].title || human(key)
+      title: state.sections[key].title || getSectionDefaultTitle(key)
     };
   });
 
@@ -572,7 +629,7 @@ function renderAutoSectionHtml(key, val) {
   if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] === false) return '';
   if (!val) return '';
   
-  var title = (state.sections[key] && state.sections[key].title) || human(key);
+  var title = (state.sections[key] && state.sections[key].title) || getSectionDefaultTitle(key);
   var html = '<section id="section-' + key + '">\n  <h2>' + htmlEscape(title) + '</h2>\n';
   
   if (isObj(val) && !Array.isArray(val)) {
@@ -643,6 +700,30 @@ function renderAutoSectionHtml(key, val) {
           return;
         }
 
+        var spacer = (state.headerSpacer !== undefined) ? state.headerSpacer : 20;
+
+        if (key === 'languages' || (it.language && !it.role && !it.degree && !it.organization && !it.institution)) {
+          var langName = it.language || it.name || '';
+          var profStr = '';
+          if (isObj(it.proficiency)) {
+            var pParts = [];
+            if (it.proficiency.speaks) pParts.push('speaks ' + it.proficiency.speaks);
+            if (it.proficiency.reads) pParts.push('reads ' + it.proficiency.reads);
+            if (it.proficiency.writes) pParts.push('writes ' + it.proficiency.writes);
+            if (it.proficiency.listens) pParts.push('listens ' + it.proficiency.listens);
+            profStr = pParts.join(', ');
+          } else {
+            profStr = String(it.proficiency || it.fluency || it.level || '');
+          }
+          html += '  <div class="entry" id="item-' + key + '-' + realIdx + '">\n';
+          html += '    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:' + spacer + 'px;">\n';
+          html += '      <span style="font-weight:600;">' + htmlEscape(langName) + '</span>\n';
+          if (profStr) html += '      <span style="color:#666; font-style:italic;">' + htmlEscape(profStr) + '</span>\n';
+          html += '    </div>\n';
+          html += '  </div>\n';
+          return;
+        }
+
         var headerLeft = it.role || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '';
         var headerRight = joinDate(it.start, it.end, 'dash') || it.year || it.date || '';
         
@@ -653,7 +734,8 @@ function renderAutoSectionHtml(key, val) {
         else if (it.institution) orgInstDept = it.institution;
         else if (it.department) orgInstDept = it.department;
 
-        var subheader = orgInstDept || it.company || it.publisher || it.vendor || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
+        var profVal = isObj(it.proficiency) ? JSON.stringify(it.proficiency) : (it.proficiency || '');
+        var subheader = orgInstDept || it.company || it.publisher || it.vendor || profVal || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
         
         var descParts = [];
         if (it.dissertation) {
@@ -673,7 +755,6 @@ function renderAutoSectionHtml(key, val) {
 
         if (!headerLeft && !headerRight && !subheader && !desc) return;
 
-        var spacer = (state.headerSpacer !== undefined) ? state.headerSpacer : 20;
         html += '  <div class="entry" id="item-' + key + '-' + realIdx + '">\n';
         html += '    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:' + spacer + 'px;">\n';
         html += '      <span>' + htmlEscape(headerLeft + (subheader ? ' - ' + subheader : '')) + '</span>\n';
@@ -699,7 +780,7 @@ function renderAutoSectionLatex(key, val) {
   if (activeInstance && activeInstance.visibility && activeInstance.visibility[key] === false) return '';
   if (!val) return '';
   
-  var title = (state.sections[key] && state.sections[key].title) || human(key);
+  var title = (state.sections[key] && state.sections[key].title) || getSectionDefaultTitle(key);
   var tex = '\\section{' + latexText(title) + '}\n';
   
   if (isObj(val) && !Array.isArray(val)) {
@@ -764,6 +845,23 @@ function renderAutoSectionLatex(key, val) {
           return;
         }
 
+        if (key === 'languages' || (it.language && !it.role && !it.degree && !it.organization && !it.institution)) {
+          var langName = latexText(it.language || it.name || '');
+          var profStr = '';
+          if (isObj(it.proficiency)) {
+            var pParts = [];
+            if (it.proficiency.speaks) pParts.push('speaks ' + it.proficiency.speaks);
+            if (it.proficiency.reads) pParts.push('reads ' + it.proficiency.reads);
+            if (it.proficiency.writes) pParts.push('writes ' + it.proficiency.writes);
+            if (it.proficiency.listens) pParts.push('listens ' + it.proficiency.listens);
+            profStr = latexText(pParts.join(', '));
+          } else {
+            profStr = latexText(String(it.proficiency || it.fluency || it.level || ''));
+          }
+          tex += '\\cvitemwithcomment{' + langName + '}{' + profStr + '}{}\n';
+          return;
+        }
+
         var dateStr = joinDate(it.start, it.end, 'dash') || latexText(it.year || it.date || '');
         var title1 = latexText(it.role || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '');
         
@@ -774,7 +872,8 @@ function renderAutoSectionLatex(key, val) {
         else if (it.institution) texOrgInstDept = it.institution;
         else if (it.department) texOrgInstDept = it.department;
 
-        var subheaderVal = texOrgInstDept || it.company || it.publisher || it.vendor || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
+        var profVal = isObj(it.proficiency) ? JSON.stringify(it.proficiency) : (it.proficiency || '');
+        var subheaderVal = texOrgInstDept || it.company || it.publisher || it.vendor || profVal || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
         var title2 = latexText(subheaderVal);
         
         var texDescParts = [];
@@ -1192,6 +1291,18 @@ function renderLatex() {
   var rendered = renderLatexCode();
   var prevEl = el('latexPreview');
   if (prevEl) prevEl.textContent = rendered;
+
+  if (typeof updateHtmlPreviewContent === 'function') {
+    updateHtmlPreviewContent();
+  }
+  var frame = el('htmlPreviewFrame');
+  if (frame && typeof renderHtmlContent === 'function') {
+    var htmlContent = renderHtmlContent();
+    if (!frame.srcdoc || frame.srcdoc !== htmlContent) {
+      frame.srcdoc = htmlContent;
+    }
+  }
+
   if (typeof updateAtsBadge === 'function') updateAtsBadge();
 }
 

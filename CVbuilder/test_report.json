@@ -1,0 +1,324 @@
+{
+  "protocolName": "CVbuilder Extensive Functionality Test Suite",
+  "timestamp": "2026-10-04T23:26:38.355Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+  "durationMs": 1656,
+  "statistics": {
+    "totalTests": 32,
+    "passed": 32,
+    "failed": 0,
+    "successRate": "100.0%"
+  },
+  "assertions": [
+    {
+      "id": "1.1",
+      "name": "LaTeX Escaping",
+      "category": "compiler",
+      "expected": "Guillermo \\& Co \\% Sales \\#100 \\{New\\} \\_Project\\_ \\textasciitilde{}home\\textasciicircum{}",
+      "actual": "Guillermo \\& Co \\% Sales \\#100 \\{New\\} \\_Project\\_ \\textasciitilde{}home\\textasciicircum{}",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "1.2",
+      "name": "Array Item Escaping",
+      "category": "compiler",
+      "expected": "A\\&B, C\\%D",
+      "actual": "A\\&B, C\\%D",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "1.3",
+      "name": "HTML Sanitizer Escaping",
+      "category": "compiler",
+      "expected": "John &lt;script&gt;alert(1)&lt;/script&gt; &amp; Co",
+      "actual": "John &lt;script&gt;alert(1)&lt;/script&gt; &amp; Co",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "1.4",
+      "name": "HTML Entity Escaping",
+      "category": "compiler",
+      "expected": "A &amp; B &lt; C &gt; D",
+      "actual": "A &amp; B &lt; C &gt; D",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "1.5",
+      "name": "LaTeX Unicode Typography Escaping",
+      "category": "compiler",
+      "expected": "Colegio Alem\u00e1n ``Mariscal Braun'' -- `1997'---2024\\dots{}",
+      "actual": "Colegio Alem\u00e1n ``Mariscal Braun'' -- `1997'---2024\\dots{}",
+      "passed": true,
+      "latency": 1
+    },
+    {
+      "id": "1.6",
+      "name": "LaTeX Macro Argument Preservation",
+      "category": "compiler",
+      "expected": "Valid LaTeX braces",
+      "actual": "Valid LaTeX braces",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "1.7",
+      "name": "Language Proficiency Rendering",
+      "category": "compiler",
+      "expected": "German with Fluent / C1",
+      "actual": "German with Fluent / C1",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "2.1",
+      "name": "Entry Move Up",
+      "category": "data",
+      "expected": [
+        "Developer A",
+        "Developer C",
+        "Developer B"
+      ],
+      "actual": [
+        "Developer A",
+        "Developer C",
+        "Developer B"
+      ],
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "2.2",
+      "name": "Entry Move Down",
+      "category": "data",
+      "expected": [
+        "Developer C",
+        "Developer A",
+        "Developer B"
+      ],
+      "actual": [
+        "Developer C",
+        "Developer A",
+        "Developer B"
+      ],
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "2.3",
+      "name": "Reorder Boundaries",
+      "category": "data",
+      "expected": {
+        "canMoveUp": false,
+        "canMoveDown": false
+      },
+      "actual": {
+        "canMoveUp": false,
+        "canMoveDown": false
+      },
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "2.4",
+      "name": "Nested Key Resolver",
+      "category": "data",
+      "expected": "La Paz",
+      "actual": "La Paz",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "2.5",
+      "name": "Nested Path Setter",
+      "category": "data",
+      "expected": "New City",
+      "actual": "New City",
+      "passed": true,
+      "latency": 17
+    },
+    {
+      "id": "3.1",
+      "name": "Save DB LocalStorage",
+      "category": "storage",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "latency": 1
+    },
+    {
+      "id": "3.2",
+      "name": "Load DB Storage",
+      "category": "storage",
+      "expected": "UnitTester",
+      "actual": "UnitTester",
+      "passed": true,
+      "latency": 7
+    },
+    {
+      "id": "3.3",
+      "name": "Delete DB Storage",
+      "category": "storage",
+      "expected": false,
+      "actual": false,
+      "passed": true,
+      "latency": 9
+    },
+    {
+      "id": "4.1",
+      "name": "DB to Compiler Integration",
+      "category": "integration",
+      "expected": "Contains 'DynamicIntegrationTest'",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 5
+    },
+    {
+      "id": "4.2",
+      "name": "Translator to UI Integration",
+      "category": "integration",
+      "expected": "Exportar PDF",
+      "actual": "Exportar PDF",
+      "passed": true,
+      "latency": 3
+    },
+    {
+      "id": "4.3",
+      "name": "Instance Overrides to Compiler Integration",
+      "category": "integration",
+      "expected": "Contains 'Architect Override'",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 5
+    },
+    {
+      "id": "5.1",
+      "name": "importStyleFile Exists",
+      "category": "regression",
+      "expected": "function",
+      "actual": "function",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.2",
+      "name": "Mappers Editor Element",
+      "category": "regression",
+      "expected": "no-stale, has-correct",
+      "actual": "no-stale, has-correct",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.3",
+      "name": "closeAllDropdowns Uses .open",
+      "category": "regression",
+      "expected": "false",
+      "actual": "false",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.4",
+      "name": "Core Modal Buttons Wired",
+      "category": "regression",
+      "expected": "[]",
+      "actual": "[]",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.5",
+      "name": "Mappers JSON Round-trip",
+      "category": "regression",
+      "expected": "skills_test_override",
+      "actual": "skills_test_override",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.6",
+      "name": "Array Section Live Preview",
+      "category": "regression",
+      "expected": "Contains 'Ph.D. Quantum Computing'",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 4
+    },
+    {
+      "id": "5.7",
+      "name": "PDF Download Handler Guard",
+      "category": "regression",
+      "expected": "function, element-found",
+      "actual": "function, element-found",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.8",
+      "name": "Markdown Syntax Parser",
+      "category": "unit",
+      "expected": "Markdown converted to TeX & HTML",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.9",
+      "name": "Embedded Instance Storage Housekeeping",
+      "category": "unit",
+      "expected": "Array & stored in db.instances",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.10",
+      "name": "Importer & Exporter Data Engine",
+      "category": "unit",
+      "expected": "Valid Import & Export Data",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.11",
+      "name": "ATS Scoring Rules",
+      "category": "unit",
+      "expected": "100% ATS score & keyword match",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.12",
+      "name": "AI Client & Settings",
+      "category": "unit",
+      "expected": "AIClient configured & Settings readable",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 0
+    },
+    {
+      "id": "5.13",
+      "name": "Unconfigured Chat Widget Prompt",
+      "category": "integration",
+      "expected": "unconfigured prompt -> active chat",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 1
+    },
+    {
+      "id": "5.14",
+      "name": "AI Browser Tools Engine",
+      "category": "integration",
+      "expected": "All tools executed successfully",
+      "actual": "Passed",
+      "passed": true,
+      "latency": 68
+    }
+  ]
+}

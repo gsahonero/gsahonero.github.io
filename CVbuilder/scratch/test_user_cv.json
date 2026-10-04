@@ -1,0 +1,139 @@
+{
+  "basics": {
+    "firstname": "Maria Lourdes",
+    "lastname": "Nava",
+    "title": "Profesional en Bibliotecología y Ciencias de la información | Alemán | Enseñanza particular",
+    "email": "maourdesnava@hotmail.com",
+    "homepage": "",
+    "location": "La Paz, Bolivia",
+    "photo": "",
+    "research_interests": "Profesional en Bibliotecología y Ciencias de la Información con sólida formación en idioma alemán y experiencia en enseñanza particular. Estudios de alemán realizados en Alemania, certificaciones del Goethe-Institut y formación escolar en el Colegio Alemán “Mariscal Braun”. Experiencia en clases particulares de alemán, preparación individual de estudiantes y preparación para el ingreso a instituciones educativas con formación alemana. Perfil organizado, paciente y orientado a la comunicación, la atención personalizada y el aprendizaje. Amplia experiencia adicional en gestión documental, secretariado, atención al cliente y coordinación."
+  },
+  "education": [
+    {
+      "degree": "Bibliotecología y Ciencias de la información",
+      "institution": "Universidad Mayor de San Andrés",
+      "start": "2014",
+      "end": "",
+      "description": "",
+      "dissertation": "",
+      "selected": true
+    }
+  ],
+  "work_experience": [
+    {
+      "role": "Enseñanza Particular de Alemán",
+      "department": "La Paz, Bolivia",
+      "organization": "",
+      "start": "2007",
+      "end": "",
+      "description": "Preparó a un estudiante para su ingreso al Colegio Ave María, institución de las Hermanas Alemanas en Villa Fátima, logrando su ingreso exitoso.\nFomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.",
+      "selected": true
+    },
+    {
+      "role": "Enseñanza Particular de Alemán",
+      "department": "La Paz, Bolivia",
+      "organization": "",
+      "start": "1997",
+      "end": "",
+      "description": "Impartió clases particulares de alemán y brindó acompañamiento individualizado a estudiantes del Colegio Alemán de La Paz.\nAcompañó a dos estudiantes en sus primeras etapas de formación en alemán, quienes posteriormente continuaron estudios orientados a la traducción simultánea.\nFomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.",
+      "selected": true
+    }
+  ],
+  "skills": {
+    "programming": [
+      {
+        "name": "JavaScript",
+        "selected": true
+      },
+      {
+        "name": "TypeScript",
+        "selected": true
+      },
+      {
+        "name": "Python",
+        "selected": true
+      },
+      {
+        "name": "Go",
+        "selected": true
+      },
+      {
+        "name": "LaTeX",
+        "selected": true
+      }
+    ],
+    "tools": [
+      {
+        "name": "Docker",
+        "selected": true
+      },
+      {
+        "name": "Kubernetes",
+        "selected": true
+      },
+      {
+        "name": "Git",
+        "selected": true
+      },
+      {
+        "name": "GitHub Actions",
+        "selected": true
+      },
+      {
+        "name": "Vite",
+        "selected": true
+      }
+    ]
+  },
+  "languages": [
+    {
+      "language": "Aleman",
+      "proficiency": "Fluido / profesional",
+      "selected": true
+    },
+    {
+      "language": "Español",
+      "proficiency": "Nativo",
+      "selected": true
+    }
+  ],
+  "_style": {
+    "cvTitle": "Curriculum Vitae",
+    "style": "classic",
+    "preamble": "",
+    "footer": "",
+    "latexTemplate": "\\documentclass[11pt,a4paper,sans]{moderncv}\n\\usepackage[utf8]{inputenc}\n\\moderncvstyle{classic}\n%\\moderncvcolor{grey}\n\\definecolor{color2}{RGB}{60,60,60}\n\\definecolor{color1}{HTML}{{{theme.accentColor}}}\n{{&theme.fontLatex}}\n\\usepackage{lipsum}\n\\usepackage{xstring}\n\\usepackage[scale=0.93]{geometry}\n\n\\firstname{\\Huge {{basics.firstname}} \\vspace{10pt}}\n\\familyname{\\\\\\Huge {{basics.lastname}}}\n\\title{{{basics.title}}}\n{{#basics.location}}\\address{{{basics.location}}}{{/basics.location}}\n{{#basics.email}}\\email{{{basics.email}}}{{/basics.email}}\n{{#basics.homepage}}\\homepage{{{basics.homepage}}}{{/basics.homepage}}\n{{#has_photo}}\\photo[70pt][0.4pt]{{{photo_filename}}}{{/has_photo}}\n\\hyphenation{Universidad}\n\n\\begin{document}\n{{&theme.textAlignLatex}}\n\\makecvtitle\n\\vspace{-1em}\n\n{{#has_research_interests}}\n\\section{{{labels.basics.research_interests}}}\n{{{basics.research_interests}}}\n{{/has_research_interests}}\n\n\\renewcommand{\\listitemsymbol}{}\n\n{{&all_sections}}\n\n\\end{document}",
+    "htmlTemplate": "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>{{basics.firstname}} {{basics.lastname}} - CV</title>\n<style>\n  body, h1, h2, h3, p, section, .entry, .entry-description, .entry-subheader, .contact-info, .kv-list, ul, li {\n    {{&theme.textAlignCss}}\n  }\n  body {\n    {{&theme.fontCss}}\n    line-height: 1.6;\n    color: #333;\n    max-width: 800px;\n    margin: 40px auto;\n    padding: 0 20px;\n    background: #fff;\n  }\n  .contact-info {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 15px;\n    margin-bottom: 30px;\n    padding-bottom: 15px;\n    border-bottom: 2px solid #eee;\n    font-size: 0.9em;\n    {{&theme.textAlignFlexCss}}\n  }\n  h1 {\n    font-size: 2.5em;\n    margin-bottom: 5px;\n    color: #111;\n  }\n  .subtitle {\n    font-size: 1.2em;\n    color: #666;\n    margin-bottom: 20px;\n  }\n  .contact-info {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 15px;\n    margin-bottom: 30px;\n    padding-bottom: 15px;\n    border-bottom: 2px solid #eee;\n    font-size: 0.9em;\n  }\n  .contact-info a {\n    color: #{{{theme.accentColor}}};\n    text-decoration: none;\n  }\n  section {\n    margin-bottom: 30px;\n  }\n  h2 {\n    font-size: 1.5em;\n    border-bottom: 2px solid #{{{theme.accentColor}}};\n    padding-bottom: 5px;\n    color: #{{{theme.accentColor}}};\n    margin-bottom: 15px;\n  }\n  .entry {\n    margin-bottom: 15px;\n  }\n  .entry-header {\n    display: flex;\n    justify-content: space-between;\n    align-items: baseline;\n    gap: {{&theme.headerSpacer}}px;\n    font-weight: bold;\n    {{&theme.textAlignFlexCss}}\n  }\n  .entry-subheader {\n    font-style: italic;\n    color: #555;\n  }\n  .entry-description {\n    margin-top: 5px;\n    font-size: 0.95em;\n    white-space: pre-wrap;\n  }\n  .skills-list {\n    margin: 0;\n    padding: 0;\n    list-style: none;\n  }\n  body, section, main, header {\n    cursor: default !important;\n  }\n  .entry, [id^=\"item-\"], [id^=\"section-\"], h1, h2, h3, h4, h5, h6, p, li, span, a, img, strong, em, u, b, i, .subtitle, .contact-info > div, .kv-list > li, .entry-header, .entry-description, .entry-subheader {\n    cursor: pointer !important;\n  }\n</style>\n</head>\n<body>\n  <header id=\"section-basics\" style=\"display:flex; align-items:center; margin-bottom:15px\">\n    <div>\n      <h1 id=\"item-basics-firstname\" style=\"margin:0\">{{basics.firstname}} {{basics.lastname}}</h1>\n      <div id=\"item-basics-title\" class=\"subtitle\" style=\"margin-top:4px; margin-bottom:0\">{{basics.title}}</div>\n    </div>\n    {{#basics.photo}}\n    <img id=\"item-basics-photo\" src=\"{{basics.photo}}\" alt=\"Profile photo\" style=\"width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #{{{theme.accentColor}}}; flex-shrink:0; margin-left:{{theme.photoLeftOffset}}px; margin-top:{{theme.photoTopOffset}}px;\">\n    {{/basics.photo}}\n  </header>\n  <div class=\"contact-info\">\n    {{#basics.email}}<div id=\"item-basics-email\">{{labels.basics.email}}: <a href=\"mailto:{{basics.email}}\">{{basics.email}}</a></div>{{/basics.email}}\n    {{#basics.homepage}}<div id=\"item-basics-homepage\">{{labels.basics.homepage}}: <a href=\"{{basics.homepage}}\" target=\"_blank\">{{basics.homepage}}</a></div>{{/basics.homepage}}\n    {{#basics.location}}<div id=\"item-basics-location\">{{labels.basics.location}}: {{basics.location}}</div>{{/basics.location}}\n  </div>\n  {{#basics.research_interests}}\n  <section id=\"section-research_interests\">\n    <h2>{{labels.basics.research_interests}}</h2>\n    <p id=\"item-basics-research_interests\">{{basics.research_interests}}</p>\n  </section>\n  {{/basics.research_interests}}\n  <main id=\"all-cv-sections\">\n    {{&all_sections}}\n  </main>\n </body>\n</html>",
+    "mappers": {
+      "education": "cventry_education",
+      "research_experience": "cventry_research",
+      "work_experience": "cventry_work",
+      "teaching_experience": "cventry_teaching",
+      "publications": "publications",
+      "abstracts": "abstracts",
+      "awards": "awards",
+      "continuing_education": "continuing_education",
+      "skills": "skills",
+      "languages": "languages"
+    },
+    "theme": {
+      "accentColor": "#2563eb",
+      "font": "sans",
+      "photoLeftOffset": 40,
+      "photoTopOffset": 0
+    }
+  },
+  "instances": {},
+  "_sections": {
+    "basics": {
+      "title": "Basics"
+    },
+    "education": {
+      "title": "Educación"
+    },
+    "work_experience": {
+      "title": "Experiencia Laboral"
+    }
+  }
+}

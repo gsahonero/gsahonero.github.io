@@ -382,7 +382,9 @@ function renderSectionList(){
     var btn=document.createElement('button');
     btn.className='navitem'+(state.activeSection===k?' active':'');
     var displayTitle = (state.sections[k] && state.sections[k].title) || human(k);
-    btn.innerHTML='<span>'+esc(displayTitle)+'</span><span class="count">'+countEntries(data[k])+'</span>';
+    var count = countEntries(data[k]);
+    var badgeClass = count > 0 ? 'count sec-meter-badge complete' : 'count sec-meter-badge empty';
+    btn.innerHTML='<span>'+esc(displayTitle)+'</span><span class="'+badgeClass+'">'+count+'</span>';
     btn.onclick=function(){ state.activeSection=k; renderAll(); scrollOutlineTo(k); };
     list.appendChild(btn);
   });

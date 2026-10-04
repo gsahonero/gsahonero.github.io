@@ -1,5 +1,16 @@
-var APP_VERSION = '0.8.0';
+var APP_VERSION = '0.9.0';
 var CHANGELOG = [
+  {version:'0.9.0', changes:[
+    'Modular & Robust Core: Decoupled pure compilation, ATS evaluation, and escaping engines with 100% test pass rate across the full regression test suite (29/29 passing).',
+    'LaTeX Braces Escaping: Fixed curly brace escaping in texEscape to ensure valid compilation of literal braces ({}) without interfering with LaTeX macros.',
+    'Synchronized Live Preview: Unified renderLatex and updateHtmlPreviewContent so both LaTeX and live HTML previews update simultaneously across edits.',
+    'Modern UI/UX & Glassmorphism: Refined design system with backdrop blur panels, subtle borders, elevated shadows, and responsive dark/light mode tokens.',
+    'Native Toast Notifications: Replaced disruptive browser alert dialogs with non-blocking, auto-dismissing toast notifications.',
+    'Live Preview Controls & Zoom: Added interactive preview scale controls (75%, 100%, 125%, Fit to Width) and estimated A4 draft indicators.',
+    'Section Completion Meters: Added visual entry status badges in the sidebar showing filled vs. empty sections at a glance.',
+    'Global Keyboard Shortcuts: Added keyboard accelerators for Ctrl+S (save), Ctrl+P (PDF export), and Ctrl+/ (shortcuts cheat sheet).',
+    'TypeScript Domain Contract: Introduced types.d.ts defining strict type interfaces for CV databases, instances, ATS results, and configurations.'
+  ]},
   {version:'0.8.0', changes:[
     'AI Engine Integration (Ollama + Gemini): Added 100% free and offline local LLM support via Ollama (http://localhost:11434) and free Google Gemini Flash API key support (BYOK) for bullet point polishing, grammar correction, translation, and an interactive "Ask me to improve" critique wizard.',
     'ATS Score & Job Keyword Inspector: Real-time ATS compliance score calculator with live input updates, optional phone number rules, multi-schema section detection (work_experience, education), and job description keyword matcher.',

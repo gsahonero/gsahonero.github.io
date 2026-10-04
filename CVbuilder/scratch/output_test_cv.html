@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Maria Lourdes Nava - CV</title>
+<style>
+  body, h1, h2, h3, p, section, .entry, .entry-description, .entry-subheader, .contact-info, .kv-list, ul, li {
+    text-align: left !important;
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    background: #fff;
+  }
+  .contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    font-size: 0.9em;
+    justify-content: flex-start !important; text-align: left !important;
+  }
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 5px;
+    color: #111;
+  }
+  .subtitle {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  .contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    font-size: 0.9em;
+  }
+  .contact-info a {
+    color: #2563EB;
+    text-decoration: none;
+  }
+  section {
+    margin-bottom: 30px;
+  }
+  h2 {
+    font-size: 1.5em;
+    border-bottom: 2px solid #2563EB;
+    padding-bottom: 5px;
+    color: #2563EB;
+    margin-bottom: 15px;
+  }
+  .entry {
+    margin-bottom: 15px;
+  }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
+    font-weight: bold;
+    justify-content: flex-start !important; text-align: left !important;
+  }
+  .entry-subheader {
+    font-style: italic;
+    color: #555;
+  }
+  .entry-description {
+    margin-top: 5px;
+    font-size: 0.95em;
+    white-space: pre-wrap;
+  }
+  .skills-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  body, section, main, header {
+    cursor: default !important;
+  }
+  .entry, [id^="item-"], [id^="section-"], h1, h2, h3, h4, h5, h6, p, li, span, a, img, strong, em, u, b, i, .subtitle, .contact-info > div, .kv-list > li, .entry-header, .entry-description, .entry-subheader {
+    cursor: pointer !important;
+  }
+</style>
+<script>
+function getElementPath(el) {
+  if (!el) return 'basics';
+  
+  var itemEl = el.closest('[id^="item-"]');
+  if (itemEl && itemEl.id) {
+    return itemEl.id.replace(/^item-/, '').replace(/-/g, '.');
+  }
+
+  var secEl = el.closest('[id^="section-"]');
+  if (secEl && secEl.id) {
+    return secEl.id.replace(/^section-/, '');
+  }
+
+  var anySec = el.closest('section, header, .entry, .contact-info, body');
+  if (anySec && anySec.id) {
+    return anySec.id.replace(/^(item|section)-/, '').replace(/-/g, '.');
+  }
+
+  return 'basics';
+}
+
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  var action = e.data.action;
+  
+  if (action === 'scrollToItem' || action === 'scrollToSection') {
+    var path = String(e.data.propPath || e.data.sectionId || '');
+    var parts = path.replace(/^section-/, '').split(/[.-]/);
+    var sectionKey = parts[0];
+    
+    var target = null;
+    if (e.data.propPath) {
+      var sanitized = 'item-' + e.data.propPath.replace(/./g, '-');
+      target = document.getElementById(sanitized);
+      if (!target && parts.length >= 2) {
+        target = document.getElementById('item-' + parts[0] + '-' + parts[1]);
+      }
+    }
+    
+    if (!target) {
+      var secId = 'section-' + sectionKey;
+      target = document.getElementById(secId) || document.getElementById(sectionKey);
+    }
+    
+    if (!target) {
+      var headings = document.querySelectorAll('h1, h2, h3, header, section');
+      for (var i = 0; i < headings.length; i++) {
+        var txt = (headings[i].textContent || '').trim().toLowerCase();
+        if (txt && (txt.indexOf(sectionKey.toLowerCase()) !== -1)) {
+          target = headings[i].closest('section') || headings[i].closest('header') || headings[i];
+          break;
+        }
+      }
+    }
+
+    if (target) {
+      var rect = target.getBoundingClientRect();
+      var viewH = window.innerHeight || document.documentElement.clientHeight;
+      var viewW = window.innerWidth || document.documentElement.clientWidth;
+      var isVisible = (rect.top >= 0 && rect.bottom <= viewH && rect.left >= 0 && rect.right <= viewW);
+
+      if (!e.data.force && isVisible) {
+        return;
+      }
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.style.transition = 'outline 0.3s ease, box-shadow 0.3s ease';
+      target.style.outline = '2.5px solid #2563eb';
+      target.style.borderRadius = '6px';
+      target.style.boxShadow = '0 0 12px rgba(37, 99, 235, 0.3)';
+      setTimeout(function() {
+        if (target) {
+          target.style.outline = 'none';
+          target.style.boxShadow = 'none';
+        }
+      }, 1800);
+    }
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.closest && e.target.closest('a')) return;
+  var contentEl = e.target && e.target.closest ? e.target.closest('[id^="item-"], .entry, h1, h2, h3, p, li, span, img, .subtitle, .contact-info > div, section, header') : null;
+  if (!contentEl) return;
+
+  var rawId = '';
+  var itemEl = contentEl.closest('[id^="item-"]');
+  if (itemEl && itemEl.id) {
+    rawId = itemEl.id;
+  } else {
+    var secEl = contentEl.closest('[id^="section-"]');
+    if (secEl && secEl.id) {
+      rawId = secEl.id;
+    }
+  }
+
+  if (rawId) {
+    window.parent.postMessage({
+      action: 'previewClickFocus',
+      rawId: rawId
+    }, '*');
+  }
+});
+</script>
+</head>
+<body>
+
+  <header id="section-basics" style="display:flex; align-items:center; margin-bottom:15px">
+    <div>
+      <h1 id="item-basics-firstname" style="margin:0">Maria Lourdes Nava</h1>
+      <div id="item-basics-title" class="subtitle" style="margin-top:4px; margin-bottom:0">Profesional en Bibliotecología y Ciencias de la información | Alemán | Enseñanza particular</div>
+    </div>
+    
+  </header>
+  <div class="contact-info">
+    <div id="item-basics-email">Email: <a href="mailto:maourdesnava@hotmail.com">maourdesnava@hotmail.com</a></div>
+    
+    <div id="item-basics-location">Ubicación: La Paz, Bolivia</div>
+  </div>
+
+  
+  <section id="section-research_interests">
+    <h2>Intereses de Investigación</h2>
+    <p id="item-basics-research_interests">Profesional en Bibliotecología y Ciencias de la Información con sólida formación en idioma alemán y experiencia en enseñanza particular. Estudios de alemán realizados en Alemania, certificaciones del Goethe-Institut y formación escolar en el Colegio Alemán “Mariscal Braun”. Experiencia en clases particulares de alemán, preparación individual de estudiantes y preparación para el ingreso a instituciones educativas con formación alemana. Perfil organizado, paciente y orientado a la comunicación, la atención personalizada y el aprendizaje. Amplia experiencia adicional en gestión documental, secretariado, atención al cliente y coordinación.</p>
+  </section>
+  
+
+  <main id="all-cv-sections">
+    <section id="section-education">
+  <h2>Educación</h2>
+  <div class="entry" id="item-education-0">
+    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:20px;">
+      <span>Bibliotecología y Ciencias de la información - Universidad Mayor de San Andrés</span>
+      <span style="white-space:nowrap;">2014</span>
+    </div>
+  </div>
+</section>
+
+<section id="section-work_experience">
+  <h2>Experiencia Laboral</h2>
+  <div class="entry" id="item-work_experience-0">
+    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:20px;">
+      <span>Enseñanza Particular de Alemán - La Paz, Bolivia</span>
+      <span style="white-space:nowrap;">2007</span>
+    </div>
+    <div class="entry-description"><ul class="cv-bullet-list" style="margin:2px 0; padding-left:14px; list-style-type:disc; line-height:1.35">
+  <li style="margin-bottom:1px">Preparó a un estudiante para su ingreso al Colegio Ave María, institución de las Hermanas Alemanas en Villa Fátima, logrando su ingreso exitoso.</li>
+  <li style="margin-bottom:1px">Fomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.</li>
+</ul></div>
+  </div>
+  <div class="entry" id="item-work_experience-1">
+    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:20px;">
+      <span>Enseñanza Particular de Alemán - La Paz, Bolivia</span>
+      <span style="white-space:nowrap;">1997</span>
+    </div>
+    <div class="entry-description"><ul class="cv-bullet-list" style="margin:2px 0; padding-left:14px; list-style-type:disc; line-height:1.35">
+  <li style="margin-bottom:1px">Impartió clases particulares de alemán y brindó acompañamiento individualizado a estudiantes del Colegio Alemán de La Paz.</li>
+  <li style="margin-bottom:1px">Acompañó a dos estudiantes en sus primeras etapas de formación en alemán, quienes posteriormente continuaron estudios orientados a la traducción simultánea.</li>
+  <li style="margin-bottom:1px">Fomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.</li>
+</ul></div>
+  </div>
+</section>
+
+<section id="section-skills">
+  <h2>Habilidades</h2>
+  <ul class="kv-list">
+    <li id="item-skills-programming"><strong>Programming:</strong> JavaScript, TypeScript, Python, Go, LaTeX</li>
+    <li id="item-skills-tools"><strong>Tools:</strong> Docker, Kubernetes, Git, GitHub Actions, Vite</li>
+  </ul>
+</section>
+
+<section id="section-languages">
+  <h2>Idiomas</h2>
+  <div class="entry" id="item-languages-0">
+    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:20px;">
+      <span style="font-weight:600;">Aleman</span>
+      <span style="color:#666; font-style:italic;">Fluido / profesional</span>
+    </div>
+  </div>
+  <div class="entry" id="item-languages-1">
+    <div class="entry-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:20px;">
+      <span style="font-weight:600;">Español</span>
+      <span style="color:#666; font-style:italic;">Nativo</span>
+    </div>
+  </div>
+</section>
+  </main>
+ </body>
+</html>

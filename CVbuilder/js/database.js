@@ -557,3 +557,35 @@ function applyOverrideToMaster(pathStr, pathArray) {
     renderAll();
   }
 }
+
+function importStyleFile(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var styleObj = JSON.parse(e.target.result);
+      if (!styleObj || typeof styleObj !== 'object') {
+        throw new Error('Invalid style configuration');
+      }
+      if (activeInstance) {
+        activeInstance.style = Object.assign({}, activeInstance.style || {}, styleObj);
+      } else {
+        if (!data._style) data._style = JSON.parse(JSON.stringify(DEFAULT_STYLE));
+        data._style = Object.assign({}, data._style, styleObj);
+      }
+      applyStyleToUI(activeInstance ? activeInstance.style : data._style);
+      saveCurrentDatabase();
+      renderAll();
+      if (typeof showToast === 'function') {
+        showToast(state.langFilter === 'es' ? 'Estilo importado correctamente.' : 'Style imported successfully.', 'success');
+      }
+    } catch (err) {
+      if (typeof showToast === 'function') {
+        showToast((state.langFilter === 'es' ? 'Error al importar estilo: ' : 'Error importing style: ') + err.message, 'error');
+      } else {
+        alert('Error: ' + err.message);
+      }
+    }
+  };
+  reader.readAsText(file);
+}

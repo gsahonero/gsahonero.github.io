@@ -1,17 +1,22 @@
-# CV JSON to LaTeX Builder
+# CV JSON to LaTeX Builder (v0.9.0)
 
 A modular, high-fidelity offline web application designed to build, customize, and compile curriculum vitae (CV) documents from structured JSON databases into premium LaTeX, HTML, Markdown, and JSON Resume formats.
 
 ## 🚀 Key Features
 
-*   **Modular Architecture**: Fully decoupled CSS and JS modules for easy maintainability, extensibility, and clean developer workflows.
+*   **Modular Architecture**: Fully decoupled CSS and JS modules for easy maintainability, extensibility, and clean developer workflows with formal TypeScript contracts (`types.d.ts`).
+*   **100% Verified Test Suite**: Automated 29-assertion regression and functionality test suite passing with a 100% success rate.
+*   **Modern UI/UX & Glassmorphism**: Sleek OKLCH-based design system with translucent glass panels, elevated modals, and responsive dark/light themes.
+*   **Native Toast Notifications**: Non-blocking toast notification system replacing disruptive browser alert dialogs.
+*   **Live Preview Controls & Zoom**: Responsive zoom controls (75%, 100%, 125%, Fit to Width) and page draft indicators for live rendering.
+*   **Section Completion Meters**: Real-time visual progress tags in the sidebar indicating filled vs. empty sections.
+*   **Keyboard Accelerators**: Global productivity shortcuts (`Ctrl+S` save, `Ctrl+P` PDF export, `Ctrl+/` shortcuts reference).
 *   **Bilingual Translation Layer**: Dynamic language toggle FAB and filter to customize content outputs in English (EN) or Spanish (ES).
 *   **Unified Tailored CV Instances**: Maintain a single Master CV career profile while saving application-specific overrides directly inside your `.cv` database.
 *   **Free & Local AI Integration (Ollama + Gemini)**: 100% offline local LLM support via Ollama (`http://localhost:11434`) and free Google Gemini Flash API (BYOK) for bullet point polishing, grammar correction, translation, and an interactive **"Ask me to improve"** critique wizard.
 *   **Data Importer & Exporter Engine**: Seamless import and export support for standard **JSON Resume (`resume.json`)**, **Reactive Resume JSON**, **LinkedIn Data**, **Markdown**, and **Plain Text**.
 *   **ATS Optimization & Keyword Inspector**: Real-time ATS compliance score calculator (with optional phone rules) and target job description keyword matcher.
 *   **Smooth Drag-and-Drop Reordering**: Intuitive HTML5 drag-and-drop handles (`⋮⋮`) to reorder experience entries and section list items.
-*   **Live Previews & Page-Break Guides**: Real-time rendering of HTML drafts, LaTeX source files, JSON schemas, and visual A4/Letter page-break guide lines.
 *   **Markdown Syntax Support**: Write `**bold**`, `*italic*`, and `[link](url)` in description fields—automatically compiled into LaTeX (`\textbf{}`, `\textit{}`, `\href{}`) and HTML.
 *   **One-Click PDF Compiler**: Directly compiles LaTeX source files via an external server payload compiler to download high-fidelity PDF documents.
 
@@ -24,8 +29,9 @@ The project is structured into clean, dedicated modules:
 ```text
 ├── index.html                           # App entry point & main layout nodes
 ├── test_logic.html                      # Extensive functionality & integration test runner
+├── types.d.ts                           # Formal TypeScript domain type contracts
 ├── css/
-│   └── main.css                         # CSS design tokens, animations, drag-and-drop & modal grids
+│   └── main.css                         # CSS tokens, glassmorphism, animations, toast & modal grids
 ├── js/
 │   ├── constants.js                     # Global templates, changelogs, and preset definitions
 │   ├── translations.js                  # Localization dictionary keys and DOM translations
@@ -35,9 +41,10 @@ The project is structured into clean, dedicated modules:
 │   ├── exporter.js                      # Exporter engine (JSON Resume, Reactive Resume, Markdown, Text)
 │   ├── ats.js                           # ATS compliance evaluator & job keyword matcher
 │   ├── ai.js                            # Free Gemini Flash & Ollama Local LLM client + Critique wizard
+│   ├── ai_tools.js                      # Browser-level MCP function calling tools registry
 │   ├── editor.js                        # Form outline, drag-and-drop handlers, and input editors
 │   ├── tour.js                          # Welcome guided tour step sequences
-│   └── app.js                           # Core bootstrap controller & diagnostics runner
+│   └── app.js                           # Core bootstrap controller & toast/shortcut handlers
 ├── presets/
 │   └── professional_default.cv          # Basic Professional profile preset (Alex Morgan)
 └── README.md                            # Repository technical documentation
