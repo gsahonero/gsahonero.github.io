@@ -99,34 +99,98 @@ var CHANGELOG = [
 var DEFAULT_LATEX_TEMPLATE = `\\documentclass[11pt,a4paper,sans]{moderncv}
 \\usepackage[utf8]{inputenc}
 \\moderncvstyle{classic}
-%\\moderncvcolor{grey}
-\\definecolor{color2}{RGB}{60,60,60}
+\\definecolor{color2}{RGB}{51,51,51}
 \\definecolor{color1}{HTML}{{{theme.accentColor}}}
 {{&theme.fontLatex}}
 \\usepackage{lipsum}
 \\usepackage{xstring}
-\\usepackage[scale=0.93]{geometry}
+\\usepackage{enumitem}
+\\usepackage[scale=0.92, top=1.8cm, bottom=2cm, left=2cm, right=2cm]{geometry}
 
-\\firstname{\\Huge {{basics.firstname}} \\vspace{10pt}}
-\\familyname{\\\\\\Huge {{basics.lastname}}}
-\\title{{{basics.title}}}
-{{#basics.location}}\\address{{{basics.location}}}{{/basics.location}}
-{{#basics.email}}\\email{{{basics.email}}}{{/basics.email}}
-{{#basics.homepage}}\\homepage{{{basics.homepage}}}{{/basics.homepage}}
+\\setlist[itemize]{label=\\textbullet, leftmargin=1.5em, itemsep=1.5pt, topsep=2pt, parsep=0pt, partopsep=0pt}
+
+\\firstname{{{basics.firstname}}}
+\\familyname{{{basics.lastname}}}
+{{#basics.title}}\\title{{{basics.title}}}{{/basics.title}}
 {{#has_photo}}\\photo[70pt][0.4pt]{{{photo_filename}}}{{/has_photo}}
+
+\\newlength{\\cvheaderwidth}
+\\setlength{\\cvheaderwidth}{\\textwidth}
+{{#has_photo}}
+\\addtolength{\\cvheaderwidth}{-85pt}
+{{/has_photo}}
+
+\\makeatletter
+\\renewcommand*{\\makecvtitle}{%
+  \\noindent\\begin{minipage}{\\cvheaderwidth}%
+    {\\fontsize{22}{26}\\selectfont\\bfseries\\color{color2} {{{basics.firstname}}} {{{basics.lastname}}}}\\par\\vspace{4pt}%
+    {{#basics.title}}{\\color{color2!80}\\large {{{basics.title}}}\\par\\vspace{6pt}}{{/basics.title}}%
+    {\\small\\color{color2}%
+      {{#basics.email}}\\textbf{{{labels.basics.email}}:} \\href{mailto:{{{basics.email}}}}{{{basics.email}}}\\quad {{/basics.email}}%
+      {{#basics.homepage}}\\textbf{{{labels.basics.homepage}}:} \\href{{{{basics.homepage}}}}{{{basics.homepage}}}\\quad {{/basics.homepage}}%
+      {{#basics.location}}\\textbf{{{labels.basics.location}}:} {{{basics.location}}}{{/basics.location}}%
+    }%
+  \\end{minipage}%
+  {{#has_photo}}%
+  \\hfill%
+  \\begin{minipage}{80pt}%
+    \\raggedleft%
+    \\includegraphics[width=70pt]{{{photo_filename}}}%
+  \\end{minipage}%
+  {{/has_photo}}%
+  \\par\\vspace{8pt}%
+  {\\color{black!15}\\rule{\\textwidth}{1pt}}%
+  \\par\\vspace{8pt}%
+}
+
+\\renewcommand*{\\section}[1]{%
+  \\par\\addvspace{2.2ex}%
+  \\phantomsection{}%
+  {\\color{color1}\\Large\\bfseries #1}\\par\\nobreak\\vspace{2pt}%
+  {\\color{color1}\\rule{\\textwidth}{1.2pt}}%
+  \\par\\nobreak\\addvspace{1.2ex}\\@afterheading%
+}
+
+\\renewcommand*{\\cventry}[6]{%
+  \\par\\addvspace{1ex}%
+  \\noindent\\begin{minipage}{\\textwidth}%
+    {\\bfseries #2}%
+    \\if\\relax\\detokenize{#3}\\relax\\else\\ -- {\\normalfont #3}\\fi%
+    \\if\\relax\\detokenize{#4}\\relax\\else, #4\\fi%
+    \\if\\relax\\detokenize{#5}\\relax\\else, #5\\fi%
+    \\if\\relax\\detokenize{#1}\\relax\\else\\hfill{\\normalfont #1}\\fi%
+    \\par%
+    \\if\\relax\\detokenize{#6}\\relax\\else%
+      \\vspace{2pt}%
+      {#6}%
+      \\par%
+    \\fi%
+  \\end{minipage}%
+  \\par\\addvspace{0.8ex}%
+}
+
+\\renewcommand*{\\cvitemwithcomment}[3]{%
+  \\par\\addvspace{0.5ex}%
+  \\noindent%
+  \\if\\relax\\detokenize{#3}\\relax%
+    {\\bfseries #1:}\\hspace{0.5em}#2%
+  \\else%
+    {\\bfseries #1}\\hfill{\\color{color2!80}\\textit{#2}}%
+  \\fi%
+  \\par\\addvspace{0.5ex}%
+}
+\\makeatother
+
 \\hyphenation{Universidad}
 
 \\begin{document}
 {{&theme.textAlignLatex}}
 \\makecvtitle
-\\vspace{-1em}
 
 {{#has_research_interests}}
 \\section{{{labels.basics.research_interests}}}
 {{{basics.research_interests}}}
 {{/has_research_interests}}
-
-\\renewcommand{\\listitemsymbol}{}
 
 {{&all_sections}}
 

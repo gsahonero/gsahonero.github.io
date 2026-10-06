@@ -228,6 +228,7 @@ function applyStyleToUI(styleObj) {
   // Migration: detect outdated templates and reset/inject alignment tags
   var hasMigration = false;
   if (latexTpl.indexOf('has_publications') === -1) { latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
+  if (latexTpl.indexOf('\\cvheaderwidth') === -1 || latexTpl.indexOf('\\firstname{\\Huge') !== -1) { latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
   if (htmlTpl.indexOf('all_sections') === -1 || latexTpl.indexOf('all_sections') === -1) { htmlTpl = DEFAULT_HTML_TEMPLATE; latexTpl = DEFAULT_LATEX_TEMPLATE; hasMigration = true; }
   if (htmlTpl.indexOf('theme.textAlign') === -1) {
     if (htmlTpl.indexOf('</style>') !== -1) {

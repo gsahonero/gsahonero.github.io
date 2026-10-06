@@ -279,35 +279,21 @@ function texEscape(str) {
   str = str.replace(/\*\*([^*]+)\*\*/g, '\\textbf{$1}');
   str = str.replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1\\textit{$2}$3');
 
-  // Parse Bullet Lists (- item, * item, • item) into LaTeX itemize
-  if (/(?:^|\n)\s*[-*•]\s+/m.test(str)) {
-    var texLines = str.split(/\r?\n/);
-    var inTexList = false;
-    var texResult = [];
+  // Parse Bullet Lists (Multi-line text or explicit hyphens/asterisks/bullets)
+  var hasNewlines = str.indexOf('\n') !== -1;
+  var hasBulletMarkers = /(?:^|\n)\s*[-*•]\s+/m.test(str);
 
-    for (var j = 0; j < texLines.length; j++) {
-      var tLine = texLines[j];
-      var tMatch = tLine.match(/^\s*[-*•]\s+(.*)$/);
-      if (tMatch) {
-        if (!inTexList) {
-          inTexList = true;
-          texResult.push('\\begin{itemize}');
-        }
-        texResult.push('  \\item ' + tMatch[1]);
-      } else {
-        if (inTexList) {
-          inTexList = false;
-          texResult.push('\\end{itemize}');
-        }
-        if (tLine.trim()) {
-          texResult.push(tLine);
-        }
+  if (hasNewlines || hasBulletMarkers) {
+    var rawLines = str.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+    if (rawLines.length > 1 || hasBulletMarkers) {
+      var texResult = ['\\begin{itemize}'];
+      for (var j = 0; j < rawLines.length; j++) {
+        var cleanLine = rawLines[j].replace(/^\s*[-*•]\s+/, '');
+        texResult.push('  \\item ' + cleanLine);
       }
-    }
-    if (inTexList) {
       texResult.push('\\end{itemize}');
+      str = texResult.join('\n');
     }
-    str = texResult.join('\n');
   }
 
   var placeholders = [];
@@ -724,15 +710,14 @@ function renderAutoSectionHtml(key, val) {
           return;
         }
 
-        var headerLeft = it.role || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '';
+        var headerLeft = it.role || it.position || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '';
         var headerRight = joinDate(it.start, it.end, 'dash') || it.year || it.date || '';
         
         var orgInstDept = '';
-        if (it.organization && it.department) orgInstDept = it.organization + ', ' + it.department;
-        else if (it.institution && it.department) orgInstDept = it.institution + ', ' + it.department;
-        else if (it.organization) orgInstDept = it.organization;
-        else if (it.institution) orgInstDept = it.institution;
-        else if (it.department) orgInstDept = it.department;
+        var orgParts = [it.organization || it.institution, it.department, it.location].filter(Boolean);
+        if (orgParts.length) {
+          orgInstDept = orgParts.join(', ');
+        }
 
         var profVal = isObj(it.proficiency) ? JSON.stringify(it.proficiency) : (it.proficiency || '');
         var subheader = orgInstDept || it.company || it.publisher || it.vendor || profVal || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
@@ -863,14 +848,13 @@ function renderAutoSectionLatex(key, val) {
         }
 
         var dateStr = joinDate(it.start, it.end, 'dash') || latexText(it.year || it.date || '');
-        var title1 = latexText(it.role || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '');
+        var title1 = latexText(it.role || it.position || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '');
         
         var texOrgInstDept = '';
-        if (it.organization && it.department) texOrgInstDept = it.organization + ', ' + it.department;
-        else if (it.institution && it.department) texOrgInstDept = it.institution + ', ' + it.department;
-        else if (it.organization) texOrgInstDept = it.organization;
-        else if (it.institution) texOrgInstDept = it.institution;
-        else if (it.department) texOrgInstDept = it.department;
+        var texOrgParts = [it.organization || it.institution, it.department, it.location].filter(Boolean);
+        if (texOrgParts.length) {
+          texOrgInstDept = texOrgParts.map(latexText).join(', ');
+        }
 
         var profVal = isObj(it.proficiency) ? JSON.stringify(it.proficiency) : (it.proficiency || '');
         var subheaderVal = texOrgInstDept || it.company || it.publisher || it.vendor || profVal || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
@@ -890,7 +874,7 @@ function renderAutoSectionLatex(key, val) {
           if (cCsv) texDescParts.push('\\textit{Courses:} ' + cCsv);
         }
 
-        var desc = texDescParts.join(' \\\\ ');
+        var desc = texDescParts.join('\n\n');
         
         tex += '\\cventry{' + dateStr + '}{' + title1 + '}{' + title2 + '}{}{}{' + desc + '}\n';
       });

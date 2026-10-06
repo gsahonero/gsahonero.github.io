@@ -1,8 +1,8 @@
 {
   "protocolName": "CVbuilder Extensive Functionality Test Suite",
-  "timestamp": "2026-10-04T23:26:38.355Z",
+  "timestamp": "2026-10-06T02:34:42.931Z",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
-  "durationMs": 1656,
+  "durationMs": 1593,
   "statistics": {
     "totalTests": 32,
     "passed": 32,
@@ -53,7 +53,7 @@
       "expected": "Colegio Alem\u00e1n ``Mariscal Braun'' -- `1997'---2024\\dots{}",
       "actual": "Colegio Alem\u00e1n ``Mariscal Braun'' -- `1997'---2024\\dots{}",
       "passed": true,
-      "latency": 1
+      "latency": 0
     },
     {
       "id": "1.6",
@@ -138,7 +138,7 @@
       "expected": "New City",
       "actual": "New City",
       "passed": true,
-      "latency": 17
+      "latency": 10
     },
     {
       "id": "3.1",
@@ -147,7 +147,7 @@
       "expected": true,
       "actual": true,
       "passed": true,
-      "latency": 1
+      "latency": 0
     },
     {
       "id": "3.2",
@@ -156,7 +156,7 @@
       "expected": "UnitTester",
       "actual": "UnitTester",
       "passed": true,
-      "latency": 7
+      "latency": 4
     },
     {
       "id": "3.3",
@@ -165,7 +165,7 @@
       "expected": false,
       "actual": false,
       "passed": true,
-      "latency": 9
+      "latency": 6
     },
     {
       "id": "4.1",
@@ -174,7 +174,7 @@
       "expected": "Contains 'DynamicIntegrationTest'",
       "actual": "Passed",
       "passed": true,
-      "latency": 5
+      "latency": 3
     },
     {
       "id": "4.2",
@@ -183,7 +183,7 @@
       "expected": "Exportar PDF",
       "actual": "Exportar PDF",
       "passed": true,
-      "latency": 3
+      "latency": 1
     },
     {
       "id": "4.3",
@@ -192,7 +192,7 @@
       "expected": "Contains 'Architect Override'",
       "actual": "Passed",
       "passed": true,
-      "latency": 5
+      "latency": 3
     },
     {
       "id": "5.1",
@@ -246,7 +246,7 @@
       "expected": "Contains 'Ph.D. Quantum Computing'",
       "actual": "Passed",
       "passed": true,
-      "latency": 4
+      "latency": 3
     },
     {
       "id": "5.7",
@@ -309,7 +309,7 @@
       "expected": "unconfigured prompt -> active chat",
       "actual": "Passed",
       "passed": true,
-      "latency": 1
+      "latency": 0
     },
     {
       "id": "5.14",
@@ -318,7 +318,7 @@
       "expected": "All tools executed successfully",
       "actual": "Passed",
       "passed": true,
-      "latency": 68
+      "latency": 37
     }
   ]
 }

@@ -6,10 +6,10 @@
 
 \usepackage{lipsum}
 \usepackage{xstring}
-\usepackage{enumitem}
 \usepackage[scale=0.92, top=1.8cm, bottom=2cm, left=2cm, right=2cm]{geometry}
 
-\setlist[itemize]{label=\textbullet, leftmargin=1.5em, itemsep=1.5pt, topsep=2pt, parsep=0pt, partopsep=0pt}
+\setlength{\hintscolumnwidth}{0pt}
+\setlength{\separatorcolumnwidth}{0pt}
 
 \firstname{ Maria Lourdes }
 \familyname{ Nava }
@@ -64,14 +64,15 @@
 }
 
 \renewcommand*{\cvitemwithcomment}[3]{%
-  \par\addvspace{0.5ex}%
-  \noindent%
-  \if\relax\detokenize{#3}\relax%
-    {\bfseries #1:}\hspace{0.5em}#2%
-  \else%
-    {\bfseries #1}\hfill{\color{color2!80}\textit{#2}}%
-  \fi%
-  \par\addvspace{0.5ex}%
+  \par\addvspace{0.6ex}%
+  \noindent\begin{minipage}{\textwidth}%
+    \if\relax\detokenize{#3}\relax%
+      {\bfseries #1:} {#2}%
+    \else%
+      {\bfseries #1}\hfill{\color{color2!80}\textit{#2}}%
+    \fi%
+  \end{minipage}%
+  \par\addvspace{0.6ex}%
 }
 \makeatother
 
@@ -91,15 +92,11 @@ Profesional en Bibliotecología y Ciencias de la Información con sólida formac
 
 
 \section{Experiencia Laboral}
-\cventry{2007}{Enseñanza Particular de Alemán}{La Paz, Bolivia}{}{}{\begin{itemize}
-  \item Preparó a un estudiante para su ingreso al Colegio Ave María, institución de las Hermanas Alemanas en Villa Fátima, logrando su ingreso exitoso.
-  \item Fomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.
-\end{itemize}}
-\cventry{1997}{Enseñanza Particular de Alemán}{La Paz, Bolivia}{}{}{\begin{itemize}
-  \item Impartió clases particulares de alemán y brindó acompañamiento individualizado a estudiantes del Colegio Alemán de La Paz.
-  \item Acompañó a dos estudiantes en sus primeras etapas de formación en alemán, quienes posteriormente continuaron estudios orientados a la traducción simultánea.
-  \item Fomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.
-\end{itemize}}
+\cventry{2007}{Enseñanza Particular de Alemán}{La Paz, Bolivia}{}{}{Preparó a un estudiante para su ingreso al Colegio Ave María, institución de las Hermanas Alemanas en Villa Fátima, logrando su ingreso exitoso.
+Fomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.}
+\cventry{1997}{Enseñanza Particular de Alemán}{La Paz, Bolivia}{}{}{Impartió clases particulares de alemán y brindó acompañamiento individualizado a estudiantes del Colegio Alemán de La Paz.
+Acompañó a dos estudiantes en sus primeras etapas de formación en alemán, quienes posteriormente continuaron estudios orientados a la traducción simultánea.
+Fomentó el aprendizaje y la motivación por el idioma alemán, contribuyendo al desarrollo lingüístico de sus estudiantes.}
 
 
 \section{Habilidades}
