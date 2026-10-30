@@ -10,9 +10,24 @@ var Exporter = (function() {
     return (typeof data !== 'undefined' && data) ? data : {};
   }
 
+  function getWorkList(d) {
+    if (Array.isArray(d.work_experience)) return d.work_experience;
+    if (Array.isArray(d.work)) return d.work;
+    if (Array.isArray(d.experience)) return d.experience;
+    return [];
+  }
+
+  function getPubList(d) {
+    if (Array.isArray(d.publications)) return d.publications;
+    if (Array.isArray(d.publication)) return d.publication;
+    return [];
+  }
+
   function exportToJsonResume(customData) {
     var d = customData || getActiveData();
     var b = d.basics || {};
+    var workEntries = getWorkList(d);
+    var pubEntries = getPubList(d);
 
     var jsonResume = {
       $schema: "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
@@ -21,9 +36,9 @@ var Exporter = (function() {
         label: b.title || '',
         image: b.photo || '',
         email: b.email || '',
-        phone: '',
+        phone: b.phone || '',
         url: b.homepage || '',
-        summary: b.research_interests || '',
+        summary: b.research_interests || b.summary || '',
         location: {
           address: b.location || '',
           postalCode: '',
@@ -33,60 +48,64 @@ var Exporter = (function() {
         },
         profiles: []
       },
-      work: Array.isArray(d.work) ? d.work.filter(function(w){ return w.selected !== false; }).map(function(w) {
+      work: workEntries.filter(function(w){ return w.selected !== false; }).map(function(w) {
+        var hls = Array.isArray(w.highlights) ? w.highlights.filter(Boolean) : [];
+        if (!hls.length && w.description && w.description.indexOf('\n') !== -1) {
+          hls = w.description.split(/\r?\n/).map(function(l){ return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
+        }
         return {
-          name: w.organization || '',
+          name: w.organization || w.company || '',
           position: w.role || '',
-          url: '',
+          url: w.url || '',
           startDate: w.start || '',
           endDate: w.end || '',
           summary: w.description || '',
-          highlights: []
+          highlights: hls
         };
-      }) : [],
+      }),
       education: Array.isArray(d.education) ? d.education.filter(function(e){ return e.selected !== false; }).map(function(e) {
         return {
           institution: e.institution || '',
           url: '',
-          area: '',
+          area: e.area || '',
           studyType: e.degree || '',
           startDate: e.start || '',
           endDate: e.end || '',
-          score: '',
-          courses: []
+          score: e.gpa || e.score || '',
+          courses: Array.isArray(e.courses) ? e.courses.map(function(c){ return typeof c === 'string' ? c : (c.name || ''); }).filter(Boolean) : []
         };
       }) : [],
-      publications: Array.isArray(d.publications) ? d.publications.filter(function(p){ return p.selected !== false; }).map(function(p) {
+      publications: pubEntries.filter(function(p){ return p.selected !== false; }).map(function(p) {
         return {
           name: p.title || '',
-          publisher: p.venue || '',
-          releaseDate: p.year || '',
-          url: '',
-          summary: p.authors || ''
+          publisher: p.venue || p.publisher || '',
+          releaseDate: p.year || p.date || '',
+          url: p.url || '',
+          summary: p.authors || p.description || ''
         };
-      }) : [],
+      }),
       projects: Array.isArray(d.projects) ? d.projects.filter(function(pr){ return pr.selected !== false; }).map(function(pr) {
         return {
           name: pr.title || '',
           description: pr.description || '',
-          highlights: [],
+          highlights: Array.isArray(pr.highlights) ? pr.highlights : [],
           startDate: pr.start || '',
           endDate: pr.end || '',
-          url: ''
+          url: pr.url || ''
         };
       }) : [],
       skills: [],
       languages: Array.isArray(d.languages) ? d.languages.filter(function(l){ return l.selected !== false; }).map(function(l) {
         return {
-          language: l.language || '',
+          language: l.language || l.name || '',
           fluency: typeof l.proficiency === 'string' ? l.proficiency : ''
         };
       }) : [],
       awards: Array.isArray(d.awards) ? d.awards.filter(function(a){ return a.selected !== false; }).map(function(a) {
         return {
-          title: a.category || '',
-          date: a.year || '',
-          awarder: '',
+          title: a.category || a.title || '',
+          date: a.year || a.date || '',
+          awarder: a.organization || '',
           summary: a.description || ''
         };
       }) : []
@@ -123,10 +142,10 @@ var Exporter = (function() {
         summary: b.research_interests || ''
       },
       sections: {
-        work: { name: "Work Experience", items: Array.isArray(d.work) ? d.work.map(function(w){ return { company: w.organization, position: w.role, date: w.start + (w.end ? ' - ' + w.end : ''), summary: w.description }; }) : [] },
-        education: { name: "Education", items: Array.isArray(d.education) ? d.education.map(function(e){ return { institution: e.institution, studyType: e.degree, date: e.start + (e.end ? ' - ' + e.end : '') }; }) : [] },
-        publications: { name: "Publications", items: Array.isArray(d.publications) ? d.publications.map(function(p){ return { name: p.title, publisher: p.venue, date: p.year, summary: p.authors }; }) : [] },
-        projects: { name: "Projects", items: Array.isArray(d.projects) ? d.projects.map(function(pr){ return { name: pr.title, date: pr.start + (pr.end ? ' - ' + pr.end : ''), summary: pr.description }; }) : [] }
+        work: { name: "Work Experience", items: getWorkList(d).map(function(w){ return { company: w.organization || w.company || '', position: w.role || '', date: w.start + (w.end ? ' - ' + w.end : ''), summary: w.description || '' }; }) },
+        education: { name: "Education", items: Array.isArray(d.education) ? d.education.map(function(e){ return { institution: e.institution || '', studyType: e.degree || '', date: e.start + (e.end ? ' - ' + e.end : '') }; }) : [] },
+        publications: { name: "Publications", items: getPubList(d).map(function(p){ return { name: p.title || '', publisher: p.venue || p.publisher || '', date: p.year || p.date || '', summary: p.authors || '' }; }) },
+        projects: { name: "Projects", items: Array.isArray(d.projects) ? d.projects.map(function(pr){ return { name: pr.title || '', date: pr.start + (pr.end ? ' - ' + pr.end : ''), summary: pr.description || '' }; }) : [] }
       }
     };
 
@@ -149,12 +168,18 @@ var Exporter = (function() {
       lines.push(b.research_interests + '\n');
     }
 
-    if (Array.isArray(d.work) && d.work.length > 0) {
+    var workEntries = getWorkList(d);
+    if (workEntries.length > 0) {
       lines.push('## Work Experience');
-      d.work.filter(function(w){ return w.selected !== false; }).forEach(function(w) {
-        lines.push('### ' + (w.role || 'Role') + ' - ' + (w.organization || 'Company'));
+      workEntries.filter(function(w){ return w.selected !== false; }).forEach(function(w) {
+        lines.push('### ' + (w.role || 'Role') + ' - ' + (w.organization || w.company || 'Company'));
         if (w.start || w.end) lines.push('*' + w.start + (w.end ? ' - ' + w.end : '') + '*');
-        if (w.description) lines.push(w.description);
+        if (w.description || w.summary) lines.push(w.description || w.summary);
+        if (Array.isArray(w.highlights) && w.highlights.length > 0) {
+          w.highlights.forEach(function(hl) {
+            lines.push('- ' + hl);
+          });
+        }
         lines.push('');
       });
     }
@@ -206,3 +231,9 @@ var Exporter = (function() {
   };
 
 })();
+
+if (typeof window !== 'undefined') {
+  window.exportMarkdown = Exporter.exportToMarkdown;
+  window.exportPlainText = Exporter.exportToPlainText;
+  window.exportJsonResume = Exporter.exportToJsonResume;
+}

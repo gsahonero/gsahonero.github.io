@@ -311,7 +311,7 @@ function downloadFile(content, mime, filename) {
 
 function downloadTexFile() {
   var tplText = (el('latexTplEditor') && el('latexTplEditor').value) || DEFAULT_LATEX_TEMPLATE;
-  var context = buildTemplateContext();
+  var context = buildTemplateContext('latex');
   var rendered = renderTemplate(tplText, context, texEscape);
   downloadFile(rendered, 'application/x-tex', currentDbName.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.tex');
 }
@@ -322,7 +322,7 @@ function downloadPdfFile() {
   if (activeTab === 'latex-prev') {
     // Mode 1: LaTeX PDF Compilation via TeX Live CGI POST form submission (avoids 414 & Cannot POST errors)
     var tplText = (el('latexTplEditor') && el('latexTplEditor').value) || DEFAULT_LATEX_TEMPLATE;
-    var context = buildTemplateContext();
+    var context = buildTemplateContext('latex');
     var rendered = renderTemplate(tplText, context, texEscape);
 
     var isEs = state.langFilter === 'es';
@@ -384,9 +384,166 @@ function downloadPdfFile() {
   }
 }
 
-function openDbManagerModal() {
+function switchCvHubTab(tabName) {
+  var masterBtn = el('hubTabMasterBtn');
+  var instBtn = el('hubTabInstancesBtn');
+  var masterPanel = el('hubMasterPanel');
+  var instPanel = el('hubInstancesPanel');
+  var titleLbl = el('dbManagerTitleLbl');
+  var isEs = (typeof state === 'object' && state && state.langFilter === 'es');
+
+  if (tabName === 'instances') {
+    if (masterBtn) {
+      masterBtn.classList.remove('active');
+      masterBtn.style.borderBottom = 'none';
+      masterBtn.style.color = 'var(--color-text-muted)';
+    }
+    if (instBtn) {
+      instBtn.classList.add('active');
+      instBtn.style.borderBottom = '2px solid var(--color-primary)';
+      instBtn.style.color = 'var(--color-text)';
+    }
+    if (masterPanel) masterPanel.style.display = 'none';
+    if (instPanel) instPanel.style.display = 'block';
+    if (titleLbl) titleLbl.textContent = isEs ? 'Instancias Adaptadas de CV' : 'Tailored CV Instances';
+    renderDbManagerInstancesTable();
+  } else {
+    if (instBtn) {
+      instBtn.classList.remove('active');
+      instBtn.style.borderBottom = 'none';
+      instBtn.style.color = 'var(--color-text-muted)';
+    }
+    if (masterBtn) {
+      masterBtn.classList.add('active');
+      masterBtn.style.borderBottom = '2px solid var(--color-primary)';
+      masterBtn.style.color = 'var(--color-text)';
+    }
+    if (instPanel) instPanel.style.display = 'none';
+    if (masterPanel) masterPanel.style.display = 'block';
+    if (titleLbl) titleLbl.textContent = isEs ? 'Bases de Datos de CV (Perfiles Maestros)' : 'CV Databases (Master Profiles)';
+    renderDbManagerTable();
+  }
+}
+
+function openDbManagerModal(tab) {
   openModal('dbManagerModal');
-  renderDbManagerTable();
+  switchCvHubTab(tab || 'master');
+}
+
+function renderDbManagerInstancesTable() {
+  var tbody = el('hubInstancesTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  var isEs = (typeof state === 'object' && state && state.langFilter === 'es');
+  var list = (typeof listInstances === 'function') ? listInstances() : [];
+  var badgeCount = el('hubInstanceCountBadge');
+  if (badgeCount) badgeCount.textContent = list.length;
+
+  if (list.length === 0) {
+    var trEmpty = document.createElement('tr');
+    trEmpty.innerHTML = '<td colspan="2" style="padding:var(--space-4); text-align:center; color:var(--color-text-muted); font-size:var(--text-sm)">'
+      + (isEs ? 'No hay instancias creadas todavía para este CV. Haz clic en "+ Crear Nueva Instancia" para adaptar tu CV para una postulación.' : 'No tailored instances created yet for this Master CV. Click "+ Create New Instance" to tailor your CV for a specific application.')
+      + '</td>';
+    tbody.appendChild(trEmpty);
+    return;
+  }
+
+  list.forEach(function(name) {
+    var tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--color-divider)';
+    tr.style.fontSize = 'var(--text-sm)';
+
+    var inst = (data.instances && data.instances[name]) || {};
+    var isActive = (name === currentInstanceName);
+    var overrideCount = inst.overwrites ? Object.keys(inst.overwrites).length : 0;
+    
+    var tdInfo = document.createElement('td');
+    tdInfo.style.padding = 'var(--space-3) var(--space-4)';
+    
+    var nameSpan = document.createElement('strong');
+    nameSpan.textContent = name;
+    tdInfo.appendChild(nameSpan);
+
+    if (isActive) {
+      var activePill = document.createElement('span');
+      activePill.className = 'pill';
+      activePill.style.cssText = 'font-size:10px; background:oklch(from var(--color-primary) l c h / .15); color:var(--color-primary); border:1px solid var(--color-primary); margin-left:6px;';
+      activePill.textContent = isEs ? 'Activo' : 'Active';
+      tdInfo.appendChild(activePill);
+    }
+
+    if (overrideCount > 0) {
+      var countPill = document.createElement('span');
+      countPill.className = 'pill';
+      countPill.style.cssText = 'font-size:10px; background:oklch(from var(--color-primary) l c h / .1); color:var(--color-primary); margin-left:6px;';
+      countPill.textContent = overrideCount + ' ' + (isEs ? 'anulaciones' : 'overrides');
+      tdInfo.appendChild(countPill);
+    }
+
+    if (inst.targetRole) {
+      var roleDiv = document.createElement('div');
+      roleDiv.style.cssText = 'font-size:11px; color:var(--color-text-muted); margin-top:2px; display:flex; align-items:center; gap:4px;';
+      roleDiv.innerHTML = '🎯 <span>' + esc(inst.targetRole) + '</span>';
+      tdInfo.appendChild(roleDiv);
+    }
+
+    var tdActions = document.createElement('td');
+    tdActions.style.padding = 'var(--space-3) var(--space-4)';
+    tdActions.style.textAlign = 'right';
+    tdActions.className = 'toolbar';
+    tdActions.style.justifyContent = 'flex-end';
+
+    var btnLoad = document.createElement('button');
+    btnLoad.className = 'btn btn-ghost btn-xs';
+    btnLoad.style.minHeight = '28px';
+    btnLoad.style.padding = '2px 8px';
+    btnLoad.textContent = isEs ? 'Cargar' : 'Load';
+    btnLoad.disabled = isActive;
+    btnLoad.onclick = function() {
+      loadInstance(name);
+      closeModal('dbManagerModal');
+    };
+    tdActions.appendChild(btnLoad);
+
+    var btnDup = document.createElement('button');
+    btnDup.className = 'btn btn-ghost btn-xs';
+    btnDup.style.minHeight = '28px';
+    btnDup.style.padding = '2px 8px';
+    btnDup.textContent = isEs ? 'Duplicar' : 'Duplicate';
+    btnDup.onclick = function() {
+      showDuplicateInstanceModal(name);
+      renderDbManagerInstancesTable();
+    };
+    tdActions.appendChild(btnDup);
+
+    if (overrideCount > 0) {
+      var btnMerge = document.createElement('button');
+      btnMerge.className = 'btn btn-ghost btn-xs';
+      btnMerge.style.minHeight = '28px';
+      btnMerge.style.padding = '2px 8px';
+      btnMerge.textContent = isEs ? 'Fusionar' : 'Merge';
+      btnMerge.onclick = function() {
+        mergeInstanceToMaster(name);
+        renderDbManagerInstancesTable();
+      };
+      tdActions.appendChild(btnMerge);
+    }
+
+    var btnDel = document.createElement('button');
+    btnDel.className = 'btn btn-danger btn-xs';
+    btnDel.style.minHeight = '28px';
+    btnDel.style.padding = '2px 8px';
+    btnDel.textContent = isEs ? 'Eliminar' : 'Delete';
+    btnDel.onclick = function() {
+      deleteInstance(name);
+      renderDbManagerInstancesTable();
+    };
+    tdActions.appendChild(btnDel);
+
+    tr.appendChild(tdInfo);
+    tr.appendChild(tdActions);
+    tbody.appendChild(tr);
+  });
 }
 
 function renderDbManagerTable() {
@@ -394,6 +551,8 @@ function renderDbManagerTable() {
   tbody.innerHTML = '';
   var list = listDatabases();
   var isEs = state.langFilter === 'es';
+  var badgeCount = el('hubInstanceCountBadge');
+  if (badgeCount && typeof listInstances === 'function') badgeCount.textContent = listInstances().length;
   list.forEach(function(name) {
     var tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid var(--color-divider)';
@@ -1703,6 +1862,43 @@ el('instanceSelect').onchange = function(e) {
 if (el('manageInstancesBtn')) {
   el('manageInstancesBtn').onclick = function() {
     showInstanceManagerModal();
+  };
+}
+
+if (el('createInstanceBtn')) {
+  el('createInstanceBtn').onclick = function() {
+    createNewInstancePrompt('');
+  };
+}
+
+if (el('btnConfirmCreateInst')) {
+  el('btnConfirmCreateInst').onclick = function() {
+    var nameInp = el('instModalNameInput');
+    var roleInp = el('instModalRoleInput');
+    var notesInp = el('instModalNotesInput');
+    var name = nameInp ? nameInp.value.trim() : '';
+    if (!name) {
+      if (nameInp) nameInp.focus();
+      return;
+    }
+    var targetRole = roleInp ? roleInp.value.trim() : '';
+    var notes = notesInp ? notesInp.value.trim() : '';
+    var created = createInstance(name, targetRole, notes);
+    if (created) {
+      closeModal('createInstanceModal');
+      if (typeof renderDbManagerInstancesTable === 'function') {
+        renderDbManagerInstancesTable();
+      }
+    }
+  };
+}
+
+if (el('instModalNameInput')) {
+  el('instModalNameInput').onkeydown = function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (el('btnConfirmCreateInst')) el('btnConfirmCreateInst').click();
+    }
   };
 }
 
@@ -3105,11 +3301,30 @@ function updateAiChatWidgetState() {
   var inputEl = widget.querySelector('#aiChatInput');
   var sendBtn = widget.querySelector('#aiChatSendBtn');
   var chips = widget.querySelectorAll('.chat-chip');
+  var badge = widget.querySelector('#copilotProviderBadge');
+
+  if (badge) {
+    if (isConfigured) {
+      var s = (typeof AIClient !== 'undefined' && AIClient.getSettings) ? AIClient.getSettings() : {};
+      var provName = s.provider === 'gemini' 
+        ? ('Gemini ' + (s.geminiModel ? s.geminiModel.replace('gemini-', '') : 'Flash')) 
+        : ('Ollama: ' + (s.ollamaModel || 'local'));
+      badge.textContent = provName;
+      badge.style.background = 'oklch(from var(--color-primary) l c h / .14)';
+      badge.style.color = 'var(--color-primary)';
+      badge.title = 'AI Provider Connected: ' + provName;
+    } else {
+      badge.textContent = isEs ? 'Sin configurar' : 'Not configured';
+      badge.style.background = 'oklch(from var(--color-warning) l c h / .18)';
+      badge.style.color = 'var(--color-warning)';
+      badge.title = 'Click to configure AI settings';
+    }
+  }
 
   if (!isConfigured) {
     if (inputEl) {
       inputEl.disabled = true;
-      inputEl.placeholder = isEs ? 'Configure el proveedor de IA primero...' : 'Configure AI provider first...';
+      inputEl.placeholder = isEs ? 'Configure el proveedor de IA (Ollama o Gemini) primero...' : 'Configure AI provider (Ollama or Gemini) first...';
     }
     if (sendBtn) {
       sendBtn.disabled = true;
@@ -3127,17 +3342,17 @@ function updateAiChatWidgetState() {
         msgBox.innerHTML = '';
         var promptBubble = document.createElement('div');
         promptBubble.className = 'ai-config-prompt-bubble';
-        promptBubble.style.cssText = 'background:oklch(from var(--color-error) l c h / .1); border:1px solid oklch(from var(--color-error) l c h / .2); color:var(--color-text); padding:12px; border-radius:var(--radius-md); max-width:92%; align-self:flex-start; display:flex; flex-direction:column; gap:10px; margin-bottom:10px;';
+        promptBubble.style.cssText = 'background:oklch(from var(--color-error) l c h / .08); border:1px solid oklch(from var(--color-error) l c h / .25); color:var(--color-text); padding:14px; border-radius:var(--radius-lg); max-width:92%; align-self:flex-start; display:flex; flex-direction:column; gap:10px; margin-bottom:10px; font-size:13px; line-height:1.5;';
         
         var textDiv = document.createElement('div');
         textDiv.innerHTML = isEs 
-          ? '🔌 <strong>Configuración de IA Requerida</strong><br>Para chatear con el asistente, primero configure su proveedor de IA (Ollama Local o Google Gemini).' 
-          : '🔌 <strong>AI Configuration Required</strong><br>To chat with the assistant, please configure your AI provider (Local Ollama or Google Gemini) first.';
+          ? '🔌 <strong>Configuración de IA Requerida</strong><br>Para interactuar con el Copiloto Inteligente, primero configure su proveedor de IA (Ollama Local o Google Gemini).' 
+          : '🔌 <strong>AI Configuration Required</strong><br>To chat with your Intelligent CV Copilot, please configure your AI provider (Local Ollama or Google Gemini) first.';
         promptBubble.appendChild(textDiv);
 
         var btn = document.createElement('button');
         btn.className = 'btn btn-xs btn-primary';
-        btn.style.cssText = 'align-self:flex-start; font-weight:700;';
+        btn.style.cssText = 'align-self:flex-start; font-weight:700; padding:6px 14px; font-size:13px;';
         btn.textContent = isEs ? 'Configurar Proveedor' : 'Configure Provider';
         btn.onclick = function() {
           showAiProviderConfigModal();
@@ -3150,7 +3365,7 @@ function updateAiChatWidgetState() {
   } else {
     if (inputEl) {
       inputEl.disabled = false;
-      inputEl.placeholder = isEs ? 'Escribe un mensaje...' : 'Type a message...';
+      inputEl.placeholder = isEs ? 'Escribe a Copiloto (Shift+Enter para nueva línea)...' : 'Ask Copilot anything (Shift+Enter for new line)...';
     }
     if (sendBtn) {
       sendBtn.disabled = false;
@@ -3163,8 +3378,8 @@ function updateAiChatWidgetState() {
     });
 
     if (msgBox && msgBox.querySelector('.ai-config-prompt-bubble')) {
-      msgBox.innerHTML = '<div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
-        + (isEs ? '👋 ¡Hola! Soy tu asistente de CV. ¿En qué puedo ayudarte a pulir tu currículum, redactar logros o redactar cartas de presentación hoy?' : '👋 Hello! I am your CV Assistant. How can I help you refine your resume, draft bullet points, or tailor cover letters today?')
+      msgBox.innerHTML = '<div class="copilot-bubble-bot">'
+        + (isEs ? '👋 ¡Hola! Soy tu <strong>Copiloto de CV Inteligente</strong>. Puedo ayudarte a adaptar tu experiencia para ofertas específicas, pulir viñetas con métricas de alto impacto, o auditar palabras clave ATS. ¿En qué trabajamos hoy?' : '👋 Hello! I am your <strong>AI CV Copilot</strong>. I can help tailor your experience for specific job descriptions, polish bullet points with high-impact metrics, or audit ATS keywords. What would you like to work on today?')
         + '</div>';
     }
   }
@@ -3196,30 +3411,35 @@ function createAiChatWidget() {
 
   var widget = document.createElement('div');
   widget.id = 'aiChatWidget';
-  widget.style.cssText = 'position:fixed; bottom:34px; right:24px; width:360px; height:490px; max-width:calc(100vw - 32px); max-height:calc(100vh - 80px); background:var(--color-surface); border:1px solid oklch(from var(--color-text) l c h / .18); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); z-index:9999; display:none; flex-direction:column; overflow:hidden; font-family:inherit;';
+  widget.className = 'ai-copilot-drawer';
+  widget.style.display = 'none';
 
-  widget.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; background:var(--color-surface-offset); padding:10px 14px; border-bottom:1px solid oklch(from var(--color-text) l c h / .1)">'
-    + '  <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px; color:var(--color-primary)">'
-    + '    <span>🤖</span> <span>' + (isEs ? 'Chat Temporal IA' : 'AI Temporal Chat') + '</span>'
+  widget.innerHTML = 
+    '<div class="copilot-header">'
+    + '  <div class="copilot-title">'
+    + '    <span>🤖</span> <span>' + (isEs ? 'Copiloto de CV IA' : 'AI CV Copilot') + '</span>'
+    + '    <span id="copilotProviderBadge" class="copilot-provider-badge" style="cursor:pointer" title="AI Provider Status">Connecting...</span>'
     + '  </div>'
     + '  <div style="display:flex; align-items:center; gap:8px">'
-    + '    <button id="clearChatBtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:12px" title="' + (isEs ? 'Limpiar conversación' : 'Clear Chat') + '">🗑️</button>'
-    + '    <button id="closeChatBtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:14px; font-weight:700" title="' + (isEs ? 'Cerrar chat' : 'Close Chat') + '">✕</button>'
+    + '    <button id="expandChatBtn" class="iconbtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:15px; padding:2px 4px" title="' + (isEs ? 'Expandir / Reducir panel' : 'Expand / Collapse panel') + '">⤢</button>'
+    + '    <button id="clearChatBtn" class="iconbtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:14px; padding:2px 4px" title="' + (isEs ? 'Limpiar conversación' : 'Clear Chat') + '">🗑️</button>'
+    + '    <button id="closeChatBtn" class="iconbtn" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:16px; font-weight:700; padding:2px 4px" title="' + (isEs ? 'Cerrar chat' : 'Close Chat') + '">✕</button>'
     + '  </div>'
     + '</div>'
-    + '<div id="aiChatMessages" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:13px; line-height:1.45">'
-    + '  <div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
-    +      (isEs ? '👋 ¡Hola! Soy tu asistente de CV. ¿En qué puedo ayudarte a pulir tu currículum, redactar logros o redactar cartas de presentación hoy?' : '👋 Hello! I am your CV Assistant. How can I help you refine your resume, draft bullet points, or tailor cover letters today?')
+    + '<div id="aiChatMessages" class="copilot-messages">'
+    + '  <div class="copilot-bubble-bot">'
+    +      (isEs ? '👋 ¡Hola! Soy tu <strong>Copiloto de CV Inteligente</strong>. Puedo ayudarte a adaptar tu experiencia para ofertas específicas, pulir viñetas con métricas de alto impacto, o redactar resúmenes ejecutivos. ¿En qué trabajamos hoy?' : '👋 Hello! I am your <strong>AI CV Copilot</strong>. I can help tailor your experience for specific job descriptions, polish bullet points with high-impact metrics, or draft executive summaries. What would you like to work on today?')
     + '  </div>'
     + '</div>'
-    + '<div style="display:flex; gap:4px; padding:6px 10px; border-top:1px solid oklch(from var(--color-text) l c h / .08); background:var(--color-surface-offset); overflow-x:auto">'
-    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Audit my CV experience and bullet points" style="font-size:12px; white-space:nowrap; padding:2px 6px">📊 ' + (isEs ? 'Auditar CV' : 'Audit CV') + '</button>'
-    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Enhance my executive summary" style="font-size:12px; white-space:nowrap; padding:2px 6px">⚡ ' + (isEs ? 'Pulir Resumen' : 'Enhance Summary') + '</button>'
-    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="Check ATS power verbs and metrics" style="font-size:12px; white-space:nowrap; padding:2px 6px">🎯 ' + (isEs ? 'Check ATS' : 'Check ATS') + '</button>'
+    + '<div class="copilot-chips">'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="' + (isEs ? 'Por favor adapta las viñetas y habilidades de mi CV para esta oferta de trabajo:\n\n[Pega la descripción de la vacante aquí]' : 'Please tailor my CV experience bullet points and skills for this job description:\n\n[Paste job description here]') + '" style="font-size:12px; white-space:nowrap; padding:3px 8px">🎯 ' + (isEs ? 'Adaptar para Puesto' : 'Tailor for Job') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="' + (isEs ? 'Pule los logros y viñetas de mi experiencia laboral usando verbos de acción fuertes y resultados cuantificables.' : 'Polish my work experience bullet points using strong action verbs and quantifiable results.') + '" style="font-size:12px; white-space:nowrap; padding:3px 8px">✨ ' + (isEs ? 'Pulir Viñetas' : 'Polish Bullets') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="' + (isEs ? 'Mejora mi resumen ejecutivo para que sea impactante y conciso a nivel senior.' : 'Enhance my executive summary to be compelling, concise, and senior-level.') + '" style="font-size:12px; white-space:nowrap; padding:3px 8px">⚡ ' + (isEs ? 'Pulir Resumen' : 'Enhance Summary') + '</button>'
+    + '  <button class="chat-chip btn btn-xs btn-ghost" data-chip="' + (isEs ? 'Realiza una auditoría ATS completa de mi CV e identifica palabras clave ausentes o mejoras de impacto.' : 'Perform a comprehensive ATS audit of my CV and identify missing industry keywords or formatting improvements.') + '" style="font-size:12px; white-space:nowrap; padding:3px 8px">🔍 ' + (isEs ? 'Auditar ATS' : 'Audit ATS') + '</button>'
     + '</div>'
-    + '<div style="display:flex; gap:6px; padding:10px; border-top:1px solid oklch(from var(--color-text) l c h / .1); background:var(--color-surface-offset)">'
-    + '  <input type="text" id="aiChatInput" placeholder="' + (isEs ? 'Escribe un mensaje...' : 'Type a message...') + '" style="flex:1; height:32px; padding:0 10px; font-size:13px; border-radius:var(--radius-md); border:1px solid oklch(from var(--color-text) l c h / .2); background:var(--color-surface); color:var(--color-text); font-family:inherit">'
-    + '  <button id="aiChatSendBtn" class="btn btn-xs btn-primary" style="height:32px; padding:0 12px; font-weight:700; font-size:13px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
+    + '<div class="copilot-input-bar">'
+    + '  <textarea id="aiChatInput" class="copilot-textarea" rows="1" placeholder="' + (isEs ? 'Escribe a Copiloto (Shift+Enter para nueva línea)...' : 'Ask Copilot anything (Shift+Enter for new line)...') + '"></textarea>'
+    + '  <button id="aiChatSendBtn" class="btn btn-primary" style="min-height:42px; height:42px; padding:0 14px; font-weight:700; font-size:13px; display:flex; align-items:center; gap:4px">' + (isEs ? 'Enviar' : 'Send') + '</button>'
     + '</div>';
 
   document.body.appendChild(widget);
@@ -3227,6 +3447,21 @@ function createAiChatWidget() {
   var msgBox = widget.querySelector('#aiChatMessages');
   var inputEl = widget.querySelector('#aiChatInput');
   var sendBtn = widget.querySelector('#aiChatSendBtn');
+  var expandBtn = widget.querySelector('#expandChatBtn');
+  var badge = widget.querySelector('#copilotProviderBadge');
+
+  if (badge) {
+    badge.onclick = function() {
+      if (typeof showAiProviderConfigModal === 'function') showAiProviderConfigModal();
+    };
+  }
+
+  if (expandBtn) {
+    expandBtn.onclick = function() {
+      widget.classList.toggle('expanded');
+      expandBtn.textContent = widget.classList.contains('expanded') ? '⤡' : '⤢';
+    };
+  }
 
   widget.querySelector('#closeChatBtn').onclick = function() { toggleAiChatWidget(false); };
 
@@ -3236,10 +3471,18 @@ function createAiChatWidget() {
     if (!isConfigured) {
       updateAiChatWidgetState();
     } else {
-      msgBox.innerHTML = '<div style="background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start">'
-        + (isEs ? '👋 Chat reiniciado. ¿En qué te ayudo?' : '👋 Chat reset. How can I assist you?') + '</div>';
+      msgBox.innerHTML = '<div class="copilot-bubble-bot">'
+        + (isEs ? '👋 Conversación reiniciada. ¿En qué te ayudo a continuación?' : '👋 Conversation reset. How can I assist you next?') + '</div>';
     }
   };
+
+  function autoExpandTextarea() {
+    inputEl.style.height = 'auto';
+    var newH = Math.min(inputEl.scrollHeight, 120);
+    inputEl.style.height = (newH > 42 ? newH : 42) + 'px';
+  }
+
+  inputEl.oninput = autoExpandTextarea;
 
   function sendChatMessage() {
     var text = inputEl.value.trim();
@@ -3252,15 +3495,16 @@ function createAiChatWidget() {
     }
 
     var userBubble = document.createElement('div');
-    userBubble.style.cssText = 'background:var(--color-primary); color:#fff; padding:8px 12px; border-radius:var(--radius-md); max-width:85%; align-self:flex-end; word-break:break-word; font-weight:500;';
+    userBubble.className = 'copilot-bubble-user';
     userBubble.textContent = text;
     msgBox.appendChild(userBubble);
     inputEl.value = '';
+    inputEl.style.height = '42px';
     msgBox.scrollTop = msgBox.scrollHeight;
 
     var loadBubble = document.createElement('div');
-    loadBubble.style.cssText = 'background:oklch(from var(--color-text) l c h / .08); color:var(--color-text-muted); padding:8px 12px; border-radius:var(--radius-md); max-width:85%; align-self:flex-start;';
-    loadBubble.textContent = '⏳ Thinking...';
+    loadBubble.className = 'copilot-bubble-bot';
+    loadBubble.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px">⏳ <em>' + (isEs ? 'Pensando y analizando currículum...' : 'Thinking and analyzing CV context...') + '</em></span>';
     msgBox.appendChild(loadBubble);
     msgBox.scrollTop = msgBox.scrollHeight;
 
@@ -3283,7 +3527,7 @@ function createAiChatWidget() {
     function onProgress(ev) {
       if (ev.type === 'tool_start') {
         var pBubble = document.createElement('div');
-        pBubble.style.cssText = 'background:oklch(from var(--color-text) l c h / .05); border:1px dashed oklch(from var(--color-text) l c h / .15); color:var(--color-text-muted); padding:6px 10px; border-radius:var(--radius-md); max-width:90%; align-self:flex-start; font-family:monospace; font-size:12px; margin-top:2px;';
+        pBubble.style.cssText = 'background:oklch(from var(--color-text) l c h / .05); border:1px dashed oklch(from var(--color-text) l c h / .18); color:var(--color-text-muted); padding:8px 12px; border-radius:var(--radius-md); max-width:92%; align-self:flex-start; font-family:monospace; font-size:12px; margin-top:2px;';
         pBubble.innerHTML = '⚙️ Executing <strong>' + ev.name + '</strong>...';
         msgBox.appendChild(pBubble);
         msgBox.scrollTop = msgBox.scrollHeight;
@@ -3308,14 +3552,15 @@ function createAiChatWidget() {
       aiChatHistory = resObj.history;
 
       var botBubble = document.createElement('div');
-      botBubble.style.cssText = 'background:oklch(from var(--color-primary) l c h / .1); color:var(--color-text); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start; word-break:break-word;';
+      botBubble.className = 'copilot-bubble-bot';
       botBubble.innerHTML = (typeof parseMarkdown === 'function') ? parseMarkdown(resObj.text) : resObj.text;
       msgBox.appendChild(botBubble);
       msgBox.scrollTop = msgBox.scrollHeight;
     }).catch(function(err) {
       loadBubble.remove();
       var errBubble = document.createElement('div');
-      errBubble.style.cssText = 'background:rgba(239,68,68,.15); color:var(--color-error); padding:8px 12px; border-radius:var(--radius-md); max-width:88%; align-self:flex-start;';
+      errBubble.className = 'copilot-bubble-bot';
+      errBubble.style.cssText = 'background:rgba(239,68,68,.12); color:var(--color-error); border:1px solid rgba(239,68,68,.25);';
       errBubble.textContent = '❌ Error: ' + err.message;
       msgBox.appendChild(errBubble);
       msgBox.scrollTop = msgBox.scrollHeight;
@@ -3325,9 +3570,13 @@ function createAiChatWidget() {
   widget.querySelectorAll('.chat-chip').forEach(function(chip) {
     chip.onclick = function() {
       var isConfigured = typeof AIClient !== 'undefined' && AIClient.isConfigured();
-      if (!isConfigured) return;
+      if (!isConfigured) {
+        showAiProviderConfigModal();
+        return;
+      }
       inputEl.value = chip.dataset.chip;
-      sendChatMessage();
+      autoExpandTextarea();
+      inputEl.focus();
     };
   });
 

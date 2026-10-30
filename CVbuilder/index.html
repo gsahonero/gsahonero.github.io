@@ -678,38 +678,104 @@
   </div>
 </div>
 
-<!-- Database Manager Modal -->
+<!-- Create Tailored Instance Modal -->
+<div id="createInstanceModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="createInstanceTitleLbl" style="max-width:520px">
+    <header>
+      <strong id="createInstanceTitleLbl">Create Tailored CV Instance</strong>
+      <button class="iconbtn" onclick="closeModal('createInstanceModal')" aria-label="Close">&#x2715;</button>
+    </header>
+    <div class="body stack" style="gap:var(--space-3)">
+      <div class="tiny" style="color:var(--color-text-muted)" id="createInstanceDesc">
+        A tailored instance creates an isolated copy of styling, section order, visibility, and targeted bullet-point overrides for a specific job application. Your Master CV remains untouched.
+      </div>
+      <div>
+        <label for="instModalNameInput" class="tiny" style="font-weight:700; display:block; margin-bottom:4px" id="lblInstName">Instance Name *</label>
+        <input type="text" id="instModalNameInput" class="input" style="width:100%" placeholder="e.g. Senior_Frontend_Google_2026" required>
+      </div>
+      <div>
+        <label for="instModalRoleInput" class="tiny" style="font-weight:700; display:block; margin-bottom:4px" id="lblInstRole">Target Role / Job Title</label>
+        <input type="text" id="instModalRoleInput" class="input" style="width:100%" placeholder="e.g. Senior Frontend Engineer">
+      </div>
+      <div>
+        <label for="instModalNotesInput" class="tiny" style="font-weight:700; display:block; margin-bottom:4px" id="lblInstNotes">Notes &amp; Key Job Description Requirements</label>
+        <textarea id="instModalNotesInput" class="input" style="width:100%; min-height:70px; resize:vertical" placeholder="Paste key required technologies, team focus, or hiring manager details..."></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:var(--space-2); margin-top:var(--space-2)">
+        <button class="btn btn-ghost" onclick="closeModal('createInstanceModal')" id="btnCancelCreateInst">Cancel</button>
+        <button class="btn btn-primary" id="btnConfirmCreateInst">Create &amp; Switch</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Database & Instances Hub Modal -->
 <div id="dbManagerModal" class="modal-backdrop" aria-hidden="true">
   <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="dbManagerTitleLbl">
     <header>
-      <strong id="dbManagerTitleLbl">Manage CV Databases</strong>
+      <strong id="dbManagerTitleLbl">CV Profiles &amp; Instances Hub</strong>
       <button class="iconbtn" id="closeDbManagerModal" aria-label="Close">&#x2715;</button>
     </header>
     <div class="body stack">
-      <div class="split">
-        <div class="tiny">Manage your local CV databases stored in browser LocalStorage.</div>
-        <div style="display:flex; gap:var(--space-2)">
-          <input type="file" id="importCvFileInput" accept=".cv" style="display:none">
-          <button class="btn" id="modalImportCvBtn" onclick="el('importCvFileInput').click()">Import CV (.cv)</button>
-          <button class="btn btn-primary" id="modalCreateDbBtn">+ Create New CV</button>
+      <div class="modal-nav-tabs" style="display:flex; border-bottom:1px solid var(--color-divider); margin-bottom:var(--space-3); gap:var(--space-2)">
+        <button id="hubTabMasterBtn" class="tabbtn active" style="padding:var(--space-2) var(--space-4); font-weight:700; border-bottom:2px solid var(--color-primary); background:none; border-top:none; border-left:none; border-right:none; cursor:pointer" onclick="switchCvHubTab('master')">📘 Master CV Profiles</button>
+        <button id="hubTabInstancesBtn" class="tabbtn" style="padding:var(--space-2) var(--space-4); font-weight:600; color:var(--color-text-muted); background:none; border:none; cursor:pointer" onclick="switchCvHubTab('instances')">🎯 Tailored Instances (<span id="hubInstanceCountBadge">0</span>)</button>
+      </div>
+
+      <!-- Tab 1: Master Profiles -->
+      <div id="hubMasterPanel">
+        <div class="split">
+          <div class="tiny">Manage your local CV databases stored in browser LocalStorage.</div>
+          <div style="display:flex; gap:var(--space-2)">
+            <input type="file" id="importCvFileInput" accept=".cv" style="display:none">
+            <button class="btn" id="modalImportCvBtn" onclick="el('importCvFileInput').click()">Import CV (.cv)</button>
+            <button class="btn btn-primary" id="modalCreateDbBtn">+ Create New CV</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:var(--space-2)">
+          <div class="cardhead"><strong>Saved Master Profiles</strong></div>
+          <div class="cardbody" style="padding:0">
+            <table style="width:100%; border-collapse:collapse; text-align:left">
+              <thead>
+                <tr style="border-bottom:1px solid var(--color-divider); font-size:var(--text-xs); color:var(--color-text-muted)">
+                  <th style="padding:var(--space-3) var(--space-4)">Name</th>
+                  <th style="padding:var(--space-3) var(--space-4); text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dbManagerTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="card" style="margin-top:var(--space-2)">
-        <div class="cardhead"><strong>Saved Databases</strong></div>
-        <div class="cardbody" style="padding:0">
-          <table style="width:100%; border-collapse:collapse; text-align:left">
-            <thead>
-              <tr style="border-bottom:1px solid var(--color-divider); font-size:var(--text-xs); color:var(--color-text-muted)">
-                <th style="padding:var(--space-3) var(--space-4)">Name</th>
-                <th style="padding:var(--space-3) var(--space-4); text-align:right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="dbManagerTableBody">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
+
+      <!-- Tab 2: Tailored Instances -->
+      <div id="hubInstancesPanel" style="display:none">
+        <div class="split">
+          <div class="tiny">Tailored instances are saved strictly inside the active .cv file with specific bullet and styling overrides.</div>
+          <div style="display:flex; gap:var(--space-2)">
+            <button class="btn btn-primary" id="createInstanceBtn">+ Create New Instance</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:var(--space-2)">
+          <div class="cardhead"><strong>Tailored Instances for Current CV</strong></div>
+          <div class="cardbody" style="padding:0">
+            <table style="width:100%; border-collapse:collapse; text-align:left">
+              <thead>
+                <tr style="border-bottom:1px solid var(--color-divider); font-size:var(--text-xs); color:var(--color-text-muted)">
+                  <th style="padding:var(--space-3) var(--space-4)">Instance &amp; Target Role</th>
+                  <th style="padding:var(--space-3) var(--space-4); text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="hubInstancesTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>

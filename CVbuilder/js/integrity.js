@@ -10,7 +10,7 @@ var CvIntegrityChecker = (function() {
     return val !== null && typeof val === 'object' && !Array.isArray(val);
   }
 
-  // Helper to get a value by path (e.g. "education.0.degree")
+  // Helper to get a value by path (supports both indices "education.0.degree" and entity IDs "education.edu_123.degree")
   function getValueByPath(obj, path) {
     if (!obj || !path) return undefined;
     var parts = path.split('.');
@@ -18,11 +18,21 @@ var CvIntegrityChecker = (function() {
     for (var i = 0; i < parts.length; i++) {
       var p = parts[i];
       if (current === null || current === undefined) return undefined;
-      // Handle array indices
       if (Array.isArray(current)) {
         var idx = parseInt(p, 10);
-        if (isNaN(idx)) return undefined;
-        current = current[idx];
+        if (!isNaN(idx) && idx >= 0 && idx < current.length) {
+          current = current[idx];
+        } else {
+          var found = null;
+          for (var j = 0; j < current.length; j++) {
+            if (current[j] && (current[j].id === p || current[j]._id === p)) {
+              found = current[j];
+              break;
+            }
+          }
+          if (found) current = found;
+          else return undefined;
+        }
       } else if (isObj(current)) {
         current = current[p];
       } else {
@@ -32,7 +42,7 @@ var CvIntegrityChecker = (function() {
     return current;
   }
 
-  // Helper to check if a path exists in obj
+  // Helper to check if a path exists in obj (supports both numeric indices and entity IDs)
   function pathExists(obj, path) {
     if (!obj || !path) return false;
     var parts = path.split('.');
@@ -42,8 +52,22 @@ var CvIntegrityChecker = (function() {
       if (current === null || current === undefined) return false;
       if (Array.isArray(current)) {
         var idx = parseInt(p, 10);
-        if (isNaN(idx) || idx < 0 || idx >= current.length) return false;
-        current = current[idx];
+        if (!isNaN(idx) && idx >= 0 && idx < current.length) {
+          current = current[idx];
+        } else {
+          var found = null;
+          for (var j = 0; j < current.length; j++) {
+            if (current[j] && (current[j].id === p || current[j]._id === p)) {
+              found = current[j];
+              break;
+            }
+          }
+          if (found) {
+            current = found;
+          } else {
+            return false;
+          }
+        }
       } else if (isObj(current)) {
         if (!(p in current)) return false;
         current = current[p];
@@ -521,17 +545,18 @@ var CvIntegrityChecker = (function() {
                 val[cat] = [];
               }
             } else {
-              val[cat] = items.map(function(it) {
+              val[cat] = items.map(function(it, idx) {
                 if (typeof it === 'string') {
-                  return { name: it, selected: true };
+                  return { id: cat + '_' + (idx + 1) + '_' + Math.random().toString(36).substring(2, 7), name: it, selected: true };
                 } else if (isObj(it)) {
                   var cleanIt = Object.assign({}, it);
                   if (typeof cleanIt.name !== 'string') cleanIt.name = String(cleanIt.name || '');
+                  if (!cleanIt.id) cleanIt.id = cat + '_' + (idx + 1) + '_' + Math.random().toString(36).substring(2, 7);
                   if (cleanIt.selected === undefined) cleanIt.selected = true;
                   else cleanIt.selected = !!cleanIt.selected;
                   return cleanIt;
                 } else {
-                  return { name: String(it || ''), selected: true };
+                  return { id: cat + '_' + (idx + 1) + '_' + Math.random().toString(36).substring(2, 7), name: String(it || ''), selected: true };
                 }
               });
             }
@@ -539,15 +564,18 @@ var CvIntegrityChecker = (function() {
         }
       } else {
         if (Array.isArray(val)) {
-          fixed[key] = val.map(function(item) {
+          fixed[key] = val.map(function(item, idx) {
             if (!isObj(item)) {
               if (typeof item === 'string') {
-                return { description: item, selected: true };
+                return { id: key + '_' + (idx + 1) + '_' + Math.random().toString(36).substring(2, 7), description: item, selected: true };
               } else {
-                return { selected: true };
+                return { id: key + '_' + (idx + 1) + '_' + Math.random().toString(36).substring(2, 7), selected: true };
               }
             }
             var cleanItem = Object.assign({}, item);
+            if (!cleanItem.id) {
+              cleanItem.id = key + '_' + (idx + 1) + '_' + Math.random().toString(36).substring(2, 7);
+            }
             if (cleanItem.selected === undefined) {
               cleanItem.selected = true;
             } else {

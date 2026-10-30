@@ -149,7 +149,21 @@ if (typeof document !== 'undefined') {
 
 function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
   var displayVal = getInstanceValue(propPath, masterVal);
-  var isOverridden = activeInstance && activeInstance.overwrites && (propPath in activeInstance.overwrites);
+  var isOverridden = false;
+  if (activeInstance && activeInstance.overwrites) {
+    if (propPath in activeInstance.overwrites) {
+      isOverridden = true;
+    } else {
+      var parts = propPath.split('.');
+      if (parts.length >= 3 && data && Array.isArray(data[parts[0]])) {
+        var idx = parseInt(parts[1], 10);
+        if (!isNaN(idx) && data[parts[0]][idx] && data[parts[0]][idx].id) {
+          var idPath = parts[0] + '.' + data[parts[0]][idx].id + '.' + parts.slice(2).join('.');
+          if (idPath in activeInstance.overwrites) isOverridden = true;
+        }
+      }
+    }
+  }
   
   var wrapper = document.createElement('div');
   wrapper.className = 'input-wrapper' + (isOverridden ? ' overridden' : '');
@@ -217,11 +231,15 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
           statusBar.style.display = 'flex';
           
           var isEs = state.langFilter === 'es';
-          var overrideMsg = isEs
+          var overrideMsgUnsaved = isEs
+            ? '🟡 Anulación adaptada (sin guardar) [Instancia: ' + currentInstanceName + ']'
+            : '🟡 Tailored Override (Unsaved) [Instance: ' + currentInstanceName + ']';
+          var overrideMsgSaved = isEs
             ? '🟢 Anulación adaptada [Instancia: ' + currentInstanceName + ']'
             : '🟢 Tailored Override [Instance: ' + currentInstanceName + ']';
           var resetText = isEs ? 'Restablecer' : 'Reset';
           var promoteText = t('save_to_master');
+          var applyText = isEs ? 'Guardar' : 'Save instance';
 
           var displayMasterVal = masterVal === undefined || masterVal === null ? '' : String(masterVal);
           var shortMaster = displayMasterVal.length > 60 ? displayMasterVal.substring(0, 57) + '...' : displayMasterVal;
@@ -230,13 +248,31 @@ function makeInputWrapper(propPath, pathArray, masterVal, isTextarea) {
             + '</div>';
 
           statusBar.innerHTML = '<div style="display:flex; flex-direction:column">'
-            + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:700; color:var(--color-primary)">' + overrideMsg + '</span>'
+            + '<span class="status-label" style="font-size:var(--text-xxs); font-weight:700; color:var(--color-primary)">' + overrideMsgUnsaved + '</span>'
             + masterPreviewHtml
             + '</div>'
             + '<div class="status-buttons" style="display:flex; gap:var(--space-1)">'
+            + '<button class="btn btn-xs btn-primary" data-apply style="min-width:40px; min-height:24px">' + applyText + '</button>'
             + '<button class="btn btn-xs btn-ghost" data-reset>' + resetText + '</button>'
             + '<button class="btn btn-xs btn-primary" data-promote>' + promoteText + '</button>'
             + '</div>';
+
+          var applyBtn = statusBar.querySelector('[data-apply]');
+          if (applyBtn) {
+            applyBtn.onclick = function() {
+              if (activeInstance) {
+                if (!activeInstance.overwrites) activeInstance.overwrites = {};
+                activeInstance.overwrites[propPath] = inputEl.value;
+                saveCurrentInstance();
+                var lbl = statusBar.querySelector('.status-label');
+                if (lbl) lbl.textContent = overrideMsgSaved;
+                applyBtn.style.display = 'none';
+                renderLatex();
+                renderSchema();
+                updateHtmlPreviewContent();
+              }
+            };
+          }
 
           var resetBtn = statusBar.querySelector('[data-reset]');
           if (resetBtn) {
@@ -769,9 +805,12 @@ function renderEditor(){
     
     var titleText = t('editing_tailored_instance', { name: currentInstanceName });
     var descText = t('changes_apply_this_only');
+    var roleBadge = (activeInstance.targetRole && activeInstance.targetRole.trim())
+      ? ' <span class="pill" style="font-size:11px; font-weight:700; background:oklch(from var(--color-primary) l c h / .15); color:var(--color-primary); border:1px solid oklch(from var(--color-primary) l c h / .3)">🎯 ' + esc(activeInstance.targetRole) + '</span>'
+      : '';
 
     banner.innerHTML = '<div>'
-      + '<span style="display:flex; align-items:center; gap:6px">🎯 <strong>' + esc(titleText) + '</strong> <span style="font-weight:normal">(' + countText + '). ' + esc(descText) + '</span></span>'
+      + '<span style="display:flex; align-items:center; gap:6px; flex-wrap:wrap"><strong>' + esc(titleText) + '</strong>' + roleBadge + ' <span style="font-weight:normal">(' + countText + '). ' + esc(descText) + '</span></span>'
       + '</div>'
       + '<div style="display:flex; gap:var(--space-2); align-items:center; flex-shrink:0">'
       + '<button class="btn btn-xs btn-ghost" id="instanceBannerBackBtn" style="border:1px solid currentColor">' + esc(t('switch_to_master')) + '</button>'
@@ -1345,11 +1384,15 @@ function setPath(path,value){
 function addEntry(key){
   var arr=data[key]; var template=null;
   for(var i=0;i<arr.length;i++){ if(isObj(arr[i])){ template=arr[i]; break; } }
+  var entryId = key + '_' + (arr.length + 1) + '_' + Math.random().toString(36).substring(2, 7);
   if(template){
-    var entry={};
-    Object.keys(template).forEach(function(k){ entry[k]=k==='selected'?true:(Array.isArray(template[k])?['']:''); });
+    var entry={ id: entryId };
+    Object.keys(template).forEach(function(k){
+      if (k === 'id') return;
+      entry[k]=k==='selected'?true:(Array.isArray(template[k])?['']:'');
+    });
     arr.push(entry);
-  } else arr.push({selected:true});
+  } else arr.push({ id: entryId, selected: true });
   markDirty(); renderAll();
   var newId=slugId(key,arr.length-1), newEl=document.getElementById(newId);
   if(newEl){ newEl.scrollIntoView({behavior:'smooth',block:'start'}); var inp=newEl.querySelector('input:not([type=checkbox]),textarea'); if(inp) setTimeout(function(){ inp.focus(); },120); }

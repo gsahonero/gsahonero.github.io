@@ -351,10 +351,33 @@ function applyOverwrites(obj, overwrites) {
     var parts = pathStr.split('.');
     var current = obj;
     for (var i = 0; i < parts.length - 1; i++) {
-      if (!current[parts[i]]) current[parts[i]] = {};
-      current = current[parts[i]];
+      var p = parts[i];
+      if (Array.isArray(current)) {
+        var idx = parseInt(p, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < current.length) {
+          current = current[idx];
+        } else {
+          var found = null;
+          for (var j = 0; j < current.length; j++) {
+            if (current[j] && (current[j].id === p || current[j]._id === p)) {
+              found = current[j];
+              break;
+            }
+          }
+          if (found) {
+            current = found;
+          } else {
+            return;
+          }
+        }
+      } else {
+        if (!current[p]) current[p] = {};
+        current = current[p];
+      }
     }
-    current[parts[parts.length - 1]] = val;
+    if (current && typeof current === 'object') {
+      current[parts[parts.length - 1]] = val;
+    }
   });
 }
 
@@ -552,8 +575,20 @@ function buildTemplateContext(format) {
 
 function isFieldVisible(path) {
   if (!path) return true;
-  if (activeInstance && activeInstance.visibility && activeInstance.visibility[path] !== undefined) {
-    return activeInstance.visibility[path] !== false;
+  if (activeInstance && activeInstance.visibility) {
+    if (activeInstance.visibility[path] !== undefined) {
+      return activeInstance.visibility[path] !== false;
+    }
+    var parts = path.split('.');
+    if (parts.length >= 2 && typeof data !== 'undefined' && data && Array.isArray(data[parts[0]])) {
+      var idx = parseInt(parts[1], 10);
+      if (!isNaN(idx) && data[parts[0]][idx] && data[parts[0]][idx].id) {
+        var idPath = parts[0] + '.' + data[parts[0]][idx].id + (parts.length > 2 ? '.' + parts.slice(2).join('.') : '');
+        if (activeInstance.visibility[idPath] !== undefined) {
+          return activeInstance.visibility[idPath] !== false;
+        }
+      }
+    }
   }
   if (typeof data !== 'undefined' && data && data._hiddenFields && data._hiddenFields[path] !== undefined) {
     return !data._hiddenFields[path];
@@ -726,9 +761,17 @@ function renderAutoSectionHtml(key, val) {
         if (it.dissertation) {
           descParts.push('<em>Dissertation:</em> ' + htmlEscape(it.dissertation));
         }
-        var mainDesc = it.description || it.details || it.summary || it.highlights || '';
+        var mainDesc = it.description || it.details || it.summary || '';
         if (mainDesc) {
           descParts.push(htmlEscape(mainDesc));
+        }
+        if (Array.isArray(it.highlights) && it.highlights.length) {
+          var hlHtml = ['<ul class="cv-bullet-list" style="margin:4px 0; padding-left:18px; list-style-type:disc">'];
+          it.highlights.forEach(function(h) {
+            if (h) hlHtml.push('  <li>' + htmlEscape(h) + '</li>');
+          });
+          hlHtml.push('</ul>');
+          descParts.push(hlHtml.join('\n'));
         }
 
         if (Array.isArray(it.courses) && it.courses.length) {
@@ -850,23 +893,29 @@ function renderAutoSectionLatex(key, val) {
         var dateStr = joinDate(it.start, it.end, 'dash') || latexText(it.year || it.date || '');
         var title1 = latexText(it.role || it.position || it.degree || it.title || it.language || it.name || it.label || it.category || it.course_area || it.project || '');
         
-        var texOrgInstDept = '';
-        var texOrgParts = [it.organization || it.institution, it.department, it.location].filter(Boolean);
-        if (texOrgParts.length) {
-          texOrgInstDept = texOrgParts.map(latexText).join(', ');
-        }
+        var orgName = it.organization || it.institution || it.company || it.publisher || it.vendor || '';
+        var locName = it.location || '';
+        var deptName = it.department || (it.level ? (it.institution ? it.level : '') : '') || it.grade || it.score || '';
 
-        var profVal = isObj(it.proficiency) ? JSON.stringify(it.proficiency) : (it.proficiency || '');
-        var subheaderVal = texOrgInstDept || it.company || it.publisher || it.vendor || profVal || it.fluency || (it.level ? (it.institution ? (it.institution + ' (' + it.level + ')') : it.level) : '') || '';
-        var title2 = latexText(subheaderVal);
+        var title2 = latexText(orgName);
+        var locStr = latexText(locName);
+        var deptStr = latexText(deptName);
         
         var texDescParts = [];
         if (it.dissertation) {
           texDescParts.push('Dissertation: \\textit{' + latexText(it.dissertation) + '}');
         }
-        var mainTexDesc = latexText(it.description || it.details || it.summary || it.highlights || '');
+        var mainTexDesc = latexText(it.description || it.details || it.summary || '');
         if (mainTexDesc) {
           texDescParts.push(mainTexDesc);
+        }
+        if (Array.isArray(it.highlights) && it.highlights.length) {
+          var hlTex = ['\\begin{itemize}'];
+          it.highlights.forEach(function(h) {
+            if (h) hlTex.push('  \\item ' + latexText(h));
+          });
+          hlTex.push('\\end{itemize}');
+          texDescParts.push(hlTex.join('\n'));
         }
 
         if (Array.isArray(it.courses) && it.courses.length) {
@@ -876,7 +925,7 @@ function renderAutoSectionLatex(key, val) {
 
         var desc = texDescParts.join('\n\n');
         
-        tex += '\\cventry{' + dateStr + '}{' + title1 + '}{' + title2 + '}{}{}{' + desc + '}\n';
+        tex += '\\cventry{' + dateStr + '}{' + title1 + '}{' + title2 + '}{' + locStr + '}{' + deptStr + '}{' + desc + '}\n';
       });
     }
   } else if (typeof val === 'string') {

@@ -104,9 +104,13 @@ export interface CvInstance {
   visibility: Record<string, boolean>;
   propertyNames?: Record<string, string>;
   sections?: Record<string, CvSectionMeta>;
+  notes?: string;
+  targetRole?: string;
 }
 
 export interface CvDatabase {
+  version?: string;
+  $schema?: string;
   basics: CvBasics;
   work_experience?: CvWorkEntry[];
   work?: CvWorkEntry[];
@@ -116,6 +120,9 @@ export interface CvDatabase {
   instances?: Record<string, CvInstance>;
   _style?: CvStyleConfig;
   _sections?: Record<string, CvSectionMeta>;
+  _sectionOrder?: string[];
+  _propertyNames?: Record<string, string>;
+  _visibility?: Record<string, boolean>;
   _activeInstanceName?: string | null;
   [sectionKey: string]: unknown;
 }

@@ -1188,6 +1188,138 @@
           testRuns.push({ id: '5.14', name: 'AI Browser Tools Engine', category: 'integration', expected: 'All tools executed successfully', actual: passed ? 'Passed' : ('Failed (' + details + ')'), passed, latency });
         })();
 
+        // Test 5.15: Entity ID Assignment & Schema Standardization
+        (function() {
+          var tStart = performance.now();
+          var testData = {
+            work_experience: [
+              { company: "Acme Corp", role: "Developer" },
+              { company: "Beta LLC", role: "Lead" }
+            ],
+            education: [
+              { institution: "MIT", studyType: "B.S." }
+            ]
+          };
+          if (typeof win.ensureEntryIds === 'function') {
+            win.ensureEntryIds(testData);
+          } else if (typeof win.fix === 'function') {
+            testData = win.fix(testData);
+          }
+          var item1HasId = !!(testData.work_experience[0].id && typeof testData.work_experience[0].id === 'string');
+          var item2HasId = !!(testData.work_experience[1].id && typeof testData.work_experience[1].id === 'string');
+          var eduHasId = !!(testData.education[0].id && typeof testData.education[0].id === 'string');
+          var uniqueIds = testData.work_experience[0].id !== testData.work_experience[1].id;
+          
+          var passed = item1HasId && item2HasId && eduHasId && uniqueIds;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.15', 'Entity ID Assignment', 'Verifies ensureEntryIds assigns stable unique IDs to all section entries', 'integrity', 'All entries have unique string IDs', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.15', name: 'Entity ID Assignment', category: 'integrity', expected: 'All entries have unique string IDs', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.16: Entity-ID-based Instance Override Resolution
+        (function() {
+          var tStart = performance.now();
+          var originalData = win.data;
+          var originalInstance = win.activeInstance;
+
+          win.data = {
+            work_experience: [
+              { id: 'work_item_001', company: 'Alpha Co', role: 'Software Engineer' },
+              { id: 'work_item_002', company: 'Beta Corp', role: 'Product Manager' }
+            ]
+          };
+          win.activeInstance = {
+            overwrites: {
+              'work_experience.work_item_001.role': 'Staff Architect',
+              'work_experience.work_item_002.role': 'Director of Engineering'
+            }
+          };
+
+          // Test resolution before reordering
+          var resolved0 = win.getValueByPath ? win.getValueByPath(win.data, 'work_experience.0.role', win.activeInstance) : win.getInstanceValue('work_experience.0.role', 'Software Engineer');
+          var resolved1 = win.getValueByPath ? win.getValueByPath(win.data, 'work_experience.1.role', win.activeInstance) : win.getInstanceValue('work_experience.1.role', 'Product Manager');
+
+          // Simulate array reordering (reverse entries)
+          win.data.work_experience.reverse();
+          // Now index 0 is work_item_002, index 1 is work_item_001
+          var reordered0 = win.getValueByPath ? win.getValueByPath(win.data, 'work_experience.0.role', win.activeInstance) : win.getInstanceValue('work_experience.0.role', 'Product Manager');
+          var reordered1 = win.getValueByPath ? win.getValueByPath(win.data, 'work_experience.1.role', win.activeInstance) : win.getInstanceValue('work_experience.1.role', 'Software Engineer');
+
+          var passed = (resolved0 === 'Staff Architect') &&
+                       (resolved1 === 'Director of Engineering') &&
+                       (reordered0 === 'Director of Engineering') &&
+                       (reordered1 === 'Staff Architect');
+
+          // Restore
+          win.data = originalData;
+          win.activeInstance = originalInstance;
+
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.16', 'Entity-ID Override Resolution', 'Resolves overrides by stable entity ID even after array reordering', 'integrity', 'Persistent overrides resolved across reordering', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.16', name: 'Entity-ID Override Resolution', category: 'integrity', expected: 'Persistent overrides resolved across reordering', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.17: Exporter Multi-Format Schema Fidelity with work_experience
+        (function() {
+          var tStart = performance.now();
+          var mockCv = {
+            basics: { name: 'Ada Lovelace', label: 'Computing Pioneer', email: 'ada@example.com' },
+            work_experience: [
+              { company: 'Analytical Engines Ltd', role: 'Chief Algorithm Architect', summary: 'Designed first computer program' }
+            ]
+          };
+
+          var exp = win.Exporter || win;
+          var mdExport = (exp.exportToMarkdown || exp.exportMarkdown) ? (exp.exportToMarkdown || exp.exportMarkdown)(mockCv) : '';
+          var txtExport = (exp.exportToPlainText || exp.exportPlainText) ? (exp.exportToPlainText || exp.exportPlainText)(mockCv) : '';
+
+          var mdHasCompany = mdExport.indexOf('Analytical Engines Ltd') !== -1;
+          var mdHasRole = mdExport.indexOf('Chief Algorithm Architect') !== -1;
+          var txtHasCompany = txtExport.indexOf('Analytical Engines Ltd') !== -1;
+          var txtHasRole = txtExport.indexOf('Chief Algorithm Architect') !== -1;
+
+          var passed = mdHasCompany && mdHasRole && txtHasCompany && txtHasRole;
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.17', 'Exporter Multi-Format Fidelity', 'Verifies exportMarkdown and exportPlainText include work_experience without dropping entries', 'exporter', 'All work entries present in Markdown & Plain Text exports', passed ? 'Passed' : 'Failed', latency, passed);
+          testRuns.push({ id: '5.17', name: 'Exporter Multi-Format Fidelity', category: 'exporter', expected: 'All work entries present in Markdown & Plain Text exports', actual: passed ? 'Passed' : 'Failed', passed, latency });
+        })();
+
+        // Test 5.18: LaTeX PDF Compilation Sanitization
+        (function() {
+          var tStart = performance.now();
+          var latexCtx = (typeof win.buildTemplateContext === 'function') ? win.buildTemplateContext('latex') : null;
+          var passed = false;
+          var details = '';
+
+          if (latexCtx && latexCtx.all_sections) {
+            var hasHtmlDiv = /<div[\s>]/i.test(latexCtx.all_sections);
+            var hasHtmlSection = /<section[\s>]/i.test(latexCtx.all_sections);
+            var hasHtmlP = /<p[\s>]/i.test(latexCtx.all_sections);
+            var hasLatexSection = /\\section/i.test(latexCtx.all_sections);
+
+            passed = !hasHtmlDiv && !hasHtmlSection && !hasHtmlP && hasLatexSection;
+            details = 'hasHtmlDiv: ' + hasHtmlDiv + ', hasHtmlSection: ' + hasHtmlSection + ', hasLatexSection: ' + hasLatexSection;
+          } else {
+            details = 'latexCtx.all_sections missing or null';
+          }
+
+          var tEnd = performance.now();
+          var latency = Math.round(tEnd - tStart);
+
+          if (passed) totalPassed++; else totalFailed++;
+          appendResultRow('5.18', 'LaTeX PDF Sanitization', 'Ensures LaTeX compilation context contains pure LaTeX and no HTML tags', 'compiler', 'Clean LaTeX in all_sections without HTML tags', passed ? 'Passed' : ('Failed (' + details + ')'), latency, passed);
+          testRuns.push({ id: '5.18', name: 'LaTeX PDF Sanitization', category: 'compiler', expected: 'Clean LaTeX in all_sections without HTML tags', actual: passed ? 'Passed' : ('Failed (' + details + ')'), passed, latency });
+        })();
+
         // Finalize test metrics
         var endSuiteTime = performance.now();
         var suiteDuration = Math.round(endSuiteTime - startSuiteTime);
