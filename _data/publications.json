@@ -1,370 +1,416 @@
 [
-	{
-		"id": "easttomFunctionalBCIModel2021",
-		"type": "article-journal",
-		"abstract": "In order to facilitate communication and collaboration between researchers, Brain–computer interfaces (BCI) require a generally applicable functional model as well as a common vocabulary. The IEEE P2731 working group is in the process of developing such a functional model and a lexicon of BCI terminology. Such a functional model has multiple aspects including the control interface, physiology, transducers, etc. This current paper focuses on the control interface aspects of that model. Having a generally applicable control interface model will facilitate interdisciplinar y research and communication. The control interface is a critical part of the functional model and is described in this current paper. The control interface presented intentionally is intentionally kept general in order to be widely applicable. Some details are specific to a particular application and are thus left to those applications. It does contain the encoder (which also contains a decoder), with a feedback submodule.",
-		"citation-key": "easttomFunctionalBCIModel2021",
-		"container-title": "Brain-Computer Interfaces",
-		"DOI": "10.1080/2326263X.2021.2002004",
-		"ISSN": "2326-263X, 2326-2621",
-		"issue": "4",
-		"journalAbbreviation": "Brain-Computer Interfaces",
-		"language": "en",
-		"page": "154-160",
-		"source": "DOI.org (Crossref)",
-		"title": "A functional BCI model by the P2731 working group: control interface",
-		"title-short": "A functional BCI model by the P2731 working group",
-		"URL": "https://www.tandfonline.com/doi/full/10.1080/2326263X.2021.2002004",
-		"volume": "8",
-		"author": [
-			{
-				"family": "Easttom",
-				"given": "Chuck"
-			},
-			{
-				"family": "Bianchi",
-				"given": "Luigi"
-			},
-			{
-				"family": "Valeriani",
-				"given": "Davide"
-			},
-			{
-				"family": "Nam",
-				"given": "Chang S."
-			},
-			{
-				"family": "Hossaini",
-				"given": "Ali"
-			},
-			{
-				"family": "Zapała",
-				"given": "Dariusz"
-			},
-			{
-				"family": "Roman-Gonzalez",
-				"given": "Avid"
-			},
-			{
-				"family": "Singh",
-				"given": "Avinash K"
-			},
-			{
-				"family": "Antonietti",
-				"given": "Alberto"
-			},
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			},
-			{
-				"family": "Balachandran",
-				"given": "Pradeep"
-			}
-		],
-		"accessed": {
-			"date-parts": [
-				[
-					"2026",
-					3,
-					13
-				]
-			]
-		},
-		"issued": {
-			"date-parts": [
-				[
-					"2021",
-					10,
-					2
-				]
-			]
-		}
-	},
-	{
-		"id": "easttomFunctionalModelUnifying2021",
-		"type": "article-journal",
-		"abstract": "Brain Computer Interface (BCI) technology is a critical area both for researchers and clinical practitioners. The IEEE P2731 working group is developing a comprehensive BCI lexicography and a functional model of BCI. The glossary and the functional model are inextricably intertwined. The functional model guides the development of the glossary. Terminology is developed from the basis of a BCI functional model. This paper provides the current status of the P2731 working group’s progress towards developing a BCI terminology standard and functional model for the IEEE.",
-		"citation-key": "easttomFunctionalModelUnifying2021",
-		"container-title": "IEEE Open Journal of Engineering in Medicine and Biology",
-		"DOI": "10.1109/OJEMB.2021.3057471",
-		"ISSN": "2644-1276",
-		"journalAbbreviation": "IEEE Open J. Eng. Med. Biol.",
-		"language": "en",
-		"license": "https://creativecommons.org/licenses/by/4.0/legalcode",
-		"page": "91-96",
-		"source": "DOI.org (Crossref)",
-		"title": "A Functional Model for Unifying Brain Computer Interface Terminology",
-		"URL": "https://ieeexplore.ieee.org/document/9349175/",
-		"volume": "2",
-		"author": [
-			{
-				"family": "Easttom",
-				"given": "Chuck"
-			},
-			{
-				"family": "Bianchi",
-				"given": "Luigi"
-			},
-			{
-				"family": "Valeriani",
-				"given": "Davide"
-			},
-			{
-				"family": "Nam",
-				"given": "Chang S."
-			},
-			{
-				"family": "Hossaini",
-				"given": "Ali"
-			},
-			{
-				"family": "Zapala",
-				"given": "Dariusz"
-			},
-			{
-				"family": "Roman-Gonzalez",
-				"given": "Avid"
-			},
-			{
-				"family": "Singh",
-				"given": "Avinash K"
-			},
-			{
-				"family": "Antonietti",
-				"given": "Alberto"
-			},
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			},
-			{
-				"family": "Balachandran",
-				"given": "Pradeep"
-			}
-		],
-		"accessed": {
-			"date-parts": [
-				[
-					"2026",
-					3,
-					13
-				]
-			]
-		},
-		"issued": {
-			"date-parts": [
-				[
-					"2021"
-				]
-			]
-		}
-	},
-	{
-		"id": "sahonero-alvarezFunctionalBCIModel2021",
-		"type": "article-journal",
-		"abstract": "A Brain-Computer Interface (BCI) can be considered as a technology that allows for alternative means of communication between humans and their environment using thoughts and intentions. The structure of this interface is composed of various stages, beginning with the acquisition of the brain signals, followed by several processing stages, and leading to the generation of feedback signals. The development of a BCI system involves a diverse set of expertise in order to produce a unique environment for continuous innovations. However, such diversity in technical background and expertise may lead to confusion in the terminology used by the community. As such, the IEEE P2731 WG has been tasked with the development of a functional model to facilitate the understanding of a BCI system. In this paper, we focus on the description of the functional elements that belong to the transducer stage of a BCI.",
-		"citation-key": "sahonero-alvarezFunctionalBCIModel2021",
-		"container-title": "Brain-Computer Interfaces",
-		"DOI": "10.1080/2326263X.2021.1968633",
-		"ISSN": "2326-263X, 2326-2621",
-		"issue": "3",
-		"journalAbbreviation": "Brain-Computer Interfaces",
-		"language": "en",
-		"page": "92-107",
-		"source": "DOI.org (Crossref)",
-		"title": "A Functional BCI Model by the P2731 Working Group: Transducer",
-		"title-short": "A Functional BCI Model by the P2731 Working Group",
-		"URL": "https://www.tandfonline.com/doi/full/10.1080/2326263X.2021.1968633",
-		"volume": "8",
-		"author": [
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			},
-			{
-				"family": "Singh",
-				"given": "Avinash Kumar"
-			},
-			{
-				"family": "Sayrafian",
-				"given": "Kamran"
-			},
-			{
-				"family": "Bianchi",
-				"given": "Luigi"
-			},
-			{
-				"family": "Roman-Gonzalez",
-				"given": "Avid"
-			}
-		],
-		"accessed": {
-			"date-parts": [
-				[
-					"2026",
-					3,
-					13
-				]
-			]
-		},
-		"issued": {
-			"date-parts": [
-				[
-					"2021",
-					7,
-					3
-				]
-			]
-		}
-	},
-	{
-		"id": "ordonez3DConvolutionAccelerator2019",
-		"type": "paper-conference",
-		"abstract": "Convolutional Neural Networks (CNNs) have become a popular and useful deep learning algorithm. However, the requirements of computation have also increased. As implementation of CNNs in Embedded Systems or Cyber-Physical Systems (CPS) is required, the need of efficient technologies of computation like FPGAs arise substantially. In this paper, we present a 3D convolution accelerator implemented on a Xilinx ZCU102 FPGA board. It achieves 32.08 GOP/s of performance and an efficiency of 3.58 GOP/s per Watt. This accelerator has been developed in Xilinx SDSoC environment.",
-		"citation-key": "ordonez3DConvolutionAccelerator2019",
-		"container-title": "2019 7th International Engineering, Sciences and Technology Conference (IESTEC)",
-		"DOI": "10.1109/IESTEC46403.2019.00126",
-		"event-title": "2019 7th International Engineering, Sciences and Technology Conference (IESTEC)",
-		"ISBN": "978-1-7281-1691-4",
-		"language": "en",
-		"license": "https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html",
-		"page": "677-681",
-		"publisher": "IEEE",
-		"publisher-place": "Panama, Panama",
-		"source": "DOI.org (Crossref)",
-		"title": "A 3D Convolution Accelerator Implemented on FPGA Using SDSoC",
-		"URL": "https://ieeexplore.ieee.org/document/8943580/",
-		"author": [
-			{
-				"family": "Ordonez",
-				"given": "Jhon"
-			},
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			}
-		],
-		"accessed": {
-			"date-parts": [
-				[
-					"2026",
-					3,
-					13
-				]
-			]
-		},
-		"issued": {
-			"date-parts": [
-				[
-					"2019",
-					10
-				]
-			]
-		}
-	},
-	{
-		"id": "carlosBLDCMotorController",
-		"type": "paper-conference",
-		"abstract": "Brushless DC Motors (BLDCM) have many beneﬁts for their high eﬃciency, small size, and low maintenance requirements. On the other hand, high eﬃciency electronics are usually related to the usage of ARM based microcontrollers. In this work, the behavior over multiple PWM frequencies and after applying PWM compensation is studied using an ARM based board. In general, performance of sensorless and hall-eﬀect based controller show expected diﬀerences. However, by using the proposed control schema on a real plant, impactful advantages are obtained showing 67% performance improvement and an average of 20% torque ripple reduction.",
-		"citation-key": "carlosBLDCMotorController",
-		"event-title": "Congreso Latinoamericano de Control Automático",
-		"language": "en",
-		"publisher-place": "Quito, Ecuador",
-		"source": "Zotero",
-		"title": "BLDC Motor Controller Response to PWM Compensation",
-		"author": [
-			{
-				"family": "Gutierrez",
-				"given": "Carlos"
-			},
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			}
-		],
-		"issued": {
-			"date-parts": [
-				[
-					"2018"
-				]
-			]
-		}
-	},
-	{
-		"id": "SahoneroComparison",
-		"type": "paper-conference",
-		"abstract": "The Blind Source Separation (BSS) problem is present in a variety of engineering applications, including the electroencephalographic (EEG) signal separation for artifact removal procedure in Brain Computer Interfaces (BCI). Independent Component Analysis (ICA) is a widely used technique for this purpose, although, it is also well known to have high computational complexity. Thus, when 'real time' operation is the target on BCI systems, hardware solutions and specifically FPGA devices arise as feasible answers to the needs. However, when considering the design constraints and requirements, it is necessary to analyze which ICA algorithm would fit better in hardware. In this work, we evaluate different software implementations of ICA approaches using MATLAB and according to some criteria (running time, allocated memory, accuracy and scalability) targeting four ICA algorithms: Second-Order Blind Identification (SOBI), Hyvarinen's fixed-point algorithm (FastICA), logistic Infomax (Infomax) and Joint Approximation Diagonalization of Eigenmatrices (JADE). The outcomes have shown that SOBI's MATLAB implementation is the best procedure among all the analyzed techniques by drastically overcoming the speed of the others algorithms. Moreover, its correlation grades, corresponding to Pearson and Spearman correlation coefficients respectively, indicate it as one of the more accurate algorithms.",
-		"citation-key": "SahoneroComparison",
-		"container-title": "Proceedings of the 8th International Multi-Conference on Complexity, Informatics and Cybernetics",
-		"event-title": "8th International Multi-Conference on Complexity, Informatics and Cybernetics",
-		"note": "tex.eventtitle: International Multi-Conference on Complexity, Informatics and Cybernetics",
-		"publisher-place": "Orlando, FL, US",
-		"title": "A Comparison of SOBI, FastICA, JADE and Infomax Algorithms",
-		"author": [
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			},
-			{
-				"family": "Calderon",
-				"given": "Humberto"
-			}
-		],
-		"issued": {
-			"date-parts": [
-				[
-					"2017"
-				]
-			]
-		}
-	},
-	{
-		"id": "Zapaa2021functional",
-		"type": "article-journal",
-		"citation-key": "Zapaa2021functional",
-		"container-title": "Brain-Computer Interfaces",
-		"DOI": "10.1080/2326263x.2021.1935124",
-		"ISSN": "2326-263X",
-		"issue": "3",
-		"journalAbbreviation": "Brain-Computer Interfaces",
-		"language": "en",
-		"note": "tex.\"author+an:orcid\": 1=\"https://orcid.org/0000-0002-3472-3050\"; 2=\"https://orcid.org/0000-0001-5314-222X\"; 4=\"https://orcid.org/0000-0001-5259-7927\"; 5=\"https://orcid.org/0000-0002-5883-6113\"",
-		"page": "82–91",
-		"publisher": "Informa UK Limited",
-		"title": "A functional BCI model by the P2731 working group: psychology",
-		"URL": "http://dx.doi.org/10.1080/2326263X.2021.1935124",
-		"volume": "8",
-		"author": [
-			{
-				"family": "Zapała",
-				"given": "Dariusz"
-			},
-			{
-				"family": "Hossaini",
-				"given": "Ali"
-			},
-			{
-				"family": "Kianpour",
-				"given": "Mazaher"
-			},
-			{
-				"family": "Sahonero-Alvarez",
-				"given": "Guillermo"
-			},
-			{
-				"family": "Ayesh",
-				"given": "Aladdin"
-			}
-		],
-		"issued": {
-			"date-parts": [
-				[
-					"2021",
-					6,
-					22
-				]
-			]
-		}
-	}
+  {
+    "id": "publications_1_b253r",
+    "title": "Accelerated DESPOT1 with variable parameters for 3D T1 brain mapping",
+    "authors_formatted": "Ronal Coronado, Gabriel Varela-Mattatall, <strong>Guillermo Sahonero-Alvarez</strong>, René Botnar, Cecilia Besa, Pablo Irarrazaval, Claudia Prieto",
+    "authors_plain": "Ronal Coronado, Gabriel Varela-Mattatall, Guillermo Sahonero-Alvarez, René Botnar, Cecilia Besa, Pablo Irarrazaval, Claudia Prieto",
+    "authors_short": "Ronal Coronado, Gabriel Varela-Mattatall, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 4,
+    "total_authors": 7,
+    "venue": "Journal of Magnetic Resonance Imaging",
+    "year": 2025,
+    "doi": null,
+    "topic": "MRI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_1_b253r,\n  author = {Ronal Coronado, Gabriel Varela-Mattatall, Guillermo Sahonero-Alvarez, René Botnar, Cecilia Besa, Pablo Irarrazaval, Claudia Prieto},\n  title = {Accelerated DESPOT1 with variable parameters for 3D T1 brain mapping},\n  journal = {Journal of Magnetic Resonance Imaging},\n  year = {2025}\n}"
+  },
+  {
+    "id": "publications_2_d4dbm",
+    "title": "Distributed edge computing for appearance-based gait recognition",
+    "authors_formatted": "Christian Conchari, <strong>Guillermo Sahonero-Alvarez</strong>, Raul Mollocuaquira, Edgar Salazar",
+    "authors_plain": "Christian Conchari, Guillermo Sahonero-Alvarez, Raul Mollocuaquira, Edgar Salazar",
+    "authors_short": "Christian Conchari, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 2,
+    "total_authors": 4,
+    "venue": "IEEE ANDESCON",
+    "year": 2024,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_2_d4dbm,\n  author = {Christian Conchari, Guillermo Sahonero-Alvarez, Raul Mollocuaquira, Edgar Salazar},\n  title = {Distributed edge computing for appearance-based gait recognition},\n  journal = {IEEE ANDESCON},\n  year = {2024}\n}"
+  },
+  {
+    "id": "publications_3_wlmtc",
+    "title": "Frost Forecast and Early Alarm System based on Deep Learning",
+    "authors_formatted": "Mario Torrez-Callisaya, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "authors_plain": "Mario Torrez-Callisaya, Guillermo Sahonero-Alvarez",
+    "authors_short": "Mario Torrez-Callisaya, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "Proceedings of the 2023 IEEE Latin American Conference on Computational Intelligence (LA-CCI)",
+    "year": 2023,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_3_wlmtc,\n  author = {Mario Torrez-Callisaya, Guillermo Sahonero-Alvarez},\n  title = {Frost Forecast and Early Alarm System based on Deep Learning},\n  journal = {Proceedings of the 2023 IEEE Latin American Conference on Computational Intelligence (LA-CCI)},\n  year = {2023}\n}"
+  },
+  {
+    "id": "publications_4_8rdnr",
+    "title": "Exploring microgravity liquid printing based on resin solidification for outer space applications",
+    "authors_formatted": "Fabio Diaz Palacios, <strong>Guillermo Sahonero Alvarez</strong>, Gabriel Rojas, Miguel Clavijo, Jhon Ordoñez, Khalil Nallar",
+    "authors_plain": "Fabio Diaz Palacios, Guillermo Sahonero Alvarez, Gabriel Rojas, Miguel Clavijo, Jhon Ordoñez, Khalil Nallar",
+    "authors_short": "Fabio Diaz Palacios, <strong>Guillermo Sahonero Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 4,
+    "total_authors": 6,
+    "venue": "Key Engineering Materials",
+    "year": 2023,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_4_8rdnr,\n  author = {Fabio Diaz Palacios, Guillermo Sahonero Alvarez, Gabriel Rojas, Miguel Clavijo, Jhon Ordoñez, Khalil Nallar},\n  title = {Exploring microgravity liquid printing based on resin solidification for outer space applications},\n  journal = {Key Engineering Materials},\n  year = {2023}\n}"
+  },
+  {
+    "id": "publications_5_rmdj3",
+    "title": "Structure of personal values and corruption: An experimental analysis of decisions leading to accepting or rejecting bribery",
+    "authors_formatted": "Eric Roth, <strong>Guillermo Sahonero</strong>, Andrés Rodríguez",
+    "authors_plain": "Eric Roth, Guillermo Sahonero, Andrés Rodríguez",
+    "authors_short": "Eric Roth, <strong>Guillermo Sahonero</strong>, Andrés Rodríguez",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 3,
+    "venue": "Revista AJAYU",
+    "year": 2023,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_5_rmdj3,\n  author = {Eric Roth, Guillermo Sahonero, Andrés Rodríguez},\n  title = {Structure of personal values and corruption: An experimental analysis of decisions leading to accepting or rejecting bribery},\n  journal = {Revista AJAYU},\n  year = {2023}\n}"
+  },
+  {
+    "id": "publications_6_ag5ne",
+    "title": "ADRAS: Airborne Disease Risk Assessment System for Closed Environments",
+    "authors_formatted": "Wilber Rojas, Edwin Salcedo, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "authors_plain": "Wilber Rojas, Edwin Salcedo, Guillermo Sahonero-Alvarez",
+    "authors_short": "Wilber Rojas, Edwin Salcedo, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 3,
+    "venue": "Proceedings of the 9th International Conference on Information Management and Big Data (SIMBig)",
+    "year": 2022,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_6_ag5ne,\n  author = {Wilber Rojas, Edwin Salcedo, Guillermo Sahonero-Alvarez},\n  title = {ADRAS: Airborne Disease Risk Assessment System for Closed Environments},\n  journal = {Proceedings of the 9th International Conference on Information Management and Big Data (SIMBig)},\n  year = {2022}\n}"
+  },
+  {
+    "id": "publications_7_3n7do",
+    "title": "Merging Brain-Computer interface P300 speller datasets: perspectives and pitfalls",
+    "authors_formatted": "Luigi Bianchi, Raffaele Ferrante, Yaoping Hu, <strong>Guillermo Sahonero-Alvarez</strong>, and Nusrat Z. Zenia",
+    "authors_plain": "Luigi Bianchi, Raffaele Ferrante, Yaoping Hu, Guillermo Sahonero-Alvarez, and Nusrat Z. Zenia",
+    "authors_short": "Luigi Bianchi, ..., <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 3,
+    "total_authors": 5,
+    "venue": "Frontiers in Neuroergonomics: 36",
+    "year": 2022,
+    "doi": null,
+    "topic": "BCI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_7_3n7do,\n  author = {Luigi Bianchi, Raffaele Ferrante, Yaoping Hu, Guillermo Sahonero-Alvarez, and Nusrat Z. Zenia},\n  title = {Merging Brain-Computer interface P300 speller datasets: perspectives and pitfalls},\n  journal = {Frontiers in Neuroergonomics: 36},\n  year = {2022}\n}"
+  },
+  {
+    "id": "publications_8_j7w36",
+    "title": "MAMBU: A Bolivian case of response to artificial ventilators shortage",
+    "authors_formatted": "Fabio Richard Diaz Palacios, Jhon Ordoñez, Gabriel Antonio Rojas Silva, Miguel Angel Clavijo Quispe, <strong>Guillermo Sahonero-Alvarez</strong>, Rodrigo Ruben Botelho Oblitas, Juan Manuel Valverde Velasquez, Guillermo Enrique Manning Soria Galvarro, Renan Andres Espinar Saavedra, Anna Montevilla, Diego Alberto Suarez Traverso, Oscar Crispin Nina, Khalil Nallar Camacho",
+    "authors_plain": "Fabio Richard Diaz Palacios, Jhon Ordoñez, Gabriel Antonio Rojas Silva, Miguel Angel Clavijo Quispe, Guillermo Sahonero-Alvarez, Rodrigo Ruben Botelho Oblitas, Juan Manuel Valverde Velasquez, Guillermo Enrique Manning Soria Galvarro, Renan Andres Espinar Saavedra, Anna Montevilla, Diego Alberto Suarez Traverso, Oscar Crispin Nina, Khalil Nallar Camacho",
+    "authors_short": "Fabio Richard Diaz Palacios, ..., <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 11,
+    "total_authors": 13,
+    "venue": "IEEE ANDESCON",
+    "year": 2022,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_8_j7w36,\n  author = {Fabio Richard Diaz Palacios, Jhon Ordoñez, Gabriel Antonio Rojas Silva, Miguel Angel Clavijo Quispe, Guillermo Sahonero-Alvarez, Rodrigo Ruben Botelho Oblitas, Juan Manuel Valverde Velasquez, Guillermo Enrique Manning Soria Galvarro, Renan Andres Espinar Saavedra, Anna Montevilla, Diego Alberto Suarez Traverso, Oscar Crispin Nina, Khalil Nallar Camacho},\n  title = {MAMBU: A Bolivian case of response to artificial ventilators shortage},\n  journal = {IEEE ANDESCON},\n  year = {2022}\n}"
+  },
+  {
+    "id": "publications_9_te017",
+    "title": "Exploring Edge Computing for Gait Recognition",
+    "authors_formatted": "Israel Raul Tiñini, <strong>Guillermo Sahonero-Alvarez</strong>, Carlos Menacho, and Josmar Suarez",
+    "authors_plain": "Israel Raul Tiñini, Guillermo Sahonero-Alvarez, Carlos Menacho, and Josmar Suarez",
+    "authors_short": "Israel Raul Tiñini, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 2,
+    "total_authors": 4,
+    "venue": "4th International Conference on Bio-Engineering for Smart Technologies (BioSMART), IEEE",
+    "year": 2021,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_9_te017,\n  author = {Israel Raul Tiñini, Guillermo Sahonero-Alvarez, Carlos Menacho, and Josmar Suarez},\n  title = {Exploring Edge Computing for Gait Recognition},\n  journal = {4th International Conference on Bio-Engineering for Smart Technologies (BioSMART), IEEE},\n  year = {2021}\n}"
+  },
+  {
+    "id": "publications_10_84ogf",
+    "title": "A protocol for Brain-Computer Interfaces based on Musical Notes Imagery",
+    "authors_formatted": "Anna Montevilla, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "authors_plain": "Anna Montevilla, Guillermo Sahonero-Alvarez",
+    "authors_short": "Anna Montevilla, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "IEEE Latin American Conference on Computational Intelligence (LA-CCI)",
+    "year": 2021,
+    "doi": null,
+    "topic": "BCI",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_10_84ogf,\n  author = {Anna Montevilla, Guillermo Sahonero-Alvarez},\n  title = {A protocol for Brain-Computer Interfaces based on Musical Notes Imagery},\n  journal = {IEEE Latin American Conference on Computational Intelligence (LA-CCI)},\n  year = {2021}\n}"
+  },
+  {
+    "id": "easttomFunctionalBCIModel2021",
+    "title": "A functional BCI model by the P2731 working group: control interface",
+    "authors_formatted": "Chuck Easttom, Luigi Bianchi, Davide Valeriani, Chang S Nam, Ali Hossaini, Dariusz Zapała, Avid Roman-Gonzalez, Avinash K Singh, Alberto Antonietti, <strong>Guillermo Sahonero-Alvarez</strong>, Pradeep Balachandran",
+    "authors_plain": "Chuck Easttom, Luigi Bianchi, Davide Valeriani, Chang S Nam, Ali Hossaini, Dariusz Zapała, Avid Roman-Gonzalez, Avinash K Singh, Alberto Antonietti, Guillermo Sahonero-Alvarez, Pradeep Balachandran",
+    "authors_short": "Chuck Easttom, ..., <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 9,
+    "total_authors": 11,
+    "venue": "Brain-Computer Interfaces",
+    "year": 2021,
+    "doi": "10.1080/2326263X.2021.2002004",
+    "topic": "BCI",
+    "selected": false,
+    "has_pdf": true,
+    "pdf_url": "/assets/papers/easttomFunctionalBCIModel2021.pdf",
+    "bibtex": "@article{easttomFunctionalBCIModel2021,\n  author = {Chuck Easttom, Luigi Bianchi, Davide Valeriani, Chang S Nam, Ali Hossaini, Dariusz Zapała, Avid Roman-Gonzalez, Avinash K Singh, Alberto Antonietti, Guillermo Sahonero-Alvarez, Pradeep Balachandran},\n  title = {A functional BCI model by the P2731 working group: control interface},\n  journal = {Brain-Computer Interfaces},\n  year = {2021},\n  doi = {10.1080/2326263X.2021.2002004}\n}"
+  },
+  {
+    "id": "sahonero-alvarezFunctionalBCIModel2021",
+    "title": "A Functional BCI Model by the P2731 Working Group: Transducer",
+    "authors_formatted": "<strong>Guillermo Sahonero-Alvarez</strong>, Avinash K. Singh, Kamran Sayrafian, Luigi Bianchi, and Avid Roman-Gonzalez",
+    "authors_plain": "Guillermo Sahonero-Alvarez, Avinash K. Singh, Kamran Sayrafian, Luigi Bianchi, and Avid Roman-Gonzalez",
+    "authors_short": "<strong>Guillermo Sahonero-Alvarez</strong>, Avinash K. Singh",
+    "is_truncated": true,
+    "remaining_authors": 3,
+    "total_authors": 5,
+    "venue": "Brain-Computer Interfaces",
+    "year": 2021,
+    "doi": "10.1080/2326263X.2021.1968633",
+    "topic": "BCI",
+    "selected": true,
+    "has_pdf": true,
+    "pdf_url": "/assets/papers/sahonero-alvarezFunctionalBCIModel2021.pdf",
+    "bibtex": "@article{sahonero-alvarezFunctionalBCIModel2021,\n  author = {Guillermo Sahonero-Alvarez, Avinash K. Singh, Kamran Sayrafian, Luigi Bianchi, and Avid Roman-Gonzalez},\n  title = {A Functional BCI Model by the P2731 Working Group: Transducer},\n  journal = {Brain-Computer Interfaces},\n  year = {2021},\n  doi = {10.1080/2326263X.2021.1968633}\n}"
+  },
+  {
+    "id": "Zapaa2021functional",
+    "title": "A functional BCI model by the P2731 working group: psychology",
+    "authors_formatted": "Dariusz Zapała, Ali Hossaini, Mazaher Kianpour, <strong>Guillermo Sahonero-Alvarez</strong>, Aladdin Ayesh",
+    "authors_plain": "Dariusz Zapała, Ali Hossaini, Mazaher Kianpour, Guillermo Sahonero-Alvarez, Aladdin Ayesh",
+    "authors_short": "Dariusz Zapała, ..., <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 3,
+    "total_authors": 5,
+    "venue": "Brain-Computer Interfaces",
+    "year": 2021,
+    "doi": "10.1080/2326263x.2021.1935124",
+    "topic": "BCI",
+    "selected": true,
+    "has_pdf": true,
+    "pdf_url": "/assets/papers/Zapaa2021functional.pdf",
+    "bibtex": "@article{Zapaa2021functional,\n  author = {Dariusz Zapała, Ali Hossaini, Mazaher Kianpour, Guillermo Sahonero-Alvarez, Aladdin Ayesh},\n  title = {A functional BCI model by the P2731 working group: psychology},\n  journal = {Brain-Computer Interfaces},\n  year = {2021},\n  doi = {10.1080/2326263x.2021.1935124}\n}"
+  },
+  {
+    "id": "publications_14_bd3k4",
+    "title": "A Functional Model for Unifying Brain Computer Interface Terminology",
+    "authors_formatted": "Easttom C., Bianchi L., Valeriani D., Nam C. S., Hossaini A., Zapała D., Roman-Gonzalez A., Singh A. K., Antonietti A., <strong>Sahonero-Alvarez G.</strong>, Balachandran P.",
+    "authors_plain": "Easttom C., Bianchi L., Valeriani D., Nam C. S., Hossaini A., Zapała D., Roman-Gonzalez A., Singh A. K., Antonietti A., Sahonero-Alvarez G., Balachandran P.",
+    "authors_short": "Easttom C., ..., <strong>Sahonero-Alvarez G.</strong>",
+    "is_truncated": true,
+    "remaining_authors": 9,
+    "total_authors": 11,
+    "venue": "IEEE Open Journal of Engineering in Medicine and Biology",
+    "year": 2021,
+    "doi": "10.1109/OJEMB.2021.3057471",
+    "topic": "Deep Learning & AI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_14_bd3k4,\n  author = {Easttom C., Bianchi L., Valeriani D., Nam C. S., Hossaini A., Zapała D., Roman-Gonzalez A., Singh A. K., Antonietti A., Sahonero-Alvarez G., Balachandran P.},\n  title = {A Functional Model for Unifying Brain Computer Interface Terminology},\n  journal = {IEEE Open Journal of Engineering in Medicine and Biology},\n  year = {2021},\n  doi = {10.1109/OJEMB.2021.3057471}\n}"
+  },
+  {
+    "id": "publications_15_sh50k",
+    "title": "Towards Bridging the Gap Between Computational Intelligence and Neuroscience in Brain-Computer Interfaces with a Common Description of Systems and Data",
+    "authors_formatted": "Avinash Kumar Singh, <strong>Guillermo Sahonero-Alvarez</strong>, Mufti Mahmud, Luigi Bianchi",
+    "authors_plain": "Avinash Kumar Singh, Guillermo Sahonero-Alvarez, Mufti Mahmud, Luigi Bianchi",
+    "authors_short": "Avinash Kumar Singh, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 2,
+    "total_authors": 4,
+    "venue": "Frontiers in Neuroinformatics",
+    "year": 2021,
+    "doi": null,
+    "topic": "BCI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_15_sh50k,\n  author = {Avinash Kumar Singh, Guillermo Sahonero-Alvarez, Mufti Mahmud, Luigi Bianchi},\n  title = {Towards Bridging the Gap Between Computational Intelligence and Neuroscience in Brain-Computer Interfaces with a Common Description of Systems and Data},\n  journal = {Frontiers in Neuroinformatics},\n  year = {2021}\n}"
+  },
+  {
+    "id": "publications_16_ajoqc",
+    "title": "Cross-View Gait Recognition Based on U-Net",
+    "authors_formatted": "Tiñini Alvarez I. R., <strong>Sahonero-Alvarez, G.</strong>",
+    "authors_plain": "Tiñini Alvarez I. R., Sahonero-Alvarez, G.",
+    "authors_short": "Tiñini Alvarez I. R., <strong>Sahonero-Alvarez, G.</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "2020 International Joint Conference on Neural Networks (IJCNN), Glasgow, United Kingdom",
+    "year": 2020,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": true,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_16_ajoqc,\n  author = {Tiñini Alvarez I. R., Sahonero-Alvarez, G.},\n  title = {Cross-View Gait Recognition Based on U-Net},\n  journal = {2020 International Joint Conference on Neural Networks (IJCNN), Glasgow, United Kingdom},\n  year = {2020}\n}"
+  },
+  {
+    "id": "ordonez3DConvolutionAccelerator2019",
+    "title": "A 3D Convolution Accelerator Implemented on FPGA Using SDSoC",
+    "authors_formatted": "Ordoñez, J., <strong>Sahonero-Alvarez, G.</strong>",
+    "authors_plain": "Ordoñez, J., Sahonero-Alvarez, G.",
+    "authors_short": "Ordoñez, J., <strong>Sahonero-Alvarez, G.</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "7th International Engineering, Sciences and Technology Conference (IESTEC)",
+    "year": 2019,
+    "doi": "10.1109/IESTEC46403.2019.00126",
+    "topic": "Hardware & Edge",
+    "selected": true,
+    "has_pdf": true,
+    "pdf_url": "/assets/papers/ordonez3DConvolutionAccelerator2019.pdf",
+    "bibtex": "@article{ordonez3DConvolutionAccelerator2019,\n  author = {Ordoñez, J., Sahonero-Alvarez, G.},\n  title = {A 3D Convolution Accelerator Implemented on FPGA Using SDSoC},\n  journal = {7th International Engineering, Sciences and Technology Conference (IESTEC)},\n  year = {2019},\n  doi = {10.1109/IESTEC46403.2019.00126}\n}"
+  },
+  {
+    "id": "publications_18_09epa",
+    "title": "Gait recognition based on modified Gait energy image",
+    "authors_formatted": "Israel Raul Tiñini Alvarez, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "authors_plain": "Israel Raul Tiñini Alvarez, Guillermo Sahonero-Alvarez",
+    "authors_short": "Israel Raul Tiñini Alvarez, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "IEEE sciences and humanities international research conference (SHIRCON)",
+    "year": 2018,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_18_09epa,\n  author = {Israel Raul Tiñini Alvarez, Guillermo Sahonero-Alvarez},\n  title = {Gait recognition based on modified Gait energy image},\n  journal = {IEEE sciences and humanities international research conference (SHIRCON)},\n  year = {2018}\n}"
+  },
+  {
+    "id": "publications_19_k9ns9",
+    "title": "Implementation Issues of Student-Centered Learning based Engineering Education in Developing Countries Universities",
+    "authors_formatted": "<strong>Guillermo Sahonero-Alvarez</strong>, Humberto Calderon",
+    "authors_plain": "Guillermo Sahonero-Alvarez, Humberto Calderon",
+    "authors_short": "<strong>Guillermo Sahonero-Alvarez</strong>, Humberto Calderon",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "World Engineering Education Forum & Global Engineering Dean Council",
+    "year": 2018,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_19_k9ns9,\n  author = {Guillermo Sahonero-Alvarez, Humberto Calderon},\n  title = {Implementation Issues of Student-Centered Learning based Engineering Education in Developing Countries Universities},\n  journal = {World Engineering Education Forum & Global Engineering Dean Council},\n  year = {2018}\n}"
+  },
+  {
+    "id": "publications_20_srx95",
+    "title": "Blockchain and Peace Engineering and its Relationship to Engineering Education",
+    "authors_formatted": "<strong>Guillermo Sahonero-Alvarez</strong>",
+    "authors_plain": "Guillermo Sahonero-Alvarez",
+    "authors_short": "<strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 1,
+    "venue": "World Engineering Education Forum & Global Engineering Dean Council",
+    "year": 2018,
+    "doi": null,
+    "topic": "Deep Learning & AI",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_20_srx95,\n  author = {Guillermo Sahonero-Alvarez},\n  title = {Blockchain and Peace Engineering and its Relationship to Engineering Education},\n  journal = {World Engineering Education Forum & Global Engineering Dean Council},\n  year = {2018}\n}"
+  },
+  {
+    "id": "publications_21_fgotr",
+    "title": "Implementación de la Metodología SUM Modificada para el Desarrollo de Videojuegos Orientados al Aprendizaje en Bolivia",
+    "authors_formatted": "Xavier-Alexis Murillo-Sánchez, Andrés-Leonardo Gutiérrez-Rocha, Alan-Wilfor Ibáñez-Illanes, Jorge-Armando Quiroz-Pérez, <strong>Guillermo Sahonero-Álvarez</strong>, Fabio-Richard Díaz-Palacios",
+    "authors_plain": "Xavier-Alexis Murillo-Sánchez, Andrés-Leonardo Gutiérrez-Rocha, Alan-Wilfor Ibáñez-Illanes, Jorge-Armando Quiroz-Pérez, Guillermo Sahonero-Álvarez, Fabio-Richard Díaz-Palacios",
+    "authors_short": "Xavier-Alexis Murillo-Sánchez, ..., <strong>Guillermo Sahonero-Álvarez</strong>",
+    "is_truncated": true,
+    "remaining_authors": 4,
+    "total_authors": 6,
+    "venue": "Memorias de la Décima Séptima Conferencia Iberoamericana en Sistemas, Cibernética e Informática: CISCI",
+    "year": 2018,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": false,
+    "has_pdf": false,
+    "pdf_url": null,
+    "bibtex": "@article{publications_21_fgotr,\n  author = {Xavier-Alexis Murillo-Sánchez, Andrés-Leonardo Gutiérrez-Rocha, Alan-Wilfor Ibáñez-Illanes, Jorge-Armando Quiroz-Pérez, Guillermo Sahonero-Álvarez, Fabio-Richard Díaz-Palacios},\n  title = {Implementación de la Metodología SUM Modificada para el Desarrollo de Videojuegos Orientados al Aprendizaje en Bolivia},\n  journal = {Memorias de la Décima Séptima Conferencia Iberoamericana en Sistemas, Cibernética e Informática: CISCI},\n  year = {2018}\n}"
+  },
+  {
+    "id": "carlosBLDCMotorController",
+    "title": "BLDC Motor Controller Response to PWM Compensation",
+    "authors_formatted": "Carlos Gutierrez Sanjines, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "authors_plain": "Carlos Gutierrez Sanjines, Guillermo Sahonero-Alvarez",
+    "authors_short": "Carlos Gutierrez Sanjines, <strong>Guillermo Sahonero-Alvarez</strong>",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "CLCA 2018 Proceedings",
+    "year": 2018,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": false,
+    "has_pdf": true,
+    "pdf_url": "/assets/papers/carlosBLDCMotorController.pdf",
+    "bibtex": "@article{carlosBLDCMotorController,\n  author = {Carlos Gutierrez Sanjines, Guillermo Sahonero-Alvarez},\n  title = {BLDC Motor Controller Response to PWM Compensation},\n  journal = {CLCA 2018 Proceedings},\n  year = {2018}\n}"
+  },
+  {
+    "id": "SahoneroComparison",
+    "title": "A Comparison of SOBI, FastICA, JADE and Infomax Algorithms",
+    "authors_formatted": "<strong>Sahonero-Alvarez G.</strong>, Calderón H.",
+    "authors_plain": "Sahonero-Alvarez G., Calderón H.",
+    "authors_short": "<strong>Sahonero-Alvarez G.</strong>, Calderón H.",
+    "is_truncated": false,
+    "remaining_authors": 0,
+    "total_authors": 2,
+    "venue": "Proceedings of the 8th International Multi-Conference on Complexity, Informatics and Cybernetics, Orlando, US",
+    "year": 2017,
+    "doi": null,
+    "topic": "Biomedical & Engineering",
+    "selected": true,
+    "has_pdf": true,
+    "pdf_url": "/assets/papers/SahoneroComparison.pdf",
+    "bibtex": "@article{SahoneroComparison,\n  author = {Sahonero-Alvarez G., Calderón H.},\n  title = {A Comparison of SOBI, FastICA, JADE and Infomax Algorithms},\n  journal = {Proceedings of the 8th International Multi-Conference on Complexity, Informatics and Cybernetics, Orlando, US},\n  year = {2017}\n}"
+  }
 ]

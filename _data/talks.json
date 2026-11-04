@@ -1,0 +1,50 @@
+[
+  {
+    "title": "IMAGINE Summer School 2026",
+    "description": "I was invited to give a seminar lecture at the IMAGINE Summer School 2026 about basic MRI, Bloch equations, and relaxation.",
+    "year": "2026",
+    "selected": true
+  },
+  {
+    "title": "iHEALTH AI Winter/Summer School",
+    "description": "Taught a practical workshop on design and training for Convolutional Neural Networks.",
+    "year": "2025, 2026",
+    "selected": true
+  },
+  {
+    "title": "Universitat d'Alacant",
+    "description": "I was invited to give a talk at Universidad de Alicante about MRI simulation and its role in artificial intelligence.",
+    "year": "2025",
+    "selected": true
+  },
+  {
+    "title": "Universidad Nacional (Colombia)",
+    "description": "I was invited to give a talk at Universidad Nacional from Colombia about the research on the Principles of MRI and the MRI research in Chile.",
+    "year": "2025",
+    "selected": true
+  },
+  {
+    "title": "ESMRMB 2025 - MRI Together Session",
+    "description": "I gave a talk to describe MRI Together initiative, present the 2025 organizing committee, invite and summarize the 2025 edition of the event.",
+    "year": "2025",
+    "selected": true
+  },
+  {
+    "title": "ESMRMB - CAMERA Session",
+    "description": "I presented \"Real-world implementation of open source MRI designs\" where I shared progress on the Chilean initiative to develop the first low-cost MRI scanner in Chile.",
+    "year": "2025",
+    "selected": true
+  },
+  {
+    "title": "ESMRMB 2025 CAMERA Workshop",
+    "description": "Presented foundations about Halbach-based magnet optimization for ultra-low field MRI scanners.",
+    "year": "2025",
+    "selected": true
+  },
+  {
+    "title": "Universidad Privada del Valle - La Paz",
+    "description": "Presented a brief recap of how to do research in constrained settings. The talk was directed to Professors and Students, as well as authorities.",
+    "year": "2026",
+    "selected": true
+  }
+]

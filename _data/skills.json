@@ -1,0 +1,33 @@
+{
+  "mri": [
+    "Bloch simulations",
+    "Pulse sequence design",
+    "Low-field MRI",
+    "Sequence optimization",
+    "Signal modeling",
+    "K-space sampling strategies",
+    "B0 inhomogeneity modeling"
+  ],
+  "programming": [
+    "MATLAB",
+    "Julia",
+    "R",
+    "Python",
+    "C/C++",
+    "Java"
+  ],
+  "domains": [
+    "Optimization",
+    "Deep Learning",
+    "Computer Vision",
+    "Physics-informed Neural Networks",
+    "Signal Processing",
+    "Statistical Machine Learning",
+    "BCI",
+    "Edge Computing",
+    "Scientific software development",
+    "Biomedical imaging"
+  ],
+  "hardware": [],
+  "frameworks": []
+}

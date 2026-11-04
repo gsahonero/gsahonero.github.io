@@ -1,0 +1,26 @@
+[
+  {
+    "acronym": "UC Chile",
+    "name": "Pontificia Universidad Católica de Chile",
+    "role": "PhD Candidate",
+    "url": "https://www.uc.cl"
+  },
+  {
+    "acronym": "IIBM",
+    "name": "Institute for Biological and Medical Engineering",
+    "role": "Interdisciplinary Research",
+    "url": "https://iibm.uc.cl/"
+  },
+  {
+    "acronym": "CIB",
+    "name": "Center for Biomedical Imaging",
+    "role": "MRI Laboratory",
+    "url": "https://cib.uc.cl"
+  },
+  {
+    "acronym": "iHEALTH",
+    "name": "Millennium Institute for Intelligent Healthcare Engineering",
+    "role": "Low-Field MRI & AI",
+    "url": "https://i-health.cl"
+  }
+]

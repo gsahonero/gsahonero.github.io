@@ -2,17 +2,16 @@
 permalink: /404.html
 ---
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
+    <title>Redirecting - Guillermo Sahonero</title>
     <script>
-      // This site uses hash-based sections (/#teaching, /#contact, etc.)
-      // When someone visits /teaching directly (e.g. after a refresh),
-      // GitHub Pages serves this 404. We redirect to /#section instead.
       (function() {
-        var path = window.location.pathname; // e.g. "/teaching"
-        var section = path.replace(/^\//, '').replace(/\/$/, ''); // e.g. "teaching"
-        if (section) {
+        var path = window.location.pathname;
+        var section = path.replace(/^\/+|\/+$/g, '');
+        var knownSections = ['home', 'bio', 'publications', 'teaching', 'contact'];
+        if (knownSections.indexOf(section) !== -1) {
           window.location.replace('/#' + section);
         } else {
           window.location.replace('/');
@@ -20,5 +19,9 @@ permalink: /404.html
       })();
     </script>
   </head>
-  <body></body>
+  <body>
+    <p style="font-family: sans-serif; text-align: center; margin-top: 20vh; color: #64748b;">
+      Redirecting to section... <a href="/">Click here if not redirected</a>.
+    </p>
+  </body>
 </html>

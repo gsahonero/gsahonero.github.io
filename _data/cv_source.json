@@ -1,0 +1,1630 @@
+{
+  "basics": {
+    "firstname": "Guillermo",
+    "lastname": "Sahonero Alvarez",
+    "full_name": "Guillermo Sahonero Alvarez",
+    "title": "Curriculum Vitae",
+    "email": "gsahonero at uc.cl",
+    "location": "Santiago, Chile",
+    "homepage": "gsahonero.github.io",
+    "photo": "data:image/jpeg;base64,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",
+    "research_interests": "My research focuses on MRI simulation and sequence optimization. I am particularly interested in applying high-performance mathematical and physical abstractions and numerical optimization principles. I'm also interested in Physics-Informed Machine Learning, Deep Learning, Agentic-based AI. Previously, I worked with Machine Learning techniques for gait recognition, brain-computer interfaces, and FPGA hardware accelerator design.",
+    "selected": true
+  },
+  "education": [
+    {
+      "institution": "Pontificia Universidad Católica de Chile",
+      "degree": "PhD in Biological and Medical Engineering",
+      "start": "2022",
+      "end": "on going",
+      "dissertation": "Low-field MRI Sequence Optimization for Reproducing High-Field Image Quality",
+      "description": "- Researched low-field MRI, sequence optimization, physical simulation, and signal processing.\n- Developed a simulation paradigm for reusing tissue signals and accelerating MRI simulation.\n- Developed a target-driven sequence optimization paradigm based on simulation.",
+      "selected": true,
+      "id": "education_1_8ajqq"
+    },
+    {
+      "institution": "Universidad Católica Boliviana 'San Pablo'",
+      "degree": "Bach. in Mechatronics Engineering",
+      "start": "2011",
+      "end": "-2016",
+      "dissertation": "Hardware Accelerator Design for ICA based Brain Signal Separation on BCI",
+      "description": "Training in mechatronics engineering with emphasis on embedded systems, control, signal processing, and computational methods.",
+      "selected": true,
+      "id": "education_2_7d886"
+    }
+  ],
+  "research_experience": [
+    {
+      "organization": "iHEALTH Millennium Institute for Intelligent Healthcare Engineering",
+      "role": "PhD Student Researcher",
+      "start": "2022",
+      "end": "present",
+      "description": "Low-Field MRI research conducted within the iHEALTH research community and infrastructure. Participated in institute research activities, received research support through iHEALTH, and contributed as an instructor for the iHEALTH Deep Learning School (2024-2025).",
+      "selected": true,
+      "id": "research_experience_1_qx1nm"
+    },
+    {
+      "organization": "Institute of Instrumentation for Molecular Imaging (CSIC-UPV)",
+      "role": "Research Intern",
+      "start": "2025",
+      "end": "2026",
+      "description": "Research on simulation-based optimization of ultra-low-field TSE MRI sequences. Developed a 3D digital twin of the ACR small phantom and adapted a Frank-Wolfe optimization framework using KomaMRI to investigate sequence optimization and simulation-to-scanner transfer.",
+      "selected": true,
+      "id": "research_experience_2_18nvv"
+    },
+    {
+      "organization": "Universidad Católica Boliviana 'San Pablo'",
+      "role": "Principal Investigator",
+      "start": "2021",
+      "end": "2022",
+      "description": "Real-time gait-based human identification for smart surveillance systems. Managed a competitive grant of approximately USD 14,000 and worked with deep learning and edge computing for computer vision.",
+      "selected": true,
+      "id": "research_experience_3_k7y2b"
+    },
+    {
+      "organization": "Universidad Católica Boliviana 'San Pablo'",
+      "role": "Associate Researcher",
+      "start": "2017",
+      "end": "2020",
+      "description": "Human identification system based on gait for assistive technologies. Managed approximately USD 4,000 in equipment funding, including OAK-D cameras and Azure access. Worked with deep learning and edge computing for computer vision.",
+      "selected": true,
+      "id": "research_experience_4_keqb7"
+    },
+    {
+      "organization": "Universidad Católica Boliviana 'San Pablo'",
+      "role": "Researcher",
+      "start": "2016",
+      "end": "2019",
+      "description": "Brain-computer interface research for support of people with cognitive and motor disabilities. Managed approximately USD 14,000 in funding. Worked with signal processing, statistical machine learning, and deep learning for EEG signal classification.",
+      "selected": true,
+      "id": "research_experience_5_bfgpa"
+    }
+  ],
+  "work_experience": [
+    {
+      "organization": "Generadora Metropolitana",
+      "department": "",
+      "role": "Innovation intern",
+      "start": "2026",
+      "end": "2026",
+      "description": "Contributed to the development of an enterprise AI assistant using Azure Functions, Azure AI Foundry, and Azure OpenAI. Designed the assistant response logic and prompt strategy. Developed an automated multi-agent evaluation framework for benchmarking LLM performance.",
+      "selected": true,
+      "id": "work_experience_1_dwdrb"
+    },
+    {
+      "organization": "ENTEL-Chile",
+      "department": "Digital Business VP",
+      "role": "Innovation intern",
+      "start": "2024",
+      "end": "2024",
+      "description": "Explored statistical modeling and deep learning approaches to efficiently extract data for decision-making. ",
+      "selected": true,
+      "id": "work_experience_2_u98lz"
+    },
+    {
+      "organization": "Pontificia Universidad Católica de Chile",
+      "department": "Biomedical Imaging Center",
+      "role": "Graduate Diploma Course Tutor",
+      "start": "2024",
+      "end": "2025",
+      "description": "Updated diploma contents and collaborated in the re-validation process of the Diploma program. ",
+      "selected": true,
+      "id": "work_experience_3_qj14c"
+    },
+    {
+      "organization": "BCI Chile",
+      "department": "New Technologies Unit",
+      "role": "Innovation intern",
+      "start": "2023",
+      "end": "2023",
+      "description": "Studied deep learning pipelines, including LLM-based and vector database approaches, for information retrieval and analysis processes.",
+      "selected": true,
+      "id": "work_experience_4_sfibx"
+    },
+    {
+      "organization": "Universidad Católica Boliviana `San Pablo'",
+      "department": "Mechatronics & Biomedical Engineering Department",
+      "role": "Lecturer",
+      "start": "2022",
+      "end": "2025",
+      "description": "Lectured a remote course on research methodology for undergraduate students and graduate courses on biomaterials and biomedical device design. Also taught biomedical engineering-related topics including neural networks, machine learning, and computer vision.",
+      "selected": true,
+      "id": "work_experience_5_bwen4"
+    },
+    {
+      "organization": "Universidad Católica Boliviana 'San Pablo'",
+      "department": "Mechatronics Engineering Department",
+      "role": "Full time Lecturer & Researcher",
+      "start": "2018",
+      "end": "2022",
+      "description": "- Taught undergraduate and graduate courses in AI, computer vision, biomedical engineering, and electronics.\n- Supervised research projects and undergraduate theses in machine learning and biomedical engineering.\n- Contributed to curriculum development and academic program coordination.",
+      "selected": true,
+      "id": "work_experience_6_a5t6q"
+    },
+    {
+      "organization": "Universidad Católica Boliviana 'San Pablo'",
+      "department": "Mechatronics and Telecommunications Engineering Departments",
+      "role": "Partial time Lecturer & Researcher",
+      "start": "2016",
+      "end": "2018",
+      "description": "- Taught engineering courses in robotics, computer vision, electronics, and circuit design.\n- Supervised undergraduate research projects in AI, signal processing, and computer vision.\n- Mentored student research groups and supported scientific dissemination.",
+      "selected": true,
+      "id": "work_experience_7_druoo"
+    },
+    {
+      "organization": "Curricular Re-design Assistant",
+      "department": "Mechatronics Engineering Department",
+      "role": "Curricular Re-design Assistant",
+      "start": "2016",
+      "end": "2016",
+      "description": "Assisted in the curricular content upgrade process of the Mechatronics Engineering undergraduate program. Market research on local expectation of the Mechatronics Engineering training process and outcomes.",
+      "selected": true,
+      "id": "work_experience_8_63zq6"
+    },
+    {
+      "organization": "Natural Bolivia",
+      "role": "Software-Hardware Developer",
+      "start": "2015",
+      "end": "2017",
+      "description": "- Developed embedded and full-stack software for RFID access control and multimedia applications.\n- Built web interfaces and backend services integrating hardware and software systems.\n- Delivered end-to-end engineering solutions from embedded devices to web applications.",
+      "selected": true,
+      "id": "work_experience_9_hbnim"
+    }
+  ],
+  "teaching_experience": [
+    {
+      "course_area": "Mechatronics Engineering",
+      "institution": "Universidad Católica Boliviana 'San Pablo'",
+      "level": "Undergraduate courses",
+      "courses": [
+        {
+          "name": "Introduction to Mechatronics",
+          "description": "Foundational principles of mechatronic system design, covering multidisciplinary integration of mechanical, electrical, and computer engineering with hands-on projects using Arduino and LEGO Mindstorms kits."
+        },
+        {
+          "name": "Electronic Measurements and Components and Lab.",
+          "description": "Operation, characterization, and testing of passive and active discrete electronic components, signal conditioning circuits, and experimental error analysis using laboratory instrumentation, tailored across multidisciplinary engineering cohorts, including chemical engineering students."
+        },
+        {
+          "name": "Analog Electronics and Lab.",
+          "description": "Design, mathematical modeling, and analysis of analog circuits, covering BJT and MOSFET transistor stages, operational amplifiers, active filter design, and frequency response, combining SPICE simulation with hands-on hardware prototyping."
+        },
+        {
+          "name": "Circuits I Lab.",
+          "description": "Practical laboratory experiments in DC circuit analysis covering Ohm's and Kirchhoff's laws, nodal/mesh methods, Thévenin and Norton equivalents, and transient responses, coordinated across multiple course sections (paralelos) with collaborative, project-based experimentation."
+        },
+        {
+          "name": "Circuits II Lab.",
+          "description": "Hands-on laboratory experiments focused on operational amplifier (OpAmp) topologies, active linear and non-linear circuit configurations, feedback analysis, signal conditioning, and practical circuit testing."
+        },
+        {
+          "name": "Robotics Lab.",
+          "description": "Practical implementation of robotic systems, covering forward and inverse kinematics, actuator and servo control, trajectory planning, sensor integration, and computer vision-based practices for visual feedback and robotic guidance."
+        },
+        {
+          "name": "Servomechanisms Design",
+          "description": "Design, modeling, and numerical simulation of electromechanical servomechanisms, covering actuator selection, transmission dynamics, experimental system identification, discrete-time control, PID tuning, and Lyapunov stability analysis for precision motion control."
+        },
+        {
+          "name": "Mechatronics Design",
+          "description": "Comprehensive project-based design course integrating mechanical structure, embedded hardware, sensor/actuator interfacing, and firmware architecture into functional multidisciplinary mechatronic prototypes."
+        },
+        {
+          "name": "Computer Vision",
+          "description": "Core algorithms and principles of computer vision, covering spatial and frequency-domain image processing (including 2D Fourier transforms), feature extraction, filtering, and segmentation, implemented through interactive Jupyter Notebooks with classical and deep learning approaches."
+        },
+        {
+          "name": "Degree Workshop",
+          "description": "Advising and technical supervision of undergraduate engineering graduation projects, evaluating technical reports, organizing departmental milestone progress workshops, and serving on evaluation committees to guide and assess students' final oral defenses."
+        }
+      ],
+      "selected": true,
+      "id": "teaching_experience_1_9nu9t"
+    },
+    {
+      "course_area": "Biomedical Engineering",
+      "institution": "Universidad Católica Boliviana 'San Pablo'",
+      "level": "Graduate courses",
+      "courses": [
+        {
+          "name": "Biomaterials",
+          "description": "Structure, characterization, and clinical applications of metallic, ceramic, polymeric, and composite biomaterials, focusing on host-material interactions, biocompatibility, biodegradation kinetics, tissue engineering scaffolds, and regulatory evaluation."
+        },
+        {
+          "name": "Biomedical Device Design",
+          "description": "Translational design and development of medical technologies through structured clinical problem definition and engineering methodologies—including design thinking, iterative spiral design, and concurrent engineering—integrating prototyping validation and consideration of regulatory frameworks."
+        }
+      ],
+      "selected": true,
+      "id": "teaching_experience_2_sbv9v"
+    },
+    {
+      "course_area": "Mechatronics Engineering",
+      "institution": "Universidad Católica Boliviana 'San Pablo'",
+      "level": "Graduate courses",
+      "courses": [
+        {
+          "name": "Neural Networks",
+          "description": "Theoretical foundations and practical implementation of artificial neural networks, covering multilayer perceptrons, backpropagation dynamics, loss optimization, regularization techniques, convolutional architectures (CNNs), and deep learning workflows implemented in Python."
+        },
+        {
+          "name": "Advanced Topics in Machine Learning",
+          "description": "Exploration of advanced machine learning paradigms, focusing on unsupervised techniques (such as clustering, ICA, and PCA), ensemble learning, generative modeling, and physics-informed neural networks (PINNs) applied to engineering systems."
+        },
+        {
+          "name": "Introduction to Machine Learning",
+          "description": "Foundational principles of machine learning, comparing supervised, unsupervised, and reinforcement learning paradigms, covering core predictive models, introductory neural networks, end-to-end data pipelines, evaluation strategies, and real-world engineering applications."
+        }
+      ],
+      "selected": true,
+      "id": "teaching_experience_3_mh6c4"
+    },
+    {
+      "course_area": "Extra lectured courses",
+      "institution": "Universidad Católica Boliviana 'San Pablo'",
+      "courses": [
+        {
+          "name": "Applied Multivariate Analysis",
+          "description": "Multidimensional data analysis rooted in applied linear algebra and matrix decompositions, covering Singular Value Decomposition (SVD), Principal Component Analysis (PCA), Independent Component Analysis (ICA), factor analysis, and discriminant techniques for high-dimensional datasets."
+        },
+        {
+          "name": "Neural Networks for Computer Vision",
+          "description": "Specialized course on neural network architectures for visual perception, starting from developing multilayer perceptrons (MLPs) from scratch, advancing through convolutional neural networks (CNNs), transfer learning, recurrent neural networks (RNNs), multimodal systems, and semantic and instance segmentation."
+        },
+        {
+          "name": "LaTeX",
+          "description": "Comprehensive training in scientific typesetting with LaTeX, covering document structuring, complex mathematical typography, bibliography management with BibTeX and Mendeley, automated table/figure formatting, thesis styling, and presentation creation with Beamer using TeXstudio and Overleaf workflows."
+        }
+      ],
+      "selected": true,
+      "id": "teaching_experience_4_ad7ab"
+    }
+  ],
+  "abstracts": [
+    {
+      "selected": true,
+      "authors": "\\textbf{Guillermo Sahonero-Alvarez}, Ronal Coronado, Carlos A Castillo-Passi, Pablo Irarrazaval",
+      "title": "Modeling Tissue Signals from a Single Voxel Simulation",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: Signal Modeling and Signal Preparation: Novel Approaches)",
+      "year": "2026",
+      "type": "Digital Poster",
+      "id": "abstracts_1_9izud"
+    },
+    {
+      "selected": true,
+      "authors": "Nayebare Maureen, Marina Fernández-García, \\textbf{Guillermo Sahonero-Alvarez}, Sipan Hovsepian, Beatrice Lena, Timon Machtelinckx, Mayinja W Bob, Noha Magdy Zayed, Mohannad Barakat, Ali Akbarzadeh-Sharbaf, Pedram Yazdanbakhsh, Christophe Vilmen, Joseba Alonso, Andrew Webb, Osama Abdullah, Johnes Obungoloch, Haile B Kassahun, Stefan du Plessis, Udunna Anazodo",
+      "title": "A low-field MRI toolkit for hands-on MRI education: A pilot implementation at the 2025 ESMRMB Workshop",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: Low Field Applications and Systems)",
+      "year": "2026",
+      "type": "Digital Poster",
+      "id": "abstracts_2_04k9w"
+    },
+    {
+      "selected": true,
+      "authors": "Timon Machtelinckx, Nayebare Maureen, Marina Fernández-García, Ihssene Brahimi, \\textbf{Guillermo Sahonero-Alvarez}, Sipan Hovsepian, Mayinja W Bob, David Rodriguez-Duarte, Ali Akbarzadeh-Sharbaf, Pedram Yazdanbakhsh, Jennifer X Mifatu, Kidist Kebede, Maruf Adewole, Raymond Confidence, Johnes Obungoloch, Haile B Kassahun, Udunna Anazodo, Stefan du Plessis",
+      "title": "Halbach Magnet Design and Optimization for a low-field Pre-clinical MR Scanner",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: Low Field MRI)",
+      "year": "2026",
+      "type": "Traditional Poster",
+      "id": "abstracts_3_qo50a"
+    },
+    {
+      "selected": true,
+      "authors": "Marina Fernández-García, Haile B Kassahun, Nayebare Maureen, \\textbf{Guillermo Sahonero-Alvarez}, Sipan Hovsepian, Timon Machtelinckx, Ihssene Brahimi, Pedram Yazdanbakhsh, Ali Akbarzadeh-Sharbaf, Raymond Confidence, Maruf Adewole, Osama Abdullah, Johnes Obungoloch, Stefan du Plessis, Udunna Anazodo",
+      "title": "Building MRI Capacity Through Open-Source Hardware and Hands-On Training: The IMAGINE Summer School",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: MRI in Africa: Advancing Neuroimaging Research, Capacity, and Equity in African Populations)",
+      "year": "2026",
+      "type": "Digital Poster",
+      "id": "abstracts_4_m02d1"
+    },
+    {
+      "selected": true,
+      "authors": "Haile B Kassahun, Nayebare Maureen, Timon Machtelinckx, Sipan Hovsepian, Ali Akbarzadeh-Sharbaf, \\textbf{Guillermo Sahonero-Alvarez}, Marina Fernández-García, David O Rodriguez-Duarte, Mayinja W Bob, Ihssene Brahimi, Kidist Kebede, Jennifer X Mifatu, Maruf Adewole, Confidence Raymond, Pedram Yazdanbakhsh, Johnes Obungoloch, Osama Abdullah, Stefan du Plessis, Udunna Anazodo",
+      "title": "Design and Construction of Gradient Coils for Low-field Halbach Array Scanners using the Discrete Wire Method",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: Low Field Applications and Systems)",
+      "year": "2026",
+      "type": "Digital Poster",
+      "id": "abstracts_5_wz3lz"
+    },
+    {
+      "selected": true,
+      "authors": "Sipan Hovsepian, Nayebare Maureen, David Rodriguez-Duarte, \\textbf{Guillermo Sahonero-Alvarez}, Timon Machtelinckx, Ihssene Brahimi, Mayinja W Bob, Jennifer X Mifatu, Kidist Kebede, Maruf Adewole, Raymond Confidence, Marina Fernández-García, Johnes Obungoloch, Haile B Kassahun, Stefan du Plessis, Udunna Anazodo, Osama Abdullah",
+      "title": "Modular Low-Cost 3D Magnetic Field Mapper Robot",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: Novel MRI Hardware)",
+      "year": "2026",
+      "type": "Digital Poster",
+      "id": "abstracts_6_4h52t"
+    },
+    {
+      "selected": true,
+      "authors": "Ronal Coronado, Jose Miguel Gonzalez, \\textbf{Guillermo Sahonero-Alvarez}, Rene M Botnar, Claudia Prieto, Cecilia Besa, Pablo Irarrazaval",
+      "title": "3D T1/T2 mapping of prostate using DESPO+: a clinical feasibility study for prostate cancer assessment at 3T",
+      "venue": "ISMRM-ISMRT Annual Meeting and Exhibition (Session: Quantitative Applications in Body MRI: Make the Numbers Count)",
+      "year": "2026",
+      "type": "Digital Poster",
+      "id": "abstracts_7_e7ls1"
+    },
+    {
+      "selected": true,
+      "authors": "\\textbf{Guillermo Sahonero-Alvarez}, Ronal Coronado, Carlos Castillo-Passi, Marcelo Andía, Pablo Irarrazaval",
+      "title": "Simulation-Based Optimization of SPGR MRI Acquisition Protocols for Brain Contrast Similarity at 0.55T and 1.5T",
+      "venue": "ESMRMB 41st Annual Scientific Meeting",
+      "year": "2025",
+      "type": "Lightning Talk",
+      "id": "abstracts_8_m0ar8"
+    }
+  ],
+  "publications": [
+    {
+      "selected": true,
+      "authors": "Ronal Coronado, Gabriel Varela-Mattatall, \\textbf{Guillermo Sahonero-Alvarez}, René Botnar, Cecilia Besa, Pablo Irarrazaval, Claudia Prieto",
+      "title": "Accelerated DESPOT1 with variable parameters for 3D T1 brain mapping",
+      "venue": "Journal of Magnetic Resonance Imaging",
+      "year": "2025",
+      "id": "publications_1_b253r"
+    },
+    {
+      "selected": true,
+      "authors": "Christian Conchari, \\textbf{Guillermo Sahonero-Alvarez}, Raul Mollocuaquira, Edgar Salazar",
+      "title": "Distributed edge computing for appearance-based gait recognition",
+      "venue": "IEEE ANDESCON",
+      "year": "2024",
+      "id": "publications_2_d4dbm"
+    },
+    {
+      "selected": true,
+      "authors": "Mario Torrez-Callisaya, \\textbf{Guillermo Sahonero-Alvarez}",
+      "title": "Frost Forecast and Early Alarm System based on Deep Learning",
+      "venue": "Proceedings of the 2023 IEEE Latin American Conference on Computational Intelligence (LA-CCI)",
+      "year": "2023",
+      "id": "publications_3_wlmtc"
+    },
+    {
+      "selected": false,
+      "authors": "Fabio Diaz Palacios, \\textbf{Guillermo Sahonero Alvarez}, Gabriel Rojas, Miguel Clavijo, Jhon Ordoñez, Khalil Nallar",
+      "title": "Exploring microgravity liquid printing based on resin solidification for outer space applications",
+      "venue": "Key Engineering Materials",
+      "year": "2023",
+      "id": "publications_4_8rdnr"
+    },
+    {
+      "selected": false,
+      "authors": "Eric Roth, \\textbf{Guillermo Sahonero}, Andrés Rodríguez",
+      "title": "Structure of personal values and corruption: An experimental analysis of decisions leading to accepting or rejecting bribery",
+      "venue": "Revista AJAYU",
+      "year": "2023",
+      "id": "publications_5_rmdj3"
+    },
+    {
+      "selected": true,
+      "authors": "Wilber Rojas, Edwin Salcedo, \\textbf{Guillermo Sahonero-Alvarez}",
+      "title": "ADRAS: Airborne Disease Risk Assessment System for Closed Environments",
+      "venue": "Proceedings of the 9th International Conference on Information Management and Big Data (SIMBig)",
+      "year": "2022",
+      "id": "publications_6_ag5ne"
+    },
+    {
+      "selected": true,
+      "authors": "Luigi Bianchi, Raffaele Ferrante, Yaoping Hu, \\textbf{Guillermo Sahonero-Alvarez}, and Nusrat Z. Zenia",
+      "title": "Merging Brain-Computer interface P300 speller datasets: perspectives and pitfalls",
+      "venue": "Frontiers in Neuroergonomics: 36",
+      "year": "2022",
+      "id": "publications_7_3n7do"
+    },
+    {
+      "selected": false,
+      "authors": "Fabio Richard Diaz Palacios, Jhon Ordoñez, Gabriel Antonio Rojas Silva, Miguel Angel Clavijo Quispe, \\textbf{Guillermo Sahonero-Alvarez}, Rodrigo Ruben Botelho Oblitas, Juan Manuel Valverde Velasquez, Guillermo Enrique Manning Soria Galvarro, Renan Andres Espinar Saavedra, Anna Montevilla, Diego Alberto Suarez Traverso, Oscar Crispin Nina, Khalil Nallar Camacho",
+      "title": "MAMBU: A Bolivian case of response to artificial ventilators shortage",
+      "venue": "IEEE ANDESCON",
+      "year": "2022",
+      "id": "publications_8_j7w36"
+    },
+    {
+      "selected": true,
+      "authors": "Israel Raul Tiñini, \\textbf{Guillermo Sahonero-Alvarez}, Carlos Menacho, and Josmar Suarez",
+      "title": "Exploring Edge Computing for Gait Recognition",
+      "venue": "4th International Conference on Bio-Engineering for Smart Technologies (BioSMART), IEEE",
+      "year": "2021",
+      "id": "publications_9_te017"
+    },
+    {
+      "selected": false,
+      "authors": "Anna Montevilla, \\textbf{Guillermo Sahonero-Alvarez}",
+      "title": "A protocol for Brain-Computer Interfaces based on Musical Notes Imagery",
+      "venue": "IEEE Latin American Conference on Computational Intelligence (LA-CCI)",
+      "year": "2021",
+      "id": "publications_10_84ogf"
+    },
+    {
+      "selected": false,
+      "authors": "Chuck Easttom, Luigi Bianchi, Davide Valeriani, Chang S Nam, Ali Hossaini, Dariusz Zapała, Avid Roman-Gonzalez, Avinash K Singh, Alberto Antonietti, \\textbf{Guillermo Sahonero-Alvarez}, Pradeep Balachandran",
+      "title": "A functional BCI model by the P2731 working group: control interface",
+      "venue": "Brain-Computer Interfaces",
+      "year": "2021",
+      "id": "publications_11_vq17p"
+    },
+    {
+      "selected": true,
+      "authors": "\\textbf{Guillermo Sahonero-Alvarez}, Avinash K. Singh, Kamran Sayrafian, Luigi Bianchi, and Avid Roman-Gonzalez",
+      "title": "A Functional BCI Model by the P2731 Working Group: Transducer",
+      "venue": "Brain-Computer Interfaces",
+      "year": "2021",
+      "id": "publications_12_r9luu"
+    },
+    {
+      "selected": true,
+      "authors": "Dariusz Zapała, Ali Hossaini, Mazaher Kianpour, \\textbf{Guillermo Sahonero-Alvarez}, Aladdin Ayesh",
+      "title": "A functional BCI model by the P2731 working group: psychology",
+      "venue": "Brain-Computer Interfaces",
+      "year": "2021",
+      "id": "publications_13_0i3sd"
+    },
+    {
+      "selected": true,
+      "authors": "Easttom C., Bianchi L., Valeriani D., Nam C. S., Hossaini A., Zapała D., Roman-Gonzalez A., Singh A. K., Antonietti A., \\textbf{Sahonero-Alvarez G.}, Balachandran P.",
+      "title": "A Functional Model for Unifying Brain Computer Interface Terminology",
+      "venue": "IEEE Open Journal of Engineering in Medicine and Biology",
+      "year": "2021",
+      "id": "publications_14_bd3k4"
+    },
+    {
+      "selected": true,
+      "authors": "Avinash Kumar Singh, \\textbf{Guillermo Sahonero-Alvarez}, Mufti Mahmud, Luigi Bianchi",
+      "title": "Towards Bridging the Gap Between Computational Intelligence and Neuroscience in Brain-Computer Interfaces with a Common Description of Systems and Data",
+      "venue": "Frontiers in Neuroinformatics",
+      "year": "2021",
+      "id": "publications_15_sh50k"
+    },
+    {
+      "selected": true,
+      "authors": "Tiñini Alvarez I. R., \\textbf{Sahonero-Alvarez, G.}",
+      "title": "Cross-View Gait Recognition Based on U-Net",
+      "venue": "2020 International Joint Conference on Neural Networks (IJCNN), Glasgow, United Kingdom",
+      "year": "2020",
+      "id": "publications_16_ajoqc"
+    },
+    {
+      "selected": true,
+      "authors": "Ordoñez, J., \\textbf{Sahonero-Alvarez, G.}",
+      "title": "A 3D Convolution Accelerator Implemented on FPGA Using SDSoC",
+      "venue": "7th International Engineering, Sciences and Technology Conference (IESTEC)",
+      "year": "2019",
+      "id": "publications_17_0q14c"
+    },
+    {
+      "selected": false,
+      "authors": "Israel Raul Tiñini Alvarez, \\textbf{Guillermo Sahonero-Alvarez}",
+      "title": "Gait recognition based on modified Gait energy image",
+      "venue": "IEEE sciences and humanities international research conference (SHIRCON)",
+      "year": "2018",
+      "id": "publications_18_09epa"
+    },
+    {
+      "selected": false,
+      "authors": "\\textbf{Guillermo Sahonero-Alvarez}, Humberto Calderon",
+      "title": "Implementation Issues of Student-Centered Learning based Engineering Education in Developing Countries Universities",
+      "venue": "World Engineering Education Forum \\& Global Engineering Dean Council",
+      "year": "2018",
+      "id": "publications_19_k9ns9"
+    },
+    {
+      "selected": false,
+      "authors": "\\textbf{Guillermo Sahonero-Alvarez}",
+      "title": "Blockchain and Peace Engineering and its Relationship to Engineering Education",
+      "venue": "World Engineering Education Forum \\& Global Engineering Dean Council",
+      "year": "2018",
+      "id": "publications_20_srx95"
+    },
+    {
+      "selected": false,
+      "authors": "Xavier-Alexis Murillo-Sánchez, Andrés-Leonardo Gutiérrez-Rocha, Alan-Wilfor Ibáñez-Illanes, Jorge-Armando Quiroz-Pérez, \\textbf{Guillermo Sahonero-Álvarez}, Fabio-Richard Díaz-Palacios",
+      "title": "Implementación de la Metodología SUM Modificada para el Desarrollo de Videojuegos Orientados al Aprendizaje en Bolivia",
+      "venue": "Memorias de la Décima Séptima Conferencia Iberoamericana en Sistemas, Cibernética e Informática: CISCI",
+      "year": "2018",
+      "id": "publications_21_fgotr"
+    },
+    {
+      "selected": false,
+      "authors": "Carlos Gutierrez Sanjines, \\textbf{Guillermo Sahonero-Alvarez}",
+      "title": "BLDC Motor Controller Response to PWM Compensation",
+      "venue": "CLCA 2018 Proceedings",
+      "year": "2018",
+      "id": "publications_22_522s9"
+    },
+    {
+      "selected": true,
+      "authors": "\\textbf{Sahonero-Alvarez G.}, Calderón H.",
+      "title": "A Comparison of SOBI, FastICA, JADE and Infomax Algorithms",
+      "venue": "Proceedings of the 8th International Multi-Conference on Complexity, Informatics and Cybernetics, Orlando, US",
+      "year": "2017",
+      "id": "publications_23_0spns"
+    }
+  ],
+  "awards": [
+    {
+      "category": "Contribution",
+      "description": "Outgoing Trainee Representative in the Latin American ISMRM Chapter",
+      "year": "2026",
+      "selected": true,
+      "id": "awards_1_9c0zf"
+    },
+    {
+      "category": "Award",
+      "description": "Travel award for ISMRM 2026 Conference from Imaging Without Borders (IMAGINE) Program at the Multimodal Imaging in Neurodegenerative Disease (MiND) Lab of the Montreal Neurological Institute",
+      "year": "2026",
+      "selected": true,
+      "id": "awards_2_44bd7"
+    },
+    {
+      "category": "Contribution",
+      "description": "Member of the ESMRMB MRI Together Working Group",
+      "year": "2026",
+      "selected": true,
+      "id": "awards_3_50po6"
+    },
+    {
+      "category": "Contribution",
+      "description": "Publications Committee member. International Society for Magnetic Resonance in Medicine",
+      "year": "2025-2028",
+      "selected": true,
+      "id": "awards_4_5hpkl"
+    },
+    {
+      "category": "Contribution",
+      "description": "Organizing Committee member of MRI Together 2025, an event sponsored by the European Society for Magnetic Resonance in Medicine and Biology",
+      "year": "2025",
+      "selected": true,
+      "id": "awards_5_2hr5u"
+    },
+    {
+      "category": "Contribution",
+      "description": "Trainee Representative in the Latin American ISMRM Chapter",
+      "year": "2025",
+      "selected": true,
+      "id": "awards_6_z3h8y"
+    },
+    {
+      "category": "Scholarship",
+      "description": "Full PhD Scholarship. Agencia Nacional de Investigación y Desarrollo (ANID) of Chile",
+      "year": "2022",
+      "selected": true,
+      "id": "awards_7_4z0hw"
+    },
+    {
+      "category": "Award",
+      "description": "2nd Place. Premio Plurinacional de Ciencia y Tecnología (Plurinational Award of Science and Technology). Ministry of Education",
+      "year": "2021",
+      "selected": true,
+      "id": "awards_8_nsjj1"
+    },
+    {
+      "category": "Grant",
+      "description": "Research Grant Winner. 5th Call for Small Research Projects program at Universidad Católica Boliviana 'San Pablo'",
+      "year": "2021",
+      "selected": true,
+      "id": "awards_9_wunx2"
+    },
+    {
+      "category": "Award",
+      "description": "IEEE HackTech COVID Winner. Project: MAMBU",
+      "year": "2020",
+      "selected": true,
+      "id": "awards_10_1oxvh"
+    },
+    {
+      "category": "Award",
+      "description": "UNOOSA DropTES Winner 2020. Project: Microgravity Liquid Printing",
+      "year": "2020",
+      "selected": true,
+      "id": "awards_11_cekue"
+    },
+    {
+      "category": "Contribution",
+      "description": "Co-organizer of workshop: Bridging the gap between Computational Intelligence and Neuroscience in Brain-Computer Interfaces: towards the definition of a common description of systems and data. World Congress on Computational Intelligence",
+      "year": "2020",
+      "selected": true,
+      "id": "awards_12_7ud8j"
+    },
+    {
+      "category": "Award",
+      "description": "Eureka Award - Researcher of the Year. Universidad Católica Boliviana 'San Pablo'",
+      "year": "2020",
+      "selected": true,
+      "id": "awards_13_8e22y"
+    },
+    {
+      "category": "Activity",
+      "description": "Attendant to the PhD Neuroscience Summer School at Pontificia Universidad Católica de Chile (UC)",
+      "year": "2019",
+      "selected": true,
+      "id": "awards_14_2k15e"
+    },
+    {
+      "category": "Honor",
+      "description": "Honor Mention. Premio Plurinacional de Ciencia y Tecnología (Plurinational Award of Science and Technology). Ministry of Education",
+      "year": "2017",
+      "selected": true,
+      "id": "awards_15_jnva0"
+    },
+    {
+      "category": "Honor",
+      "description": "1st Place, Hackathon de Aplicaciones para Periodistas (Hackathon for Journalism Applications), Bolivia Tech-Hub, US-Embassy, La Paz, Bolivia",
+      "year": "2015",
+      "selected": true,
+      "id": "awards_16_0jdbw"
+    },
+    {
+      "category": "Honor",
+      "description": "1st Place, RIOT Hackathon, Mojix-Coderoad, La Paz, Bolivia.",
+      "year": "2015",
+      "selected": true,
+      "id": "awards_17_z0yko"
+    },
+    {
+      "category": "Honor",
+      "description": "Distinguido con Honor (Awarded Honor), Undergraduate Dissertation. Universidad Católica Boliviana `San Pablo'",
+      "year": "2015",
+      "selected": true,
+      "id": "awards_18_2rr3m"
+    },
+    {
+      "category": "Contribution",
+      "description": "IEEE P2731 Working Group member: Standard for a Unified Terminology for Brain-Computer Interfaces",
+      "year": "Ongoing",
+      "selected": true,
+      "id": "awards_19_kpw50"
+    }
+  ],
+  "talks": [
+    {
+      "category": "IMAGINE Summer School 2026",
+      "description": "I was invited to give a seminar lecture at the IMAGINE Summer School 2026 about basic MRI, Bloch equations, and relaxation.\t\t",
+      "year": "2026",
+      "selected": true,
+      "id": "talks_1_ijjen"
+    },
+    {
+      "category": "iHEALTH AI Winter/Summer School",
+      "description": "Taught a practical workshop on design and training for Convolutional Neural Networks.",
+      "year": "2025, 2026",
+      "selected": true,
+      "id": "talks_2_awv37"
+    },
+    {
+      "category": "Universitat d'Alacant",
+      "description": "I was invited to give a talk at Universidad de Alicante about MRI simulation and its role in artificial intelligence. ",
+      "year": "2025",
+      "selected": true,
+      "id": "talks_3_as904"
+    },
+    {
+      "category": "Universidad Nacional (Colombia)",
+      "description": "I was invited to give a talk at Universidad Nacional from Colombia about the research on the Principles of MRI and the MRI research in Chile.",
+      "year": "2025",
+      "selected": true,
+      "id": "talks_4_ri2ie"
+    },
+    {
+      "category": "ESMRMB 2025 - MRI Together Session",
+      "description": "I gave a talk to describe MRI Together initiative, present the 2025 organizing committee, invite and summarize the 2025 edition of the event.",
+      "year": "2025",
+      "selected": true,
+      "id": "talks_5_w3wlz"
+    },
+    {
+      "category": "ESMRMB - CAMERA Session",
+      "description": "I presented \"Real-world implementation of open source MRI designs\" where I shared progress on the Chilean initiative to develop the first low-cost MRI scanner in Chile.",
+      "year": "2025",
+      "selected": true,
+      "id": "talks_6_0xzl6"
+    },
+    {
+      "category": "ESMRMB 2025 CAMERA Workshop",
+      "description": "Presented foundations about Halbach-based magnet optimization for ultra-low field MRI scanners.",
+      "year": "2025",
+      "selected": true,
+      "id": "talks_7_bcfw7"
+    },
+    {
+      "id": "talks_8_rb3oj",
+      "category": "Universidad Privada del Valle - La Paz",
+      "description": "Presented a brief recap of how to do research in constrained settings. The talk was directed to Professors and Students, as well as authorities.",
+      "year": "2026",
+      "selected": true
+    }
+  ],
+  "continuing_education": [
+    {
+      "type": "Summer School",
+      "title": "Imaging Without Borders Summer School",
+      "year": "2025",
+      "details": "IMAGINE is a hybrid training summer school hosted by CAMERA to develop skills for the development of low-cost MRI scanners.",
+      "selected": true,
+      "id": "continuing_education_1_uogct"
+    },
+    {
+      "type": "Course",
+      "title": "Oxford Machine Learning Summer School",
+      "year": "2022, 2023, 2024",
+      "details": "Generative AI, representation learning, Health and Bio tracks",
+      "selected": true,
+      "id": "continuing_education_2_pzw1b"
+    },
+    {
+      "type": "Course",
+      "title": "Interactive Track. Neuromatch Academy Summer School: Deep Learning",
+      "year": "2021",
+      "details": "Project: 'Does the internal representation of an object recognition Deep Neural Network mirror the organization of Inferior Temporal?'",
+      "selected": true,
+      "id": "continuing_education_3_vw945"
+    },
+    {
+      "type": "Course",
+      "title": "Interactive Track. Neuromatch Academy Summer School: Computational Neuroscience",
+      "year": "2020",
+      "details": "Project: 'Graphing Temporal Dynamics in FRMI from Kay Dataset'",
+      "selected": true,
+      "id": "continuing_education_4_ou6h2"
+    },
+    {
+      "type": "Course",
+      "title": "Online BCI & Neurotechnology Summer School",
+      "year": "2020",
+      "details": "Organized and hosted by g.tec medical engineering GmbH.",
+      "selected": true,
+      "id": "continuing_education_5_eah8c"
+    },
+    {
+      "type": "Course",
+      "title": "Online BCI & Neurotechnology Spring School",
+      "year": "2020",
+      "details": "Organized and hosted by g.tec medical engineering GmbH.",
+      "selected": true,
+      "id": "continuing_education_6_07u70"
+    },
+    {
+      "type": "Graduate Course",
+      "title": "Diploma in Internet of Things",
+      "year": "2022",
+      "details": "Universidad Catolica Boliviana San Pablo",
+      "selected": true,
+      "id": "continuing_education_7_2yxnf"
+    },
+    {
+      "type": "Graduate Course",
+      "title": "Diploma in Teaching Training for Higher Education",
+      "year": "2017",
+      "details": "Universidad Catolica Boliviana San Pablo",
+      "selected": true,
+      "id": "continuing_education_8_p7sbz"
+    },
+    {
+      "type": "Graduate Course",
+      "title": "Diploma in Automation and Control of Mechatronics Processes",
+      "year": "2018",
+      "details": "Universidad Católica Boliviana \"San Pablo\"",
+      "selected": true,
+      "id": "continuing_education_9_yc678"
+    }
+  ],
+  "skills": {
+    "programming": [
+      {
+        "name": "MATLAB",
+        "selected": true,
+        "id": "programming_1_rcgs8"
+      },
+      {
+        "name": "Julia",
+        "selected": true,
+        "id": "programming_2_h0myt"
+      },
+      {
+        "name": "R",
+        "selected": true,
+        "id": "programming_3_ke47f"
+      },
+      {
+        "name": "Python",
+        "selected": true,
+        "id": "programming_4_lpqtw"
+      },
+      {
+        "name": "C/C++",
+        "selected": true,
+        "id": "programming_5_a3mf1"
+      },
+      {
+        "name": "Java",
+        "selected": true,
+        "id": "programming_6_yaxnf"
+      }
+    ],
+    "mri": [
+      {
+        "name": "Bloch simulations",
+        "selected": true,
+        "id": "mri_1_3k4ov"
+      },
+      {
+        "name": "Pulse sequence design",
+        "selected": true,
+        "id": "mri_2_li488"
+      },
+      {
+        "name": "Low-field MRI",
+        "selected": true,
+        "id": "mri_3_s6f0o"
+      },
+      {
+        "name": "Sequence optimization",
+        "selected": true,
+        "id": "mri_4_i4wsn"
+      },
+      {
+        "name": "Signal modeling",
+        "selected": true,
+        "id": "mri_5_crtvh"
+      },
+      {
+        "name": "K-space sampling strategies",
+        "selected": true,
+        "id": "mri_6_nzrff"
+      },
+      {
+        "name": "B0 inhomogeneity modeling",
+        "selected": true,
+        "id": "mri_7_28v2l"
+      }
+    ],
+    "domains": [
+      {
+        "name": "Optimization",
+        "selected": true,
+        "id": "domains_1_1mpsm"
+      },
+      {
+        "name": "Deep Learning",
+        "selected": true,
+        "id": "domains_2_07vkg"
+      },
+      {
+        "name": "Computer Vision",
+        "selected": true,
+        "id": "domains_3_1sbmr"
+      },
+      {
+        "name": "Physics-informed Neural Networks",
+        "selected": true,
+        "id": "domains_4_dbt73"
+      },
+      {
+        "name": "Signal Processing",
+        "selected": true,
+        "id": "domains_5_2dtdq"
+      },
+      {
+        "name": "Statistical Machine Learning",
+        "selected": true,
+        "id": "domains_6_zjqk0"
+      },
+      {
+        "name": "BCI",
+        "selected": true,
+        "id": "domains_7_f6pkn"
+      },
+      {
+        "name": "Edge Computing",
+        "selected": true,
+        "id": "domains_8_rmtd5"
+      },
+      {
+        "name": "Scientific software development",
+        "selected": true,
+        "id": "domains_9_prgz9"
+      },
+      {
+        "name": "Biomedical imaging",
+        "selected": true,
+        "id": "domains_10_x0m8p"
+      }
+    ]
+  },
+  "instances": {},
+  "_style": {
+    "mappers": {
+      "education": "cventry_education",
+      "research_experience": "cventry_research",
+      "work_experience": "cventry_work",
+      "teaching_experience": "cventry_teaching",
+      "publications": "publications",
+      "abstracts": "abstracts",
+      "awards": "awards",
+      "continuing_education": "continuing_education",
+      "skills": "skills",
+      "languages": "generic",
+      "lang": "skills"
+    },
+    "latexTemplate": "\\documentclass[11pt,a4paper,sans]{moderncv}\n\\usepackage[utf8]{inputenc}\n\\moderncvstyle{classic}\n\\definecolor{color2}{RGB}{51,51,51}\n\\definecolor{color1}{HTML}{{{theme.accentColor}}}\n{{&theme.fontLatex}}\n\\usepackage{lipsum}\n\\usepackage{xstring}\n\\usepackage{enumitem}\n\\usepackage[scale=0.92, top=1.8cm, bottom=2cm, left=2cm, right=2cm]{geometry}\n\n\\setlist[itemize]{label=\\textbullet, leftmargin=1.5em, itemsep=1.5pt, topsep=2pt, parsep=0pt, partopsep=0pt}\n\n\\firstname{{{basics.firstname}}}\n\\familyname{{{basics.lastname}}}\n{{#basics.title}}\\title{{{basics.title}}}{{/basics.title}}\n{{#has_photo}}\\photo[70pt][0.4pt]{{{photo_filename}}}{{/has_photo}}\n\n\\newlength{\\cvheaderwidth}\n\\setlength{\\cvheaderwidth}{\\textwidth}\n{{#has_photo}}\n\\addtolength{\\cvheaderwidth}{-85pt}\n{{/has_photo}}\n\n\\makeatletter\n\\renewcommand*{\\makecvtitle}{%\n  \\noindent\\begin{minipage}{\\cvheaderwidth}%\n    {\\fontsize{22}{26}\\selectfont\\bfseries\\color{color2} {{{basics.firstname}}} {{{basics.lastname}}}}\\par\\vspace{4pt}%\n    {{#basics.title}}{\\color{color2!80}\\large {{{basics.title}}}\\par\\vspace{6pt}}{{/basics.title}}%\n    {\\small\\color{color2}%\n      {{#basics.email}}\\textbf{{{labels.basics.email}}:} \\href{mailto:{{{basics.email}}}}{{{basics.email}}}\\quad {{/basics.email}}%\n      {{#basics.homepage}}\\textbf{{{labels.basics.homepage}}:} \\href{{{{basics.homepage}}}}{{{basics.homepage}}}\\quad {{/basics.homepage}}%\n      {{#basics.location}}\\textbf{{{labels.basics.location}}:} {{{basics.location}}}{{/basics.location}}%\n    }%\n  \\end{minipage}%\n  {{#has_photo}}%\n  \\hfill%\n  \\begin{minipage}{80pt}%\n    \\raggedleft%\n    \\includegraphics[width=70pt]{{{photo_filename}}}%\n  \\end{minipage}%\n  {{/has_photo}}%\n  \\par\\vspace{8pt}%\n  {\\color{black!15}\\rule{\\textwidth}{1pt}}%\n  \\par\\vspace{8pt}%\n}\n\n\\renewcommand*{\\section}[1]{%\n  \\par\\addvspace{2.2ex}%\n  \\phantomsection{}%\n  {\\color{color1}\\Large\\bfseries #1}\\par\\nobreak\\vspace{2pt}%\n  {\\color{color1}\\rule{\\textwidth}{1.2pt}}%\n  \\par\\nobreak\\addvspace{1.2ex}\\@afterheading%\n}\n\n\\renewcommand*{\\cventry}[6]{%\n  \\par\\addvspace{1ex}%\n  \\noindent\\begin{minipage}{\\textwidth}%\n    {\\bfseries #2}%\n    \\if\\relax\\detokenize{#3}\\relax\\else\\ -- {\\normalfont #3}\\fi%\n    \\if\\relax\\detokenize{#4}\\relax\\else, #4\\fi%\n    \\if\\relax\\detokenize{#5}\\relax\\else, #5\\fi%\n    \\if\\relax\\detokenize{#1}\\relax\\else\\hfill{\\normalfont #1}\\fi%\n    \\par%\n    \\if\\relax\\detokenize{#6}\\relax\\else%\n      \\vspace{2pt}%\n      {#6}%\n      \\par%\n    \\fi%\n  \\end{minipage}%\n  \\par\\addvspace{0.8ex}%\n}\n\n\\renewcommand*{\\cvitemwithcomment}[3]{%\n  \\par\\addvspace{0.5ex}%\n  \\noindent%\n  \\if\\relax\\detokenize{#3}\\relax%\n    {\\bfseries #1:}\\hspace{0.5em}#2%\n  \\else%\n    {\\bfseries #1}\\hfill{\\color{color2!80}\\textit{#2}}%\n  \\fi%\n  \\par\\addvspace{0.5ex}%\n}\n\\makeatother\n\n\\hyphenation{Universidad}\n\n\\begin{document}\n{{&theme.textAlignLatex}}\n\\makecvtitle\n\n{{#has_research_interests}}\n\\section{{{labels.basics.research_interests}}}\n{{{basics.research_interests}}}\n{{/has_research_interests}}\n\n{{&all_sections}}\n\n\\end{document}",
+    "htmlTemplate": "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>{{basics.firstname}} {{basics.lastname}} - CV</title>\n<style>\n  body, h1, h2, h3, p, section, .entry, .entry-description, .entry-subheader, .contact-info, .kv-list, ul, li {\n    {{&theme.textAlignCss}}\n  }\n  body {\n    {{&theme.fontCss}}\n    line-height: 1.6;\n    color: #333;\n    max-width: 800px;\n    margin: 40px auto;\n    padding: 0 20px;\n    background: #fff;\n  }\n  .contact-info {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 15px;\n    margin-bottom: 30px;\n    padding-bottom: 15px;\n    border-bottom: 2px solid #eee;\n    font-size: 0.9em;\n    {{&theme.textAlignFlexCss}}\n  }\n  h1 {\n    font-size: 2.5em;\n    margin-bottom: 5px;\n    color: #111;\n  }\n  .subtitle {\n    font-size: 1.2em;\n    color: #666;\n    margin-bottom: 20px;\n  }\n  .contact-info {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 15px;\n    margin-bottom: 30px;\n    padding-bottom: 15px;\n    border-bottom: 2px solid #eee;\n    font-size: 0.9em;\n  }\n  .contact-info a {\n    color: #{{{theme.accentColor}}};\n    text-decoration: none;\n  }\n  section {\n    margin-bottom: 30px;\n  }\n  h2 {\n    font-size: 1.5em;\n    border-bottom: 2px solid #{{{theme.accentColor}}};\n    padding-bottom: 5px;\n    color: #{{{theme.accentColor}}};\n    margin-bottom: 15px;\n  }\n  .entry {\n    margin-bottom: 15px;\n  }\n  .entry-header {\n    display: flex;\n    justify-content: space-between;\n    align-items: baseline;\n    gap: {{&theme.headerSpacer}}px;\n    font-weight: bold;\n    {{&theme.textAlignFlexCss}}\n  }\n  .entry-subheader {\n    font-style: italic;\n    color: #555;\n  }\n  .entry-description {\n    margin-top: 5px;\n    font-size: 0.95em;\n    white-space: pre-wrap;\n  }\n  .skills-list {\n    margin: 0;\n    padding: 0;\n    list-style: none;\n  }\n  body, section, main, header {\n    cursor: default !important;\n  }\n  .entry, [id^=\"item-\"], [id^=\"section-\"], h1, h2, h3, h4, h5, h6, p, li, span, a, img, strong, em, u, b, i, .subtitle, .contact-info > div, .kv-list > li, .entry-header, .entry-description, .entry-subheader {\n    cursor: pointer !important;\n  }\n</style>\n<script>\nfunction getElementPath(el) {\n  if (!el) return 'basics';\n  \n  var itemEl = el.closest('[id^=\"item-\"]');\n  if (itemEl && itemEl.id) {\n    return itemEl.id.replace(/^item-/, '').replace(/-/g, '.');\n  }\n\n  var secEl = el.closest('[id^=\"section-\"]');\n  if (secEl && secEl.id) {\n    return secEl.id.replace(/^section-/, '');\n  }\n\n  var anySec = el.closest('section, header, .entry, .contact-info, body');\n  if (anySec && anySec.id) {\n    return anySec.id.replace(/^(item|section)-/, '').replace(/-/g, '.');\n  }\n\n  return 'basics';\n}\n\nwindow.addEventListener('message', function(e) {\n  if (!e.data) return;\n  var action = e.data.action;\n  \n  if (action === 'scrollToItem' || action === 'scrollToSection') {\n    var path = String(e.data.propPath || e.data.sectionId || '');\n    var parts = path.replace(/^section-/, '').split(/[.-]/);\n    var sectionKey = parts[0];\n    \n    var target = null;\n    if (e.data.propPath) {\n      var sanitized = 'item-' + e.data.propPath.replace(/./g, '-');\n      target = document.getElementById(sanitized);\n      if (!target && parts.length >= 2) {\n        target = document.getElementById('item-' + parts[0] + '-' + parts[1]);\n      }\n    }\n    \n    if (!target) {\n      var secId = 'section-' + sectionKey;\n      target = document.getElementById(secId) || document.getElementById(sectionKey);\n    }\n    \n    if (!target) {\n      var headings = document.querySelectorAll('h1, h2, h3, header, section');\n      for (var i = 0; i < headings.length; i++) {\n        var txt = (headings[i].textContent || '').trim().toLowerCase();\n        if (txt && (txt.indexOf(sectionKey.toLowerCase()) !== -1)) {\n          target = headings[i].closest('section') || headings[i].closest('header') || headings[i];\n          break;\n        }\n      }\n    }\n\n    if (target) {\n      var rect = target.getBoundingClientRect();\n      var viewH = window.innerHeight || document.documentElement.clientHeight;\n      var viewW = window.innerWidth || document.documentElement.clientWidth;\n      var isVisible = (rect.top >= 0 && rect.bottom <= viewH && rect.left >= 0 && rect.right <= viewW);\n\n      if (!e.data.force && isVisible) {\n        return;\n      }\n\n      target.scrollIntoView({ behavior: 'smooth', block: 'center' });\n      target.style.transition = 'outline 0.3s ease, box-shadow 0.3s ease';\n      target.style.outline = '2.5px solid #2563eb';\n      target.style.borderRadius = '6px';\n      target.style.boxShadow = '0 0 12px rgba(37, 99, 235, 0.3)';\n      setTimeout(function() {\n        if (target) {\n          target.style.outline = 'none';\n          target.style.boxShadow = 'none';\n        }\n      }, 1800);\n    }\n  }\n});\n\ndocument.addEventListener('click', function(e) {\n  if (e.target && e.target.closest && e.target.closest('a')) return;\n  var contentEl = e.target && e.target.closest ? e.target.closest('[id^=\"item-\"], .entry, h1, h2, h3, p, li, span, img, .subtitle, .contact-info > div, section, header') : null;\n  if (!contentEl) return;\n\n  var rawId = '';\n  var itemEl = contentEl.closest('[id^=\"item-\"]');\n  if (itemEl && itemEl.id) {\n    rawId = itemEl.id;\n  } else {\n    var secEl = contentEl.closest('[id^=\"section-\"]');\n    if (secEl && secEl.id) {\n      rawId = secEl.id;\n    }\n  }\n\n  if (rawId) {\n    window.parent.postMessage({\n      action: 'previewClickFocus',\n      rawId: rawId\n    }, '*');\n  }\n});\n</script>\n</head>\n<body>\n\n  <header id=\"section-basics\" style=\"display:flex; align-items:center; margin-bottom:15px\">\n    <div>\n      <h1 id=\"item-basics-firstname\" style=\"margin:0\">{{basics.firstname}} {{basics.lastname}}</h1>\n      <div id=\"item-basics-title\" class=\"subtitle\" style=\"margin-top:4px; margin-bottom:0\">{{basics.title}}</div>\n    </div>\n    {{#basics.photo}}\n    <img id=\"item-basics-photo\" src=\"{{basics.photo}}\" alt=\"Profile photo\" style=\"width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #{{{theme.accentColor}}}; flex-shrink:0; margin-left:{{theme.photoLeftOffset}}px; margin-top:{{theme.photoTopOffset}}px;\">\n    {{/basics.photo}}\n  </header>\n  <div class=\"contact-info\">\n    {{#basics.email}}<div id=\"item-basics-email\">{{labels.basics.email}}: <a href=\"mailto:{{basics.email}}\">{{basics.email}}</a></div>{{/basics.email}}\n    {{#basics.homepage}}<div id=\"item-basics-homepage\">{{labels.basics.homepage}}: <a href=\"{{basics.homepage}}\" target=\"_blank\">{{basics.homepage}}</a></div>{{/basics.homepage}}\n    {{#basics.location}}<div id=\"item-basics-location\">{{labels.basics.location}}: {{basics.location}}</div>{{/basics.location}}\n  </div>\n\n  {{#basics.research_interests}}\n  <section id=\"section-research_interests\">\n    <h2>{{labels.basics.research_interests}}</h2>\n    <p id=\"item-basics-research_interests\">{{basics.research_interests}}</p>\n  </section>\n  {{/basics.research_interests}}\n\n  <main id=\"all-cv-sections\">\n    {{&all_sections}}\n  </main>\n </body>\n</html>",
+    "cvTitle": "Curriculum Vitae",
+    "style": "classic",
+    "preamble": "",
+    "footer": "",
+    "theme": {
+      "accentColor": "#2563eb",
+      "font": "palatino",
+      "photoLeftOffset": 130,
+      "photoTopOffset": 0,
+      "textAlign": "justify",
+      "headerSpacer": 55
+    }
+  },
+  "_activeInstanceName": null,
+  "_sections": {
+    "skills": {
+      "title": "Skills"
+    },
+    "education": {
+      "title": "Education",
+      "include": true
+    },
+    "research_experience": {
+      "title": "Research experience",
+      "include": true
+    },
+    "work_experience": {
+      "title": "Work experience",
+      "include": true
+    },
+    "teaching_experience": {
+      "title": "Teaching experience",
+      "include": true
+    },
+    "abstracts": {
+      "title": "Abstracts",
+      "include": true
+    },
+    "publications": {
+      "title": "Publications",
+      "include": true
+    },
+    "awards": {
+      "title": "Awards",
+      "include": true
+    },
+    "talks": {
+      "title": "Talks",
+      "include": true
+    },
+    "continuing_education": {
+      "title": "Continuing education",
+      "include": true
+    },
+    "languages": {
+      "title": "Languages",
+      "include": true
+    },
+    "basics": {
+      "include": true,
+      "title": "Basics"
+    }
+  },
+  "_hiddenFields": {
+    "basics.selected": false,
+    "education.0.description": true
+  },
+  "languages": [
+    {
+      "description": "**English**: speaks well, writes well, listens well.\n**Spanish**: mother tongue.",
+      "selected": true,
+      "id": "languages_1_0sqgs"
+    }
+  ],
+  "_propertyNames": {
+    "basics.firstname": "Firstname",
+    "basics.lastname": "Lastname",
+    "basics.full_name": "Full name",
+    "basics.title": "Title",
+    "basics.email": "Email",
+    "basics.location": "Location",
+    "basics.homepage": "Homepage",
+    "basics.photo": "Photo",
+    "basics.research_interests": "Research interests",
+    "basics.selected": "Selected",
+    "education.0.institution": "Institution",
+    "education.0.degree": "Degree",
+    "education.0.start": "Start",
+    "education.0.end": "End",
+    "education.0.dissertation": "Dissertation",
+    "education.0.description": "Description",
+    "education.0.selected": "Selected",
+    "education.0.id": "Id",
+    "education.1.institution": "Institution",
+    "education.1.degree": "Degree",
+    "education.1.start": "Start",
+    "education.1.end": "End",
+    "education.1.dissertation": "Dissertation",
+    "education.1.description": "Description",
+    "education.1.selected": "Selected",
+    "education.1.id": "Id",
+    "research_experience.0.organization": "Organization",
+    "research_experience.0.role": "Role",
+    "research_experience.0.start": "Start",
+    "research_experience.0.end": "End",
+    "research_experience.0.description": "Description",
+    "research_experience.0.selected": "Selected",
+    "research_experience.0.id": "Id",
+    "research_experience.1.organization": "Organization",
+    "research_experience.1.role": "Role",
+    "research_experience.1.start": "Start",
+    "research_experience.1.end": "End",
+    "research_experience.1.description": "Description",
+    "research_experience.1.selected": "Selected",
+    "research_experience.1.id": "Id",
+    "research_experience.2.organization": "Organization",
+    "research_experience.2.role": "Role",
+    "research_experience.2.start": "Start",
+    "research_experience.2.end": "End",
+    "research_experience.2.description": "Description",
+    "research_experience.2.selected": "Selected",
+    "research_experience.2.id": "Id",
+    "research_experience.3.organization": "Organization",
+    "research_experience.3.role": "Role",
+    "research_experience.3.start": "Start",
+    "research_experience.3.end": "End",
+    "research_experience.3.description": "Description",
+    "research_experience.3.selected": "Selected",
+    "research_experience.3.id": "Id",
+    "research_experience.4.organization": "Organization",
+    "research_experience.4.role": "Role",
+    "research_experience.4.start": "Start",
+    "research_experience.4.end": "End",
+    "research_experience.4.description": "Description",
+    "research_experience.4.selected": "Selected",
+    "research_experience.4.id": "Id",
+    "work_experience.0.organization": "Organization",
+    "work_experience.0.department": "Department",
+    "work_experience.0.role": "Role",
+    "work_experience.0.start": "Start",
+    "work_experience.0.end": "End",
+    "work_experience.0.description": "Description",
+    "work_experience.0.selected": "Selected",
+    "work_experience.0.id": "Id",
+    "work_experience.1.organization": "Organization",
+    "work_experience.1.department": "Department",
+    "work_experience.1.role": "Role",
+    "work_experience.1.start": "Start",
+    "work_experience.1.end": "End",
+    "work_experience.1.description": "Description",
+    "work_experience.1.selected": "Selected",
+    "work_experience.1.id": "Id",
+    "work_experience.2.organization": "Organization",
+    "work_experience.2.department": "Department",
+    "work_experience.2.role": "Role",
+    "work_experience.2.start": "Start",
+    "work_experience.2.end": "End",
+    "work_experience.2.description": "Description",
+    "work_experience.2.selected": "Selected",
+    "work_experience.2.id": "Id",
+    "work_experience.3.organization": "Organization",
+    "work_experience.3.department": "Department",
+    "work_experience.3.role": "Role",
+    "work_experience.3.start": "Start",
+    "work_experience.3.end": "End",
+    "work_experience.3.description": "Description",
+    "work_experience.3.selected": "Selected",
+    "work_experience.3.id": "Id",
+    "work_experience.4.organization": "Organization",
+    "work_experience.4.department": "Department",
+    "work_experience.4.role": "Role",
+    "work_experience.4.start": "Start",
+    "work_experience.4.end": "End",
+    "work_experience.4.description": "Description",
+    "work_experience.4.selected": "Selected",
+    "work_experience.4.id": "Id",
+    "work_experience.5.organization": "Organization",
+    "work_experience.5.department": "Department",
+    "work_experience.5.role": "Role",
+    "work_experience.5.start": "Start",
+    "work_experience.5.end": "End",
+    "work_experience.5.description": "Description",
+    "work_experience.5.selected": "Selected",
+    "work_experience.5.id": "Id",
+    "work_experience.6.organization": "Organization",
+    "work_experience.6.department": "Department",
+    "work_experience.6.role": "Role",
+    "work_experience.6.start": "Start",
+    "work_experience.6.end": "End",
+    "work_experience.6.description": "Description",
+    "work_experience.6.selected": "Selected",
+    "work_experience.6.id": "Id",
+    "work_experience.7.organization": "Organization",
+    "work_experience.7.department": "Department",
+    "work_experience.7.role": "Role",
+    "work_experience.7.start": "Start",
+    "work_experience.7.end": "End",
+    "work_experience.7.description": "Description",
+    "work_experience.7.selected": "Selected",
+    "work_experience.7.id": "Id",
+    "work_experience.8.organization": "Organization",
+    "work_experience.8.role": "Role",
+    "work_experience.8.start": "Start",
+    "work_experience.8.end": "End",
+    "work_experience.8.description": "Description",
+    "work_experience.8.selected": "Selected",
+    "work_experience.8.id": "Id",
+    "teaching_experience.0.course_area": "Course area",
+    "teaching_experience.0.institution": "Institution",
+    "teaching_experience.0.level": "Level",
+    "teaching_experience.0.courses": "Courses",
+    "teaching_experience.0.selected": "Selected",
+    "teaching_experience.0.id": "Id",
+    "teaching_experience.1.course_area": "Course area",
+    "teaching_experience.1.institution": "Institution",
+    "teaching_experience.1.level": "Level",
+    "teaching_experience.1.courses": "Courses",
+    "teaching_experience.1.selected": "Selected",
+    "teaching_experience.1.id": "Id",
+    "teaching_experience.2.course_area": "Course area",
+    "teaching_experience.2.institution": "Institution",
+    "teaching_experience.2.level": "Level",
+    "teaching_experience.2.courses": "Courses",
+    "teaching_experience.2.selected": "Selected",
+    "teaching_experience.2.id": "Id",
+    "teaching_experience.3.course_area": "Course area",
+    "teaching_experience.3.institution": "Institution",
+    "teaching_experience.3.courses": "Courses",
+    "teaching_experience.3.selected": "Selected",
+    "teaching_experience.3.id": "Id",
+    "abstracts.0.selected": "Selected",
+    "abstracts.0.authors": "Authors",
+    "abstracts.0.title": "Title",
+    "abstracts.0.venue": "Venue",
+    "abstracts.0.year": "Year",
+    "abstracts.0.type": "Type",
+    "abstracts.0.id": "Id",
+    "abstracts.1.selected": "Selected",
+    "abstracts.1.authors": "Authors",
+    "abstracts.1.title": "Title",
+    "abstracts.1.venue": "Venue",
+    "abstracts.1.year": "Year",
+    "abstracts.1.type": "Type",
+    "abstracts.1.id": "Id",
+    "abstracts.2.selected": "Selected",
+    "abstracts.2.authors": "Authors",
+    "abstracts.2.title": "Title",
+    "abstracts.2.venue": "Venue",
+    "abstracts.2.year": "Year",
+    "abstracts.2.type": "Type",
+    "abstracts.2.id": "Id",
+    "abstracts.3.selected": "Selected",
+    "abstracts.3.authors": "Authors",
+    "abstracts.3.title": "Title",
+    "abstracts.3.venue": "Venue",
+    "abstracts.3.year": "Year",
+    "abstracts.3.type": "Type",
+    "abstracts.3.id": "Id",
+    "abstracts.4.selected": "Selected",
+    "abstracts.4.authors": "Authors",
+    "abstracts.4.title": "Title",
+    "abstracts.4.venue": "Venue",
+    "abstracts.4.year": "Year",
+    "abstracts.4.type": "Type",
+    "abstracts.4.id": "Id",
+    "abstracts.5.selected": "Selected",
+    "abstracts.5.authors": "Authors",
+    "abstracts.5.title": "Title",
+    "abstracts.5.venue": "Venue",
+    "abstracts.5.year": "Year",
+    "abstracts.5.type": "Type",
+    "abstracts.5.id": "Id",
+    "abstracts.6.selected": "Selected",
+    "abstracts.6.authors": "Authors",
+    "abstracts.6.title": "Title",
+    "abstracts.6.venue": "Venue",
+    "abstracts.6.year": "Year",
+    "abstracts.6.type": "Type",
+    "abstracts.6.id": "Id",
+    "abstracts.7.selected": "Selected",
+    "abstracts.7.authors": "Authors",
+    "abstracts.7.title": "Title",
+    "abstracts.7.venue": "Venue",
+    "abstracts.7.year": "Year",
+    "abstracts.7.type": "Type",
+    "abstracts.7.id": "Id",
+    "publications.0.selected": "Selected",
+    "publications.0.authors": "Authors",
+    "publications.0.title": "Title",
+    "publications.0.venue": "Venue",
+    "publications.0.year": "Year",
+    "publications.0.id": "Id",
+    "publications.1.selected": "Selected",
+    "publications.1.authors": "Authors",
+    "publications.1.title": "Title",
+    "publications.1.venue": "Venue",
+    "publications.1.year": "Year",
+    "publications.1.id": "Id",
+    "publications.2.selected": "Selected",
+    "publications.2.authors": "Authors",
+    "publications.2.title": "Title",
+    "publications.2.venue": "Venue",
+    "publications.2.year": "Year",
+    "publications.2.id": "Id",
+    "publications.3.selected": "Selected",
+    "publications.3.authors": "Authors",
+    "publications.3.title": "Title",
+    "publications.3.venue": "Venue",
+    "publications.3.year": "Year",
+    "publications.3.id": "Id",
+    "publications.4.selected": "Selected",
+    "publications.4.authors": "Authors",
+    "publications.4.title": "Title",
+    "publications.4.venue": "Venue",
+    "publications.4.year": "Year",
+    "publications.4.id": "Id",
+    "publications.5.selected": "Selected",
+    "publications.5.authors": "Authors",
+    "publications.5.title": "Title",
+    "publications.5.venue": "Venue",
+    "publications.5.year": "Year",
+    "publications.5.id": "Id",
+    "publications.6.selected": "Selected",
+    "publications.6.authors": "Authors",
+    "publications.6.title": "Title",
+    "publications.6.venue": "Venue",
+    "publications.6.year": "Year",
+    "publications.6.id": "Id",
+    "publications.7.selected": "Selected",
+    "publications.7.authors": "Authors",
+    "publications.7.title": "Title",
+    "publications.7.venue": "Venue",
+    "publications.7.year": "Year",
+    "publications.7.id": "Id",
+    "publications.8.selected": "Selected",
+    "publications.8.authors": "Authors",
+    "publications.8.title": "Title",
+    "publications.8.venue": "Venue",
+    "publications.8.year": "Year",
+    "publications.8.id": "Id",
+    "publications.9.selected": "Selected",
+    "publications.9.authors": "Authors",
+    "publications.9.title": "Title",
+    "publications.9.venue": "Venue",
+    "publications.9.year": "Year",
+    "publications.9.id": "Id",
+    "publications.10.selected": "Selected",
+    "publications.10.authors": "Authors",
+    "publications.10.title": "Title",
+    "publications.10.venue": "Venue",
+    "publications.10.year": "Year",
+    "publications.10.id": "Id",
+    "publications.11.selected": "Selected",
+    "publications.11.authors": "Authors",
+    "publications.11.title": "Title",
+    "publications.11.venue": "Venue",
+    "publications.11.year": "Year",
+    "publications.11.id": "Id",
+    "publications.12.selected": "Selected",
+    "publications.12.authors": "Authors",
+    "publications.12.title": "Title",
+    "publications.12.venue": "Venue",
+    "publications.12.year": "Year",
+    "publications.12.id": "Id",
+    "publications.13.selected": "Selected",
+    "publications.13.authors": "Authors",
+    "publications.13.title": "Title",
+    "publications.13.venue": "Venue",
+    "publications.13.year": "Year",
+    "publications.13.id": "Id",
+    "publications.14.selected": "Selected",
+    "publications.14.authors": "Authors",
+    "publications.14.title": "Title",
+    "publications.14.venue": "Venue",
+    "publications.14.year": "Year",
+    "publications.14.id": "Id",
+    "publications.15.selected": "Selected",
+    "publications.15.authors": "Authors",
+    "publications.15.title": "Title",
+    "publications.15.venue": "Venue",
+    "publications.15.year": "Year",
+    "publications.15.id": "Id",
+    "publications.16.selected": "Selected",
+    "publications.16.authors": "Authors",
+    "publications.16.title": "Title",
+    "publications.16.venue": "Venue",
+    "publications.16.year": "Year",
+    "publications.16.id": "Id",
+    "publications.17.selected": "Selected",
+    "publications.17.authors": "Authors",
+    "publications.17.title": "Title",
+    "publications.17.venue": "Venue",
+    "publications.17.year": "Year",
+    "publications.17.id": "Id",
+    "publications.18.selected": "Selected",
+    "publications.18.authors": "Authors",
+    "publications.18.title": "Title",
+    "publications.18.venue": "Venue",
+    "publications.18.year": "Year",
+    "publications.18.id": "Id",
+    "publications.19.selected": "Selected",
+    "publications.19.authors": "Authors",
+    "publications.19.title": "Title",
+    "publications.19.venue": "Venue",
+    "publications.19.year": "Year",
+    "publications.19.id": "Id",
+    "publications.20.selected": "Selected",
+    "publications.20.authors": "Authors",
+    "publications.20.title": "Title",
+    "publications.20.venue": "Venue",
+    "publications.20.year": "Year",
+    "publications.20.id": "Id",
+    "publications.21.selected": "Selected",
+    "publications.21.authors": "Authors",
+    "publications.21.title": "Title",
+    "publications.21.venue": "Venue",
+    "publications.21.year": "Year",
+    "publications.21.id": "Id",
+    "publications.22.selected": "Selected",
+    "publications.22.authors": "Authors",
+    "publications.22.title": "Title",
+    "publications.22.venue": "Venue",
+    "publications.22.year": "Year",
+    "publications.22.id": "Id",
+    "awards.0.category": "Category",
+    "awards.0.description": "Description",
+    "awards.0.year": "Year",
+    "awards.0.selected": "Selected",
+    "awards.0.id": "Id",
+    "awards.1.category": "Category",
+    "awards.1.description": "Description",
+    "awards.1.year": "Year",
+    "awards.1.selected": "Selected",
+    "awards.1.id": "Id",
+    "awards.2.category": "Category",
+    "awards.2.description": "Description",
+    "awards.2.year": "Year",
+    "awards.2.selected": "Selected",
+    "awards.2.id": "Id",
+    "awards.3.category": "Category",
+    "awards.3.description": "Description",
+    "awards.3.year": "Year",
+    "awards.3.selected": "Selected",
+    "awards.3.id": "Id",
+    "awards.4.category": "Category",
+    "awards.4.description": "Description",
+    "awards.4.year": "Year",
+    "awards.4.selected": "Selected",
+    "awards.4.id": "Id",
+    "awards.5.category": "Category",
+    "awards.5.description": "Description",
+    "awards.5.year": "Year",
+    "awards.5.selected": "Selected",
+    "awards.5.id": "Id",
+    "awards.6.category": "Category",
+    "awards.6.description": "Description",
+    "awards.6.year": "Year",
+    "awards.6.selected": "Selected",
+    "awards.6.id": "Id",
+    "awards.7.category": "Category",
+    "awards.7.description": "Description",
+    "awards.7.year": "Year",
+    "awards.7.selected": "Selected",
+    "awards.7.id": "Id",
+    "awards.8.category": "Category",
+    "awards.8.description": "Description",
+    "awards.8.year": "Year",
+    "awards.8.selected": "Selected",
+    "awards.8.id": "Id",
+    "awards.9.category": "Category",
+    "awards.9.description": "Description",
+    "awards.9.year": "Year",
+    "awards.9.selected": "Selected",
+    "awards.9.id": "Id",
+    "awards.10.category": "Category",
+    "awards.10.description": "Description",
+    "awards.10.year": "Year",
+    "awards.10.selected": "Selected",
+    "awards.10.id": "Id",
+    "awards.11.category": "Category",
+    "awards.11.description": "Description",
+    "awards.11.year": "Year",
+    "awards.11.selected": "Selected",
+    "awards.11.id": "Id",
+    "awards.12.category": "Category",
+    "awards.12.description": "Description",
+    "awards.12.year": "Year",
+    "awards.12.selected": "Selected",
+    "awards.12.id": "Id",
+    "awards.13.category": "Category",
+    "awards.13.description": "Description",
+    "awards.13.year": "Year",
+    "awards.13.selected": "Selected",
+    "awards.13.id": "Id",
+    "awards.14.category": "Category",
+    "awards.14.description": "Description",
+    "awards.14.year": "Year",
+    "awards.14.selected": "Selected",
+    "awards.14.id": "Id",
+    "awards.15.category": "Category",
+    "awards.15.description": "Description",
+    "awards.15.year": "Year",
+    "awards.15.selected": "Selected",
+    "awards.15.id": "Id",
+    "awards.16.category": "Category",
+    "awards.16.description": "Description",
+    "awards.16.year": "Year",
+    "awards.16.selected": "Selected",
+    "awards.16.id": "Id",
+    "awards.17.category": "Category",
+    "awards.17.description": "Description",
+    "awards.17.year": "Year",
+    "awards.17.selected": "Selected",
+    "awards.17.id": "Id",
+    "awards.18.category": "Category",
+    "awards.18.description": "Description",
+    "awards.18.year": "Year",
+    "awards.18.selected": "Selected",
+    "awards.18.id": "Id",
+    "talks.0.category": "Category",
+    "talks.0.description": "Description",
+    "talks.0.year": "Year",
+    "talks.0.selected": "Selected",
+    "talks.0.id": "Id",
+    "talks.1.category": "Category",
+    "talks.1.description": "Description",
+    "talks.1.year": "Year",
+    "talks.1.selected": "Selected",
+    "talks.1.id": "Id",
+    "talks.2.category": "Category",
+    "talks.2.description": "Description",
+    "talks.2.year": "Year",
+    "talks.2.selected": "Selected",
+    "talks.2.id": "Id",
+    "talks.3.category": "Category",
+    "talks.3.description": "Description",
+    "talks.3.year": "Year",
+    "talks.3.selected": "Selected",
+    "talks.3.id": "Id",
+    "talks.4.category": "Category",
+    "talks.4.description": "Description",
+    "talks.4.year": "Year",
+    "talks.4.selected": "Selected",
+    "talks.4.id": "Id",
+    "talks.5.category": "Category",
+    "talks.5.description": "Description",
+    "talks.5.year": "Year",
+    "talks.5.selected": "Selected",
+    "talks.5.id": "Id",
+    "talks.6.category": "Category",
+    "talks.6.description": "Description",
+    "talks.6.year": "Year",
+    "talks.6.selected": "Selected",
+    "talks.6.id": "Id",
+    "continuing_education.0.type": "Type",
+    "continuing_education.0.title": "Title",
+    "continuing_education.0.year": "Year",
+    "continuing_education.0.details": "Details",
+    "continuing_education.0.selected": "Selected",
+    "continuing_education.0.id": "Id",
+    "continuing_education.1.type": "Type",
+    "continuing_education.1.title": "Title",
+    "continuing_education.1.year": "Year",
+    "continuing_education.1.details": "Details",
+    "continuing_education.1.selected": "Selected",
+    "continuing_education.1.id": "Id",
+    "continuing_education.2.type": "Type",
+    "continuing_education.2.title": "Title",
+    "continuing_education.2.year": "Year",
+    "continuing_education.2.details": "Details",
+    "continuing_education.2.selected": "Selected",
+    "continuing_education.2.id": "Id",
+    "continuing_education.3.type": "Type",
+    "continuing_education.3.title": "Title",
+    "continuing_education.3.year": "Year",
+    "continuing_education.3.details": "Details",
+    "continuing_education.3.selected": "Selected",
+    "continuing_education.3.id": "Id",
+    "continuing_education.4.type": "Type",
+    "continuing_education.4.title": "Title",
+    "continuing_education.4.year": "Year",
+    "continuing_education.4.details": "Details",
+    "continuing_education.4.selected": "Selected",
+    "continuing_education.4.id": "Id",
+    "continuing_education.5.type": "Type",
+    "continuing_education.5.title": "Title",
+    "continuing_education.5.year": "Year",
+    "continuing_education.5.details": "Details",
+    "continuing_education.5.selected": "Selected",
+    "continuing_education.5.id": "Id",
+    "continuing_education.6.type": "Type",
+    "continuing_education.6.title": "Title",
+    "continuing_education.6.year": "Year",
+    "continuing_education.6.details": "Details",
+    "continuing_education.6.selected": "Selected",
+    "continuing_education.6.id": "Id",
+    "continuing_education.7.type": "Type",
+    "continuing_education.7.title": "Title",
+    "continuing_education.7.year": "Year",
+    "continuing_education.7.details": "Details",
+    "continuing_education.7.selected": "Selected",
+    "continuing_education.7.id": "Id",
+    "continuing_education.8.type": "Type",
+    "continuing_education.8.title": "Title",
+    "continuing_education.8.year": "Year",
+    "continuing_education.8.details": "Details",
+    "continuing_education.8.selected": "Selected",
+    "continuing_education.8.id": "Id",
+    "skills.programming": "Programming",
+    "skills.programming.0.name": "Name",
+    "skills.programming.0.selected": "Selected",
+    "skills.programming.1.name": "Name",
+    "skills.programming.1.selected": "Selected",
+    "skills.programming.2.name": "Name",
+    "skills.programming.2.selected": "Selected",
+    "skills.programming.3.name": "Name",
+    "skills.programming.3.selected": "Selected",
+    "skills.programming.4.name": "Name",
+    "skills.programming.4.selected": "Selected",
+    "skills.programming.5.name": "Name",
+    "skills.programming.5.selected": "Selected",
+    "skills.mri": "Mri",
+    "skills.mri.0.name": "Name",
+    "skills.mri.0.selected": "Selected",
+    "skills.mri.1.name": "Name",
+    "skills.mri.1.selected": "Selected",
+    "skills.mri.2.name": "Name",
+    "skills.mri.2.selected": "Selected",
+    "skills.mri.3.name": "Name",
+    "skills.mri.3.selected": "Selected",
+    "skills.mri.4.name": "Name",
+    "skills.mri.4.selected": "Selected",
+    "skills.mri.5.name": "Name",
+    "skills.mri.5.selected": "Selected",
+    "skills.mri.6.name": "Name",
+    "skills.mri.6.selected": "Selected",
+    "skills.domains": "Domains",
+    "skills.domains.0.name": "Name",
+    "skills.domains.0.selected": "Selected",
+    "skills.domains.1.name": "Name",
+    "skills.domains.1.selected": "Selected",
+    "skills.domains.2.name": "Name",
+    "skills.domains.2.selected": "Selected",
+    "skills.domains.3.name": "Name",
+    "skills.domains.3.selected": "Selected",
+    "skills.domains.4.name": "Name",
+    "skills.domains.4.selected": "Selected",
+    "skills.domains.5.name": "Name",
+    "skills.domains.5.selected": "Selected",
+    "skills.domains.6.name": "Name",
+    "skills.domains.6.selected": "Selected",
+    "skills.domains.7.name": "Name",
+    "skills.domains.7.selected": "Selected",
+    "skills.domains.8.name": "Name",
+    "skills.domains.8.selected": "Selected",
+    "skills.domains.9.name": "Name",
+    "skills.domains.9.selected": "Selected",
+    "languages.0.description": "Description",
+    "languages.0.selected": "Selected",
+    "languages.0.id": "Id",
+    "talks.7.id": "Id",
+    "talks.7.category": "Category",
+    "talks.7.description": "Description",
+    "talks.7.year": "Year",
+    "talks.7.selected": "Selected"
+  },
+  "_sectionOrder": [
+    "skills",
+    "education",
+    "research_experience",
+    "work_experience",
+    "teaching_experience",
+    "abstracts",
+    "publications",
+    "awards",
+    "talks",
+    "continuing_education",
+    "languages",
+    "basics"
+  ]
+}

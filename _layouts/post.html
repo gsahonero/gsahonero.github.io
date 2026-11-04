@@ -1,139 +1,1255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }} - {{ site.title }}</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
-    
-    <style>
-        :root {
-            --bg-color: #fcfcfc;
-            --text-main: #1a1a1a;
-            --text-muted: #555555;
-            --accent: #2563eb;
-            --link-color: #2563eb;
-            --border: #e5e5e5;
-            --code-bg: #282c34;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0f1115;
-                --text-main: #f3f4f6;
-                --text-muted: #9ca3af;
-                --accent: #3b82f6;
-                --link-color: #93c5fd; 
-                --border: #374151;
-            }
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} | Guillermo Sahonero</title>
+  
+  <meta name="description" content="{{ page.description | default: 'Introducing MRIjs: An Interactive In-Browser Bloch Simulator for Pulse Sequences and NMR Physics.' }}">
+  <meta property="og:title" content="{{ page.title }} | Guillermo Sahonero">
+  <meta property="og:type" content="article">
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-        
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+  <!-- Pre-render theme initialization to prevent flash -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('gsahonero-theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 
-        /* Left Sidebar (Minimal for posts) */
-        .sidebar { width: 250px; flex-shrink: 0; padding: 3rem 2rem; border-right: 1px solid var(--border); z-index: 40; }
-        .sidebar h1 { font-size: 1.2rem; margin-bottom: 2rem; }
-        .sidebar a { text-decoration: none; color: var(--text-muted); transition: color 0.2s; font-weight: 500; }
-        .sidebar a:hover { color: var(--accent); }
+  <!-- KaTeX for rendering mathematical Bloch equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
-        /* Center Column: ADAPTIVE Scrollytelling Text */
-        /* Note the resize: horizontal, max-width, and min-width */
-        .post-content-wrapper { 
-            width: 45vw; /* Initial optimal reading width */
-            max-width: 70vw; 
-            min-width: 400px; 
-            flex-shrink: 0;
-            resize: horizontal; /* Gives the user the drag handle */
-            overflow-y: auto; 
-            overflow-x: hidden; 
-            padding: 4rem 2rem 10rem 3rem; 
-            scroll-behavior: smooth; 
-            border-right: 1px dashed var(--border); /* Moved border here for seamless UI */
-        }
-        
-        .post-header { margin-bottom: 4rem; }
-        .post-header h1 { font-size: 2.5rem; margin-bottom: 1rem; line-height: 1.2; letter-spacing: -0.02em; }
-        .post-meta { color: var(--text-muted); font-size: 0.9rem; }
+  <!-- Editorial Typography: Instrument Serif & Newsreader -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
 
-        /* The text blocks that trigger changes */
-        .scroll-step { margin-bottom: 60vh; opacity: 0.4; transition: opacity 0.4s ease; border-left: 2px solid transparent; padding-left: 1.5rem; }
-        .scroll-step.is-active { opacity: 1; border-left: 2px solid var(--accent); }
-        .scroll-step p { line-height: 1.8; margin-bottom: 1.2rem; font-size: 1.1rem; }
+  <!-- Base styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
 
-        /* Right Column: Responsive Code Visuals */
-        /* Flex: 1 allows this pane to dynamically grow/shrink as the user drags the center pane */
-        .visual-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; background-color: var(--bg-color); position: relative; }
-        
-        /* The container holding the extracted code/animations */
-        .dynamic-asset { position: absolute; width: 90%; max-height: 80vh; overflow-y: auto; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); background-color: var(--code-bg); }
-        .dynamic-asset.is-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        
-        .dynamic-asset pre { margin: 0; padding: 1.5rem; font-size: 0.9rem; border-radius: 12px; }
+  <style>
+    /* ==========================================================================
+       Two-Column Article Layout (Columns 1 & 2 Merged + Column 3 Interactive Stage)
+       ========================================================================== */
+    .post-app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      position: relative;
+    }
 
-        /* Mobile */
-        @media (max-width: 1000px) {
-            .visual-panel { display: none; }
-            .post-content-wrapper { width: 100%; max-width: 100%; resize: none; padding-bottom: 4rem; border-right: none; }
-            .scroll-step { margin-bottom: 3rem; opacity: 1; border-left: none; padding-left: 0; }
-            .dynamic-asset { position: relative; opacity: 1; transform: none; width: 100%; pointer-events: auto; margin-bottom: 2rem; }
-        }
-    </style>
+    .post-app-container.single-column {
+      justify-content: center;
+    }
+    .post-app-container.single-column .post-article-column {
+      flex: 1 1 100%;
+      max-width: 860px;
+      border-right: none;
+    }
+
+    /* Merged Column 1 & 2: Article Narrative Reader */
+    .post-article-column {
+      flex: 1 1 62%;
+      max-width: 900px;
+      min-width: 380px;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      padding: 2.5rem 3.5rem 8rem 3.5rem;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    /* Column 3: Fixed / Sticky Interactive Stage */
+    .post-interactive-stage {
+      flex: 0 0 460px;
+      width: 460px;
+      height: 100vh;
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      border-left: 1px solid var(--border-subtle);
+      position: relative;
+    }
+
+    /* Stage Card Wrap & Smooth Transition */
+    .stage-card-wrap {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stage-card-wrap.stage-is-transitioning {
+      opacity: 0.7;
+      transform: scale(0.99);
+    }
+
+    /* Elegant Stage Loading & Transition Placeholder */
+    .stage-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-surface);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
+      pointer-events: auto;
+    }
+
+    [data-theme="dark"] .stage-placeholder {
+      background: rgba(20, 24, 32, 0.94);
+    }
+
+    .stage-placeholder.is-ready {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .stage-placeholder-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .stage-placeholder-orb {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .orb-pulse {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.2);
+      animation: placeholderPulse 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    }
+
+    .orb-core {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.45);
+    }
+
+    @keyframes placeholderPulse {
+      0% { transform: scale(0.85); opacity: 0.8; }
+      50% { transform: scale(1.4); opacity: 0.15; }
+      100% { transform: scale(0.85); opacity: 0.8; }
+    }
+
+    .stage-placeholder-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .placeholder-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .placeholder-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    /* Floating 'X' Close Button on the Far Right */
+    .floating-close-btn {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 9990;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    [data-theme="dark"] .floating-close-btn {
+      background: rgba(20, 24, 32, 0.88);
+    }
+
+    .floating-close-btn:hover {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      transform: scale(1.08) rotate(90deg);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    /* Fixed / Sticky Top Navigation Bar */
+    .post-top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: -2.5rem -3.5rem 2.2rem -3.5rem;
+      padding: 1.15rem 3.5rem;
+      background: rgba(252, 252, 252, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.9rem;
+    }
+
+    [data-theme="dark"] .post-top-nav {
+      background: rgba(15, 17, 21, 0.88);
+    }
+
+    .post-nav-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .post-back-btn {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    .post-back-btn:hover {
+      transform: translateX(-3px);
+      color: var(--accent);
+    }
+
+    .post-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .post-outline-btn {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .post-outline-btn:hover {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    }
+
+    .post-outline-btn svg {
+      transition: transform 0.2s ease;
+    }
+
+    .post-outline-btn:hover svg {
+      transform: scale(1.08);
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Semi-Transparent Outline Drawer */
+    .outline-drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.32);
+      z-index: 9998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .outline-drawer-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .outline-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 350px;
+      max-width: 85vw;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-right: 1px solid var(--border-subtle);
+      z-index: 9999;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 12px 0 35px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] .outline-drawer {
+      background: rgba(20, 24, 32, 0.88);
+    }
+
+    .outline-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .outline-header {
+      padding: 1.5rem 1.5rem 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .outline-close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .outline-close-btn:hover {
+      color: var(--accent);
+    }
+
+    .outline-list {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+
+    .outline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.5rem;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      border-left: 3px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .outline-item:hover,
+    .outline-item.active {
+      color: var(--accent);
+      background: rgba(37, 99, 235, 0.05);
+      border-left-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .outline-num {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-dim);
+    }
+
+    .outline-title {
+      flex: 1;
+    }
+
+    .outline-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--bg-subtle);
+      color: var(--text-dim);
+    }
+
+    .outline-item.active .outline-badge {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Header styling */
+    .post-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .post-category-tag {
+      display: inline-block;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .post-header h1 {
+      font-size: 2.35rem;
+      line-height: 1.25;
+      letter-spacing: -0.025em;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    .post-subtitle {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .post-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border-subtle);
+    }
+
+    /* ==========================================================================
+       Card Architecture for Blog Sections (Treated as content-cards)
+       ========================================================================== */
+    .scroll-step {
+      margin-bottom: 25vh;
+      padding: 2.2rem 2.4rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--border-subtle);
+      border-radius: 12px;
+      box-shadow: var(--shadow-subtle);
+      opacity: 0.45;
+      transition: opacity 0.35s ease, border-color 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
+      position: relative;
+    }
+
+    .scroll-step.is-active {
+      opacity: 1.0;
+      border-left: 3px solid var(--accent);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .scroll-step:last-child {
+      margin-bottom: 10vh;
+    }
+
+    .scroll-step h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .scroll-step h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem 0;
+      color: var(--text-main);
+    }
+
+    .scroll-step p {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--text-muted);
+      margin-bottom: 1.35rem;
+    }
+
+    .scroll-step p strong {
+      color: var(--text-main);
+    }
+
+    .equation-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      font-size: 1.05rem;
+      text-align: center;
+    }
+
+    .step-badge {
+      display: inline-block;
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    /* Right Panel Interactive Elements */
+    .stage-card-wrap {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .stage-status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .stage-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .stage-scenario-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    .stage-canvas-box {
+      width: 100%;
+      height: 230px;
+      background: var(--bg-color);
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    #stage-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    #stage-canvas:active {
+      cursor: grabbing;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      pointer-events: none;
+      background: rgba(var(--bg-color), 0.8);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Real-Time Signal Plot */
+    .stage-plot-box {
+      background: var(--bg-color);
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      padding: 0.75rem;
+      position: relative;
+    }
+
+    .stage-plot-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    #signal-canvas {
+      width: 100%;
+      height: 85px;
+      display: block;
+    }
+
+    /* Live Readouts HUD */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .hud-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 0.45rem 0.5rem;
+      text-align: center;
+    }
+
+    .hud-label {
+      display: block;
+      font-size: 0.66rem;
+      color: var(--text-dim);
+      margin-bottom: 0.15rem;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .hud-value {
+      font-size: 0.86rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Dynamic Sequence Parameter Controls */
+    .stage-params-panel {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .params-panel-header {
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .param-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .param-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .param-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .stage-slider {
+      width: 100%;
+      height: 4px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Speed Control Pill Row */
+    .stage-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .stage-control-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .speed-btn-row {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .speed-pill-btn {
+      flex: 1;
+      padding: 0.3rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .speed-pill-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .speed-pill-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    /* Controls Bar */
+    .stage-controls-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .stage-btn-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .stage-btn {
+      flex: 1;
+      padding: 0.45rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+
+    .stage-btn:hover {
+      border-color: var(--accent);
+      background: rgba(37, 99, 235, 0.08);
+    }
+
+    .stage-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    /* Timeline Slider */
+    .stage-scrub-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .stage-range {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .stage-info-banner {
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* Responsive Mobile / Tablet Layout */
+    @media (max-width: 1024px) {
+      .post-app-container {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+      }
+      .post-article-column {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        padding: 1.5rem;
+        border-right: none;
+      }
+      .post-top-nav {
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        padding: 0.9rem 1.5rem;
+      }
+      .post-interactive-stage {
+        width: 100%;
+        height: auto;
+        border-left: none;
+        border-top: 2px solid var(--border-subtle);
+        position: relative;
+      }
+      .scroll-step {
+        margin-bottom: 2.5rem;
+        opacity: 1;
+        padding: 1.5rem;
+      }
+      .outline-drawer {
+        width: 280px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <nav class="sidebar">
-        <a href="/">← Back to Home</a>
+  <!-- Floating 'X' Close Button -->
+  <a href="/#blog" class="floating-close-btn" id="floating-close-btn" aria-label="Close article and return to blog" title="Close article (Esc)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </a>
+
+  <!-- Table of Contents Outline Drawer & Overlay -->
+  <div class="outline-drawer-overlay" id="outline-overlay"></div>
+  <aside class="outline-drawer" id="outline-drawer" aria-label="Article Outline">
+    <div class="outline-header">
+      <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Article Outline</div>
+      <button class="outline-close-btn" id="outline-close-btn" aria-label="Close outline">✕</button>
+    </div>
+    <nav class="outline-list" id="outline-nav-list">
+      <a href="#step-intro" class="outline-item active" data-step-target="step-intro">
+        <span class="outline-num">01</span>
+        <span class="outline-title">Motivation &amp; Overview</span>
+        <span class="outline-badge">INTRO</span>
+      </a>
+      <a href="#step-physics-math" class="outline-item" data-step-target="step-physics-math">
+        <span class="outline-num">02</span>
+        <span class="outline-title">The Physics &amp; Bloch Equations</span>
+        <span class="outline-badge">MATH</span>
+      </a>
+      <a href="#step-fid" class="outline-item" data-step-target="step-fid">
+        <span class="outline-num">03</span>
+        <span class="outline-title">Free Induction Decay (FID)</span>
+        <span class="outline-badge">1 SPIN</span>
+      </a>
+      <a href="#step-spin-echo" class="outline-item" data-step-target="step-spin-echo">
+        <span class="outline-num">04</span>
+        <span class="outline-title">Hahn Spin Echo (SE)</span>
+        <span class="outline-badge">5 SPINS</span>
+      </a>
+      <a href="#step-gradient-echo" class="outline-item" data-step-target="step-gradient-echo">
+        <span class="outline-num">05</span>
+        <span class="outline-title">Gradient Echo (GRE)</span>
+        <span class="outline-badge">5 SPINS</span>
+      </a>
+      <a href="#step-mrijs-tool" class="outline-item" data-step-target="step-mrijs-tool">
+        <span class="outline-num">06</span>
+        <span class="outline-title">Hands-On Explorer &amp; Full Suite</span>
+        <span class="outline-badge">SANDBOX</span>
+      </a>
     </nav>
+  </aside>
 
-    <main class="post-content-wrapper" id="post-scroller">
-        <header class="post-header">
-            <h1>{{ page.title }}</h1>
-            <div class="post-meta">{{ page.date | date: "%B %d, %Y" }}</div>
-        </header>
+  <div class="post-app-container">
 
+    <!-- ====================================================================
+         MERGED COLUMN 1 & 2: Main Narrative Scrollytelling Article Column
+         ==================================================================== -->
+    <main class="post-article-column" id="post-scroller">
+      
+      <!-- Sticky Top Navigation Bar -->
+      <nav class="post-top-nav" id="post-top-nav">
+        <div class="post-nav-left">
+          <a href="/#blog" class="post-back-btn" id="post-back-btn">
+            ← Guillermo Sahonero / Blog
+          </a>
+        </div>
+        <div class="post-nav-right">
+          <button class="post-outline-btn" id="post-outline-btn" aria-label="Toggle Outline Menu" title="Table of Contents">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="15" y2="12"></line>
+              <line x1="3" y1="18" x2="18" y2="18"></line>
+            </svg>
+            <span>Outline</span>
+          </button>
+          <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Theme">
+            🌙 Theme
+          </button>
+        </div>
+      </nav>
+
+      <!-- Post Header -->
+      <header class="post-header">
+        <span class="post-category-tag">Interactive Science &amp; Simulation</span>
+        <h1>{{ page.title }}</h1>
+        {% if page.subtitle %}
+        <p class="post-subtitle">{{ page.subtitle }}</p>
+        {% endif %}
+        <div class="post-meta-row">
+          <span>{{ page.date | date: "%B %d, %Y" }}</span>
+          <span>&bull; {{ page.read_time | default: '10 min read' }}</span>
+          <span>&bull; Bloch Physics Engine</span>
+        </div>
+      </header>
+
+      <!-- Article Content (Rendered as independent cards) -->
+      <article class="post-content">
         {{ content }}
+      </article>
+
     </main>
 
-    <aside class="visual-panel" id="visual-panel"></aside>
+    <!-- ====================================================================
+         COLUMN 3: Modular Interactive Stage (Post-Defined via File or YAML)
+         ==================================================================== -->
+    {% if page.interactive != false %}
+    <aside class="post-interactive-stage" id="post-stage">
+      
+      <!-- Stage Transition & Loading Placeholder -->
+      <div class="stage-placeholder" id="stage-placeholder" aria-label="Loading interactive scene">
+        <div class="stage-placeholder-content">
+          <div class="stage-placeholder-orb">
+            <div class="orb-pulse"></div>
+            <div class="orb-core"></div>
+          </div>
+          <div class="stage-placeholder-text">
+            <span class="placeholder-title" id="placeholder-title">Loading Simulation</span>
+            <span class="placeholder-subtitle" id="placeholder-subtitle">Preparing interactive environment...</span>
+          </div>
+        </div>
+      </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script>
-        hljs.highlightAll();
+      <!-- Stage Card Container -->
+      <div class="stage-card-wrap" id="stage-card-wrap">
+        {% if page.stage_template %}
+          {% include page.stage_template %}
+        {% elsif page.stage_include %}
+          {% include page.stage_include %}
+        {% elsif page.stage %}
+          {% include 'post_generic_stage.html' %}
+        {% else %}
+          {% include 'post_interactive_stage.html' %}
+        {% endif %}
+      </div>
 
-        if (window.innerWidth > 1000) {
-            const visualPanel = document.getElementById('visual-panel');
-            const assets = document.querySelectorAll('.dynamic-asset');
-            
-            assets.forEach(asset => {
-                visualPanel.appendChild(asset); 
-            });
+    </aside>
+    {% endif %}
+
+  </div>
+
+  <!-- Modular Interactive Scripts (Loaded dynamically from post front matter) -->
+  {% if page.interactive != false and page.interactive_scripts %}
+    {% for script_url in page.interactive_scripts %}
+    <script src="{{ script_url }}"></script>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Navigation, Theme & Outline Handlers -->
+  <script>
+    // Theme toggle listener
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('gsahonero-theme', next);
+      });
+    }
+
+    // Floating close & Escape key handler
+    function closeArticle() {
+      document.body.classList.add('page-is-exiting');
+      setTimeout(() => {
+        window.location.href = '/#blog';
+      }, 160);
+    }
+
+    const closeBtn = document.getElementById('floating-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeArticle();
+      });
+    }
+
+    const backBtn = document.getElementById('post-back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeArticle();
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const drawer = document.getElementById('outline-drawer');
+        if (drawer && drawer.classList.contains('is-open')) {
+          closeOutline();
+        } else {
+          closeArticle();
+        }
+      }
+    });
+
+    // Outline Drawer toggle
+    const outlineBtn = document.getElementById('post-outline-btn');
+    const outlineDrawer = document.getElementById('outline-drawer');
+    const outlineOverlay = document.getElementById('outline-overlay');
+    const outlineClose = document.getElementById('outline-close-btn');
+
+    function openOutline() {
+      if (outlineDrawer) outlineDrawer.classList.add('is-open');
+      if (outlineOverlay) outlineOverlay.classList.add('is-open');
+    }
+
+    function closeOutline() {
+      if (outlineDrawer) outlineDrawer.classList.remove('is-open');
+      if (outlineOverlay) outlineOverlay.classList.remove('is-open');
+    }
+
+    if (outlineBtn) outlineBtn.addEventListener('click', openOutline);
+    if (outlineClose) outlineClose.addEventListener('click', closeOutline);
+    if (outlineOverlay) outlineOverlay.addEventListener('click', closeOutline);
+
+    // Auto-populate outline items from headings if empty
+    const navList = document.getElementById('outline-nav-list');
+    if (navList && navList.children.length === 0) {
+      const headings = document.querySelectorAll('.post-content h2, .post-content section[id]');
+      headings.forEach((h, idx) => {
+        const id = h.id || `section-${idx + 1}`;
+        if (!h.id) h.id = id;
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.className = `outline-item ${idx === 0 ? 'active' : ''}`;
+        a.setAttribute('data-step-target', id);
+        a.innerHTML = `
+          <span class="outline-num">${String(idx + 1).padStart(2, '0')}</span>
+          <span class="outline-title">${h.textContent.trim()}</span>
+        `;
+        navList.appendChild(a);
+      });
+    }
+
+    // Outline link clicks
+    document.querySelectorAll('.outline-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-step-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          closeOutline();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+
+    // =========================================================================
+    // Modular Stage Transition & Scrollytelling Controller
+    // =========================================================================
+    const StageController = {
+      placeholder: document.getElementById('stage-placeholder'),
+      wrap: document.getElementById('stage-card-wrap'),
+      titleEl: document.getElementById('stage-panel-title'),
+      subtitleEl: document.getElementById('stage-panel-subtitle'),
+      tagEl: document.getElementById('stage-scenario-tag'),
+
+      markReady() {
+        if (this.placeholder) {
+          this.placeholder.classList.add('is-ready');
+        }
+      },
+
+      setTransitioning(isTransitioning, title, subtitle) {
+        if (this.wrap) {
+          if (isTransitioning) {
+            this.wrap.classList.add('stage-is-transitioning');
+          } else {
+            this.wrap.classList.remove('stage-is-transitioning');
+          }
+        }
+        if (title && document.getElementById('placeholder-title')) {
+          document.getElementById('placeholder-title').textContent = title;
+        }
+        if (subtitle && document.getElementById('placeholder-subtitle')) {
+          document.getElementById('placeholder-subtitle').textContent = subtitle;
+        }
+      },
+
+      updateStep(stepData) {
+        // Trigger subtle visual micro-transition on stage
+        if (this.wrap) {
+          this.wrap.classList.add('stage-is-transitioning');
+          setTimeout(() => {
+            if (this.wrap) this.wrap.classList.remove('stage-is-transitioning');
+          }, 240);
         }
 
-        const steps = document.querySelectorAll('.scroll-step');
-        const observerOptions = { 
-            root: document.getElementById('post-scroller'), 
-            rootMargin: "-40% 0px -40% 0px", 
-            threshold: 0 
-        };
+        // Update header readout if provided in step dataset
+        if (stepData.title && this.titleEl) this.titleEl.textContent = stepData.title;
+        if (stepData.subtitle && this.subtitleEl) this.subtitleEl.textContent = stepData.subtitle;
+        if (stepData.badge && this.tagEl) this.tagEl.textContent = stepData.badge;
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    steps.forEach(s => s.classList.remove('is-active'));
-                    entry.target.classList.add('is-active');
+        // Dispatch unified stage event for post-specific scripts
+        window.dispatchEvent(new CustomEvent('post:stage-step', { detail: stepData }));
 
-                    const targetId = entry.target.getAttribute('data-target');
-                    document.querySelectorAll('.dynamic-asset').forEach(a => a.classList.remove('is-active'));
-                    
-                    const targetAsset = document.getElementById(targetId);
-                    if (targetAsset) targetAsset.classList.add('is-active');
-                }
+        // Call registered post controller if available
+        if (window.PostInteractiveController && typeof window.PostInteractiveController.onStepChange === 'function') {
+          window.PostInteractiveController.onStepChange(stepData);
+        }
+      }
+    };
+
+    window.StageController = StageController;
+
+    // Reveal stage after initial DOM & scripts are mounted
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        StageController.markReady();
+      }, 400);
+    });
+
+    // Scrollytelling step observer in the post layout
+    const scroller = document.getElementById('post-scroller');
+    const scrollSteps = document.querySelectorAll('.scroll-step');
+    if (scrollSteps.length > 0) {
+      const observerOptions = {
+        root: scroller || null,
+        rootMargin: '-15% 0px -50% 0px',
+        threshold: 0.1
+      };
+
+      const stepObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            scrollSteps.forEach(s => s.classList.remove('is-active'));
+            entry.target.classList.add('is-active');
+
+            const stepId = entry.target.id;
+            const scenario = entry.target.getAttribute('data-scenario') || '';
+            const spins = parseInt(entry.target.getAttribute('data-spins') || '1', 10);
+            const heading = entry.target.querySelector('h2');
+            const stepTitle = entry.target.getAttribute('data-stage-title') || (heading ? heading.textContent.trim() : '');
+            const stepSubtitle = entry.target.getAttribute('data-stage-subtitle') || '';
+            const badge = entry.target.getAttribute('data-stage-badge') || scenario;
+
+            // Update outline active state
+            document.querySelectorAll('.outline-item').forEach(item => {
+              if (item.getAttribute('data-step-target') === stepId) {
+                item.classList.add('active');
+              } else {
+                item.classList.remove('active');
+              }
             });
-        }, observerOptions);
 
-        steps.forEach(step => observer.observe(step));
-    </script>
+            // Delegate to stage controller
+            StageController.updateStep({
+              stepId,
+              scenario,
+              spins,
+              title: stepTitle,
+              subtitle: stepSubtitle,
+              badge,
+              element: entry.target
+            });
+          }
+        });
+      }, observerOptions);
+
+      scrollSteps.forEach(s => stepObserver.observe(s));
+    }
+
+    // Auto-render KaTeX if available
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderMathInElement === 'function') {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+          ],
+          throwOnError: false
+        });
+      }
+    });
+  </script>
 </body>
 </html>

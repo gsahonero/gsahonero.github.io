@@ -1,0 +1,7 @@
+[
+  { "tag": "BlochEquations", "label": "#BlochEquations" },
+  { "tag": "PulseSequences", "label": "#PulseSequences" },
+  { "tag": "Interactive3D", "label": "#Interactive3D" },
+  { "tag": "OpenSourceMRI", "label": "#OpenSourceMRI" },
+  { "tag": "SpinEcho", "label": "#SpinEcho" }
+]

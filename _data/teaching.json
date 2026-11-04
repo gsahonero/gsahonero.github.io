@@ -1,0 +1,106 @@
+[
+  {
+    "course_area": "Mechatronics Engineering",
+    "institution": "Universidad Católica Boliviana 'San Pablo'",
+    "level": "Undergraduate courses",
+    "courses": [
+      {
+        "name": "Introduction to Mechatronics",
+        "description": "Foundational principles of mechatronic system design, covering multidisciplinary integration of mechanical, electrical, and computer engineering with hands-on projects using Arduino and LEGO Mindstorms kits."
+      },
+      {
+        "name": "Electronic Measurements and Components and Lab.",
+        "description": "Operation, characterization, and testing of passive and active discrete electronic components, signal conditioning circuits, and experimental error analysis using laboratory instrumentation, tailored across multidisciplinary engineering cohorts, including chemical engineering students."
+      },
+      {
+        "name": "Analog Electronics and Lab.",
+        "description": "Design, mathematical modeling, and analysis of analog circuits, covering BJT and MOSFET transistor stages, operational amplifiers, active filter design, and frequency response, combining SPICE simulation with hands-on hardware prototyping."
+      },
+      {
+        "name": "Circuits I Lab.",
+        "description": "Practical laboratory experiments in DC circuit analysis covering Ohm's and Kirchhoff's laws, nodal/mesh methods, Thévenin and Norton equivalents, and transient responses, coordinated across multiple course sections (paralelos) with collaborative, project-based experimentation."
+      },
+      {
+        "name": "Circuits II Lab.",
+        "description": "Hands-on laboratory experiments focused on operational amplifier (OpAmp) topologies, active linear and non-linear circuit configurations, feedback analysis, signal conditioning, and practical circuit testing."
+      },
+      {
+        "name": "Robotics Lab.",
+        "description": "Practical implementation of robotic systems, covering forward and inverse kinematics, actuator and servo control, trajectory planning, sensor integration, and computer vision-based practices for visual feedback and robotic guidance."
+      },
+      {
+        "name": "Servomechanisms Design",
+        "description": "Design, modeling, and numerical simulation of electromechanical servomechanisms, covering actuator selection, transmission dynamics, experimental system identification, discrete-time control, PID tuning, and Lyapunov stability analysis for precision motion control."
+      },
+      {
+        "name": "Mechatronics Design",
+        "description": "Comprehensive project-based design course integrating mechanical structure, embedded hardware, sensor/actuator interfacing, and firmware architecture into functional multidisciplinary mechatronic prototypes."
+      },
+      {
+        "name": "Computer Vision",
+        "description": "Core algorithms and principles of computer vision, covering spatial and frequency-domain image processing (including 2D Fourier transforms), feature extraction, filtering, and segmentation, implemented through interactive Jupyter Notebooks with classical and deep learning approaches."
+      },
+      {
+        "name": "Degree Workshop",
+        "description": "Advising and technical supervision of undergraduate engineering graduation projects, evaluating technical reports, organizing departmental milestone progress workshops, and serving on evaluation committees to guide and assess students' final oral defenses."
+      }
+    ],
+    "selected": true
+  },
+  {
+    "course_area": "Biomedical Engineering",
+    "institution": "Universidad Católica Boliviana 'San Pablo'",
+    "level": "Graduate courses",
+    "courses": [
+      {
+        "name": "Biomaterials",
+        "description": "Structure, characterization, and clinical applications of metallic, ceramic, polymeric, and composite biomaterials, focusing on host-material interactions, biocompatibility, biodegradation kinetics, tissue engineering scaffolds, and regulatory evaluation."
+      },
+      {
+        "name": "Biomedical Device Design",
+        "description": "Translational design and development of medical technologies through structured clinical problem definition and engineering methodologies—including design thinking, iterative spiral design, and concurrent engineering—integrating prototyping validation and consideration of regulatory frameworks."
+      }
+    ],
+    "selected": true
+  },
+  {
+    "course_area": "Mechatronics Engineering",
+    "institution": "Universidad Católica Boliviana 'San Pablo'",
+    "level": "Graduate courses",
+    "courses": [
+      {
+        "name": "Neural Networks",
+        "description": "Theoretical foundations and practical implementation of artificial neural networks, covering multilayer perceptrons, backpropagation dynamics, loss optimization, regularization techniques, convolutional architectures (CNNs), and deep learning workflows implemented in Python."
+      },
+      {
+        "name": "Advanced Topics in Machine Learning",
+        "description": "Exploration of advanced machine learning paradigms, focusing on unsupervised techniques (such as clustering, ICA, and PCA), ensemble learning, generative modeling, and physics-informed neural networks (PINNs) applied to engineering systems."
+      },
+      {
+        "name": "Introduction to Machine Learning",
+        "description": "Foundational principles of machine learning, comparing supervised, unsupervised, and reinforcement learning paradigms, covering core predictive models, introductory neural networks, end-to-end data pipelines, evaluation strategies, and real-world engineering applications."
+      }
+    ],
+    "selected": true
+  },
+  {
+    "course_area": "Extra lectured courses",
+    "institution": "Universidad Católica Boliviana 'San Pablo'",
+    "level": "Course",
+    "courses": [
+      {
+        "name": "Applied Multivariate Analysis",
+        "description": "Multidimensional data analysis rooted in applied linear algebra and matrix decompositions, covering Singular Value Decomposition (SVD), Principal Component Analysis (PCA), Independent Component Analysis (ICA), factor analysis, and discriminant techniques for high-dimensional datasets."
+      },
+      {
+        "name": "Neural Networks for Computer Vision",
+        "description": "Specialized course on neural network architectures for visual perception, starting from developing multilayer perceptrons (MLPs) from scratch, advancing through convolutional neural networks (CNNs), transfer learning, recurrent neural networks (RNNs), multimodal systems, and semantic and instance segmentation."
+      },
+      {
+        "name": "LaTeX",
+        "description": "Comprehensive training in scientific typesetting with LaTeX, covering document structuring, complex mathematical typography, bibliography management with BibTeX and Mendeley, automated table/figure formatting, thesis styling, and presentation creation with Beamer using TeXstudio and Overleaf workflows."
+      }
+    ],
+    "selected": true
+  }
+]

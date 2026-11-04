@@ -1,6 +1,13 @@
+node_modules/
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
 PaperAssistant/
 IMAGINE/node_modules/
 IMAGINE/package-lock.json
 IMAGINE/package.json
 IMAGINE/tests
 .agents/
+tests
+_posts

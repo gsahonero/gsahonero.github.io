@@ -1,8 +1,0 @@
-{
-  "name": "Tailored Application CV",
-  "masterCvName": "Default CV",
-  "overwrites": {
-    "basics.title": "Senior Solutions Engineer",
-    "basics.research_interests": "Focusing on enterprise solution scalability and developer integrations."
-  }
-}

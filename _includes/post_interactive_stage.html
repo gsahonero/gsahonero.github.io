@@ -1,0 +1,9 @@
+{% if page.stage_template %}
+  {% include page.stage_template %}
+{% elsif page.stage_include %}
+  {% include page.stage_include %}
+{% elsif page.stage %}
+  {% include 'post_generic_stage.html' %}
+{% else %}
+  {% include 'stages/mrijs_stage.html' %}
+{% endif %}

@@ -2,174 +2,378 @@
 layout: default
 ---
 
-<section id="home" class="snap-section" data-visual="/assets/profile.jpeg">
-    <div class="content-card" id="card-home">
-        <h2>Welcome.</h2>
-        <p>I am a doctoral candidate at the <a href="https://iibm.uc.cl/" target="_blank">Institute for Biological and Medical Engineering (IIBM)</a> at <a href="https://www.uc.cl" target="_blank">UC Chile</a>, working at the <a href="https://cib.uc.cl" target="_blank">Center for Biomedical Imaging (CIB)</a> and the <a href="https://i-health.cl" target="_blank">Millennium Institute for Intelligent Healthcare Engineering (iHEALTH)</a>.
-        </p>
-        <p>My work sits at the intersection of physics (Magnetic Resonance Imaging), scientific computing (Julia & Python) and artificial intelligence (Deep Learning & Optimization). I specialize in MRI simulations, sequence design, and optimization, but I also have experience in Computer Vision, Brain-Computer Interfaces, and Engineering Education.            
-        </p>
-        <br />
-        <p>
-        I always welcome collaborations, questions, or just a chat about science, code, or anything in between. Beyond academics, I enjoy photography, music, web development, coffee brewing, and gluten-free baking. Feel free to <a href="/contact">reach out</a>.
-        </p>
-        <div class="card-fade" onclick="toggleExpand('card-home')">
-            <i class="expand-arrow"></i>
-        </div>
-    </div>
+<!-- 1. Home Section -->
+<section id="home" class="snap-section">
+  <div class="content-card" id="card-home">
+    <h2>Welcome.</h2>
+    <p>
+      I am a doctoral candidate at the <a href="https://iibm.uc.cl/" target="_blank" rel="noopener">Institute for Biological and Medical Engineering (IIBM)</a> at <a href="https://www.uc.cl/" target="_blank" rel="noopener">UC Chile</a>, working at the <a href="https://cib.uc.cl/" target="_blank" rel="noopener">Center for Biomedical Imaging (CIB)</a> and the <a href="https://i-health.cl/" target="_blank" rel="noopener">Millennium Institute for Intelligent Healthcare Engineering (iHEALTH)</a>.
+    </p>
+    <p>
+      My work sits at the intersection of physics (Magnetic Resonance Imaging), scientific computing (Julia &amp; Python) and artificial intelligence (Deep Learning &amp; Optimization). I specialize in MRI simulations, sequence design, and optimization, but I also have experience in Computer Vision, Brain-Computer Interfaces, and Engineering Education.
+    </p>
+    <p>
+      I always welcome collaborations, questions, or just a chat about science, code, or anything in between. Beyond academics, I enjoy photography, music, web development, coffee brewing, and gluten-free baking. Feel free to <a href="https://gsahonero.github.io/contact">reach out</a>.
+    </p>
+  </div>
 </section>
 
+<!-- 2. Short Bio Section -->
 <section id="bio" class="snap-section">
-    <div class="content-card" id="card-bio">
+  <div class="content-card" id="card-bio">
+    <div class="bio-header-layout">
+      <div class="bio-header-text">
+        <span class="section-label">Trajectory &bull; Origins &amp; Milestones</span>
         <h2>Short Bio</h2>
-        <p>Originally from Bolivia, I served as a full-time university lecturer and researcher at <a href="https://www.ucb.edu.bo">UCB</a> before joining the <a href="https://iibm.uc.cl/" target="_blank">Institute for Biological and Medical Engineering (IIBM)</a> at <a href="https://www.uc.cl" target="_blank">UC Chile</a>, working at the <a href="https://cib.uc.cl" target="_blank">Center for Biomedical Imaging (CIB)</a> and the <a href="https://i-health.cl" target="_blank">Millennium Institute for Intelligent Healthcare Engineering (iHEALTH)</a> in Chile.</p>
-        <p>Beyond traditional research, I am deeply invested in interdisciplinarity, open science, collaboration and knowledge sharing. I program extensively in Julia and Python. I contributed to <a href = "https://mritogether.esmrmb.org/" target="_blank">MRI Together</a> and <a href="https://www.cameramriafrica.org/" target="_blank">CAMERA</a> from <a href="https://www.esmrmb.org/" target="_blank">ESMRMB</a>, the <a href="https://latam-ismrm.org/" target="_blank">ISMRM Latam Chapter</a>, the <a href="https://sagroups.ieee.org/2731/" target="_blank">IEEE P2731 WG</a> (Brain Computer Interfaces Unified Terminology).</p>
-        <p>My work at industry focused on the development of embedded systems and full-stack web solutions (Natural Bolivia), data science (<a href="https://www.entel.cl" target="_blank">Entel PCS</a>) and natural language processing (<a href="https://www.bci.cl/personas">Bci</a>).</p>
-        <div class="card-fade" onclick="toggleExpand('card-bio')">
-            <i class="expand-arrow"></i>
-        </div>
+      </div>
+      <div class="bio-portrait-wrap">
+        <img src="/assets/profile.jpeg" alt="Guillermo Sahonero" class="bio-portrait-img">
+      </div>
     </div>
+    
+    <p>
+      Originally from Bolivia, I served as a full-time university lecturer and researcher at <a href="https://www.ucb.edu.bo" target="_blank" rel="noopener">Universidad Católica Boliviana (UCB)</a> before joining the <a href="https://iibm.uc.cl/" target="_blank" rel="noopener">Institute for Biological and Medical Engineering (IIBM)</a> at <a href="https://www.uc.cl" target="_blank" rel="noopener">UC Chile</a>, working at the <a href="https://cib.uc.cl" target="_blank" rel="noopener">Center for Biomedical Imaging (CIB)</a> and the <a href="https://i-health.cl" target="_blank" rel="noopener">iHEALTH Millennium Institute</a> in Santiago, Chile.
+    </p>
+    
+    <p>
+      Beyond traditional research, I am deeply invested in interdisciplinarity, open science, collaboration, and knowledge sharing. I program extensively in Julia and Python. I contribute actively to <a href="https://mritogether.esmrmb.org/" target="_blank" rel="noopener">MRI Together</a> and <a href="https://www.cameramriafrica.org/" target="_blank" rel="noopener">CAMERA</a> from <a href="https://www.esmrmb.org/" target="_blank" rel="noopener">ESMRMB</a>, the <a href="https://latam-ismrm.org/" target="_blank" rel="noopener">ISMRM Latin American Chapter</a>, and the <a href="https://sagroups.ieee.org/2731/" target="_blank" rel="noopener">IEEE P2731 Working Group</a> on Brain-Computer Interfaces Unified Terminology.
+    </p>
+
+    <p>
+      In industry and technology transfer, I have worked on embedded systems and full-stack solutions (Natural Bolivia), data science (<a href="https://www.entel.cl" target="_blank" rel="noopener">Entel PCS</a>), and enterprise AI assistant development with multi-agent LLM evaluation at <a href="https://www.generadora.cl" target="_blank" rel="noopener">Generadora Metropolitana</a>, alongside NLP initiatives at <a href="https://www.bci.cl/personas" target="_blank" rel="noopener">Bci</a>. I also participate as a co-founder and architecture lead at <a href="https://recursalabs.cl" target="_blank" rel="noopener">Recursa Labs</a>, where we build applied AI solutions, cloud architectures, and intelligent workflows.
+    </p>
+  </div>
 </section>
 
-<section id="publications" class="snap-section" data-visual="/assets/ernie-toolkit-demo.gif">
-    <div class="content-card" id="card-pub">
-        <h2>Publications</h2>
-        
-        <div class="publications-list" style="margin-top: 2rem;">
-            {% assign current_year = "" %}
-            
-            {% for paper in site.data.publications %}
-                {% assign paper_year = paper.issued.date-parts[0][0] %}
-                
-                {% if paper_year != current_year %}
-                    {% if current_year != "" %}
-                        </div></details>
-                    {% endif %}
-                    
-                    <details class="year-accordion" {% if forloop.first %}open{% endif %}>
-                        <summary>{{ paper_year }}</summary>
-                        <div class="accordion-content">
-                    
-                    {% assign current_year = paper_year %}
-                {% endif %}
-
-                <div class="publication-item">
-                    <p class="paper-text">
-                        {% for author in paper.author %}
-                            {{ author.family }}, {{ author.given | slice: 0, 1 }}.{% if forloop.last == false %}, {% endif %}
-                        {% endfor %}
-                        ({{ paper_year }}). 
-                        <strong>{{ paper.title }}</strong>. 
-                        <em>{{ paper.container-title }}</em>.
-                    </p>
-                    
-                    <div class="pub-links">
-                        <a href="/assets/papers/{{ paper.id }}.pdf" target="_blank" class="cv-btn pub-btn">Read PDF</a>
-                        {% if paper.DOI %}
-                        <a href="https://doi.org/{{ paper.DOI }}" target="_blank" class="doi-link">DOI</a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                {% if forloop.last %}
-                    </div></details>
-                {% endif %}
-                
-            {% endfor %}
-        </div>
-        
-        <div class="card-fade" onclick="toggleExpand('card-pub')">
-            <i class="expand-arrow"></i>
-        </div>
-    </div>
-</section>
-
+<!-- 3. Blog Section -->
 <section id="blog" class="snap-section">
-    <div class="content-card" id="card-blog">
-        <h2>Blog & Notes</h2>
-        <p>Informal guides, code snippets, and thoughts on open science.</p>
-        <ul>
-            {% for post in site.posts %}
-            <li>
-                <strong>{{ post.date | date: "%B %d, %Y" }}</strong> — 
-                <a href="{{ post.url }}" style="color: var(--accent); text-decoration: none;">{{ post.title }}</a>
-            </li>
+  <div class="content-card" id="card-blog">
+    <span class="section-label">Articles &amp; Explorations</span>
+    <h2>Blog</h2>
+    <p>
+      Interactive scientific essays, MRI physics explorations, and open-source computational notebooks with live in-browser simulations.
+    </p>
+
+    <div class="blog-entries-list">
+      {% for post in site.posts %}
+      {% if post.published != false %}
+      <article class="blog-entry-card" data-url="{{ post.url | default: post.permalink }}">
+        <div class="blog-entry-header">
+          <div class="blog-entry-date">
+            <span>{{ post.date | date: "%B %d, %Y" }}</span>
+            {% if post.read_time %}<span>&bull; {{ post.read_time }}</span>{% endif %}
+          </div>
+          {% if post.badge %}
+          <span class="blog-entry-badge">{{ post.badge }}</span>
+          {% endif %}
+        </div>
+        <h3 class="blog-entry-title">
+          <a href="{{ post.url | default: post.permalink }}" class="blog-entry-link">
+            {{ post.title }}
+          </a>
+        </h3>
+        {% if post.description or post.subtitle %}
+        <p class="blog-entry-desc">
+          {{ post.description | default: post.subtitle }}
+        </p>
+        {% endif %}
+        <div class="blog-entry-footer">
+          {% if post.tags %}
+          <div class="blog-tags-row">
+            {% for tag in post.tags %}
+            <span class="blog-tag-pill">#{{ tag | remove: " " }}</span>
             {% endfor %}
-        </ul>
-        <div class="card-fade" onclick="toggleExpand('card-blog')">
-            <i class="expand-arrow"></i>
+          </div>
+          {% endif %}
+          <a href="{{ post.url | default: post.permalink }}" class="blog-primary-btn blog-transition-link">
+            Read Interactive Entry →
+          </a>
         </div>
+      </article>
+      {% endif %}
+      {% endfor %}
     </div>
+  </div>
 </section>
 
+<!-- 4. Teaching & Outreach Section -->
 <section id="teaching" class="snap-section">
-    <div class="content-card" id="card-teach">
-        <h2>Selected Teaching & Contributions</h2>
-        <p><strong>Teaching Assistant at UC Chile</strong><br>
-        </p>
-        <ul>
-            <li><strong>Biomedical Engineering Laboratory</strong></li>
-            An introductory course that covers biomedical imaging, temporal biosignals, and biology microscopy.
-            <li><strong>Deep Learning</strong></li>
-            A practical course covering deep learning fundamentals, architectures, and applications.
-            <li><strong>Advanced Signal Processing</strong></li>
-            A course focused on 2D signal processing techniques including stochastic modeling and Fourier analysis.
-            <li><strong>Mathematical Methods for Biomedical Engineering</strong></li>
-            A course covering mathematical tools for biomedical engineering, including linear algebra, optimization, and numerical methods.
-            <li><strong>Magnetic Resonance Imaging Laboratory</strong></li>
-            A hands-on course covering MRI physics, pulse sequence design, and image reconstruction.
-            <li><strong>Introduction to Biomedical Engineering</strong></li>
-            An introductory course covering the fundamentals of biomedical engineering, including biomaterials, biomechanics, and medical imaging.
-        </ul>
-        <p><strong>iHEALTH Winter/Summer School</strong><br>
-        </p>
-        <ul>
-            <li><strong>2025 & 2026: "Practical workshop: an Introduction to AI"</strong></li>
-            A practical workshop covering Multilayer Perceptron and Convolutional Neural Networks traning and usage with Colab Notebooks.
-        </ul>
-        <p><strong>Graduate Courses at UCB</strong><br>
-        <ul>
-            <li><strong>Advanced Topics in Deep Learning</strong></li>
-            A course covering advanced topics in deep learning, including generative models, reinforcement learning,self-supervised learning, and optimization techniques.
-            <li><strong>Biomedical design</strong></li>
-            A course focused on the design and development of biomedical devices, covering topics such as biomaterials, biomechanics, and regulatory considerations.
-            <li><strong>Introduction to Deep Learning</strong></li>
-            A course covering the motivation and fundamentals of deep learning such as deep learning training frameworks and typical pipelines.
-            <li><strong>Biomaterials</strong></li>
-            A course covering the properties, applications, and design of biomaterials used in medical devices and tissue engineering.
-            <li><strong>Neural networks</strong></li>
-            A course covering neural network architectures (MLP, CNN, RNN) and their applications (medical, data science, robotics).
-        </ul>
-        
-        <div class="card-fade" onclick="toggleExpand('card-teach')">
-            <i class="expand-arrow"></i>
-        </div>
+  <div class="content-card" id="card-teach">
+    <span class="section-label">Education</span>
+    <h2>Selected Teaching &amp; Contributions</h2>
+
+    <!-- Featured IMAGINE -->
+    <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px dashed var(--border-subtle);">
+      <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 0.4rem;">
+        IMAGINE Summer School 2026
+      </h3>
+      <p style="font-size: 0.98rem; margin-bottom: 0.75rem;">
+        Co-instructor and contributor to open-source hands-on low-field MRI education, basic physics, Bloch simulations, and Halbach array scanner design with CAMERA and ESMRMB.
+      </p>
+      <a href="/IMAGINE" class="paper-btn paper-btn-primary" style="display: inline-block;">
+        Explore IMAGINE Workshop Site ↗
+      </a>
     </div>
+
+    <!-- UC Chile TA -->
+    <div class="teaching-group">
+      <h3>Teaching Assistant at UC Chile</h3>
+      <div class="teaching-subtitle">Pontificia Universidad Católica de Chile</div>
+      <ul class="editorial-list">
+        <li class="editorial-item">
+          <strong>Biomedical Engineering Laboratory:</strong> Biomedical imaging, temporal biosignals, and biology microscopy.
+        </li>
+        <li class="editorial-item">
+          <strong>Deep Learning:</strong> Practical course covering deep learning fundamentals, architectures, and biomedical applications.
+        </li>
+        <li class="editorial-item">
+          <strong>Advanced Signal Processing:</strong> 2D signal processing techniques including stochastic modeling and Fourier analysis.
+        </li>
+        <li class="editorial-item">
+          <strong>Mathematical Methods for Biomedical Engineering:</strong> Linear algebra, optimization, and numerical methods.
+        </li>
+        <li class="editorial-item">
+          <strong>Magnetic Resonance Imaging Laboratory:</strong> MRI physics, pulse sequence design, and image reconstruction.
+        </li>
+      </ul>
+    </div>
+
+    <!-- iHEALTH Schools -->
+    <div class="teaching-group">
+      <h3>iHEALTH AI Summer/Winter School</h3>
+      <div class="teaching-subtitle">Millennium Institute for Intelligent Healthcare Engineering (2024–2026)</div>
+      <ul class="editorial-list">
+        <li class="editorial-item">
+          <strong>Practical Workshop - Introduction to AI:</strong> Hands-on training covering Multilayer Perceptrons (MLP) and Convolutional Neural Networks (CNN) with PyTorch and Colab notebooks.
+        </li>
+      </ul>
+    </div>
+
+    <!-- UCB Graduate & Undergraduate Courses -->
+    {% for group in site.data.teaching %}
+    <div class="teaching-group">
+      <h3>{{ group.course_area }}</h3>
+      <div class="teaching-subtitle">{{ group.institution }} &bull; {{ group.level }}</div>
+      <ul class="editorial-list">
+        {% for course in group.courses %}
+        <li class="editorial-item">
+          {% if course.name %}
+            <strong>{{ course.name }}{% if course.description %}:{% endif %}</strong>{% if course.description %} {{ course.description }}{% endif %}
+          {% else %}
+            <strong>{{ course }}</strong>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
 </section>
 
-<section id="contact" class="snap-section" data-visual="/assets/your-photography-shot.jpg">
-    <div class="content-card" id="card-contact">
-        <h2>Connect</h2>
-        <p>Feel free to reach out for collaborations, questions, or just a chat about science, code, or anything in between. </p>
-        
-        <h3 style="font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.8rem; color: var(--text-main);">Academic & Code</h3>
-        <ul>
-            <li><strong>Email:</strong> gsahonero [at] uc {dot} cl</li>
-            <li><strong>Google Scholar:</strong> <a href="https://scholar.google.com/citations?user=Jfq_wNsAAAAJ&hl=en" target="_blank">Research Profile</a></li>
-            <li><strong>ORCID:</strong> <a href="https://orcid.org/0000-0001-5259-7927" target="_blank">0000-0001-5259-7927</a></li>
-            <li><strong>GitHub:</strong> <a href="https://github.com/gsahonero" target="_blank">@gsahonero</a></li>
-            <li><strong>ResearchGate:</strong> <a href="https://www.researchgate.net/profile/Guillermo-Sahonero" target="_blank">Guillermo Sahonero</a></li>
-        </ul>
-        
-        <h3 style="font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.8rem; color: var(--text-main);">Social & Creative</h3>
-        <p style="margin-bottom: 0.8rem;">Follow me for updates on my research, side projects, and hobbies.</p>
-        <ul>
-            <li><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/guillermosahonero" target="_blank">My life as a multifaceted researcher</a></li>
-            <li><strong>Threads:</strong> <a href="https://www.threads.net/@thepolygongs" target="_blank">My life as a photographer and writer</a></li>
-        </ul>
-        
-        <div class="card-fade" onclick="toggleExpand('card-contact')">
-            <i class="expand-arrow"></i>
-        </div>
+<!-- 5. Publications Section -->
+<section id="publications" class="snap-section">
+  <div class="content-card" id="card-pub">
+    <span class="section-label">Research &amp; Papers</span>
+    <h2>Publications</h2>
+    
+    <p>
+      Peer-reviewed journal articles, conference proceedings, and recent conference presentations.
+    </p>
+
+    <!-- Publications Category Toggle: Papers vs Conference Abstracts -->
+    <div class="pub-type-toggle">
+      <button class="type-toggle-btn active" data-type="papers">Journal &amp; Conference Papers</button>
+      <button class="type-toggle-btn" data-type="abstracts">Conference Abstracts &amp; Posters</button>
     </div>
+
+    <!-- Clean Minimalist Filter Tabs -->
+    <div class="pubs-filter-row">
+      <button class="filter-tab active" data-filter="All">All</button>
+      <button class="filter-tab" data-filter="MRI">MRI</button>
+      <button class="filter-tab" data-filter="BCI">BCI</button>
+      <button class="filter-tab" data-filter="Deep Learning & AI">Deep Learning &amp; AI</button>
+      <button class="filter-tab" data-filter="Hardware & Edge">Hardware &amp; Edge</button>
+    </div>
+
+    <!-- Minimal Underlined Search -->
+    <input 
+      type="text" 
+      id="pubs-search" 
+      class="pubs-search" 
+      placeholder="Search by keyword, author, or venue..." 
+      aria-label="Search publications"
+    >
+
+    <!-- Papers Feed -->
+    <div class="publications-feed" id="papers-feed">
+      {% assign current_year = "" %}
+      {% for paper in site.data.publications %}
+        {% if paper.year != current_year %}
+          {% if current_year != "" %}
+            </div><!-- /.year-content -->
+          </details><!-- /.year-group -->
+          {% endif %}
+          {% assign current_year = paper.year %}
+          <details class="year-group year-accordion" data-year="{{ current_year }}" {% if current_year >= 2024 %}open{% endif %}>
+            <summary class="year-summary">
+              <span class="year-heading-text">{{ current_year }}</span>
+              <span class="year-chevron">▾</span>
+            </summary>
+            <div class="year-content">
+        {% endif %}
+
+        <article class="publication-item" data-topic="{{ paper.topic }}" data-venue="{{ paper.venue }}">
+          <p class="paper-citation">
+            <span class="authors-wrap">
+              {% if paper.is_truncated %}
+                <span class="authors-display authors-short">{{ paper.authors_short }}, <em>et al.</em></span>
+                <span class="authors-display authors-full" style="display: none;">{{ paper.authors_formatted }}</span>
+                <button type="button" class="authors-toggle-btn" data-remaining="{{ paper.remaining_authors }}" aria-label="Toggle full author list" title="Show all {{ paper.total_authors }} authors">
+                  +{{ paper.remaining_authors }} more
+                </button>
+              {% else %}
+                <span class="authors-display">{{ paper.authors_formatted }}</span>
+              {% endif %}
+            </span>
+            ({{ paper.year }}). 
+            <strong>{{ paper.title }}</strong>. 
+            <em>{{ paper.venue }}</em>.
+          </p>
+
+          <div class="paper-links">
+            {% if paper.has_pdf %}
+            <a href="{{ paper.pdf_url }}" target="_blank" class="paper-btn paper-btn-primary">
+              Read PDF
+            </a>
+            {% endif %}
+
+            {% if paper.doi %}
+            <a href="https://doi.org/{{ paper.doi }}" target="_blank" rel="noopener" class="paper-btn">
+              DOI
+            </a>
+            {% endif %}
+
+            <button class="paper-btn" data-copy-bibtex="{{ paper.bibtex | escape }}">
+              Copy BibTeX
+            </button>
+          </div>
+        </article>
+
+        {% if forloop.last %}
+            </div><!-- /.year-content -->
+          </details><!-- /.year-group -->
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Conference Abstracts Feed -->
+    <div class="publications-feed" id="abstracts-feed" style="display: none;">
+      {% assign current_abstract_year = "" %}
+      {% for abstract in site.data.abstracts %}
+        {% if abstract.year != current_abstract_year %}
+          {% if current_abstract_year != "" %}
+            </div><!-- /.year-content -->
+          </details><!-- /.year-group -->
+          {% endif %}
+          {% assign current_abstract_year = abstract.year %}
+          <details class="year-group year-accordion" data-year="{{ current_abstract_year }}" open>
+            <summary class="year-summary">
+              <span class="year-heading-text">{{ current_abstract_year }}</span>
+              <span class="year-chevron">▾</span>
+            </summary>
+            <div class="year-content">
+        {% endif %}
+
+        <article class="publication-item" data-topic="{{ abstract.topic }}" data-venue="{{ abstract.venue }}">
+          <p class="paper-citation">
+            <span class="authors-wrap">
+              {% if abstract.is_truncated %}
+                <span class="authors-display authors-short">{{ abstract.authors_short }}, <em>et al.</em></span>
+                <span class="authors-display authors-full" style="display: none;">{{ abstract.authors_formatted }}</span>
+                <button type="button" class="authors-toggle-btn" data-remaining="{{ abstract.remaining_authors }}" aria-label="Toggle full author list" title="Show all {{ abstract.total_authors }} authors">
+                  +{{ abstract.remaining_authors }} more
+                </button>
+              {% else %}
+                <span class="authors-display">{{ abstract.authors_formatted }}</span>
+              {% endif %}
+            </span>
+            ({{ abstract.year }}). 
+            <strong>{{ abstract.title }}</strong>. 
+            <em>{{ abstract.venue }}</em>. 
+            <span style="font-size: 0.8rem; color: var(--text-dim); font-family: var(--font-sans);">[{{ abstract.type }}]</span>
+          </p>
+
+          <div class="paper-links">
+            <button class="paper-btn" data-copy-bibtex="{{ abstract.bibtex | escape }}">
+              Copy BibTeX
+            </button>
+          </div>
+        </article>
+
+        {% if forloop.last %}
+            </div><!-- /.year-content -->
+          </details><!-- /.year-group -->
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Empty State Message -->
+    <div id="no-pubs-msg" style="display: none; padding: 2.5rem 0; color: var(--text-dim); font-size: 0.95rem; text-align: center;">
+      No publications found matching the selected filter.
+    </div>
+  </div>
+</section>
+
+<!-- 6. Connect Section -->
+<section id="contact" class="snap-section">
+  <div class="content-card" id="card-contact">
+    <span class="section-label">Get in Touch</span>
+    <h2>Connect</h2>
+    <p>
+      Feel free to reach out for collaborations, questions, or just a chat about science, code, or anything in between.
+    </p>
+
+    <h3 style="font-size: 1.15rem; margin-top: 1.8rem; margin-bottom: 0.8rem; color: var(--text-main);">
+      Academic &amp; Code
+    </h3>
+    <ul class="editorial-list">
+      <li class="editorial-item">
+        <strong>Email:</strong> 
+        <a href="mailto:gsahonero@uc.cl">gsahonero [at] uc {dot} cl</a> 
+        <button class="paper-btn" id="copy-email-btn" data-email="gsahonero@uc.cl" style="margin-left: 0.5rem; vertical-align: middle;">
+          Copy
+        </button>
+      </li>
+      <li class="editorial-item">
+        <strong>Google Scholar:</strong> 
+        <a href="https://scholar.google.com/citations?user=Jfq_wNsAAAAJ&hl=en" target="_blank" rel="noopener">Research Profile &amp; Citations</a>
+      </li>
+      <li class="editorial-item">
+        <strong>ORCID:</strong> 
+        <a href="https://orcid.org/0000-0001-5259-7927" target="_blank" rel="noopener">0000-0001-5259-7927</a>
+      </li>
+      <li class="editorial-item">
+        <strong>GitHub:</strong> 
+        <a href="https://github.com/gsahonero" target="_blank" rel="noopener">@gsahonero</a>
+      </li>
+      <li class="editorial-item">
+        <strong>ResearchGate:</strong> 
+        <a href="https://www.researchgate.net/profile/Guillermo-Sahonero" target="_blank" rel="noopener">Guillermo Sahonero</a>
+      </li>
+    </ul>
+
+    <h3 style="font-size: 1.15rem; margin-top: 2rem; margin-bottom: 0.8rem; color: var(--text-main);">
+      Social &amp; Creative
+    </h3>
+    <ul class="editorial-list">
+      <li class="editorial-item">
+        <strong>LinkedIn:</strong> 
+        <a href="https://www.linkedin.com/in/guillermosahonero" target="_blank" rel="noopener">Guillermo Sahonero Alvarez</a>
+      </li>
+      <li class="editorial-item">
+        <strong>Threads:</strong> 
+        <a href="https://www.threads.net/@thepolygongs" target="_blank" rel="noopener">@thepolygongs (Photography &amp; Creative)</a>
+      </li>
+    </ul>
+  </div>
 </section>

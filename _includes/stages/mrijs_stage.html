@@ -1,0 +1,164 @@
+<!-- Header with Scenario State -->
+<div class="stage-status-header">
+  <div>
+    <div class="stage-title" id="stage-panel-title">{{ page.stage.title | default: 'NMR Equilibrium &amp; Coordinate Frame' }}</div>
+    <div style="font-size: 0.75rem; color: var(--text-dim);" id="stage-panel-subtitle">{{ page.stage.subtitle | default: 'Equilibrium Magnetization M₀ along +z' }}</div>
+  </div>
+  <span class="stage-scenario-badge" id="stage-scenario-tag">{{ page.stage.badge | default: 'PHYSICS' }}</span>
+</div>
+
+<!-- 3D Bloch Sphere Canvas -->
+<div class="stage-canvas-box">
+  <canvas id="stage-canvas" width="700" height="400"></canvas>
+  <div class="canvas-hint">Drag to rotate 3D view &bull; Double-click to reset</div>
+</div>
+
+<!-- Real-Time Signal Plot -->
+<div class="stage-plot-box">
+  <div class="stage-plot-header">
+    <span><strong>Transverse Signal |M<sub>xy</sub>|</strong> &amp; Longitudinal M<sub>z</sub></span>
+    <span id="plot-indicator" style="font-family: var(--font-mono); font-weight: 600;">t = 0 ms</span>
+  </div>
+  <canvas id="signal-canvas"></canvas>
+</div>
+
+<!-- HUD Readout Cards -->
+<div class="hud-grid">
+  <div class="hud-card">
+    <span class="hud-label">Time</span>
+    <span class="hud-value" id="hud-time">0 ms</span>
+  </div>
+  <div class="hud-card">
+    <span class="hud-label">|M<sub>xy</sub>|</span>
+    <span class="hud-value" id="hud-mxy">0.00</span>
+  </div>
+  <div class="hud-card">
+    <span class="hud-label">M<sub>z</sub></span>
+    <span class="hud-value" id="hud-mz">1.00</span>
+  </div>
+  <div class="hud-card">
+    <span class="hud-label">Spins</span>
+    <span class="hud-value" id="hud-spins">1</span>
+  </div>
+</div>
+
+<!-- Speed Adjustment Control -->
+<div class="stage-control-group">
+  <div class="stage-control-header">
+    <span style="font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.04em;">Playback Speed</span>
+    <span id="speed-display" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent); font-size: 0.8rem;">1.0x</span>
+  </div>
+  <div class="speed-btn-row">
+    <button class="speed-pill-btn" data-speed="0.25">0.25x</button>
+    <button class="speed-pill-btn" data-speed="0.5">0.5x</button>
+    <button class="speed-pill-btn active" data-speed="1.0">1.0x</button>
+    <button class="speed-pill-btn" data-speed="2.0">2.0x</button>
+    <button class="speed-pill-btn" data-speed="4.0">4.0x</button>
+  </div>
+</div>
+
+<!-- Dynamic Sequence Parameter Controls (Adjustable TE/TR for SE, FA/TE/TR for GRE) -->
+<div class="stage-params-panel" id="stage-params-panel">
+  <div class="params-panel-header">
+    <span id="params-header-title">Sequence Parameters</span>
+    <span style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-dim);" id="params-live-tag">LIVE PHYSICS</span>
+  </div>
+
+  <!-- SE Controls: TE and TR -->
+  <div class="param-group" id="params-se" style="display: none;">
+    <div class="param-row">
+      <div class="param-label-row">
+        <span>Echo Time (TE)</span>
+        <span class="param-val" id="val-se-te">80 ms</span>
+      </div>
+      <input type="range" class="stage-slider" id="slider-se-te" min="20" max="140" step="5" value="80">
+    </div>
+    <div class="param-row">
+      <div class="param-label-row">
+        <span>Repetition Time (TR)</span>
+        <span class="param-val" id="val-se-tr">160 ms</span>
+      </div>
+      <input type="range" class="stage-slider" id="slider-se-tr" min="90" max="400" step="10" value="160">
+    </div>
+  </div>
+
+  <!-- GRE Controls: FA, TE, and TR -->
+  <div class="param-group" id="params-gre" style="display: none;">
+    <div class="param-row">
+      <div class="param-label-row">
+        <span>Flip Angle (&alpha;)</span>
+        <span class="param-val" id="val-gre-fa">30°</span>
+      </div>
+      <input type="range" class="stage-slider" id="slider-gre-fa" min="5" max="90" step="5" value="30">
+    </div>
+    <div class="param-row">
+      <div class="param-label-row">
+        <span>Echo Time (TE)</span>
+        <span class="param-val" id="val-gre-te">60 ms</span>
+      </div>
+      <input type="range" class="stage-slider" id="slider-gre-te" min="15" max="100" step="5" value="60">
+    </div>
+    <div class="param-row">
+      <div class="param-label-row">
+        <span>Repetition Time (TR)</span>
+        <span class="param-val" id="val-gre-tr">120 ms</span>
+      </div>
+      <input type="range" class="stage-slider" id="slider-gre-tr" min="70" max="300" step="10" value="120">
+    </div>
+  </div>
+
+  <!-- FID Controls: Flip Angle -->
+  <div class="param-group" id="params-fid" style="display: none;">
+    <div class="param-row">
+      <div class="param-label-row">
+        <span>Excitation Flip Angle (&alpha;)</span>
+        <span class="param-val" id="val-fid-fa">90°</span>
+      </div>
+      <input type="range" class="stage-slider" id="slider-fid-fa" min="10" max="180" step="5" value="90">
+    </div>
+  </div>
+
+  <!-- Default Math / Overview notice -->
+  <div class="param-group" id="params-math">
+    <div style="font-size: 0.76rem; color: var(--text-dim); line-height: 1.4;">
+      Scroll down to adjust live pulse sequence timings (TE, TR, Flip Angle) for FID, Spin Echo, and Gradient Echo.
+    </div>
+  </div>
+</div>
+
+<!-- Playback Controls Bar -->
+<div class="stage-controls-bar">
+  <div class="stage-btn-row">
+    <button class="stage-btn" id="btn-play-pause">
+      <span id="play-pause-icon">⏸️</span> Pause
+    </button>
+    <button class="stage-btn" id="btn-restart">
+      🔄 Restart
+    </button>
+    <button class="stage-btn" id="btn-scenario-override">
+      ⚡ Presets
+    </button>
+  </div>
+
+  <!-- Timeline Scrub Slider -->
+  <div class="stage-scrub-row">
+    <span>0 ms</span>
+    <input type="range" class="stage-range" id="stage-time-slider" min="0" max="300" step="1" value="0">
+    <span id="slider-max-time">300 ms</span>
+  </div>
+</div>
+
+<!-- Info Banner / Link to MRIjs Online -->
+<div class="stage-info-banner">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+    <strong style="color: var(--text-main);">{{ page.stage.engine | default: 'Powered by MRIjs' }}</strong>
+    {% if page.stage.external_url %}
+    <a href="{{ page.stage.external_url }}" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 600; text-decoration: none;">{{ page.stage.external_label | default: 'Explore Full Suite ↗' }}</a>
+    {% else %}
+    <a href="https://gsahonero.github.io/MRIjs" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 600; text-decoration: none;">Explore Full Suite ↗</a>
+    {% endif %}
+  </div>
+  <p style="margin: 0; font-size: 0.74rem; color: var(--text-dim);">
+    {{ page.stage.info | default: 'Calculated in real-time with MRIjs Bloch physics engine using SI units in the rotating reference frame.' }}
+  </p>
+</div>

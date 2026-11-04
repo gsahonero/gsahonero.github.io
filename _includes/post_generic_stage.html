@@ -1,0 +1,91 @@
+<!-- ====================================================================
+     Generic Interactive Stage Template (Dynamic YAML-driven)
+     ==================================================================== -->
+
+<!-- Header with Scenario State -->
+<div class="stage-status-header">
+  <div>
+    <div class="stage-title" id="stage-panel-title">{{ page.stage.title | default: page.title }}</div>
+    <div style="font-size: 0.75rem; color: var(--text-dim);" id="stage-panel-subtitle">{{ page.stage.subtitle | default: 'Interactive Dynamics &amp; Visualization' }}</div>
+  </div>
+  <span class="stage-scenario-badge" id="stage-scenario-tag">{{ page.stage.badge | default: 'LIVE' }}</span>
+</div>
+
+<!-- Dynamic Viewport / Canvas Container -->
+<div class="stage-canvas-box">
+  <canvas id="{{ page.stage.canvas_id | default: 'stage-canvas' }}" width="{{ page.stage.canvas_width | default: '700' }}" height="{{ page.stage.canvas_height | default: '400' }}"></canvas>
+  <div class="canvas-hint">{{ page.stage.hint | default: 'Interactive viewport &bull; Drag to rotate or explore' }}</div>
+</div>
+
+<!-- Secondary Plot Canvas (if configured) -->
+{% if page.stage.has_plot %}
+<div class="stage-plot-box">
+  <div class="stage-plot-header">
+    <span><strong>{{ page.stage.plot_title | default: 'Signal Response' }}</strong></span>
+    <span id="plot-indicator" style="font-family: var(--font-mono); font-weight: 600;">t = 0</span>
+  </div>
+  <canvas id="{{ page.stage.plot_id | default: 'signal-canvas' }}"></canvas>
+</div>
+{% endif %}
+
+<!-- Dynamic HUD Readout Cards from YAML -->
+{% if page.stage.hud %}
+<div class="hud-grid">
+  {% for item in page.stage.hud %}
+  <div class="hud-card">
+    <span class="hud-label">{{ item.label }}</span>
+    <span class="hud-value" id="{{ item.id }}">{{ item.value }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Dynamic Parameter Controls from YAML -->
+{% if page.stage.controls %}
+<div class="stage-params-panel" id="stage-params-panel">
+  <div class="params-panel-header">
+    <span id="params-header-title">{{ page.stage.controls_title | default: 'Parameters' }}</span>
+    <span style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-dim);">LIVE PHYSICS</span>
+  </div>
+  {% for ctrl in page.stage.controls %}
+  <div class="param-row">
+    <div class="param-label-row">
+      <span>{{ ctrl.label }}</span>
+      <span class="param-val" id="val-{{ ctrl.id }}">{{ ctrl.value }}{{ ctrl.unit }}</span>
+    </div>
+    <input type="range" class="stage-slider" id="{{ ctrl.id }}" min="{{ ctrl.min | default: 0 }}" max="{{ ctrl.max | default: 100 }}" step="{{ ctrl.step | default: 1 }}" value="{{ ctrl.value | default: 50 }}">
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Generic Playback Controls Bar (if enabled) -->
+{% if page.stage.has_playback != false %}
+<div class="stage-controls-bar">
+  <div class="stage-btn-row">
+    <button class="stage-btn" id="btn-play-pause">
+      <span id="play-pause-icon">⏸️</span> Pause
+    </button>
+    <button class="stage-btn" id="btn-restart">
+      🔄 Restart
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<!-- Info Banner from YAML -->
+{% if page.stage.engine or page.stage.info %}
+<div class="stage-info-banner">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+    <strong style="color: var(--text-main);">{{ page.stage.engine | default: 'Interactive Simulation' }}</strong>
+    {% if page.stage.external_url %}
+    <a href="{{ page.stage.external_url }}" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 600; text-decoration: none;">{{ page.stage.external_label | default: 'Explore ↗' }}</a>
+    {% endif %}
+  </div>
+  {% if page.stage.info %}
+  <p style="margin: 0; font-size: 0.74rem; color: var(--text-dim);">
+    {{ page.stage.info }}
+  </p>
+  {% endif %}
+</div>
+{% endif %}
