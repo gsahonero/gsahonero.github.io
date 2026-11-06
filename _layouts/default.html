@@ -26,13 +26,19 @@
     })();
   </script>
 
-  <!-- Editorial Typography: Instrument Serif & Newsreader -->
+  <!-- Preconnect to external asset origins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-  <!-- KaTeX for rendering mathematical Bloch equations -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <!-- Editorial Typography: Instrument Serif & Newsreader -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap"></noscript>
+
+  <!-- KaTeX for rendering mathematical Bloch equations (non-blocking) -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"></noscript>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathOnPage()"></script>
   <script>
@@ -88,7 +94,7 @@
       </div>
 
       <div class="sidebar-actions">
-        <a href="/Guillermo_Sahonero_CV.pdf" target="_blank" class="sidebar-cv-cta">Download CV ↗</a>
+        <a href="/Guillermo_Sahonero_CV.pdf" target="_blank" rel="noopener" class="sidebar-cv-cta">Download CV ↗</a>
         <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Theme">
           <span>🌙</span> Dark Mode
         </button>
@@ -223,21 +229,21 @@
                 <span>Flip Angle (&alpha;)</span>
                 <span id="sim-angle-val">90°</span>
               </div>
-              <input type="range" id="sim-angle-slider" class="stage-slider" min="10" max="180" step="5" value="90">
+              <input type="range" id="sim-angle-slider" class="stage-slider" min="10" max="180" step="5" value="90" aria-label="Flip Angle (alpha)">
             </div>
             <div class="stage-slider-row">
               <div class="stage-slider-label">
                 <span>Transverse Decay (T2)</span>
                 <span id="sim-t2-val">80 ms</span>
               </div>
-              <input type="range" id="sim-t2-slider" class="stage-slider" min="20" max="250" step="10" value="80">
+              <input type="range" id="sim-t2-slider" class="stage-slider" min="20" max="250" step="10" value="80" aria-label="Transverse Decay (T2)">
             </div>
             <div class="stage-readout-row">
               <span>Mz: <strong id="sim-mz-readout">0.00</strong></span>
               <span>|Mxy|: <strong id="sim-mxy-readout">1.00</strong></span>
               <span><strong id="sim-time-readout">0 ms</strong></span>
             </div>
-            <a href="https://gsahonero.github.io/MRIjs" target="_blank" class="mrijs-link-btn">
+            <a href="https://gsahonero.github.io/MRIjs" target="_blank" rel="noopener" class="mrijs-link-btn">
               Explore Full Suite at MRIjs ↗
             </a>
             <a href="/posts/introducing-mrijs/" class="mrijs-link-btn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 0.4rem;">
@@ -256,7 +262,7 @@
         <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.2rem;">
           Always open to scientific discussions, sequence design collaborations, and academic exchange.
         </p>
-        <button class="paper-btn paper-btn-primary" id="copy-email-btn" data-email="gsahonero@uc.cl" style="padding: 0.5rem 1rem; font-size: 0.88rem; margin-bottom: 1rem; width: 100%; text-align: center;">
+        <button class="paper-btn paper-btn-primary" id="stage-copy-email-btn" data-email="gsahonero@uc.cl" style="padding: 0.5rem 1rem; font-size: 0.88rem; margin-bottom: 1rem; width: 100%; text-align: center;">
           📋 Copy Email (gsahonero@uc.cl)
         </button>
         <div style="font-size: 0.84rem; color: var(--text-dim); line-height: 1.6;">
@@ -268,16 +274,10 @@
 
   </div>
 
-  <!-- Load MRIjs Online Simulation Engine directly from official web deployment -->
-  <script src="https://gsahonero.github.io/MRIjs/bloch.js"></script>
-  <!-- Fallback in case of offline environment -->
-  <script>
-    if (typeof BlochSimulator === 'undefined') {
-      document.write('<script src="/assets/js/bloch_simulator.js"><\/script>');
-    }
-  </script>
-  <script src="/assets/js/bloch_widget.js"></script>
-  <script src="/assets/js/home_isochromat.js"></script>
-  <script src="/assets/js/main.js"></script>
+  <!-- Load MRIjs Online Simulation Engine directly with offline fallback (no document.write) -->
+  <script defer src="https://gsahonero.github.io/MRIjs/bloch.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='/assets/js/bloch_simulator.js';s.defer=true;document.head.appendChild(s);"></script>
+  <script defer src="/assets/js/bloch_widget.js"></script>
+  <script defer src="/assets/js/home_isochromat.js"></script>
+  <script defer src="/assets/js/main.js"></script>
 </body>
 </html>

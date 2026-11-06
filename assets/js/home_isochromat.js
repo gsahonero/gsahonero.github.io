@@ -324,17 +324,35 @@
       resize();
     });
 
-    // Use IntersectionObserver to sleep when scrolled away
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        isVisible = entry.isIntersecting;
+    const stageHome = document.getElementById('stage-home');
+    let isIntersecting = true;
+
+    function updateVisibility() {
+      const stageActive = !stageHome || stageHome.classList.contains('is-active');
+      const shouldBeVisible = isIntersecting && stageActive;
+      if (shouldBeVisible !== isVisible) {
+        isVisible = shouldBeVisible;
         if (isVisible) {
           resize();
         }
+      }
+    }
+
+    if (stageHome && window.MutationObserver) {
+      const mo = new MutationObserver(updateVisibility);
+      mo.observe(stageHome, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Use IntersectionObserver to sleep when scrolled away
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        isIntersecting = entry.isIntersecting;
+        updateVisibility();
       });
     }, { threshold: 0.1 });
 
     observer.observe(canvas);
+    updateVisibility();
 
     // Initial pulse
     trigger90Pulse();

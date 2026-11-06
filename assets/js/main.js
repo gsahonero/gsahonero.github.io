@@ -63,7 +63,7 @@
         }
       }
 
-      const emailBtn = e.target.closest('#copy-email-btn');
+      const emailBtn = e.target.closest('#copy-email-btn, #stage-copy-email-btn, [data-email]');
       if (emailBtn) {
         const email = emailBtn.getAttribute('data-email') || 'gsahonero@uc.cl';
         if (navigator.clipboard) {

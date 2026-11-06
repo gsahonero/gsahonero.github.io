@@ -27,7 +27,7 @@ layout: default
         <h2>Short Bio</h2>
       </div>
       <div class="bio-portrait-wrap">
-        <img src="/assets/profile.jpeg" alt="Guillermo Sahonero" class="bio-portrait-img">
+        <img src="/assets/profile.jpeg" alt="Guillermo Sahonero" class="bio-portrait-img" width="192" height="256" loading="lazy" decoding="async">
       </div>
     </div>
     
@@ -242,7 +242,7 @@ layout: default
 
           <div class="paper-links">
             {% if paper.has_pdf %}
-            <a href="{{ paper.pdf_url }}" target="_blank" class="paper-btn paper-btn-primary">
+            <a href="{{ paper.pdf_url }}" target="_blank" rel="noopener" class="paper-btn paper-btn-primary">
               Read PDF
             </a>
             {% endif %}

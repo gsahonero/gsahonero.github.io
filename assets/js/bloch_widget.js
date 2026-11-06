@@ -11,6 +11,7 @@
   let currentStepIdx = 0;
   let isPlaying = true;
   let currentSequence = 'FID';
+  let isStageActive = false;
 
   // 3D View Angles (Pitch and Yaw)
   let viewAngleX = 0.42; // elevation angle
@@ -39,6 +40,34 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // Watch for size or tab/stage visibility switches
+    if (window.ResizeObserver && canvas) {
+      const ro = new ResizeObserver(() => {
+        resizeCanvas();
+      });
+      ro.observe(canvas);
+    }
+
+    const stagePanel = document.getElementById('stage-publications');
+    if (stagePanel) {
+      isStageActive = stagePanel.classList.contains('is-active');
+      if (window.MutationObserver) {
+        const mo = new MutationObserver(() => {
+          const activeNow = stagePanel.classList.contains('is-active');
+          if (activeNow !== isStageActive) {
+            isStageActive = activeNow;
+            if (isStageActive) {
+              resizeCanvas();
+              draw();
+            }
+          }
+        });
+        mo.observe(stagePanel, { attributes: true, attributeFilter: ['class'] });
+      }
+    } else {
+      isStageActive = true;
+    }
+
     // Bind Controls and 3D Drag
     bindControls();
     bindMouseDrag();
@@ -51,12 +80,17 @@
   }
 
   function resizeCanvas() {
-    if (!canvas) return;
+    if (!canvas || !ctx) return;
     const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    const displayWidth = Math.round(rect.width * dpr);
+    const displayHeight = Math.round(rect.height * dpr);
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   function runSimulation() {
@@ -72,10 +106,20 @@
           TR: params.TR
         });
         const res = sim.run();
-        currentTrajectory = (res.spinHistory || []).map((step, idx) => ({
-          time: res.timeSteps ? res.timeSteps[idx] : idx * 2,
-          M: step[0] || [0, 0, 1]
-        }));
+        currentTrajectory = (res.spinHistory || []).map((step, idx) => {
+          const M = step[0] || [0, 0, 1];
+          const timeMs = Math.round(res.timeSteps ? res.timeSteps[idx] : idx * 2);
+          const sig = res.signals && res.signals[idx];
+          const Mz = (sig && typeof sig.Mz === 'number') ? sig.Mz : M[2];
+          const Mxy = (sig && typeof sig.Mxy === 'number') ? sig.Mxy : Math.hypot(M[0], M[1]);
+          return {
+            time: timeMs,
+            timeMs: timeMs,
+            M: M,
+            Mz: Mz,
+            Mxy: Mxy
+          };
+        });
         currentStepIdx = 0;
         return;
       } catch (err) {
@@ -84,7 +128,7 @@
     }
 
     // 2. Fallback to simulateSequence if using offline helper
-    if (BlochSimulator.simulateSequence) {
+    if (BlochSimulator && BlochSimulator.simulateSequence) {
       const result = BlochSimulator.simulateSequence(currentSequence, {
         flipAngle: params.flipAngle,
         T1: params.T1,
@@ -93,7 +137,19 @@
         TR: params.TR
       });
 
-      currentTrajectory = result.trajectory || [];
+      currentTrajectory = (result.trajectory || []).map(pt => {
+        const M = pt.M || [0, 0, 1];
+        const timeMs = pt.timeMs != null ? pt.timeMs : 0;
+        const Mz = pt.Mz != null ? pt.Mz : M[2];
+        const Mxy = pt.Mxy != null ? pt.Mxy : Math.hypot(M[0], M[1]);
+        return {
+          time: timeMs,
+          timeMs: timeMs,
+          M: M,
+          Mz: Mz,
+          Mxy: Mxy
+        };
+      });
       currentStepIdx = 0;
     }
   }
@@ -335,8 +391,14 @@
       ctx.stroke();
 
       // Current Magnetization Vector M
-      const currentPoint = currentTrajectory[currentStepIdx] || currentTrajectory[0];
-      const tip = project(currentPoint.M[0], currentPoint.M[1], currentPoint.M[2], cx, cy, radius);
+      const currentPoint = currentTrajectory[currentStepIdx] || currentTrajectory[0] || {
+        M: [0, 0, 1],
+        Mz: 1,
+        Mxy: 0,
+        timeMs: 0
+      };
+      const M = currentPoint.M || [0, 0, 1];
+      const tip = project(M[0], M[1], M[2], cx, cy, radius);
 
       // Draw Vector Line
       ctx.strokeStyle = '#3b82f6';
@@ -353,7 +415,7 @@
       ctx.fill();
 
       // Transverse projection vector (Mxy)
-      const transTip = project(currentPoint.M[0], currentPoint.M[1], 0, cx, cy, radius);
+      const transTip = project(M[0], M[1], 0, cx, cy, radius);
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([2, 2]);
@@ -368,21 +430,33 @@
       const mxyEl = document.getElementById('sim-mxy-readout');
       const timeEl = document.getElementById('sim-time-readout');
 
-      if (mzEl) mzEl.textContent = currentPoint.Mz.toFixed(2);
-      if (mxyEl) mxyEl.textContent = currentPoint.Mxy.toFixed(2);
-      if (timeEl) timeEl.textContent = `${currentPoint.timeMs} ms`;
+      const mzVal = currentPoint.Mz != null ? currentPoint.Mz : M[2];
+      const mxyVal = currentPoint.Mxy != null ? currentPoint.Mxy : Math.hypot(M[0], M[1]);
+      const timeVal = currentPoint.timeMs != null ? currentPoint.timeMs : (currentPoint.time != null ? currentPoint.time : 0);
+
+      if (mzEl) mzEl.textContent = Number(mzVal).toFixed(2);
+      if (mxyEl) mxyEl.textContent = Number(mxyVal).toFixed(2);
+      if (timeEl) timeEl.textContent = `${Math.round(Number(timeVal))} ms`;
     }
   }
 
   function startAnimationLoop() {
     function animate() {
-      if (isPlaying && currentTrajectory.length > 0) {
-        currentStepIdx = (currentStepIdx + 1) % currentTrajectory.length;
+      try {
+        if (isStageActive && isPlaying && currentTrajectory.length > 0) {
+          currentStepIdx = (currentStepIdx + 1) % currentTrajectory.length;
+          draw();
+        }
+      } catch (err) {
+        console.error('[bloch_widget] Error in animation frame:', err);
       }
-      draw();
       animFrameId = requestAnimationFrame(animate);
     }
-    animate();
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId);
+    }
+    draw(); // Render initial frame so it's ready when shown
+    animFrameId = requestAnimationFrame(animate);
   }
 
   // Auto initialize on DOMContentLoaded
